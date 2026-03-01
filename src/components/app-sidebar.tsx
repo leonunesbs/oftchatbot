@@ -4,7 +4,6 @@ import * as React from "react";
 
 import { ConversationList } from "@/components/chat/conversation-list";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -38,8 +37,6 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   isLoading?: boolean;
   sessionLabel?: string;
   sessionToneClassName?: string;
-  onRefresh?: () => void;
-  isRefreshing?: boolean;
 };
 
 function matchesSearch(conversation: WahaConversation, rawQuery: string) {
@@ -61,8 +58,6 @@ export function AppSidebar({
   isLoading,
   sessionLabel,
   sessionToneClassName,
-  onRefresh,
-  isRefreshing,
   ...props
 }: AppSidebarProps) {
   const { isMobile, setOpenMobile } = useSidebar();
@@ -167,9 +162,6 @@ export function AppSidebar({
             placeholder="Buscar ou iniciar conversa"
             className="h-9 text-sm"
           />
-          <Button size="sm" variant="outline" className="h-9 px-2.5 text-xs" onClick={onRefresh} disabled={isRefreshing}>
-            {isRefreshing ? "..." : "Atual."}
-          </Button>
         </div>
 
         <div className="flex items-center gap-1 overflow-x-auto pb-0.5">

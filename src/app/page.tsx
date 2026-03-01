@@ -315,8 +315,6 @@ export default function Page() {
         isLoading={isLoadingConversations}
         sessionLabel={sessionLabel}
         sessionToneClassName={sessionTone}
-        onRefresh={() => void loadConversations()}
-        isRefreshing={isLoadingConversations}
       />
       <SidebarInset className="bg-muted/30">
         <header className="supports-backdrop-filter:bg-background/75 bg-background/92 sticky top-0 z-20 flex min-h-(--header-height) shrink-0 items-center border-b px-3 py-2 backdrop-blur md:h-(--header-height) md:px-5 md:py-0 lg:px-6">
@@ -333,16 +331,6 @@ export default function Page() {
             <Badge className={cn("hidden rounded-full border-0 px-2.5 py-0.5 text-[11px] sm:inline-flex", sessionTone)}>
               {sessionLabel}
             </Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 px-2.5 text-[11px] md:h-9 md:px-3 md:text-sm"
-              disabled={isLoadingConversations}
-              onClick={() => void loadConversations()}
-            >
-              <span className="md:hidden">{isLoadingConversations ? "..." : "Atual."}</span>
-              <span className="hidden md:inline">{isLoadingConversations ? "Atualizando..." : "Atualizar"}</span>
-            </Button>
           </div>
         </header>
 
