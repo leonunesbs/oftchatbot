@@ -1,0 +1,24 @@
+services:
+  waha:
+    image: devlikeapro/waha:arm
+    container_name: waha
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      # Override generated credentials with project root env vars.
+      WAHA_API_KEY: "${WAHA_API_KEY}"
+      WAHA_DASHBOARD_USERNAME: "${WAHA_DASHBOARD_USERNAME}"
+      WAHA_DASHBOARD_PASSWORD: "${WAHA_DASHBOARD_PASSWORD}"
+      WHATSAPP_SWAGGER_USERNAME: "${WHATSAPP_SWAGGER_USERNAME}"
+      WHATSAPP_SWAGGER_PASSWORD: "${WHATSAPP_SWAGGER_PASSWORD}"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./sessions:/app/.sessions
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

@@ -1,16 +1,17 @@
-import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import "./globals.css";
 
-import './globals.css';
+import { Geist } from "next/font/google";
+import type { Metadata } from "next";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: `TypeScript starter for Next.js by João Pedro Schmitz`,
-  description: `TypeScript starter for Next.js that includes all you need to build amazing apps`,
+  title: "OFT ChatBot",
+  description: "Painel de atendimento com conversas em tempo real para o OFT ChatBot.",
 };
 export default function RootLayout({
   children,
@@ -18,8 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable}`}>{children}</body>
+    <html lang="pt-BR">
+      <body className={`${geistSans.variable}`}>
+        <TooltipProvider>{children}</TooltipProvider>
+      </body>
     </html>
   );
 }

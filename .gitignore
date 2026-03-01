@@ -37,8 +37,15 @@ yarn-error.log*
 # env files
 .env*
 
+# local runtime artifacts
+.data/
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+
+# test artifacts
+test-results/
+playwright-report/

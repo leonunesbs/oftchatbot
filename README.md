@@ -64,7 +64,70 @@ To start the project locally, run:
 pnpm dev
 ```
 
-Open `http://localhost:3000` with your browser to see the result.
+Open `http://localhost:3030` with your browser to see the result.
+
+## WAHA ARM64 setup
+
+This repository includes local WAHA infrastructure for Apple Silicon / ARM64 in `infra/waha`.
+
+1. Pull the ARM64 image:
+   - `pnpm waha:pull`
+2. Generate WAHA defaults:
+   - `pnpm waha:init`
+   - Keep `infra/waha/.env` as base config, but set access credentials in project root `.env` (`WAHA_API_KEY`, `WAHA_DASHBOARD_*`, `WHATSAPP_SWAGGER_*`).
+3. Start the WAHA stack:
+   - `pnpm waha:up`
+4. Open the dashboard:
+   - `http://localhost:3000/dashboard`
+5. Start `default` session, scan QR, and wait for `WORKING` status.
+
+For more details, check `infra/waha/README.md`.
+
+## Next + WAHA integration
+
+### 1) Configure app env
+
+Copy `.env.example` to `.env.local` and provide valid WAHA values:
+
+- `WAHA_BASE_URL` (default `http://localhost:3000/api`)
+- `WAHA_API_KEY`
+- `WAHA_TIMEOUT_MS`
+- `WAHA_DEFAULT_SESSION`
+- `WAHA_WEBHOOK_SECRET`
+- `WAHA_CONTACTS_DB_PATH` (optional, default `.data/contact-profiles.sqlite`)
+- `WAHA_DASHBOARD_USERNAME`
+- `WAHA_DASHBOARD_PASSWORD`
+- `WHATSAPP_SWAGGER_USERNAME`
+- `WHATSAPP_SWAGGER_PASSWORD`
+
+### 2) Start the Next app
+
+```bash
+pnpm dev
+```
+
+Open `http://localhost:3030/dashboard`.
+
+### 3) API surface
+
+- WAHA proxy (server-side only): `/api/waha/[...path]`
+- Available WAHA domains index: `/api/waha/domains`
+- Frontend chat endpoints:
+  - `/api/chat/session`
+  - `/api/chat/conversations`
+  - `/api/chat/messages?chatId=<chat-id>`
+  - `POST /api/chat/send-text`
+  - `/api/chat/contact-profile?chatId=<chat-id>` (GET/PUT)
+- Real-time event stream (SSE): `/api/realtime/waha-events`
+- Webhook receiver for WAHA events: `POST /api/waha/webhook` (`x-waha-secret` when `WAHA_WEBHOOK_SECRET` is set)
+
+### 4) Smoke tests
+
+With both WAHA and Next running locally:
+
+```bash
+pnpm waha:smoke
+```
 
 ## Testimonials
 
@@ -106,7 +169,7 @@ List of websites that started off with Next.js TypeScript Starter:
 
 ### Scripts
 
-- `pnpm dev` — Starts the application in development mode at `http://localhost:3000`.
+- `pnpm dev` — Starts the application in development mode at `http://localhost:3030`.
 - `pnpm build` — Creates an optimized production build of your application.
 - `pnpm build:analyze` — Analyze the production build to see the bundle size.
 - `pnpm start` — Starts the application in production mode.
