@@ -39,6 +39,10 @@ yarn-error.log*
 
 # local runtime artifacts
 .data/
+infra/waha/sessions/
+
+# local editor tooling
+.cursor/mcp.json
 
 # vercel
 .vercel
