@@ -243,7 +243,7 @@ const scenarios: DialogScenario[] = [
       'amanha a tarde',
     ],
     expectedState: 'SCHEDULING_SHOW_DATES',
-    expectReplyIncludes: ['event_types'],
+    expectReplyIncludes: ['calendário'],
   },
   {
     id: '27-invalid-phone-once',

@@ -48,12 +48,16 @@ export function handoffReply(reason: string) {
 
 export function slotOptionsReply(options: SlotOption[]) {
   const lines = options.slice(0, 4).map((slot, index) => `${index + 1}) ${slot.label}`);
-  return `Encontrei estes spots de horário:\n${lines.join('\n')}\n\nMe diz o número da opção que você prefere.`;
+  const changeDateOption = `${lines.length + 1}) Trocar data`;
+  const changeEventOption = `${lines.length + 2}) Trocar evento (local de atendimento)`;
+  return `Encontrei estes spots de horário:\n${lines.join('\n')}\n${changeDateOption}\n${changeEventOption}\n\nMe diz o número da opção que você prefere.`;
 }
 
-export function dateOptionsReply(options: AvailableDateOption[]) {
+export function dateOptionsReply(options: AvailableDateOption[], eventTypeName?: string) {
   const lines = options.slice(0, 7).map((date, index) => `${index + 1}) ${date.label}`);
-  return `Consultei os event_types e estes são os próximos dias com agenda disponível (30 dias):\n${lines.join('\n')}\n\nMe diz o número da data que você prefere para eu te mostrar os horários.`;
+  const eventName = eventTypeName?.trim() || '[event type name]';
+  const changeEventOption = `${lines.length + 1}) Selecionar outro evento (local de atendimento)`;
+  return `Consultei o calendário e estes são os próximos dias em ${eventName} com agenda disponível (30 dias):\n${lines.join('\n')}\n${changeEventOption}\n\nMe diz o número da data que você prefere para eu te mostrar os horários.`;
 }
 
 export function confirmationReply(data: LumiCollectedData, selectedSlot?: SlotOption) {
@@ -69,11 +73,15 @@ export function confirmationReply(data: LumiCollectedData, selectedSlot?: SlotOp
     .filter(Boolean)
     .join('\n');
 
-  return `Perfeito, organizei tudo aqui:\n${summary}\n\nPosso confirmar esse agendamento?`;
+  return `Perfeito, organizei tudo aqui:\n${summary}\n\nPosso confirmar esse agendamento e já te enviar o link de pagamento?`;
 }
 
-export function bookingSuccessReply(protocol: string) {
-  return `Consulta pré-agendada com sucesso. Protocolo: ${protocol}. Se precisar ajustar, fale com nosso time: https://wa.me/5585999999999`;
+export function bookingSuccessReply(protocol: string, paymentUrl?: string, phone?: string) {
+  if (paymentUrl) {
+    const contactSuffix = phone ? ` no número ${phone}` : '';
+    return `Consulta pré-agendada com sucesso. Protocolo: ${protocol}.\n\nAqui está o link de pagamento (Stripe) gerado pelo Cal.com${contactSuffix}:\n${paymentUrl}\n\nSe precisar ajustar, fale com nosso time: https://wa.me/5585999999999`;
+  }
+  return `Consulta pré-agendada com sucesso. Protocolo: ${protocol}. O link de pagamento será enviado em seguida pelo nosso time. Se precisar ajustar, fale com nosso time: https://wa.me/5585999999999`;
 }
 
 export function fallbackReply() {

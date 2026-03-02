@@ -11,6 +11,7 @@ type SlotSearchInput = {
 
 type BookInput = {
   slotId: string;
+  eventTypeId?: string;
   fullName: string;
   phone: string;
   email?: string;
@@ -320,6 +321,35 @@ function extractEventTypeId(raw: unknown): string | undefined {
   return undefined;
 }
 
+function extractUrl(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const source = value as Record<string, unknown>;
+  const directCandidates = [
+    source.paymentUrl,
+    source.paymentURL,
+    source.paymentLink,
+    source.paymentLinkUrl,
+    source.stripePaymentUrl,
+    source.checkoutUrl,
+    source.url,
+  ];
+  const direct = directCandidates.find((candidate) => typeof candidate === 'string' && candidate.startsWith('http'));
+  if (typeof direct === 'string') {
+    return direct;
+  }
+
+  const nestedCandidates = [source.payment, source.checkout, source.metadata, source.links];
+  for (const nested of nestedCandidates) {
+    const nestedResult = extractUrl(nested);
+    if (nestedResult) {
+      return nestedResult;
+    }
+  }
+  return undefined;
+}
+
 async function getAvailableEventTypeId(endpoint: string, apiKey: string) {
   if (cachedEventTypeId) {
     return cachedEventTypeId;
@@ -502,7 +532,7 @@ export const calComAdapter = {
     }
   },
 
-  async book(input: BookInput): Promise<{ protocol: string; source: 'calcom' | 'mock' }> {
+  async book(input: BookInput): Promise<{ protocol: string; source: 'calcom' | 'mock'; paymentUrl?: string }> {
     const apiKey = serverEnv.CALCOM_API_KEY;
     const endpoint = serverEnv.CALCOM_API_BASE_URL;
 
@@ -514,7 +544,7 @@ export const calComAdapter = {
     }
 
     try {
-      const eventTypeId = await getAvailableEventTypeId(endpoint, apiKey);
+      const eventTypeId = input.eventTypeId ?? (await getAvailableEventTypeId(endpoint, apiKey));
       if (!eventTypeId) {
         return {
           protocol: `LUMI-MOCK-${Math.floor(Date.now() / 1000)}`,
@@ -567,6 +597,7 @@ export const calComAdapter = {
       return {
         protocol,
         source: 'calcom',
+        paymentUrl: extractUrl(payload) ?? extractUrl(body),
       };
     } catch {
       return {
