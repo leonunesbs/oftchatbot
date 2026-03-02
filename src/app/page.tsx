@@ -54,6 +54,11 @@ type ContactProfileResponse = {
   profile: ContactProfile;
 };
 
+type ConversationAction = "mark-unread" | "archive" | "advance-funnel";
+type ConversationActionResponse = {
+  profile?: ContactProfile;
+};
+
 const CONVERSATIONS_PAGE_SIZE = 30;
 const MESSAGES_PAGE_SIZE = 40;
 const CONVERSATIONS_REFRESH_INTERVAL_MS = 10_000;
@@ -229,6 +234,14 @@ function sortConversationsByPriority(items: WahaConversation[]) {
   });
 }
 
+function getNextFunnelStage(stage: FunnelStage) {
+  const currentIndex = funnelStages.indexOf(stage);
+  if (currentIndex < 0 || currentIndex >= funnelStages.length - 1) {
+    return stage;
+  }
+  return funnelStages[currentIndex + 1] ?? stage;
+}
+
 export default function Page() {
   const [session, setSession] = React.useState<WahaSession | null>(null);
   const [conversations, setConversations] = React.useState<WahaConversation[]>(
@@ -257,6 +270,10 @@ export default function Page() {
   const [isLoadingProfile, setIsLoadingProfile] = React.useState(false);
   const [isSavingProfile, setIsSavingProfile] = React.useState(false);
   const [lastSyncAt, setLastSyncAt] = React.useState<Date | null>(null);
+  const [pendingConversationActions, setPendingConversationActions] =
+    React.useState<Record<string, Partial<Record<ConversationAction, boolean>>>>(
+      {},
+    );
   const activeMessagesChatRef = React.useRef<string | null>(null);
   const conversationsRequestRef = React.useRef(0);
   const messagesRequestRef = React.useRef(0);
@@ -516,6 +533,119 @@ export default function Page() {
       setFunnelStageDraft(data.profile.funnelStage);
     } finally {
       setIsSavingProfile(false);
+    }
+  }
+
+  function setConversationActionPending(
+    chatId: string,
+    action: ConversationAction,
+    isPending: boolean,
+  ) {
+    setPendingConversationActions((current) => {
+      const currentForChat = current[chatId] ?? {};
+      const nextForChat = {
+        ...currentForChat,
+        [action]: isPending,
+      };
+      return {
+        ...current,
+        [chatId]: nextForChat,
+      };
+    });
+  }
+
+  async function runConversationAction(chatId: string, action: ConversationAction) {
+    const targetConversation = conversations.find(
+      (conversation) => conversation.id === chatId,
+    );
+
+    setConversationActionPending(chatId, action, true);
+
+    if (action === "mark-unread") {
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === chatId
+            ? {
+                ...conversation,
+                unreadCount: Math.max(1, conversation.unreadCount),
+              }
+            : conversation,
+        ),
+      );
+    }
+
+    if (action === "archive") {
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === chatId
+            ? {
+                ...conversation,
+                isArchived: true,
+              }
+            : conversation,
+        ),
+      );
+    }
+
+    if (action === "advance-funnel") {
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === chatId
+            ? {
+                ...conversation,
+                funnelStage: getNextFunnelStage(
+                  conversation.funnelStage ?? "primeiro-contato",
+                ),
+              }
+            : conversation,
+        ),
+      );
+    }
+
+    try {
+      const response = await fetch("/api/chat/conversations/actions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatId,
+          action,
+          contactName: targetConversation?.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to run action ${action}`);
+      }
+
+      const data = (await response.json()) as ConversationActionResponse;
+
+      if (action === "advance-funnel" && data.profile) {
+        setConversations((current) =>
+          current.map((conversation) =>
+            conversation.id === chatId
+              ? {
+                  ...conversation,
+                  funnelStage: data.profile?.funnelStage,
+                }
+              : conversation,
+          ),
+        );
+
+        if (selectedChatId === chatId) {
+          setContactProfile(data.profile);
+          setFunnelStageDraft(data.profile.funnelStage);
+          setNotesDraft(data.profile.notes);
+        }
+      }
+    } catch {
+      void refreshConversations();
+      if (selectedChatId === chatId) {
+        void loadContactProfile(chatId, targetConversation?.name);
+      }
+    } finally {
+      setConversationActionPending(chatId, action, false);
     }
   }
 
@@ -848,6 +978,16 @@ export default function Page() {
         conversations={conversations}
         selectedChatId={selectedChatId}
         onSelectConversation={setSelectedChatId}
+        onMarkAsUnread={(chatId) => runConversationAction(chatId, "mark-unread")}
+        onArchiveConversation={(chatId) =>
+          runConversationAction(chatId, "archive")
+        }
+        onAdvanceFunnelStage={(chatId) =>
+          runConversationAction(chatId, "advance-funnel")
+        }
+        isConversationActionPending={(chatId, action) =>
+          Boolean(pendingConversationActions[chatId]?.[action])
+        }
         isLoading={isLoadingConversations}
         isLoadingMore={isLoadingMoreConversations}
         hasMore={hasMoreConversations}

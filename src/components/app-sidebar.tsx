@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Eye, MessageCircle, Pin, Search } from "lucide-react";
+import { Archive, Eye, Mail, MessageCircle, Pin, Search, TrendingUp } from "lucide-react";
 import type { ComponentProps } from "react";
 import * as React from "react";
 
@@ -22,6 +22,13 @@ type AppSidebarProps = ComponentProps<typeof Sidebar> & {
   conversations: WahaConversation[];
   selectedChatId?: string;
   onSelectConversation: (chatId: string) => void;
+  onMarkAsUnread?: (chatId: string) => void | Promise<void>;
+  onArchiveConversation?: (chatId: string) => void | Promise<void>;
+  onAdvanceFunnelStage?: (chatId: string) => void | Promise<void>;
+  isConversationActionPending?: (
+    chatId: string,
+    action: "mark-unread" | "archive" | "advance-funnel",
+  ) => boolean;
   isLoading?: boolean;
   isLoadingMore?: boolean;
   hasMore?: boolean;
@@ -82,6 +89,10 @@ export function AppSidebar({
   conversations,
   selectedChatId,
   onSelectConversation,
+  onMarkAsUnread,
+  onArchiveConversation,
+  onAdvanceFunnelStage,
+  isConversationActionPending,
   isLoading = false,
   isLoadingMore = false,
   hasMore = false,
@@ -209,19 +220,35 @@ export function AppSidebar({
                 const funnelStage =
                   conversation.funnelStage ?? "primeiro-contato";
 
+                const markUnreadPending = isConversationActionPending?.(
+                  conversation.id,
+                  "mark-unread",
+                );
+                const archivePending = isConversationActionPending?.(
+                  conversation.id,
+                  "archive",
+                );
+                const advanceFunnelPending = isConversationActionPending?.(
+                  conversation.id,
+                  "advance-funnel",
+                );
+
                 return (
-                  <button
+                  <div
                     key={conversation.id}
-                    type="button"
-                    onClick={() => onSelectConversation(conversation.id)}
                     className={cn(
-                      "focus-visible:ring-sidebar-ring w-full rounded-xl border px-2.5 py-2 text-left outline-hidden transition-colors focus-visible:ring-2",
+                      "w-full rounded-xl border px-2.5 py-2 transition-colors",
                       isActive
                         ? "bg-sidebar-accent border-sidebar-border"
                         : "border-transparent hover:bg-sidebar-accent/70",
                     )}
                   >
-                    <div className="flex items-start gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onSelectConversation(conversation.id)}
+                      className="focus-visible:ring-sidebar-ring w-full rounded-md text-left outline-hidden focus-visible:ring-2"
+                    >
+                      <div className="flex items-start gap-2.5">
                       <div className="bg-sidebar-primary/15 text-sidebar-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
                         {getConversationInitials(conversation.name)}
                       </div>
@@ -251,6 +278,8 @@ export function AppSidebar({
                           >
                             {funnelStageLabels[funnelStage]}
                           </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
                           <p className="text-muted-foreground line-clamp-1 text-xs">
                             {conversation.preview || "Sem mensagens recentes"}
                           </p>
@@ -261,8 +290,41 @@ export function AppSidebar({
                           ) : null}
                         </div>
                       </div>
+                      </div>
+                    </button>
+                    <div className="mt-2 flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={Boolean(markUnreadPending)}
+                        onClick={() => void onMarkAsUnread?.(conversation.id)}
+                        aria-label="Marcar como não lida"
+                        title="Marcar como não lida"
+                        className="text-muted-foreground hover:bg-background inline-flex size-6 items-center justify-center rounded-md transition-colors disabled:opacity-60"
+                      >
+                        <Mail className="size-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={Boolean(archivePending)}
+                        onClick={() => void onArchiveConversation?.(conversation.id)}
+                        aria-label="Arquivar conversa"
+                        title="Arquivar conversa"
+                        className="text-muted-foreground hover:bg-background inline-flex size-6 items-center justify-center rounded-md transition-colors disabled:opacity-60"
+                      >
+                        <Archive className="size-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={Boolean(advanceFunnelPending)}
+                        onClick={() => void onAdvanceFunnelStage?.(conversation.id)}
+                        aria-label="Avançar funil"
+                        title="Avançar funil"
+                        className="text-muted-foreground hover:bg-background ml-auto inline-flex size-6 items-center justify-center rounded-md transition-colors disabled:opacity-60"
+                      >
+                        <TrendingUp className="size-3" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })
             ) : (
