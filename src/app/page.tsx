@@ -54,6 +54,8 @@ const CONVERSATIONS_PAGE_SIZE = 30;
 const MESSAGES_PAGE_SIZE = 40;
 const CONVERSATIONS_REFRESH_INTERVAL_MS = 10_000;
 const MESSAGES_REFRESH_INTERVAL_MS = 3_000;
+const OPTIMISTIC_MESSAGE_ID_PREFIX = "optimistic:";
+const MESSAGE_DUPLICATE_WINDOW_MS = 15_000;
 
 function mergeUniqueById<T extends { id: string }>(
   current: T[],
@@ -73,9 +75,137 @@ function mergeMessagesChronologically(
   current: WahaMessage[],
   incoming: WahaMessage[],
 ) {
-  return mergeUniqueById(current, incoming).sort(
+  return dedupeMessages(mergeUniqueById(current, incoming)).sort(
     (a, b) => a.timestamp - b.timestamp,
   );
+}
+
+function asRecord(value: unknown) {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function asString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function asBoolean(value: unknown) {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function asNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function toTimestamp(value: unknown) {
+  const numeric = asNumber(value);
+  if (typeof numeric === "number") {
+    return numeric < 1_000_000_000_000 ? Math.round(numeric * 1000) : Math.round(numeric);
+  }
+  if (typeof value === "string") {
+    const parsedDate = Date.parse(value);
+    if (!Number.isNaN(parsedDate)) {
+      return parsedDate;
+    }
+  }
+  return Date.now();
+}
+
+function isOptimisticMessageId(id: string) {
+  return id.startsWith(OPTIMISTIC_MESSAGE_ID_PREFIX);
+}
+
+function isLikelyDuplicateMessage(first: WahaMessage, second: WahaMessage) {
+  if (first.chatId !== second.chatId || first.fromMe !== second.fromMe) {
+    return false;
+  }
+  if (first.text.trim() !== second.text.trim()) {
+    return false;
+  }
+  return Math.abs(first.timestamp - second.timestamp) <= MESSAGE_DUPLICATE_WINDOW_MS;
+}
+
+function dedupeMessages(messages: WahaMessage[]) {
+  const sorted = [...messages].sort((a, b) => a.timestamp - b.timestamp);
+  const deduped: WahaMessage[] = [];
+
+  for (const next of sorted) {
+    const existingIndex = deduped.findIndex(
+      (existing) =>
+        existing.id === next.id || isLikelyDuplicateMessage(existing, next),
+    );
+
+    if (existingIndex === -1) {
+      deduped.push(next);
+      continue;
+    }
+
+    const existing = deduped[existingIndex];
+    if (!existing) {
+      deduped.push(next);
+      continue;
+    }
+    const existingIsOptimistic = isOptimisticMessageId(existing.id);
+    const nextIsOptimistic = isOptimisticMessageId(next.id);
+
+    if (existingIsOptimistic && !nextIsOptimistic) {
+      deduped[existingIndex] = next;
+    }
+  }
+
+  return deduped;
+}
+
+function extractMessageId(candidate: Record<string, unknown>) {
+  const nestedData = asRecord(candidate._data);
+  const nestedId = asRecord(nestedData?.id);
+  return (
+    asString(candidate.id) ??
+    asString(nestedId?._serialized) ??
+    asString(nestedId?.id)
+  );
+}
+
+function normalizeMessageFromUnknown(
+  rawMessage: unknown,
+  fallback: { chatId: string; fromMe: boolean; text: string },
+) {
+  const record = asRecord(rawMessage);
+  if (!record) {
+    return null;
+  }
+
+  const messageId = extractMessageId(record);
+  const fromMe = asBoolean(record.fromMe) ?? fallback.fromMe;
+  const text =
+    asString(record.body) ??
+    asString(record.text) ??
+    asString(record.caption) ??
+    fallback.text;
+  const chatId =
+    asString(record.chatId) ??
+    (fromMe ? asString(record.to) : asString(record.from)) ??
+    fallback.chatId;
+
+  if (!messageId || !text) {
+    return null;
+  }
+
+  return {
+    id: messageId,
+    chatId,
+    fromMe,
+    text,
+    timestamp: toTimestamp(record.timestamp),
+  } satisfies WahaMessage;
 }
 
 function sortConversationsByPriority(items: WahaConversation[]) {
@@ -384,27 +514,68 @@ export default function Page() {
       return;
     }
 
-    await fetch("/api/chat/send-text", {
+    const chatId = selectedChatId;
+    const optimisticId = `${OPTIMISTIC_MESSAGE_ID_PREFIX}${crypto.randomUUID()}`;
+    const optimisticMessage: WahaMessage = {
+      id: optimisticId,
+      chatId,
+      fromMe: true,
+      text,
+      timestamp: Date.now(),
+    };
+
+    setMessages((current) =>
+      mergeMessagesChronologically(current, [optimisticMessage]),
+    );
+
+    const response = await fetch("/api/chat/send-text", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chatId: selectedChatId,
+        chatId,
         text,
       }),
     });
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        chatId: selectedChatId,
-        fromMe: true,
-        text,
-        timestamp: Date.now(),
-      },
-    ]);
+    if (!response.ok) {
+      setMessages((current) =>
+        current.filter((message) => message.id !== optimisticId),
+      );
+      return;
+    }
+
+    const rawBody = await response.text();
+    if (!rawBody) {
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(rawBody) as unknown;
+      const rootPayload = asRecord(payload);
+      const confirmed =
+        normalizeMessageFromUnknown(payload, {
+          chatId,
+          fromMe: true,
+          text,
+        }) ??
+        normalizeMessageFromUnknown(rootPayload?.message, {
+          chatId,
+          fromMe: true,
+          text,
+        });
+
+      if (!confirmed) {
+        return;
+      }
+
+      setMessages((current) =>
+        mergeMessagesChronologically(current, [confirmed]),
+      );
+    } catch {
+      // Ignore parse errors and keep optimistic rendering.
+    }
   }
 
   React.useEffect(() => {
@@ -477,34 +648,26 @@ export default function Page() {
       }
 
       const payload = parsed.payload ?? {};
-      const nestedPayload =
-        payload.payload && typeof payload.payload === "object"
-          ? (payload.payload as Record<string, unknown>)
-          : undefined;
-      const text =
-        (typeof nestedPayload?.body === "string"
-          ? nestedPayload.body
-          : undefined) ??
-        (typeof nestedPayload?.text === "string"
-          ? nestedPayload.text
-          : undefined) ??
-        (typeof payload.body === "string" ? payload.body : undefined) ??
-        (typeof payload.text === "string" ? payload.text : undefined) ??
-        "";
-      if (!text) {
+      const nestedPayload = asRecord(payload.payload);
+      const normalized =
+        normalizeMessageFromUnknown(nestedPayload, {
+          chatId: selectedChatId,
+          fromMe: false,
+          text: "",
+        }) ??
+        normalizeMessageFromUnknown(payload, {
+          chatId: selectedChatId,
+          fromMe: false,
+          text: "",
+        });
+
+      if (!normalized) {
         return;
       }
 
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          chatId: selectedChatId,
-          fromMe: false,
-          text,
-          timestamp: Date.now(),
-        },
-      ]);
+      setMessages((current) =>
+        mergeMessagesChronologically(current, [normalized]),
+      );
     });
 
     return () => {
