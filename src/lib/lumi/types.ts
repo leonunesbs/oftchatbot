@@ -1,41 +1,42 @@
 export const lumiStates = [
-  "START",
-  "TRIAGE",
-  "FAQ_ROUTER",
-  "SCHEDULING_COLLECT_NAME",
-  "SCHEDULING_COLLECT_PHONE",
-  "SCHEDULING_COLLECT_EMAIL",
-  "SCHEDULING_COLLECT_LOCATION",
-  "SCHEDULING_COLLECT_TYPE",
-  "SCHEDULING_COLLECT_DATE_PREF",
-  "SCHEDULING_SHOW_SLOTS",
-  "SCHEDULING_CONFIRM",
-  "HANDOFF_WHATSAPP",
-  "END",
+  'START',
+  'TRIAGE',
+  'FAQ_ROUTER',
+  'SCHEDULING_COLLECT_NAME',
+  'SCHEDULING_COLLECT_PHONE',
+  'SCHEDULING_COLLECT_EMAIL',
+  'SCHEDULING_COLLECT_LOCATION',
+  'SCHEDULING_COLLECT_TYPE',
+  'SCHEDULING_COLLECT_DATE_PREF',
+  'SCHEDULING_SHOW_DATES',
+  'SCHEDULING_SHOW_SLOTS',
+  'SCHEDULING_CONFIRM',
+  'HANDOFF_WHATSAPP',
+  'END',
 ] as const;
 
 export type LumiState = (typeof lumiStates)[number];
 
 export const lumiIntents = [
-  "greeting",
-  "ask_hours",
-  "ask_location",
-  "ask_pricing",
-  "ask_insurance",
-  "ask_services",
-  "urgent_symptoms",
-  "schedule_appointment",
-  "reschedule",
-  "cancel",
-  "talk_to_human",
-  "fallback",
+  'greeting',
+  'ask_hours',
+  'ask_location',
+  'ask_pricing',
+  'ask_insurance',
+  'ask_services',
+  'urgent_symptoms',
+  'schedule_appointment',
+  'reschedule',
+  'cancel',
+  'talk_to_human',
+  'fallback',
 ] as const;
 
 export type LumiIntent = (typeof lumiIntents)[number];
 
 export type DatePreference = {
   raw: string;
-  period?: "manha" | "tarde" | "noite";
+  period?: 'manha' | 'tarde' | 'noite';
   isoDate?: string;
 };
 
@@ -46,7 +47,20 @@ export type SlotOption = {
   label: string;
   location: string;
   consultationType: string;
-  source: "calcom" | "mock";
+  source: 'calcom' | 'mock';
+};
+
+export type EventTypeOption = {
+  id: string;
+  title: string;
+  slug?: string;
+  locationLabel?: string;
+};
+
+export type AvailableDateOption = {
+  isoDate: string;
+  label: string;
+  source: 'calcom' | 'mock';
 };
 
 export type LumiCollectedData = {
@@ -56,6 +70,10 @@ export type LumiCollectedData = {
   location?: string;
   consultationType?: string;
   datePreference?: DatePreference;
+  eventTypes?: EventTypeOption[];
+  selectedEventTypeId?: string;
+  availableDates?: AvailableDateOption[];
+  selectedDateIso?: string;
   selectedSlotId?: string;
   slotOptions?: SlotOption[];
 };
@@ -94,19 +112,19 @@ export type LumiTurnDecision = {
 };
 
 export type LumiTelemetryEventName =
-  | "intent_detected"
-  | "scheduling_started"
-  | "scheduling_completed"
-  | "urgent_triage_triggered"
-  | "handoff_triggered"
-  | "fallback_hit";
+  | 'intent_detected'
+  | 'scheduling_started'
+  | 'scheduling_completed'
+  | 'urgent_triage_triggered'
+  | 'handoff_triggered'
+  | 'fallback_hit';
 
 export type LumiTelemetryEvent = {
   event: LumiTelemetryEventName;
   chatIdHash: string;
   intent?: LumiIntent;
   state?: LumiState;
-  timezone: "America/Fortaleza";
+  timezone: 'America/Fortaleza';
   timestamp: string;
   metadata?: Record<string, string | number | boolean | undefined>;
 };
