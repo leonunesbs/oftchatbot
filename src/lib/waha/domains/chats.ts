@@ -328,7 +328,7 @@ export const chatsDomain = {
       );
     }
 
-    if (typeof state.lastSentAt === "number") {
+    if (!options?.allowBotFollowUp && typeof state.lastSentAt === "number") {
       const elapsed = now - state.lastSentAt;
       const requiredGap = randomBetween(MIN_SEND_GAP_MS, MAX_SEND_GAP_MS);
       if (elapsed < requiredGap) {
