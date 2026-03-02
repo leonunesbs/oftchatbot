@@ -207,7 +207,14 @@ export default function Page() {
       }
 
       const payload = parsed.payload ?? {};
-      const text = typeof payload.text === "string" ? payload.text : "";
+      const nestedPayload =
+        payload.payload && typeof payload.payload === "object" ? (payload.payload as Record<string, unknown>) : undefined;
+      const text =
+        (typeof nestedPayload?.body === "string" ? nestedPayload.body : undefined) ??
+        (typeof nestedPayload?.text === "string" ? nestedPayload.text : undefined) ??
+        (typeof payload.body === "string" ? payload.body : undefined) ??
+        (typeof payload.text === "string" ? payload.text : undefined) ??
+        "";
       if (!text) {
         return;
       }
@@ -303,10 +310,10 @@ export default function Page() {
         sessionLabel={sessionLabel}
         sessionToneClassName={sessionTone}
       />
-      <SidebarInset className="bg-muted/30">
-        <div className="flex min-h-0 flex-1 flex-col p-4 md:p-5 lg:p-7">
-          <section className="chat-layout flex min-h-0 flex-1 flex-col">
-            <div className="border-border/70 flex items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
+      <SidebarInset className="h-dvh overflow-hidden bg-muted/30">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:p-5 lg:p-7">
+          <section className="chat-layout grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden">
+            <div className="border-border/70 flex shrink-0 items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
               <div className="min-w-0 space-y-1">
                 <p className="truncate text-sm font-semibold tracking-tight md:text-base">
                   {activeConversation?.name ?? "Nenhuma conversa selecionada"}
@@ -403,10 +410,12 @@ export default function Page() {
               </Sheet>
             </div>
 
-            <div className="min-h-0 flex-1">
+            <div className="min-h-0 overflow-hidden">
               <ChatThread activeConversation={activeConversation} messages={messages} isLoading={isLoadingMessages} />
             </div>
-            <ChatComposer disabled={!selectedChatId} onSend={handleSend} />
+            <div className="shrink-0">
+              <ChatComposer disabled={!selectedChatId} onSend={handleSend} />
+            </div>
           </section>
         </div>
       </SidebarInset>

@@ -22,7 +22,7 @@ export const wahaConversationSchema = z.object({
   unreadCount: z.number().int().nonnegative().default(0),
   lastMessageAt: z.string().optional(),
   preview: z.string().optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().optional(),
   isPinned: z.boolean().default(false),
   isArchived: z.boolean().default(false),
 });

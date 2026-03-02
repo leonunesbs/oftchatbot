@@ -12,11 +12,23 @@ function unauthorized() {
 
 function buildEvent(rawPayload: unknown) {
   const payload = rawPayload as Record<string, unknown>;
+  const messagePayload =
+    payload?.payload && typeof payload.payload === "object" ? (payload.payload as Record<string, unknown>) : undefined;
+
+  const fromMe = typeof messagePayload?.fromMe === "boolean" ? messagePayload.fromMe : false;
   const chatId =
     typeof payload?.chatId === "string"
       ? payload.chatId
       : typeof payload?.id === "string"
         ? payload.id
+        : typeof messagePayload?.chatId === "string"
+          ? messagePayload.chatId
+          : typeof messagePayload?.id === "string"
+            ? messagePayload.id
+            : fromMe && typeof messagePayload?.to === "string"
+              ? messagePayload.to
+              : typeof messagePayload?.from === "string"
+                ? messagePayload.from
         : undefined;
 
   const session = typeof payload?.session === "string" ? payload.session : undefined;
