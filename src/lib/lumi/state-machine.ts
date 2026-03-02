@@ -2,6 +2,7 @@ import { contactProfileStore } from '@/lib/contact-profile/store';
 import { educationalFaq } from '@/lib/lumi/config/clinic';
 import {
   askMissingField,
+  bookingStatusReply,
   bookingSuccessReply,
   confirmationReply,
   dateOptionsReply,
@@ -193,7 +194,7 @@ export async function runLumiTurn(input: LumiTurnInput): Promise<LumiTurnDecisio
   const entities: Partial<LumiCollectedData> = {
     ...contextualEntities,
     ...extractedEntities,
-    phone: extractedEntities.phone ?? currentSession.collected.phone ?? autoCollectedPhone,
+    phone: autoCollectedPhone ?? extractedEntities.phone ?? currentSession.collected.phone,
   };
   const merged = mergeCollectedData(currentSession.collected, entities);
 
@@ -301,6 +302,53 @@ export async function runLumiTurn(input: LumiTurnInput): Promise<LumiTurnDecisio
       replyText: handoffReply('reagendamento ou cancelamento'),
       shouldSend: true,
       handoffTriggered: true,
+    };
+  }
+
+  if (intent.intent === 'check_booking_status') {
+    const latestBooking = currentSession.collected.latestBooking ?? merged.latestBooking;
+    if (!latestBooking) {
+      const nextSession: LumiSession = {
+        ...currentSession,
+        state: 'TRIAGE',
+        collected: merged,
+        lastIntent: intent.intent,
+        lastInteractionAt: nowIso(input.now),
+        updatedAt: nowIso(input.now),
+      };
+      contactProfileStore.upsertLumiSession(nextSession);
+      return {
+        nextState: 'TRIAGE',
+        replyText:
+          'Ainda nao encontrei um agendamento recente por aqui. Se quiser, posso iniciar um novo agendamento agora.',
+        shouldSend: true,
+      };
+    }
+
+    const status = await calComAdapter.getBookingStatus({
+      protocol: latestBooking.protocol,
+      paymentUrl: latestBooking.paymentUrl,
+      stripeCodes: merged.stripeCodes,
+    });
+
+    const nextSession: LumiSession = {
+      ...currentSession,
+      state: 'TRIAGE',
+      collected: merged,
+      lastIntent: intent.intent,
+      lastInteractionAt: nowIso(input.now),
+      updatedAt: nowIso(input.now),
+    };
+    contactProfileStore.upsertLumiSession(nextSession);
+    return {
+      nextState: 'TRIAGE',
+      replyText: bookingStatusReply({
+        protocol: latestBooking.protocol,
+        paymentStatusText: status.paymentStatusText,
+        bookingStatusText: status.bookingStatusText,
+        paymentUrl: status.paymentUrl,
+      }),
+      shouldSend: true,
     };
   }
 
@@ -735,6 +783,19 @@ export async function runLumiTurn(input: LumiTurnInput): Promise<LumiTurnDecisio
     location: merged.location ?? '',
     consultationType: merged.consultationType ?? 'consulta geral',
   });
+
+  merged.latestBooking = {
+    protocol: booking.protocol,
+    source: booking.source,
+    paymentUrl: booking.paymentUrl,
+    eventTypeId: merged.selectedEventTypeId,
+    slotStartAt: selectedSlot?.startAt ?? merged.selectedSlotId,
+    slotEndAt: selectedSlot?.endAt,
+    location: merged.location,
+    consultationType: merged.consultationType,
+    bookedAt: nowIso(input.now),
+  };
+  merged.stripeCodes = booking.stripeCodes ?? merged.stripeCodes;
 
   const nextSession: LumiSession = {
     ...currentSession,

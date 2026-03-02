@@ -191,8 +191,8 @@ function extractIncomingMessage(rawPayload: unknown) {
 }
 
 async function markIncomingAsSeen(chatId: string, session?: string) {
-  // Anti-block behavior: avoid immediate read receipt.
-  const seenDelayMs = randomBetween(2_000, 4_500);
+  // Keep anti-block behavior with a shorter acknowledgment delay for better UX.
+  const seenDelayMs = randomBetween(400, 1_000);
   await sleep(seenDelayMs);
 
   await requestWaha({
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (turn.strategicReplyText && turn.strategicReplyText.trim().length > 0) {
-          const strategicDelayMs = randomBetween(800, 1400);
+          const strategicDelayMs = randomBetween(250, 550);
           await sleep(strategicDelayMs);
           await chatsDomain.sendText({
             chatId: incomingMessage.chatId,

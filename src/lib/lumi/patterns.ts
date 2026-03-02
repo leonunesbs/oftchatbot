@@ -26,6 +26,24 @@ export const intentPatterns: Record<LumiIntent, IntentPattern> = {
     synonyms: ["quero marcar", "tem vaga", "agendamento"],
     typos: ["agenda", "agendarr", "consuta"],
   },
+  check_booking_status: {
+    priority: 85,
+    keywords: [
+      "atualizar status",
+      "atualizar pagamento",
+      "atualizar agendamento",
+      "status do pagamento",
+      "status do agendamento",
+    ],
+    synonyms: [
+      "consultar status",
+      "verificar pagamento",
+      "verificar agendamento",
+      "checar pagamento",
+      "acompanhar pagamento",
+    ],
+    typos: ["atualiza status", "atualizar pagameto", "stats pagamento"],
+  },
   reschedule: {
     priority: 70,
     keywords: ["reagendar", "mudar horario", "trocar data"],

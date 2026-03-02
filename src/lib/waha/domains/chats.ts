@@ -5,11 +5,10 @@ import type { WahaConversation, WahaMessage } from "@/lib/waha/types";
 
 const REPLY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
-const MAX_MESSAGES_PER_WINDOW = 4;
-const MIN_SEND_GAP_MS = 30_000;
-const MAX_SEND_GAP_MS = 60_000;
-const MIN_TYPING_MS = 1_500;
-const MAX_TYPING_MS = 15_000;
+const MIN_SEND_GAP_MS = 5_000;
+const MAX_SEND_GAP_MS = 12_000;
+const MIN_TYPING_MS = 500;
+const MAX_TYPING_MS = 3_500;
 
 type ChatRateState = {
   windowStartedAt: number;
@@ -68,9 +67,9 @@ function normalizeRateState(now: number, state?: ChatRateState): ChatRateState {
 
 function estimateTypingDelayMs(text: string) {
   const cleanLength = text.trim().length;
-  const base = cleanLength * 55;
+  const base = cleanLength * 28;
   const withBounds = Math.min(MAX_TYPING_MS, Math.max(MIN_TYPING_MS, base));
-  const jitter = randomBetween(200, 1_200);
+  const jitter = randomBetween(80, 300);
   return Math.min(MAX_TYPING_MS, withBounds + jitter);
 }
 
@@ -319,13 +318,6 @@ export const chatsDomain = {
           409
         );
       }
-    }
-
-    if (state.sentInWindow >= MAX_MESSAGES_PER_WINDOW) {
-      throw new WahaSendPolicyError(
-        "Limite anti-bloqueio atingido: no máximo 4 mensagens por hora para este contato.",
-        429
-      );
     }
 
     if (!options?.allowBotFollowUp && typeof state.lastSentAt === "number") {

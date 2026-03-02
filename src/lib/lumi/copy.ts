@@ -84,6 +84,20 @@ export function bookingSuccessReply(protocol: string, paymentUrl?: string, phone
   return `Consulta pré-agendada com sucesso. Protocolo: ${protocol}. O link de pagamento será enviado em seguida pelo nosso time. Se precisar ajustar, fale com nosso time: https://wa.me/5585999999999`;
 }
 
+export function bookingStatusReply(input: {
+  protocol?: string;
+  paymentStatusText: string;
+  bookingStatusText: string;
+  paymentUrl?: string;
+}) {
+  const protocol = input.protocol ?? 'não encontrado';
+  const paymentLinkText = input.paymentUrl
+    ? `\n\nSe quiser concluir o pagamento agora, use este link:\n${input.paymentUrl}`
+    : '';
+
+  return `Atualizei seu status agora.\n\nProtocolo: ${protocol}\nPagamento: ${input.paymentStatusText}\nAgendamento: ${input.bookingStatusText}${paymentLinkText}\n\nSe precisar, posso te ajudar a remarcar ou chamar nosso time humano.`;
+}
+
 export function fallbackReply() {
   return 'Entendi sua mensagem. Posso te ajudar com horários, local, dúvidas gerais de oftalmologia ou agendamento. Como prefere seguir?';
 }

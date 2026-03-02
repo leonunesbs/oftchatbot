@@ -95,6 +95,7 @@ function fallbackProfile(chatId: string, contactName?: string): ContactProfile {
     rawDetails: {},
     funnelStage: "primeiro-contato",
     notes: "",
+    lumiSession: undefined,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -174,6 +175,14 @@ function normalizeIntent(value: unknown): LumiIntent | undefined {
   return lumiIntents.includes(value as LumiIntent) ? (value as LumiIntent) : undefined;
 }
 
+function sanitizeLumiCollectedForStorage(collected: LumiSession["collected"]) {
+  if (!collected || typeof collected !== "object") {
+    return {};
+  }
+  const { phone: _phone, ...rest } = collected as Record<string, unknown>;
+  return rest;
+}
+
 export const contactProfileStore = {
   get(chatId: string, defaultName?: string): ContactProfile {
     const statement = getDb().prepare(`
@@ -198,8 +207,12 @@ export const contactProfileStore = {
     `);
 
     const result = statement.get(chatId) as ContactProfileRow | undefined;
+    const lumiSession = this.getLumiSession(chatId) ?? undefined;
     if (!result) {
-      return fallbackProfile(chatId, defaultName);
+      return {
+        ...fallbackProfile(chatId, defaultName),
+        lumiSession,
+      };
     }
 
     return {
@@ -208,6 +221,7 @@ export const contactProfileStore = {
       isMyContact: normalizeSqliteBoolean(result.isMyContact),
       rawDetails: normalizeRawDetails(result.rawDetails),
       funnelStage: normalizeFunnelStage(result.funnelStage),
+      lumiSession,
     };
   },
 
@@ -295,7 +309,10 @@ export const contactProfileStore = {
       nextProfile.updatedAt
     );
 
-    return nextProfile;
+    return {
+      ...nextProfile,
+      lumiSession: this.getLumiSession(input.chatId) ?? undefined,
+    };
   },
   getLumiSession(chatId: string): LumiSession | null {
     const statement = getDb().prepare(`
@@ -321,7 +338,7 @@ export const contactProfileStore = {
     return {
       chatId: result.chatId,
       state: normalizeState(result.state),
-      collected: normalizeRawDetails(result.collectedJson),
+      collected: sanitizeLumiCollectedForStorage(normalizeRawDetails(result.collectedJson)) as LumiSession["collected"],
       validationFailures: Number(result.validationFailures) || 0,
       handoffActive: normalizeSqliteBoolean(result.handoffActive),
       lastIntent: normalizeIntent(result.lastIntent),
@@ -355,7 +372,7 @@ export const contactProfileStore = {
     statement.run(
       input.chatId,
       input.state,
-      JSON.stringify(input.collected ?? {}),
+      JSON.stringify(sanitizeLumiCollectedForStorage(input.collected)),
       Math.max(0, Math.floor(input.validationFailures)),
       input.handoffActive ? 1 : 0,
       input.lastIntent ?? null,

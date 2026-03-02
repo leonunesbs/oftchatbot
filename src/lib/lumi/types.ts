@@ -25,6 +25,7 @@ export const lumiIntents = [
   'ask_insurance',
   'ask_services',
   'urgent_symptoms',
+  'check_booking_status',
   'schedule_appointment',
   'reschedule',
   'cancel',
@@ -76,6 +77,25 @@ export type LumiCollectedData = {
   selectedDateIso?: string;
   selectedSlotId?: string;
   slotOptions?: SlotOption[];
+  latestBooking?: {
+    protocol: string;
+    source: 'calcom' | 'mock';
+    paymentUrl?: string;
+    eventTypeId?: string;
+    slotStartAt?: string;
+    slotEndAt?: string;
+    location?: string;
+    consultationType?: string;
+    bookedAt: string;
+  };
+  stripeCodes?: {
+    checkoutSessionId?: string;
+    paymentIntentId?: string;
+    customerId?: string;
+    invoiceId?: string;
+    subscriptionId?: string;
+    paymentLinkId?: string;
+  };
 };
 
 export type LumiSession = {

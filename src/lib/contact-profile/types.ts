@@ -58,5 +58,14 @@ export type ContactProfile = {
   rawDetails: Record<string, unknown>;
   funnelStage: FunnelStage;
   notes: string;
+  lumiSession?: {
+    state: string;
+    collected: Record<string, unknown>;
+    validationFailures: number;
+    handoffActive: boolean;
+    lastIntent?: string;
+    lastInteractionAt: string;
+    updatedAt: string;
+  };
   updatedAt: string;
 };

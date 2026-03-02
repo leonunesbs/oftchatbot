@@ -937,6 +937,16 @@ export default function Page() {
     () => JSON.stringify(contactProfile?.rawDetails ?? {}, null, 2),
     [contactProfile?.rawDetails]
   );
+  const lumiCollectedData = (contactProfile?.lumiSession?.collected ?? {}) as Record<string, unknown>;
+  const lumiDatePreferenceRaw =
+    asString(asRecord(lumiCollectedData.datePreference)?.raw) ?? "--";
+  const lumiLatestBooking = asRecord(lumiCollectedData.latestBooking);
+  const lumiStripeCodes = asRecord(lumiCollectedData.stripeCodes);
+  const lumiPaymentUrl = asString(lumiLatestBooking?.paymentUrl);
+  const lumiCollectedPreview = React.useMemo(
+    () => JSON.stringify(lumiCollectedData, null, 2),
+    [lumiCollectedData]
+  );
   const isContactProfileDirty =
     funnelStageDraft !== (contactProfile?.funnelStage ?? "primeiro-contato") ||
     notesDraft !== (contactProfile?.notes ?? "");
@@ -1031,6 +1041,119 @@ export default function Page() {
           onChange={(event) => setNotesDraft(event.target.value)}
         />
       </div>
+
+      <div className="rounded-xl border p-3">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Dados coletados pela Lumi (SQLite)
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
+          <div>
+            <p className="text-muted-foreground text-[11px]">Estado atual</p>
+            <p className="truncate text-xs">{contactProfile?.lumiSession?.state ?? "--"}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Última intenção</p>
+            <p className="truncate text-xs">{contactProfile?.lumiSession?.lastIntent ?? "--"}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Nome</p>
+            <p className="truncate text-xs">{String(lumiCollectedData.fullName ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">E-mail</p>
+            <p className="truncate text-xs">{String(lumiCollectedData.email ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Local</p>
+            <p className="truncate text-xs">{String(lumiCollectedData.location ?? "--")}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Tipo de consulta</p>
+            <p className="truncate text-xs">{String(lumiCollectedData.consultationType ?? "--")}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Preferência de data</p>
+            <p className="truncate text-xs">{lumiDatePreferenceRaw}</p>
+          </div>
+        </div>
+        <p className="text-muted-foreground mt-2 text-[11px]">
+          {contactProfile?.lumiSession?.updatedAt
+            ? `Atualizado pela Lumi em ${new Date(contactProfile.lumiSession.updatedAt).toLocaleString()}`
+            : "Sem sessão da Lumi para este contato"}
+        </p>
+      </div>
+
+      <div className="rounded-xl border p-3">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Agendamento e Stripe (SQLite)
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
+          <div>
+            <p className="text-muted-foreground text-[11px]">Protocolo</p>
+            <p className="truncate text-xs">{String(lumiLatestBooking?.protocol ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Fonte</p>
+            <p className="truncate text-xs">{String(lumiLatestBooking?.source ?? "--")}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Slot selecionado</p>
+            <p className="truncate text-xs">
+              {asString(lumiLatestBooking?.slotStartAt) ?? "--"}
+              {asString(lumiLatestBooking?.slotEndAt) ? ` -> ${String(lumiLatestBooking?.slotEndAt)}` : ""}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Checkout Session</p>
+            <p className="truncate text-xs">{String(lumiStripeCodes?.checkoutSessionId ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Payment Intent</p>
+            <p className="truncate text-xs">{String(lumiStripeCodes?.paymentIntentId ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Customer</p>
+            <p className="truncate text-xs">{String(lumiStripeCodes?.customerId ?? "--")}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Invoice</p>
+            <p className="truncate text-xs">{String(lumiStripeCodes?.invoiceId ?? "--")}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Link de pagamento</p>
+            {lumiPaymentUrl ? (
+              <a
+                href={lumiPaymentUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate text-xs text-sky-600 hover:underline"
+              >
+                {lumiPaymentUrl}
+              </a>
+            ) : (
+              <p className="truncate text-xs">--</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <details className="rounded-xl border p-3">
+        <summary className="cursor-pointer text-sm font-medium">
+          Dados coletados (JSON técnico)
+        </summary>
+        <div className="mt-2 space-y-2">
+          <Label htmlFor={`${idPrefix}-lumi-collected`} className="text-xs text-muted-foreground">
+            Conteúdo de `lumi_sessions.collected_json`
+          </Label>
+          <Textarea
+            id={`${idPrefix}-lumi-collected`}
+            rows={8}
+            value={lumiCollectedPreview}
+            readOnly
+            className="font-mono text-[11px]"
+          />
+        </div>
+      </details>
 
       <details className="rounded-xl border p-3">
         <summary className="cursor-pointer text-sm font-medium">

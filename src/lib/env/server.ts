@@ -13,6 +13,7 @@ export const serverEnv = createEnv({
     WAHA_CONTACTS_DB_PATH: z.string().optional(),
     CALCOM_API_BASE_URL: z.string().url().optional(),
     CALCOM_API_KEY: z.string().min(8).optional(),
+    STRIPE_PRIVATE_KEY: z.string().min(8).optional(),
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
@@ -27,5 +28,6 @@ export const serverEnv = createEnv({
     WAHA_CONTACTS_DB_PATH: process.env.WAHA_CONTACTS_DB_PATH,
     CALCOM_API_BASE_URL: process.env.CALCOM_API_BASE_URL,
     CALCOM_API_KEY: process.env.CALCOM_API_KEY,
+    STRIPE_PRIVATE_KEY: process.env.STRIPE_PRIVATE_KEY,
   },
 });

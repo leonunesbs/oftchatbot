@@ -19,6 +19,22 @@ type BookInput = {
   consultationType: string;
 };
 
+type StripeCodes = {
+  checkoutSessionId?: string;
+  paymentIntentId?: string;
+  customerId?: string;
+  invoiceId?: string;
+  subscriptionId?: string;
+  paymentLinkId?: string;
+};
+
+type BookingStatusResult = {
+  paymentStatusText: string;
+  bookingStatusText: string;
+  paymentUrl?: string;
+  source: 'stripe' | 'cache';
+};
+
 let cachedEventTypeId: string | null = null;
 
 const CAL_API_VERSION = {
@@ -350,6 +366,226 @@ function extractUrl(value: unknown): string | undefined {
   return undefined;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object';
+}
+
+function asString(value: unknown) {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function firstMatchFromRegex(value: unknown, regex: RegExp) {
+  const source = asString(value);
+  if (!source) {
+    return undefined;
+  }
+  const match = source.match(regex);
+  return match?.[1];
+}
+
+function extractStripeCodesFromUrl(paymentUrl?: string): StripeCodes {
+  if (!paymentUrl) {
+    return {};
+  }
+
+  const codes: StripeCodes = {};
+  try {
+    const parsed = new URL(paymentUrl);
+    const sessionFromQuery =
+      parsed.searchParams.get('session_id') ??
+      parsed.searchParams.get('checkout_session_id') ??
+      parsed.searchParams.get('cs');
+    const paymentIntentFromQuery = parsed.searchParams.get('payment_intent');
+    const customerFromQuery = parsed.searchParams.get('customer');
+    const invoiceFromQuery = parsed.searchParams.get('invoice');
+    const subscriptionFromQuery = parsed.searchParams.get('subscription');
+    const paymentLinkFromQuery = parsed.searchParams.get('payment_link');
+    if (sessionFromQuery) {
+      codes.checkoutSessionId = sessionFromQuery;
+    }
+    if (paymentIntentFromQuery) {
+      codes.paymentIntentId = paymentIntentFromQuery;
+    }
+    if (customerFromQuery) {
+      codes.customerId = customerFromQuery;
+    }
+    if (invoiceFromQuery) {
+      codes.invoiceId = invoiceFromQuery;
+    }
+    if (subscriptionFromQuery) {
+      codes.subscriptionId = subscriptionFromQuery;
+    }
+    if (paymentLinkFromQuery) {
+      codes.paymentLinkId = paymentLinkFromQuery;
+    }
+  } catch {
+    // Keep fallback extraction below for non-URL values.
+  }
+
+  if (!codes.checkoutSessionId) {
+    codes.checkoutSessionId = firstMatchFromRegex(paymentUrl, /(cs_(?:test|live)_[A-Za-z0-9]+)/);
+  }
+  if (!codes.paymentIntentId) {
+    codes.paymentIntentId = firstMatchFromRegex(paymentUrl, /(pi_[A-Za-z0-9]+)/);
+  }
+  if (!codes.customerId) {
+    codes.customerId = firstMatchFromRegex(paymentUrl, /(cus_[A-Za-z0-9]+)/);
+  }
+  if (!codes.invoiceId) {
+    codes.invoiceId = firstMatchFromRegex(paymentUrl, /(in_[A-Za-z0-9]+)/);
+  }
+  if (!codes.subscriptionId) {
+    codes.subscriptionId = firstMatchFromRegex(paymentUrl, /(sub_[A-Za-z0-9]+)/);
+  }
+  if (!codes.paymentLinkId) {
+    codes.paymentLinkId = firstMatchFromRegex(paymentUrl, /(plink_[A-Za-z0-9]+)/);
+  }
+
+  return codes;
+}
+
+function mergeStripeCodes(...candidates: Array<StripeCodes | undefined>): StripeCodes | undefined {
+  const merged: StripeCodes = {};
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
+    if (candidate.checkoutSessionId) {
+      merged.checkoutSessionId = candidate.checkoutSessionId;
+    }
+    if (candidate.paymentIntentId) {
+      merged.paymentIntentId = candidate.paymentIntentId;
+    }
+    if (candidate.customerId) {
+      merged.customerId = candidate.customerId;
+    }
+    if (candidate.invoiceId) {
+      merged.invoiceId = candidate.invoiceId;
+    }
+    if (candidate.subscriptionId) {
+      merged.subscriptionId = candidate.subscriptionId;
+    }
+    if (candidate.paymentLinkId) {
+      merged.paymentLinkId = candidate.paymentLinkId;
+    }
+  }
+  return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
+function mapStripePaymentStatus(status?: string) {
+  switch (status) {
+    case 'paid':
+    case 'succeeded':
+      return 'pago';
+    case 'processing':
+      return 'em processamento';
+    case 'canceled':
+    case 'cancelled':
+      return 'cancelado';
+    case 'requires_action':
+      return 'acao necessaria';
+    case 'requires_payment_method':
+      return 'aguardando metodo de pagamento';
+    case 'requires_confirmation':
+      return 'aguardando confirmacao';
+    case 'requires_capture':
+      return 'aguardando captura';
+    case 'unpaid':
+    case 'open':
+      return 'pendente';
+    default:
+      return 'nao identificado';
+  }
+}
+
+function mapBookingStatusFromStripe(status?: string) {
+  switch (status) {
+    case 'paid':
+    case 'succeeded':
+      return 'confirmado (pagamento identificado)';
+    case 'processing':
+      return 'aguardando confirmacao financeira';
+    case 'canceled':
+    case 'cancelled':
+      return 'cancelado';
+    case 'unpaid':
+    case 'open':
+    case 'requires_action':
+    case 'requires_payment_method':
+    case 'requires_confirmation':
+    case 'requires_capture':
+      return 'pendente de pagamento';
+    default:
+      return 'em analise';
+  }
+}
+
+async function fetchStripeObject(path: string, secretKey: string) {
+  try {
+    const response = await fetch(`https://api.stripe.com/v1/${path}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+      },
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      return undefined;
+    }
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+}
+
+function extractStripeCodes(value: unknown, depth = 0): StripeCodes | undefined {
+  if (!isRecord(value) || depth > 4) {
+    return undefined;
+  }
+
+  const source = value as Record<string, unknown>;
+  const direct: StripeCodes = {
+    checkoutSessionId:
+      asString(source.checkoutSessionId) ??
+      asString(source.checkout_session_id) ??
+      asString(source.sessionId) ??
+      asString(source.session_id),
+    paymentIntentId:
+      asString(source.paymentIntentId) ??
+      asString(source.payment_intent) ??
+      asString(source.paymentIntent) ??
+      asString(source.intentId),
+    customerId:
+      asString(source.customerId) ??
+      asString(source.customer_id) ??
+      asString(source.customer),
+    invoiceId:
+      asString(source.invoiceId) ??
+      asString(source.invoice_id) ??
+      asString(source.invoice),
+    subscriptionId:
+      asString(source.subscriptionId) ??
+      asString(source.subscription_id) ??
+      asString(source.subscription),
+    paymentLinkId:
+      asString(source.paymentLinkId) ??
+      asString(source.payment_link_id) ??
+      asString(source.paymentLink),
+  };
+
+  const urlBased = extractStripeCodesFromUrl(extractUrl(source));
+  const nested = mergeStripeCodes(
+    extractStripeCodes(source.payment, depth + 1),
+    extractStripeCodes(source.checkout, depth + 1),
+    extractStripeCodes(source.metadata, depth + 1),
+    extractStripeCodes(source.links, depth + 1),
+    extractStripeCodes(source.stripe, depth + 1),
+    extractStripeCodes(source.data, depth + 1),
+  );
+
+  return mergeStripeCodes(direct, urlBased, nested);
+}
+
 async function getAvailableEventTypeId(endpoint: string, apiKey: string) {
   if (cachedEventTypeId) {
     return cachedEventTypeId;
@@ -532,7 +768,12 @@ export const calComAdapter = {
     }
   },
 
-  async book(input: BookInput): Promise<{ protocol: string; source: 'calcom' | 'mock'; paymentUrl?: string }> {
+  async book(input: BookInput): Promise<{
+    protocol: string;
+    source: 'calcom' | 'mock';
+    paymentUrl?: string;
+    stripeCodes?: StripeCodes;
+  }> {
     const apiKey = serverEnv.CALCOM_API_KEY;
     const endpoint = serverEnv.CALCOM_API_BASE_URL;
 
@@ -594,10 +835,16 @@ export const calComAdapter = {
               ? payload.reference
               : `LUMI-CAL-${Math.floor(Date.now() / 1000)}`;
 
+      const paymentUrl = extractUrl(payload) ?? extractUrl(body);
       return {
         protocol,
         source: 'calcom',
-        paymentUrl: extractUrl(payload) ?? extractUrl(body),
+        paymentUrl,
+        stripeCodes: mergeStripeCodes(
+          extractStripeCodes(payload),
+          extractStripeCodes(body),
+          extractStripeCodesFromUrl(paymentUrl),
+        ),
       };
     } catch {
       return {
@@ -605,5 +852,49 @@ export const calComAdapter = {
         source: 'mock',
       };
     }
+  },
+
+  async getBookingStatus(input: {
+    protocol?: string;
+    paymentUrl?: string;
+    stripeCodes?: StripeCodes;
+  }): Promise<BookingStatusResult> {
+    const mergedCodes = mergeStripeCodes(input.stripeCodes, extractStripeCodesFromUrl(input.paymentUrl));
+    const stripeSecretKey = serverEnv.STRIPE_PRIVATE_KEY;
+
+    if (!stripeSecretKey || !mergedCodes) {
+      return {
+        paymentStatusText: 'nao foi possivel consultar automaticamente',
+        bookingStatusText: 'pendente de confirmacao manual',
+        paymentUrl: input.paymentUrl,
+        source: 'cache',
+      };
+    }
+
+    let stripeStatus: string | undefined;
+
+    if (mergedCodes.checkoutSessionId) {
+      const checkout = await fetchStripeObject(`checkout/sessions/${mergedCodes.checkoutSessionId}`, stripeSecretKey);
+      stripeStatus = asString(checkout?.payment_status) ?? asString(checkout?.status);
+
+      if (!mergedCodes.paymentIntentId) {
+        const paymentIntentFromSession = checkout?.payment_intent;
+        if (typeof paymentIntentFromSession === 'string') {
+          mergedCodes.paymentIntentId = paymentIntentFromSession;
+        }
+      }
+    }
+
+    if (!stripeStatus && mergedCodes.paymentIntentId) {
+      const paymentIntent = await fetchStripeObject(`payment_intents/${mergedCodes.paymentIntentId}`, stripeSecretKey);
+      stripeStatus = asString(paymentIntent?.status);
+    }
+
+    return {
+      paymentStatusText: mapStripePaymentStatus(stripeStatus),
+      bookingStatusText: mapBookingStatusFromStripe(stripeStatus),
+      paymentUrl: input.paymentUrl,
+      source: stripeStatus ? 'stripe' : 'cache',
+    };
   },
 };

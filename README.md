@@ -147,6 +147,8 @@ Além das variáveis WAHA, o MVP suporta integração Cal.com:
 
 - `CALCOM_API_BASE_URL` (opcional)
 - `CALCOM_API_KEY` (opcional)
+- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` (opcional)
+- `STRIPE_PRIVATE_KEY` (opcional)
 
 Os event types são buscados diretamente na API do Cal.com. Se as variáveis não estiverem definidas (ou se não houver event types disponíveis), o fluxo usa fallback mock.
 

@@ -31,13 +31,52 @@ export function ChatThread({
   const [topVisibleDate, setTopVisibleDate] = React.useState<string | null>(null);
   const [showTopDateBadge, setShowTopDateBadge] = React.useState(false);
 
-  const getMessageDateLabel = React.useCallback((message: WahaMessage) => {
-    return new Date(message.timestamp).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+  const getDayKey = React.useCallback((dateLike: Date | string | number) => {
+    const date = new Date(dateLike);
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
   }, []);
+
+  const getRelativeDayLabel = React.useCallback(
+    (message: WahaMessage) => {
+      const messageDate = new Date(message.timestamp);
+      const now = new Date();
+      const today = new Date(now);
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const messageDayKey = getDayKey(messageDate);
+      if (messageDayKey === getDayKey(today)) {
+        return "HOJE";
+      }
+
+      if (messageDayKey === getDayKey(yesterday)) {
+        return "ONTEM";
+      }
+
+      const messageDayStart = new Date(
+        messageDate.getFullYear(),
+        messageDate.getMonth(),
+        messageDate.getDate()
+      );
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const diffInDays = Math.floor((todayStart.getTime() - messageDayStart.getTime()) / 86_400_000);
+
+      if (diffInDays >= 2 && diffInDays <= 6) {
+        return messageDate.toLocaleDateString("pt-BR", { weekday: "long" }).toLocaleUpperCase("pt-BR");
+      }
+
+      return messageDate.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    },
+    [getDayKey]
+  );
+
+  const getMessageDateLabel = React.useCallback((message: WahaMessage) => {
+    return getRelativeDayLabel(message);
+  }, [getRelativeDayLabel]);
 
   const syncTopVisibleDate = React.useCallback(() => {
     const node = scrollContainerRef.current;
@@ -180,16 +219,30 @@ export function ChatThread({
             ))}
           </div>
         ) : null}
-        {messages.map((message, index) => (
-          <div
-            key={message.id}
-            ref={(node) => {
-              messageRowRefs.current[index] = node;
-            }}
-          >
-            <MessageBubble message={message} />
-          </div>
-        ))}
+        {messages.map((message, index) => {
+          const previousMessage = index > 0 ? messages[index - 1] : null;
+          const startsNewDay =
+            !previousMessage || getDayKey(previousMessage.timestamp) !== getDayKey(message.timestamp);
+          const dayLabel = getRelativeDayLabel(message);
+
+          return (
+            <div
+              key={message.id}
+              ref={(node) => {
+                messageRowRefs.current[index] = node;
+              }}
+            >
+              {startsNewDay ? (
+                <div className="my-2 flex items-center gap-3">
+                  <div className="bg-border/70 h-px flex-1" />
+                  <span className="text-muted-foreground text-[11px] font-semibold tracking-wide">{dayLabel}</span>
+                  <div className="bg-border/70 h-px flex-1" />
+                </div>
+              ) : null}
+              <MessageBubble message={message} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

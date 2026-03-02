@@ -294,6 +294,29 @@ const scenarios: DialogScenario[] = [
     expectedState: 'SCHEDULING_COLLECT_LOCATION',
     expectReplyIncludes: ['local'],
   },
+  {
+    id: '32-check-status-without-booking',
+    turns: ['atualizar status'],
+    expectedState: 'TRIAGE',
+    expectReplyIncludes: ['nao encontrei um agendamento recente'],
+  },
+  {
+    id: '33-check-status-after-booking',
+    turns: [
+      'quero agendar',
+      'me chamo Lara Nunes',
+      '85998887766',
+      'Fortaleza',
+      'consulta geral',
+      '15/03 tarde',
+      '1',
+      '1',
+      'sim',
+      'atualizar pagamento',
+    ],
+    expectedState: 'TRIAGE',
+    expectReplyIncludes: ['Atualizei seu status', 'Pagamento:'],
+  },
 ];
 
 test('LUMI dialogs coverage', async () => {
