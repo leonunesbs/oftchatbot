@@ -660,24 +660,24 @@ export default function Page() {
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white px-0 py-0 md:px-5 md:py-1 lg:px-7">
           <div className="flex min-h-0 flex-1 gap-4 md:gap-5  lg:gap-7">
             <section className="chat-layout grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden md:rounded-2xl md:border md:border-border/70 md:bg-white md:shadow-sm">
-              <div className="border-border/70 flex shrink-0 items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
-                <div className="flex min-w-0 items-start gap-2">
-                  <SidebarTrigger className="mt-0.5 md:hidden" />
-                  <Separator orientation="vertical" className="my-0.5 h-6 md:hidden" />
-                  <div className="min-w-0 space-y-1">
+              <div className="border-border/70 flex shrink-0 items-center justify-between gap-2 border-b px-2 py-3 md:gap-3 md:px-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <SidebarTrigger className="md:hidden" />
+                  <Separator orientation="vertical" className="h-6 md:hidden" />
+                  <div className="min-w-0">
                     <p className="truncate text-sm font-semibold tracking-tight md:text-base">
                       {activeConversation?.name ?? "Nenhuma conversa selecionada"}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2">
                       <Badge
                         className={cn(
-                          "rounded-full border-0 px-2 py-0.5 text-[11px]",
+                          "rounded-full border-0 px-2 py-0.5 text-[11px] whitespace-nowrap",
                           funnelTone,
                         )}
                       >
                         Funil: {funnelStageLabels[currentFunnelStage]}
                       </Badge>
-                      <p className="text-muted-foreground truncate text-[11px]">
+                      <p className="text-muted-foreground min-w-0 truncate text-[11px]">
                         {activeConversation
                           ? `${messages.length} ${messages.length === 1 ? "mensagem" : "mensagens"} • ${
                               lastSyncAt
@@ -695,7 +695,7 @@ export default function Page() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 px-2.5 text-[11px] md:h-9 md:px-3 md:text-sm xl:hidden"
+                      className="h-8 shrink-0 px-2.5 text-[11px] md:h-9 md:px-3 md:text-sm xl:hidden"
                       disabled={!activeConversation}
                     >
                       Perfil
