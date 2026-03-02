@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { funnelStageLabels, funnelStages } from "@/lib/contact-profile/types";
@@ -48,18 +47,6 @@ export default function Page() {
     () => conversations.find((conversation) => conversation.id === selectedChatId),
     [conversations, selectedChatId]
   );
-  const activeContactMeta = React.useMemo(() => {
-    if (!activeConversation) {
-      return "Nenhum contato selecionado";
-    }
-
-    const chatIdentifier = activeConversation.id.replace(/@.+$/, "");
-    if (activeConversation.unreadCount > 0) {
-      return `${chatIdentifier} • ${activeConversation.unreadCount} não lida${activeConversation.unreadCount > 1 ? "s" : ""}`;
-    }
-
-    return chatIdentifier;
-  }, [activeConversation]);
   async function loadSession() {
     const response = await fetch("/api/chat/session", { cache: "no-store" });
 
@@ -317,26 +304,9 @@ export default function Page() {
         sessionToneClassName={sessionTone}
       />
       <SidebarInset className="bg-muted/30">
-        <header className="supports-backdrop-filter:bg-background/75 bg-background/92 sticky top-0 z-20 flex min-h-(--header-height) shrink-0 items-center border-b px-3 py-2 backdrop-blur md:h-(--header-height) md:px-5 md:py-0 lg:px-6">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <SidebarTrigger className="-ml-1.5 size-8 rounded-full" />
-            <Separator orientation="vertical" className="mr-1 hidden data-[orientation=vertical]:h-5 md:block" />
-            <p className="truncate text-sm font-semibold tracking-tight">OFT ChatBot</p>
-            <p className="text-muted-foreground hidden truncate text-xs md:block">
-              {activeConversation ? activeContactMeta : "Selecione uma conversa para começar"}
-            </p>
-          </div>
-
-          <div className="ml-2 flex shrink-0 items-center gap-1.5 md:ml-auto md:gap-2.5">
-            <Badge className={cn("hidden rounded-full border-0 px-2.5 py-0.5 text-[11px] sm:inline-flex", sessionTone)}>
-              {sessionLabel}
-            </Badge>
-          </div>
-        </header>
-
         <div className="flex min-h-0 flex-1 flex-col p-4 md:p-5 lg:p-7">
-          <section className="chat-layout bg-card/75 ring-border/80 flex min-h-0 flex-1 flex-col rounded-3xl ring-1 shadow-sm">
-            <div className="border-border/70 flex items-center justify-between gap-3 border-b px-4 py-3 md:px-6">
+          <section className="chat-layout flex min-h-0 flex-1 flex-col">
+            <div className="border-border/70 flex items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
               <div className="min-w-0 space-y-1">
                 <p className="truncate text-sm font-semibold tracking-tight md:text-base">
                   {activeConversation?.name ?? "Nenhuma conversa selecionada"}

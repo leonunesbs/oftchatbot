@@ -1,242 +1,217 @@
 "use client";
 
+import {
+  Archive,
+  Eye,
+  MessageCircle,
+  Pin,
+  Search,
+} from "lucide-react";
 import * as React from "react";
+import type { ComponentProps } from "react";
 
-import { ConversationList } from "@/components/chat/conversation-list";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
-  SidebarInput,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarSeparator,
-  useSidebar,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import type { WahaConversation } from "@/lib/waha/types";
-import { MessageCircleMore } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type ConversationFilter = "all" | "unread" | "pinned" | "archived";
-
-const FILTERS: Array<{ id: ConversationFilter; label: string }> = [
-  { id: "all", label: "Todos" },
-  { id: "unread", label: "Nao lidas" },
-  { id: "pinned", label: "Fixados" },
-  { id: "archived", label: "Arquivadas" },
-];
-
-type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+type AppSidebarProps = ComponentProps<typeof Sidebar> & {
   conversations: WahaConversation[];
   selectedChatId?: string;
-  onSelectConversation?: (chatId: string) => void;
+  onSelectConversation: (chatId: string) => void;
   isLoading?: boolean;
-  sessionLabel?: string;
-  sessionToneClassName?: string;
+  sessionLabel: string;
+  sessionToneClassName: string;
 };
 
-function matchesSearch(conversation: WahaConversation, rawQuery: string) {
-  if (!rawQuery) {
-    return true;
+function formatConversationTime(value?: string) {
+  if (!value) {
+    return "";
   }
-  const query = rawQuery.toLowerCase();
-  return (
-    conversation.name.toLowerCase().includes(query) ||
-    conversation.id.toLowerCase().includes(query) ||
-    (conversation.preview ?? "").toLowerCase().includes(query)
-  );
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function getConversationInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "C";
+  }
+
+  const initials = parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
+  return initials || "C";
 }
 
 export function AppSidebar({
   conversations,
   selectedChatId,
   onSelectConversation,
-  isLoading,
+  isLoading = false,
   sessionLabel,
   sessionToneClassName,
   ...props
 }: AppSidebarProps) {
-  const { isMobile, setOpenMobile } = useSidebar();
-  const [search, setSearch] = React.useState("");
-  const [activeFilter, setActiveFilter] = React.useState<ConversationFilter>("all");
+  const [query, setQuery] = React.useState("");
 
-  const searchedConversations = React.useMemo(
-    () => conversations.filter((conversation) => matchesSearch(conversation, search.trim())),
-    [conversations, search]
-  );
+  const sortedConversations = React.useMemo(() => {
+    return [...conversations].sort((a, b) => {
+      if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
+        return a.isPinned ? -1 : 1;
+      }
 
-  const pinnedConversations = React.useMemo(
-    () => searchedConversations.filter((conversation) => conversation.isPinned && !conversation.isArchived),
-    [searchedConversations]
-  );
-  const activeConversations = React.useMemo(
-    () => searchedConversations.filter((conversation) => !conversation.isArchived),
-    [searchedConversations]
-  );
+      const aDate = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+      const bDate = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+      return bDate - aDate;
+    });
+  }, [conversations]);
 
   const filteredConversations = React.useMemo(() => {
-    if (activeFilter === "unread") {
-      return activeConversations.filter((conversation) => conversation.unreadCount > 0);
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) {
+      return sortedConversations;
     }
-    if (activeFilter === "pinned") {
-      return pinnedConversations;
-    }
-    if (activeFilter === "archived") {
-      return searchedConversations.filter((conversation) => conversation.isArchived);
-    }
-    return activeConversations;
-  }, [activeConversations, activeFilter, pinnedConversations, searchedConversations]);
 
-  const unpinnedConversations = React.useMemo(
-    () => activeConversations.filter((conversation) => !conversation.isPinned),
-    [activeConversations]
-  );
+    return sortedConversations.filter((conversation) => {
+      const text = `${conversation.name} ${conversation.preview ?? ""}`.toLowerCase();
+      return text.includes(normalized);
+    });
+  }, [query, sortedConversations]);
 
-  const emptyByFilter = React.useMemo(() => {
-    if (activeFilter === "unread") {
-      return {
-        title: "Nenhuma conversa nao lida",
-        description: "Quando houver novas mensagens, elas aparecerao aqui.",
-      };
-    }
-    if (activeFilter === "pinned") {
-      return {
-        title: "Nenhuma conversa fixada",
-        description: "Fixe contatos importantes para acesso rapido.",
-      };
-    }
-    if (activeFilter === "archived") {
-      return {
-        title: "Nenhuma conversa arquivada",
-        description: "Arquive conversas para manter sua lista principal limpa.",
-      };
-    }
-    return {
-      title: "Nenhuma conversa encontrada",
-      description: "Tente ajustar sua busca ou atualizar a lista.",
-    };
-  }, [activeFilter]);
-
-  function handleSelect(chatId: string) {
-    onSelectConversation?.(chatId);
-    if (isMobile) {
-      setOpenMobile(false);
-    }
-  }
-
-  const unreadCount = React.useMemo(
-    () => activeConversations.reduce((total, item) => total + item.unreadCount, 0),
-    [activeConversations]
+  const unreadTotal = React.useMemo(
+    () => conversations.reduce((total, conversation) => total + Math.max(0, conversation.unreadCount), 0),
+    [conversations]
   );
 
   return (
-    <Sidebar variant="floating" collapsible="offcanvas" {...props}>
-      <SidebarHeader className="gap-3 px-3 py-3">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <button type="button" className="cursor-default">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <MessageCircleMore className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Conversas</span>
-                  <span className="truncate text-xs">{activeConversations.length} contatos ativos</span>
-                </div>
-                <Badge className={cn("rounded-full border-0 px-2 py-0.5 text-[11px]", sessionToneClassName)}>
-                  {sessionLabel ?? "Desconhecido"}
-                </Badge>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
-        <div className="flex items-center gap-2">
-          <SidebarInput
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar ou iniciar conversa"
-            className="h-9 text-sm"
-          />
+    <Sidebar variant="floating" {...props}>
+      <SidebarHeader>
+        <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+          <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+            <Eye className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold leading-none">Oftalog Chat</p>
+            <p className="text-muted-foreground truncate pt-1 text-xs">WhatsApp CRM</p>
+          </div>
         </div>
-
-        <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
-          {FILTERS.map((filter) => {
-            const isActive = filter.id === activeFilter;
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                onClick={() => setActiveFilter(filter.id)}
-                className={cn(
-                  "rounded-full border px-2.5 py-1 text-[11px] font-medium whitespace-nowrap transition-colors",
-                  isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-primary"
-                    : "border-sidebar-border bg-sidebar-accent/30 hover:bg-sidebar-accent/70 text-sidebar-foreground/80"
-                )}
-              >
-                {filter.label}
-              </button>
-            );
-          })}
-          <span className="text-sidebar-foreground/60 ml-auto shrink-0 text-[11px]">{unreadCount} nao lidas</span>
+        <div className="relative">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar conversa"
+            className="h-9 bg-background pl-9"
+          />
         </div>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <SidebarContent>
+        <SidebarGroup className="pt-0">
+          <div className="space-y-1">
+            {isLoading ? (
+              <div className="space-y-1 px-1">
+                {Array.from({ length: 7 }).map((_, index) => (
+                  <SidebarMenuSkeleton key={index} showIcon className="h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : filteredConversations.length > 0 ? (
+              filteredConversations.map((conversation) => {
+                const isActive = selectedChatId === conversation.id;
+                const timeLabel = formatConversationTime(conversation.lastMessageAt);
+                const unreadCount = Math.max(0, conversation.unreadCount);
 
-      <SidebarContent className="pb-3">
-        {activeFilter === "all" && pinnedConversations.length > 0 ? (
-          <ConversationList
-            title="Fixadas"
-            conversations={pinnedConversations}
-            selectedChatId={selectedChatId}
-            onSelect={handleSelect}
-            isLoading={isLoading}
-          />
-        ) : null}
-
-        {activeFilter === "all" && unpinnedConversations.length > 0 ? (
-          <ConversationList
-            title={pinnedConversations.length > 0 ? "Conversas" : undefined}
-            conversations={unpinnedConversations}
-            selectedChatId={selectedChatId}
-            onSelect={handleSelect}
-            isLoading={isLoading}
-          />
-        ) : null}
-
-        {activeFilter !== "all" ? (
-          <ConversationList
-            conversations={filteredConversations}
-            selectedChatId={selectedChatId}
-            onSelect={handleSelect}
-            isLoading={isLoading}
-            emptyTitle={emptyByFilter.title}
-            emptyDescription={emptyByFilter.description}
-          />
-        ) : null}
-
-        {activeFilter === "all" && !isLoading && filteredConversations.length === 0 ? (
-          <ConversationList
-            conversations={[]}
-            selectedChatId={selectedChatId}
-            onSelect={handleSelect}
-            emptyTitle={emptyByFilter.title}
-            emptyDescription={emptyByFilter.description}
-          />
-        ) : null}
+                return (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => onSelectConversation(conversation.id)}
+                    className={cn(
+                      "focus-visible:ring-sidebar-ring w-full rounded-xl border px-2.5 py-2 text-left outline-hidden transition-colors focus-visible:ring-2",
+                      isActive
+                        ? "bg-sidebar-accent border-sidebar-border"
+                        : "border-transparent hover:bg-sidebar-accent/70"
+                    )}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className="bg-sidebar-primary/15 text-sidebar-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                        {getConversationInitials(conversation.name)}
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-medium">{conversation.name || "Contato sem nome"}</p>
+                          {conversation.isPinned ? (
+                            <Pin className="text-muted-foreground size-3.5 shrink-0" />
+                          ) : null}
+                          {conversation.isArchived ? (
+                            <Archive className="text-muted-foreground size-3.5 shrink-0" />
+                          ) : null}
+                          {timeLabel ? (
+                            <span className="text-muted-foreground ml-auto shrink-0 text-[11px]">{timeLabel}</span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-muted-foreground line-clamp-1 text-xs">
+                            {conversation.preview || "Sem mensagens recentes"}
+                          </p>
+                          {unreadCount > 0 ? (
+                            <span className="bg-sidebar-primary text-sidebar-primary-foreground ml-auto inline-flex min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold">
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="text-muted-foreground rounded-lg border border-dashed px-3 py-6 text-center text-xs">
+                Nenhuma conversa encontrada.
+              </div>
+            )}
+          </div>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="px-3 pb-3">
-        <div className="border-sidebar-border bg-sidebar-accent/30 rounded-xl border px-2.5 py-2 text-xs">
-          <p className="text-sidebar-foreground/70">{unreadCount} nao lidas</p>
+
+      <SidebarFooter>
+        <div className="bg-background/60 rounded-lg border px-2.5 py-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs font-medium">
+              <MessageCircle className="size-3.5" />
+              Conversas
+            </div>
+            <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+              {conversations.length}
+            </Badge>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <Badge className={cn("rounded-full border-0 px-2 py-0.5 text-[11px]", sessionToneClassName)}>{sessionLabel}</Badge>
+            <span className="text-muted-foreground text-[11px]">
+              {unreadTotal > 0 ? `${unreadTotal} não lidas` : "Inbox zerada"}
+            </span>
+          </div>
         </div>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }
