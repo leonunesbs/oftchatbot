@@ -28,6 +28,9 @@ type AppSidebarProps = ComponentProps<typeof Sidebar> & {
   selectedChatId?: string;
   onSelectConversation: (chatId: string) => void;
   isLoading?: boolean;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
   sessionLabel: string;
   sessionToneClassName: string;
 };
@@ -67,11 +70,15 @@ export function AppSidebar({
   selectedChatId,
   onSelectConversation,
   isLoading = false,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore,
   sessionLabel,
   sessionToneClassName,
   ...props
 }: AppSidebarProps) {
   const [query, setQuery] = React.useState("");
+  const listContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const sortedConversations = React.useMemo(() => {
     return [...conversations].sort((a, b) => {
@@ -102,6 +109,32 @@ export function AppSidebar({
     [conversations]
   );
 
+  const handleListScroll = React.useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      if (!hasMore || isLoadingMore || !onLoadMore) {
+        return;
+      }
+
+      const target = event.currentTarget;
+      const threshold = 120;
+      const isNearBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - threshold;
+      if (isNearBottom) {
+        onLoadMore();
+      }
+    },
+    [hasMore, isLoadingMore, onLoadMore]
+  );
+
+  React.useEffect(() => {
+    const container = listContainerRef.current;
+    if (!container || !hasMore || isLoadingMore || !onLoadMore) {
+      return;
+    }
+    if (container.scrollHeight <= container.clientHeight + 1) {
+      onLoadMore();
+    }
+  }, [filteredConversations.length, hasMore, isLoadingMore, onLoadMore]);
+
   return (
     <Sidebar variant="floating" {...props}>
       <SidebarHeader>
@@ -126,8 +159,8 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className="pt-0">
-          <div className="space-y-1">
+        <SidebarGroup className="flex min-h-0 flex-1 pt-0">
+          <div ref={listContainerRef} className="h-full space-y-1 overflow-y-auto pr-1" onScroll={handleListScroll}>
             {isLoading ? (
               <div className="space-y-1 px-1">
                 {Array.from({ length: 7 }).map((_, index) => (
@@ -189,6 +222,13 @@ export function AppSidebar({
                 Nenhuma conversa encontrada.
               </div>
             )}
+            {!isLoading && isLoadingMore ? (
+              <div className="space-y-1 px-1 pt-1">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <SidebarMenuSkeleton key={`load-more-${index}`} showIcon className="h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : null}
           </div>
         </SidebarGroup>
       </SidebarContent>

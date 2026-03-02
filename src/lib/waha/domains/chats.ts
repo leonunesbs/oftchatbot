@@ -163,21 +163,41 @@ function normalizeMessages(rawData: unknown, chatId: string): WahaMessage[] {
 }
 
 export const chatsDomain = {
-  async list(session = serverEnv.WAHA_DEFAULT_SESSION): Promise<WahaConversation[]> {
+  async list(
+    options?: {
+      limit?: number;
+      offset?: number;
+      session?: string;
+    }
+  ): Promise<WahaConversation[]> {
+    const session = options?.session ?? serverEnv.WAHA_DEFAULT_SESSION;
+    const limit = Math.max(1, options?.limit ?? 100);
+    const offset = Math.max(0, options?.offset ?? 0);
     const response = await requestWaha({
       path: `${session}/chats/overview`,
       searchParams: {
-        limit: 100,
-        offset: 0,
+        limit,
+        offset,
       },
     });
     return normalizeConversations(response.body);
   },
-  async messages(chatId: string, limit = 100, session = serverEnv.WAHA_DEFAULT_SESSION): Promise<WahaMessage[]> {
+  async messages(
+    chatId: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      session?: string;
+    }
+  ): Promise<WahaMessage[]> {
+    const session = options?.session ?? serverEnv.WAHA_DEFAULT_SESSION;
+    const limit = Math.max(1, options?.limit ?? 100);
+    const offset = Math.max(0, options?.offset ?? 0);
     const response = await requestWaha({
       path: `${session}/chats/${encodeURIComponent(chatId)}/messages`,
       searchParams: {
         limit,
+        offset,
         downloadMedia: false,
       },
     });

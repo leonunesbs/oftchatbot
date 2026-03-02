@@ -32,7 +32,7 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
 
   return (
     <div className="border-border/70 border-t px-2 py-2 md:px-3 md:py-2.5">
-      <form onSubmit={handleSubmit} className="bg-background/95 ring-border flex items-center gap-2 rounded-2xl p-2 ring-1 shadow-xs">
+      <form onSubmit={handleSubmit} className="ring-border flex items-center gap-2 rounded-2xl bg-white p-2 ring-1 shadow-sm">
         <Input
           value={text}
           onChange={(event) => setText(event.target.value)}

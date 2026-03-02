@@ -15,15 +15,28 @@ const fallbackConversations = [
   },
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limitParam = request.url ? new URL(request.url).searchParams.get("limit") : null;
+  const offsetParam = request.url ? new URL(request.url).searchParams.get("offset") : null;
+  const limit = Math.min(100, Math.max(1, Number.parseInt(limitParam ?? "30", 10) || 30));
+  const offset = Math.max(0, Number.parseInt(offsetParam ?? "0", 10) || 0);
+
   try {
-    const conversations = await chatsDomain.list();
-    return NextResponse.json({ conversations });
+    const conversations = await chatsDomain.list({ limit, offset });
+    return NextResponse.json({
+      conversations,
+      limit,
+      offset,
+      hasMore: conversations.length === limit,
+    });
   } catch (error) {
     if (error instanceof WahaHttpError) {
       return NextResponse.json(
         {
-          conversations: fallbackConversations,
+          conversations: offset === 0 ? fallbackConversations : [],
+          limit,
+          offset,
+          hasMore: false,
           warning: "WAHA is unavailable. Showing fallback data.",
           details: error.responseBody,
         },
@@ -31,6 +44,14 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ conversations: fallbackConversations }, { status: 200 });
+    return NextResponse.json(
+      {
+        conversations: offset === 0 ? fallbackConversations : [],
+        limit,
+        offset,
+        hasMore: false,
+      },
+      { status: 200 }
+    );
   }
 }

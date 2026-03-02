@@ -19,15 +19,35 @@ import type { WahaConversation, WahaMessage, WahaSession } from "@/lib/waha/type
 
 type ConversationsResponse = {
   conversations: WahaConversation[];
+  hasMore?: boolean;
 };
 
 type MessagesResponse = {
   messages: WahaMessage[];
+  hasMore?: boolean;
 };
 
 type ContactProfileResponse = {
   profile: ContactProfile;
 };
+
+const CONVERSATIONS_PAGE_SIZE = 30;
+const MESSAGES_PAGE_SIZE = 40;
+
+function mergeUniqueById<T extends { id: string }>(current: T[], incoming: T[]) {
+  const merged = new Map<string, T>();
+  for (const item of current) {
+    merged.set(item.id, item);
+  }
+  for (const item of incoming) {
+    merged.set(item.id, item);
+  }
+  return Array.from(merged.values());
+}
+
+function mergeMessagesChronologically(current: WahaMessage[], incoming: WahaMessage[]) {
+  return mergeUniqueById(current, incoming).sort((a, b) => a.timestamp - b.timestamp);
+}
 
 export default function Page() {
   const [session, setSession] = React.useState<WahaSession | null>(null);
@@ -38,10 +58,19 @@ export default function Page() {
   const [notesDraft, setNotesDraft] = React.useState("");
   const [funnelStageDraft, setFunnelStageDraft] = React.useState<FunnelStage>("primeiro-contato");
   const [isLoadingConversations, setIsLoadingConversations] = React.useState(true);
+  const [isLoadingMoreConversations, setIsLoadingMoreConversations] = React.useState(false);
+  const [hasMoreConversations, setHasMoreConversations] = React.useState(true);
+  const [conversationsOffset, setConversationsOffset] = React.useState(0);
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(false);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = React.useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = React.useState(false);
+  const [messagesOffset, setMessagesOffset] = React.useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = React.useState(false);
   const [isSavingProfile, setIsSavingProfile] = React.useState(false);
   const [lastSyncAt, setLastSyncAt] = React.useState<Date | null>(null);
+  const activeMessagesChatRef = React.useRef<string | null>(null);
+  const conversationsRequestRef = React.useRef(0);
+  const messagesRequestRef = React.useRef(0);
 
   const activeConversation = React.useMemo(
     () => conversations.find((conversation) => conversation.id === selectedChatId),
@@ -69,29 +98,104 @@ export default function Page() {
     }
   }
 
-  async function loadConversations() {
-    setIsLoadingConversations(true);
+  async function loadConversations(options?: { append?: boolean }) {
+    const append = options?.append ?? false;
+    if (append && (isLoadingMoreConversations || isLoadingConversations || !hasMoreConversations)) {
+      return;
+    }
+
+    if (append) {
+      setIsLoadingMoreConversations(true);
+    } else {
+      setIsLoadingConversations(true);
+      setIsLoadingMoreConversations(false);
+      setConversationsOffset(0);
+      setHasMoreConversations(true);
+    }
+
+    const requestId = conversationsRequestRef.current + 1;
+    conversationsRequestRef.current = requestId;
+    const offset = append ? conversationsOffset : 0;
     try {
-      const response = await fetch("/api/chat/conversations", { cache: "no-store" });
+      const response = await fetch(
+        `/api/chat/conversations?limit=${CONVERSATIONS_PAGE_SIZE}&offset=${offset}`,
+        { cache: "no-store" }
+      );
       const data = (await response.json()) as ConversationsResponse;
-      setConversations(data.conversations);
-      setSelectedChatId((current) => current ?? data.conversations[0]?.id);
+      if (conversationsRequestRef.current !== requestId) {
+        return;
+      }
+      const page = data.conversations ?? [];
+      setConversations((current) => (append ? mergeUniqueById(current, page) : page));
+      setConversationsOffset(offset + page.length);
+      setHasMoreConversations(Boolean(data.hasMore));
+      if (!append) {
+        setSelectedChatId((current) => current ?? page[0]?.id);
+      }
       setLastSyncAt(new Date());
     } finally {
-      setIsLoadingConversations(false);
+      if (conversationsRequestRef.current !== requestId) {
+        return;
+      }
+      if (append) {
+        setIsLoadingMoreConversations(false);
+      } else {
+        setIsLoadingMoreConversations(false);
+        setIsLoadingConversations(false);
+      }
     }
   }
 
-  async function loadMessages(chatId: string) {
-    setIsLoadingMessages(true);
+  async function loadMessages(chatId: string, options?: { append?: boolean }) {
+    const append = options?.append ?? false;
+    if (append && (isLoadingMoreMessages || isLoadingMessages || !hasMoreMessages)) {
+      return;
+    }
+
+    if (append) {
+      setIsLoadingMoreMessages(true);
+    } else {
+      setIsLoadingMessages(true);
+      setIsLoadingMoreMessages(false);
+      setMessagesOffset(0);
+      setHasMoreMessages(true);
+    }
+
+    const requestId = messagesRequestRef.current + 1;
+    messagesRequestRef.current = requestId;
+    const offset = append ? messagesOffset : 0;
     try {
-      const response = await fetch(`/api/chat/messages?chatId=${encodeURIComponent(chatId)}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(
+        `/api/chat/messages?chatId=${encodeURIComponent(chatId)}&limit=${MESSAGES_PAGE_SIZE}&offset=${offset}`,
+        {
+          cache: "no-store",
+        }
+      );
       const data = (await response.json()) as MessagesResponse;
-      setMessages(data.messages);
+      if (activeMessagesChatRef.current !== chatId || messagesRequestRef.current !== requestId) {
+        return;
+      }
+
+      const page = data.messages ?? [];
+      setMessages((current) => {
+        if (!append) {
+          return page;
+        }
+
+        return mergeMessagesChronologically(page, current);
+      });
+      setMessagesOffset(offset + page.length);
+      setHasMoreMessages(Boolean(data.hasMore));
     } finally {
-      setIsLoadingMessages(false);
+      if (messagesRequestRef.current !== requestId) {
+        return;
+      }
+      if (append) {
+        setIsLoadingMoreMessages(false);
+      } else {
+        setIsLoadingMoreMessages(false);
+        setIsLoadingMessages(false);
+      }
     }
   }
 
@@ -182,11 +286,21 @@ export default function Page() {
 
   React.useEffect(() => {
     if (!selectedChatId) {
+      activeMessagesChatRef.current = null;
+      setMessages([]);
+      setMessagesOffset(0);
+      setHasMoreMessages(false);
+      setIsLoadingMoreMessages(false);
       setContactProfile(null);
       setNotesDraft("");
       setFunnelStageDraft("primeiro-contato");
       return;
     }
+    activeMessagesChatRef.current = selectedChatId;
+    setMessages([]);
+    setMessagesOffset(0);
+    setHasMoreMessages(true);
+    setIsLoadingMoreMessages(false);
     void loadMessages(selectedChatId);
     void loadContactProfile(selectedChatId, activeConversation?.name);
   }, [activeConversation?.name, selectedChatId]);
@@ -307,12 +421,15 @@ export default function Page() {
         selectedChatId={selectedChatId}
         onSelectConversation={setSelectedChatId}
         isLoading={isLoadingConversations}
+        isLoadingMore={isLoadingMoreConversations}
+        hasMore={hasMoreConversations}
+        onLoadMore={() => void loadConversations({ append: true })}
         sessionLabel={sessionLabel}
         sessionToneClassName={sessionTone}
       />
-      <SidebarInset className="h-dvh overflow-hidden bg-muted/30">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:p-5 lg:p-7">
-          <section className="chat-layout grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden">
+      <SidebarInset className="h-dvh overflow-hidden bg-white">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-4 md:p-5 lg:p-7">
+          <section className="chat-layout border-border/70 grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl border bg-white shadow-sm">
             <div className="border-border/70 flex shrink-0 items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
               <div className="min-w-0 space-y-1">
                 <p className="truncate text-sm font-semibold tracking-tight md:text-base">
@@ -411,7 +528,14 @@ export default function Page() {
             </div>
 
             <div className="min-h-0 overflow-hidden">
-              <ChatThread activeConversation={activeConversation} messages={messages} isLoading={isLoadingMessages} />
+              <ChatThread
+                activeConversation={activeConversation}
+                messages={messages}
+                isLoading={isLoadingMessages}
+                isLoadingOlder={isLoadingMoreMessages}
+                hasMoreOlder={hasMoreMessages}
+                onLoadOlder={() => (selectedChatId ? void loadMessages(selectedChatId, { append: true }) : undefined)}
+              />
             </div>
             <div className="shrink-0">
               <ChatComposer disabled={!selectedChatId} onSend={handleSend} />

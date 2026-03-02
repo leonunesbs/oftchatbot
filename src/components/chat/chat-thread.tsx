@@ -9,47 +9,72 @@ type ChatThreadProps = {
   activeConversation?: WahaConversation;
   messages: WahaMessage[];
   isLoading?: boolean;
+  isLoadingOlder?: boolean;
+  hasMoreOlder?: boolean;
+  onLoadOlder?: () => void;
 };
 
-export function ChatThread({ activeConversation, messages, isLoading }: ChatThreadProps) {
+export function ChatThread({
+  activeConversation,
+  messages,
+  isLoading,
+  isLoadingOlder = false,
+  hasMoreOlder = false,
+  onLoadOlder,
+}: ChatThreadProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
-  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const shouldStickToBottomRef = React.useRef(true);
+  const isLoadingOlderRef = React.useRef(isLoadingOlder);
+  const pendingPrependRef = React.useRef(false);
+  const previousScrollHeightRef = React.useRef(0);
+
+  React.useEffect(() => {
+    isLoadingOlderRef.current = isLoadingOlder;
+  }, [isLoadingOlder]);
 
   React.useEffect(() => {
     const node = scrollContainerRef.current;
     if (!node) {
-      setIsOverflowing(false);
       return;
     }
 
-    const updateOverflow = () => {
-      setIsOverflowing(node.scrollHeight > node.clientHeight + 1);
-    };
+    if (pendingPrependRef.current) {
+      const nextHeight = node.scrollHeight;
+      const delta = nextHeight - previousScrollHeightRef.current;
+      node.scrollTop += delta;
+      pendingPrependRef.current = false;
+      return;
+    }
 
-    updateOverflow();
-
-    const resizeObserver = new ResizeObserver(updateOverflow);
-    resizeObserver.observe(node);
-    window.addEventListener("resize", updateOverflow);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateOverflow);
-    };
-  }, [messages.length, activeConversation?.id]);
+    if (shouldStickToBottomRef.current) {
+      node.scrollTop = node.scrollHeight;
+    }
+  }, [messages]);
 
   React.useEffect(() => {
-    if (!scrollContainerRef.current || !messages.length) {
-      return;
-    }
+    shouldStickToBottomRef.current = true;
+    pendingPrependRef.current = false;
+    previousScrollHeightRef.current = 0;
+  }, [activeConversation?.id]);
 
-    if (isOverflowing) {
-      scrollContainerRef.current.scrollTop = 0;
-      return;
-    }
+  const handleScroll = React.useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      const target = event.currentTarget;
+      const bottomDistance = target.scrollHeight - target.clientHeight - target.scrollTop;
+      shouldStickToBottomRef.current = bottomDistance <= 80;
 
-    scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-  }, [messages, isOverflowing]);
+      if (!hasMoreOlder || !onLoadOlder || isLoadingOlderRef.current) {
+        return;
+      }
+
+      if (target.scrollTop <= 80) {
+        pendingPrependRef.current = true;
+        previousScrollHeightRef.current = target.scrollHeight;
+        onLoadOlder();
+      }
+    },
+    [hasMoreOlder, onLoadOlder]
+  );
 
   if (!activeConversation) {
     return (
@@ -90,11 +115,21 @@ export function ChatThread({ activeConversation, messages, isLoading }: ChatThre
   return (
     <div
       ref={scrollContainerRef}
-      className={`chat-thread-scroll flex h-full gap-3 overflow-y-auto px-2 py-3 md:px-3 md:py-4 ${
-        isOverflowing ? "flex-col-reverse" : "flex-col"
-      }`}
+      onScroll={handleScroll}
+      className="chat-thread-scroll flex h-full flex-col gap-3 overflow-y-auto px-2 py-3 md:px-3 md:py-4"
     >
-      {(isOverflowing ? [...messages].reverse() : messages).map((message) => (
+      {isLoadingOlder ? (
+        <div className="space-y-2 pb-1">
+          {Array.from({ length: 2 }).map((_, idx) => (
+            <div
+              key={`older-message-skeleton-${idx}`}
+              className="bg-muted h-10 animate-pulse rounded-2xl"
+              style={{ width: `${Math.max(44, 66 - idx * 8)}%` }}
+            />
+          ))}
+        </div>
+      ) : null}
+      {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
     </div>

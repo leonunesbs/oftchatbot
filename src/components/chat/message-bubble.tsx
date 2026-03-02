@@ -20,7 +20,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           "max-w-[min(82%,42rem)] rounded-2xl border px-3 py-2.5 text-sm shadow-xs",
           message.fromMe
             ? "bg-primary/95 text-primary-foreground border-primary/70 rounded-br-md"
-            : "bg-background text-foreground border-border rounded-bl-md"
+            : "bg-slate-50 text-foreground border-border rounded-bl-md"
         )}
       >
         <p className="wrap-break-word whitespace-pre-wrap leading-relaxed">{message.text}</p>
