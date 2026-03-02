@@ -27,11 +27,37 @@ function getDb() {
       chat_id TEXT PRIMARY KEY,
       contact_name TEXT NOT NULL,
       phone_number TEXT NOT NULL,
+      avatar_url TEXT,
+      push_name TEXT,
+      short_name TEXT,
+      business_name TEXT,
+      about TEXT,
+      is_business INTEGER NOT NULL DEFAULT 0,
+      is_my_contact INTEGER NOT NULL DEFAULT 0,
+      raw_details TEXT NOT NULL DEFAULT '{}',
       funnel_stage TEXT NOT NULL DEFAULT 'primeiro-contato',
       notes TEXT NOT NULL DEFAULT '',
       updated_at TEXT NOT NULL
     );
   `);
+  const columnRows = db.prepare("PRAGMA table_info(contact_profiles)").all() as Array<{ name?: unknown }>;
+  const columns = new Set(columnRows.map((row) => (typeof row.name === "string" ? row.name : "")).filter(Boolean));
+  const migrations: Array<{ column: string; sql: string }> = [
+    { column: "avatar_url", sql: "ALTER TABLE contact_profiles ADD COLUMN avatar_url TEXT" },
+    { column: "push_name", sql: "ALTER TABLE contact_profiles ADD COLUMN push_name TEXT" },
+    { column: "short_name", sql: "ALTER TABLE contact_profiles ADD COLUMN short_name TEXT" },
+    { column: "business_name", sql: "ALTER TABLE contact_profiles ADD COLUMN business_name TEXT" },
+    { column: "about", sql: "ALTER TABLE contact_profiles ADD COLUMN about TEXT" },
+    { column: "is_business", sql: "ALTER TABLE contact_profiles ADD COLUMN is_business INTEGER NOT NULL DEFAULT 0" },
+    { column: "is_my_contact", sql: "ALTER TABLE contact_profiles ADD COLUMN is_my_contact INTEGER NOT NULL DEFAULT 0" },
+    { column: "raw_details", sql: "ALTER TABLE contact_profiles ADD COLUMN raw_details TEXT NOT NULL DEFAULT '{}'" },
+  ];
+
+  for (const migration of migrations) {
+    if (!columns.has(migration.column)) {
+      db.exec(migration.sql);
+    }
+  }
 
   return db;
 }
@@ -45,15 +71,69 @@ function fallbackProfile(chatId: string, contactName?: string): ContactProfile {
     chatId,
     contactName: contactName?.trim() || "Contato",
     phoneNumber: normalizePhone(chatId),
+    avatarUrl: undefined,
+    pushName: undefined,
+    shortName: undefined,
+    businessName: undefined,
+    about: undefined,
+    isBusiness: false,
+    isMyContact: false,
+    rawDetails: {},
     funnelStage: "primeiro-contato",
     notes: "",
     updatedAt: new Date().toISOString(),
   };
 }
 
-type ContactProfileRow = Omit<ContactProfile, "funnelStage"> & {
+type ContactProfileRow = {
+  chatId: string;
+  contactName: string;
+  phoneNumber: string;
+  avatarUrl?: string;
+  pushName?: string;
+  shortName?: string;
+  businessName?: string;
+  about?: string;
   funnelStage: string;
+  isBusiness?: number | boolean;
+  isMyContact?: number | boolean;
+  rawDetails?: string | Record<string, unknown>;
+  notes: string;
+  updatedAt: string;
 };
+
+function normalizeRawDetails(value: unknown): Record<string, unknown> {
+  if (!value) {
+    return {};
+  }
+
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      return {};
+    }
+  }
+
+  return {};
+}
+
+function normalizeSqliteBoolean(value: unknown) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "number") {
+    return value === 1;
+  }
+  return false;
+}
 
 export const contactProfileStore = {
   get(chatId: string, defaultName?: string): ContactProfile {
@@ -62,6 +142,14 @@ export const contactProfileStore = {
         chat_id AS chatId,
         contact_name AS contactName,
         phone_number AS phoneNumber,
+        avatar_url AS avatarUrl,
+        push_name AS pushName,
+        short_name AS shortName,
+        business_name AS businessName,
+        about,
+        is_business AS isBusiness,
+        is_my_contact AS isMyContact,
+        raw_details AS rawDetails,
         funnel_stage AS funnelStage,
         notes,
         updated_at AS updatedAt
@@ -77,27 +165,75 @@ export const contactProfileStore = {
 
     return {
       ...result,
+      isBusiness: normalizeSqliteBoolean(result.isBusiness),
+      isMyContact: normalizeSqliteBoolean(result.isMyContact),
+      rawDetails: normalizeRawDetails(result.rawDetails),
       funnelStage: normalizeFunnelStage(result.funnelStage),
     };
   },
 
-  upsert(input: { chatId: string; contactName?: string; funnelStage: FunnelStage; notes: string }): ContactProfile {
+  upsert(input: {
+    chatId: string;
+    contactName?: string;
+    phoneNumber?: string;
+    avatarUrl?: string;
+    pushName?: string;
+    shortName?: string;
+    businessName?: string;
+    about?: string;
+    isBusiness?: boolean;
+    isMyContact?: boolean;
+    rawDetails?: Record<string, unknown>;
+    funnelStage: FunnelStage;
+    notes: string;
+  }): ContactProfile {
     const existing = this.get(input.chatId, input.contactName);
     const nextProfile: ContactProfile = {
       ...existing,
       contactName: input.contactName?.trim() || existing.contactName,
-      phoneNumber: existing.phoneNumber,
+      phoneNumber: input.phoneNumber?.trim() || existing.phoneNumber,
+      avatarUrl: input.avatarUrl ?? existing.avatarUrl,
+      pushName: input.pushName ?? existing.pushName,
+      shortName: input.shortName ?? existing.shortName,
+      businessName: input.businessName ?? existing.businessName,
+      about: input.about ?? existing.about,
+      isBusiness: input.isBusiness ?? existing.isBusiness,
+      isMyContact: input.isMyContact ?? existing.isMyContact,
+      rawDetails: input.rawDetails ?? existing.rawDetails,
       funnelStage: input.funnelStage,
       notes: input.notes.trim(),
       updatedAt: new Date().toISOString(),
     };
 
     const statement = getDb().prepare(`
-      INSERT INTO contact_profiles (chat_id, contact_name, phone_number, funnel_stage, notes, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO contact_profiles (
+        chat_id,
+        contact_name,
+        phone_number,
+        avatar_url,
+        push_name,
+        short_name,
+        business_name,
+        about,
+        is_business,
+        is_my_contact,
+        raw_details,
+        funnel_stage,
+        notes,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(chat_id) DO UPDATE SET
         contact_name = excluded.contact_name,
         phone_number = excluded.phone_number,
+        avatar_url = excluded.avatar_url,
+        push_name = excluded.push_name,
+        short_name = excluded.short_name,
+        business_name = excluded.business_name,
+        about = excluded.about,
+        is_business = excluded.is_business,
+        is_my_contact = excluded.is_my_contact,
+        raw_details = excluded.raw_details,
         funnel_stage = excluded.funnel_stage,
         notes = excluded.notes,
         updated_at = excluded.updated_at
@@ -107,6 +243,14 @@ export const contactProfileStore = {
       nextProfile.chatId,
       nextProfile.contactName,
       nextProfile.phoneNumber,
+      nextProfile.avatarUrl ?? null,
+      nextProfile.pushName ?? null,
+      nextProfile.shortName ?? null,
+      nextProfile.businessName ?? null,
+      nextProfile.about ?? null,
+      nextProfile.isBusiness ? 1 : 0,
+      nextProfile.isMyContact ? 1 : 0,
+      JSON.stringify(nextProfile.rawDetails ?? {}),
       nextProfile.funnelStage,
       nextProfile.notes,
       nextProfile.updatedAt

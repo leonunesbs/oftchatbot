@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { contactProfileStore } from "@/lib/contact-profile/store";
 import { chatsDomain } from "@/lib/waha/domains/chats";
+import type { WahaConversation } from "@/lib/waha/types";
 import { WahaHttpError } from "@/lib/waha/http-client";
 
 const fallbackConversations = [
@@ -15,6 +17,16 @@ const fallbackConversations = [
   },
 ];
 
+function withFunnelStage(conversations: WahaConversation[]) {
+  return conversations.map((conversation) => {
+    const profile = contactProfileStore.get(conversation.id, conversation.name);
+    return {
+      ...conversation,
+      funnelStage: profile.funnelStage,
+    };
+  });
+}
+
 export async function GET(request: Request) {
   const limitParam = request.url ? new URL(request.url).searchParams.get("limit") : null;
   const offsetParam = request.url ? new URL(request.url).searchParams.get("offset") : null;
@@ -22,7 +34,9 @@ export async function GET(request: Request) {
   const offset = Math.max(0, Number.parseInt(offsetParam ?? "0", 10) || 0);
 
   try {
-    const conversations = await chatsDomain.list({ limit, offset });
+    const conversations = withFunnelStage(
+      await chatsDomain.list({ limit, offset }),
+    );
     return NextResponse.json({
       conversations,
       limit,
@@ -33,7 +47,10 @@ export async function GET(request: Request) {
     if (error instanceof WahaHttpError) {
       return NextResponse.json(
         {
-          conversations: offset === 0 ? fallbackConversations : [],
+          conversations:
+            offset === 0
+              ? withFunnelStage(fallbackConversations)
+              : [],
           limit,
           offset,
           hasMore: false,
@@ -46,7 +63,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       {
-        conversations: offset === 0 ? fallbackConversations : [],
+        conversations:
+          offset === 0 ? withFunnelStage(fallbackConversations) : [],
         limit,
         offset,
         hasMore: false,

@@ -3,6 +3,77 @@ import { requestWaha } from "@/lib/waha/http-client";
 import { sendTextInputSchema, wahaConversationSchema, wahaMessageSchema } from "@/lib/waha/schemas";
 import type { WahaConversation, WahaMessage } from "@/lib/waha/types";
 
+const REPLY_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RATE_WINDOW_MS = 60 * 60 * 1000;
+const MAX_MESSAGES_PER_WINDOW = 4;
+const MIN_SEND_GAP_MS = 30_000;
+const MAX_SEND_GAP_MS = 60_000;
+const MIN_TYPING_MS = 1_500;
+const MAX_TYPING_MS = 15_000;
+
+type ChatRateState = {
+  windowStartedAt: number;
+  sentInWindow: number;
+  lastSentAt?: number;
+};
+
+const chatRateState = new Map<string, ChatRateState>();
+
+export class WahaSendPolicyError extends Error {
+  status: number;
+
+  constructor(message: string, status = 429) {
+    super(message);
+    this.name = "WahaSendPolicyError";
+    this.status = status;
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function randomBetween(minInclusive: number, maxInclusive: number) {
+  if (maxInclusive <= minInclusive) {
+    return minInclusive;
+  }
+  const span = maxInclusive - minInclusive + 1;
+  return Math.floor(Math.random() * span) + minInclusive;
+}
+
+function getRateStateKey(session: string, chatId: string) {
+  return `${session}:${chatId}`;
+}
+
+function normalizeRateState(now: number, state?: ChatRateState): ChatRateState {
+  if (!state) {
+    return {
+      windowStartedAt: now,
+      sentInWindow: 0,
+    };
+  }
+
+  if (now - state.windowStartedAt >= RATE_WINDOW_MS) {
+    return {
+      windowStartedAt: now,
+      sentInWindow: 0,
+      lastSentAt: state.lastSentAt,
+    };
+  }
+
+  return state;
+}
+
+function estimateTypingDelayMs(text: string) {
+  const cleanLength = text.trim().length;
+  const base = cleanLength * 55;
+  const withBounds = Math.min(MAX_TYPING_MS, Math.max(MIN_TYPING_MS, base));
+  const jitter = randomBetween(200, 1_200);
+  return Math.min(MAX_TYPING_MS, withBounds + jitter);
+}
+
 function asString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
@@ -205,13 +276,101 @@ export const chatsDomain = {
   },
   async sendText(input: { chatId: string; text: string; session?: string }) {
     const parsed = sendTextInputSchema.parse(input);
-    return requestWaha({
+    const session = parsed.session ?? serverEnv.WAHA_DEFAULT_SESSION;
+    const rateStateKey = getRateStateKey(session, parsed.chatId);
+    const now = Date.now();
+    const state = normalizeRateState(now, chatRateState.get(rateStateKey));
+    chatRateState.set(rateStateKey, state);
+
+    const recentMessages = await this.messages(parsed.chatId, { limit: 100, offset: 0, session });
+    const latestIncoming = recentMessages.filter((message) => !message.fromMe).at(-1);
+    const latestOutgoing = recentMessages.filter((message) => message.fromMe).at(-1);
+
+    if (!latestIncoming) {
+      throw new WahaSendPolicyError(
+        "Envio bloqueado por segurança: o contato ainda não iniciou conversa neste chat.",
+        409
+      );
+    }
+
+    const incomingIsRecent = now - latestIncoming.timestamp <= REPLY_WINDOW_MS;
+    if (!incomingIsRecent) {
+      throw new WahaSendPolicyError(
+        "Envio bloqueado por segurança: a última mensagem recebida está fora da janela de resposta.",
+        409
+      );
+    }
+
+    if (latestOutgoing && latestOutgoing.timestamp >= latestIncoming.timestamp) {
+      throw new WahaSendPolicyError(
+        "Envio bloqueado por segurança: aguarde uma nova mensagem do contato antes de responder novamente.",
+        409
+      );
+    }
+
+    if (state.sentInWindow >= MAX_MESSAGES_PER_WINDOW) {
+      throw new WahaSendPolicyError(
+        "Limite anti-bloqueio atingido: no máximo 4 mensagens por hora para este contato.",
+        429
+      );
+    }
+
+    if (typeof state.lastSentAt === "number") {
+      const elapsed = now - state.lastSentAt;
+      const requiredGap = randomBetween(MIN_SEND_GAP_MS, MAX_SEND_GAP_MS);
+      if (elapsed < requiredGap) {
+        await sleep(requiredGap - elapsed);
+      }
+    }
+
+    const interactionBody = {
+      chatId: parsed.chatId,
+      session,
+    };
+
+    await requestWaha({
+      path: "sendSeen",
+      method: "POST",
+      body: interactionBody,
+    }).catch((error) => {
+      console.warn("[WAHA anti-block] sendSeen failed", error);
+    });
+
+    await requestWaha({
+      path: "startTyping",
+      method: "POST",
+      body: interactionBody,
+    }).catch((error) => {
+      console.warn("[WAHA anti-block] startTyping failed", error);
+    });
+
+    const typingDelayMs = estimateTypingDelayMs(parsed.text);
+    await sleep(typingDelayMs);
+
+    await requestWaha({
+      path: "stopTyping",
+      method: "POST",
+      body: interactionBody,
+    }).catch((error) => {
+      console.warn("[WAHA anti-block] stopTyping failed", error);
+    });
+
+    const response = await requestWaha({
       path: "sendText",
       method: "POST",
       body: {
         ...parsed,
-        session: parsed.session ?? serverEnv.WAHA_DEFAULT_SESSION,
+        session,
       },
     });
+
+    const sentAt = Date.now();
+    chatRateState.set(rateStateKey, {
+      ...state,
+      sentInWindow: state.sentInWindow + 1,
+      lastSentAt: sentAt,
+    });
+
+    return response;
   },
 };

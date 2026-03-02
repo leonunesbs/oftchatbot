@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -17,8 +18,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { funnelStageLabels, funnelStages } from "@/lib/contact-profile/types";
 import type {
@@ -87,7 +91,9 @@ function asRecord(value: unknown) {
 }
 
 function asString(value: unknown) {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function asBoolean(value: unknown) {
@@ -108,7 +114,9 @@ function asNumber(value: unknown) {
 function toTimestamp(value: unknown) {
   const numeric = asNumber(value);
   if (typeof numeric === "number") {
-    return numeric < 1_000_000_000_000 ? Math.round(numeric * 1000) : Math.round(numeric);
+    return numeric < 1_000_000_000_000
+      ? Math.round(numeric * 1000)
+      : Math.round(numeric);
   }
   if (typeof value === "string") {
     const parsedDate = Date.parse(value);
@@ -130,7 +138,9 @@ function isLikelyDuplicateMessage(first: WahaMessage, second: WahaMessage) {
   if (first.text.trim() !== second.text.trim()) {
     return false;
   }
-  return Math.abs(first.timestamp - second.timestamp) <= MESSAGE_DUPLICATE_WINDOW_MS;
+  return (
+    Math.abs(first.timestamp - second.timestamp) <= MESSAGE_DUPLICATE_WINDOW_MS
+  );
 }
 
 function dedupeMessages(messages: WahaMessage[]) {
@@ -710,6 +720,10 @@ export default function Page() {
   }, [session?.status]);
 
   const currentFunnelStage = contactProfile?.funnelStage ?? "primeiro-contato";
+  const rawDetailsPreview = React.useMemo(
+    () => JSON.stringify(contactProfile?.rawDetails ?? {}, null, 2),
+    [contactProfile?.rawDetails]
+  );
   const isContactProfileDirty =
     funnelStageDraft !== (contactProfile?.funnelStage ?? "primeiro-contato") ||
     notesDraft !== (contactProfile?.notes ?? "");
@@ -723,6 +737,17 @@ export default function Page() {
         <p className="text-muted-foreground text-xs">
           {contactProfile?.phoneNumber ?? "--"}
         </p>
+        <p className="text-muted-foreground text-xs">Push name: {contactProfile?.pushName ?? "--"}</p>
+        <p className="text-muted-foreground text-xs">Short name: {contactProfile?.shortName ?? "--"}</p>
+        <p className="text-muted-foreground text-xs">Perfil comercial: {contactProfile?.isBusiness ? "Sim" : "Não"}</p>
+        <p className="text-muted-foreground text-xs">Na agenda: {contactProfile?.isMyContact ? "Sim" : "Não"}</p>
+        <p className="text-muted-foreground text-xs">Nome comercial: {contactProfile?.businessName ?? "--"}</p>
+        <p className="text-muted-foreground text-xs">Sobre: {contactProfile?.about ?? "--"}</p>
+        {contactProfile?.avatarUrl ? (
+          <a href={contactProfile.avatarUrl} target="_blank" rel="noreferrer" className="text-xs text-sky-600 hover:underline">
+            Abrir avatar
+          </a>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -754,6 +779,17 @@ export default function Page() {
           value={notesDraft}
           disabled={!activeConversation || isLoadingProfile}
           onChange={(event) => setNotesDraft(event.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-contact-raw`}>Dados brutos do contato (WAHA)</Label>
+        <Textarea
+          id={`${idPrefix}-contact-raw`}
+          rows={8}
+          value={rawDetailsPreview}
+          readOnly
+          className="font-mono text-[11px]"
         />
       </div>
 
@@ -829,7 +865,8 @@ export default function Page() {
                   <Separator orientation="vertical" className="h-6 md:hidden" />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold tracking-tight md:text-base">
-                      {activeConversation?.name ?? "Nenhuma conversa selecionada"}
+                      {activeConversation?.name ??
+                        "Nenhuma conversa selecionada"}
                     </p>
                     <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2">
                       <Badge

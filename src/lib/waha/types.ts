@@ -1,3 +1,5 @@
+import type { FunnelStage } from "@/lib/contact-profile/types";
+
 export type WahaSessionStatus =
   | "STOPPED"
   | "STARTING"
@@ -25,6 +27,7 @@ export type WahaConversation = {
   avatarUrl?: string;
   isPinned?: boolean;
   isArchived?: boolean;
+  funnelStage?: FunnelStage;
 };
 
 export type WahaMessage = {

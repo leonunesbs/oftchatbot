@@ -23,10 +23,46 @@ export function ChatThread({
   onLoadOlder,
 }: ChatThreadProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const messageRowRefs = React.useRef<Array<HTMLDivElement | null>>([]);
   const shouldStickToBottomRef = React.useRef(true);
   const isLoadingOlderRef = React.useRef(isLoadingOlder);
   const pendingPrependRef = React.useRef(false);
   const previousScrollHeightRef = React.useRef(0);
+  const [topVisibleDate, setTopVisibleDate] = React.useState<string | null>(null);
+  const [showTopDateBadge, setShowTopDateBadge] = React.useState(false);
+
+  const getMessageDateLabel = React.useCallback((message: WahaMessage) => {
+    return new Date(message.timestamp).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }, []);
+
+  const syncTopVisibleDate = React.useCallback(() => {
+    const node = scrollContainerRef.current;
+    if (!node || !messages.length) {
+      setTopVisibleDate(null);
+      return;
+    }
+
+    const viewTop = node.scrollTop;
+    let nextIndex = messages.length - 1;
+
+    for (let idx = 0; idx < messages.length; idx += 1) {
+      const row = messageRowRefs.current[idx];
+      if (!row) {
+        continue;
+      }
+
+      if (row.offsetTop + row.offsetHeight >= viewTop + 8) {
+        nextIndex = idx;
+        break;
+      }
+    }
+
+    setTopVisibleDate(getMessageDateLabel(messages[nextIndex]));
+  }, [getMessageDateLabel, messages]);
 
   React.useEffect(() => {
     isLoadingOlderRef.current = isLoadingOlder;
@@ -49,12 +85,17 @@ export function ChatThread({
     if (shouldStickToBottomRef.current) {
       node.scrollTop = node.scrollHeight;
     }
-  }, [messages]);
+
+    syncTopVisibleDate();
+  }, [messages, syncTopVisibleDate]);
 
   React.useEffect(() => {
     shouldStickToBottomRef.current = true;
     pendingPrependRef.current = false;
     previousScrollHeightRef.current = 0;
+    setTopVisibleDate(null);
+    setShowTopDateBadge(false);
+    messageRowRefs.current = [];
   }, [activeConversation?.id]);
 
   const handleScroll = React.useCallback(
@@ -62,6 +103,8 @@ export function ChatThread({
       const target = event.currentTarget;
       const bottomDistance = target.scrollHeight - target.clientHeight - target.scrollTop;
       shouldStickToBottomRef.current = bottomDistance <= 80;
+      setShowTopDateBadge(!shouldStickToBottomRef.current);
+      syncTopVisibleDate();
 
       if (!hasMoreOlder || !onLoadOlder || isLoadingOlderRef.current) {
         return;
@@ -73,7 +116,7 @@ export function ChatThread({
         onLoadOlder();
       }
     },
-    [hasMoreOlder, onLoadOlder]
+    [hasMoreOlder, onLoadOlder, syncTopVisibleDate]
   );
 
   if (!activeConversation) {
@@ -113,25 +156,41 @@ export function ChatThread({
   }
 
   return (
-    <div
-      ref={scrollContainerRef}
-      onScroll={handleScroll}
-      className="chat-thread-scroll flex h-full flex-col gap-3 overflow-y-auto px-2 py-3 md:px-3 md:py-4"
-    >
-      {isLoadingOlder ? (
-        <div className="space-y-2 pb-1">
-          {Array.from({ length: 2 }).map((_, idx) => (
-            <div
-              key={`older-message-skeleton-${idx}`}
-              className="bg-muted h-10 animate-pulse rounded-2xl"
-              style={{ width: `${Math.max(44, 66 - idx * 8)}%` }}
-            />
-          ))}
+    <div className="relative h-full">
+      {showTopDateBadge && topVisibleDate ? (
+        <div className="pointer-events-none absolute top-2 left-1/2 z-10 -translate-x-1/2">
+          <span className="bg-background/95 text-muted-foreground border-border/80 inline-flex rounded-full border px-3 py-1 text-xs font-medium shadow-xs backdrop-blur">
+            {topVisibleDate}
+          </span>
         </div>
       ) : null}
-      {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
-      ))}
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="chat-thread-scroll flex h-full flex-col gap-3 overflow-y-auto px-2 py-3 md:px-3 md:py-4"
+      >
+        {isLoadingOlder ? (
+          <div className="space-y-2 pb-1">
+            {Array.from({ length: 2 }).map((_, idx) => (
+              <div
+                key={`older-message-skeleton-${idx}`}
+                className="bg-muted h-10 animate-pulse rounded-2xl"
+                style={{ width: `${Math.max(44, 66 - idx * 8)}%` }}
+              />
+            ))}
+          </div>
+        ) : null}
+        {messages.map((message, index) => (
+          <div
+            key={message.id}
+            ref={(node) => {
+              messageRowRefs.current[index] = node;
+            }}
+          >
+            <MessageBubble message={message} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

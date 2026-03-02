@@ -48,6 +48,14 @@ export type ContactProfile = {
   chatId: string;
   contactName: string;
   phoneNumber: string;
+  avatarUrl?: string;
+  pushName?: string;
+  shortName?: string;
+  businessName?: string;
+  about?: string;
+  isBusiness: boolean;
+  isMyContact: boolean;
+  rawDetails: Record<string, unknown>;
   funnelStage: FunnelStage;
   notes: string;
   updatedAt: string;

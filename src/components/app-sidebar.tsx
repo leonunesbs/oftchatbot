@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  Archive,
-  Eye,
-  MessageCircle,
-  Pin,
-  Search,
-} from "lucide-react";
-import * as React from "react";
+import { Archive, Eye, MessageCircle, Pin, Search } from "lucide-react";
 import type { ComponentProps } from "react";
+import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,8 +14,9 @@ import {
   SidebarHeader,
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
-import type { WahaConversation } from "@/lib/waha/types";
+import { funnelStageLabels } from "@/lib/contact-profile/types";
 import { cn } from "@/lib/utils";
+import type { WahaConversation } from "@/lib/waha/types";
 
 type AppSidebarProps = ComponentProps<typeof Sidebar> & {
   conversations: WahaConversation[];
@@ -65,6 +60,24 @@ function getConversationInitials(name: string) {
   return initials || "C";
 }
 
+function getFunnelToneClass(stage?: WahaConversation["funnelStage"]) {
+  switch (stage) {
+    case "convertido":
+      return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+    case "nao-convertido":
+      return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+    case "consulta-agendada":
+    case "procedimento-cirurgia-agendado":
+      return "bg-sky-500/10 text-sky-700 dark:text-sky-300";
+    case "qualificacao-clinica":
+    case "consulta-realizada":
+    case "proposta-procedimento-cirurgia":
+      return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+}
+
 export function AppSidebar({
   conversations,
   selectedChatId,
@@ -99,14 +112,19 @@ export function AppSidebar({
     }
 
     return sortedConversations.filter((conversation) => {
-      const text = `${conversation.name} ${conversation.preview ?? ""}`.toLowerCase();
+      const text =
+        `${conversation.name} ${conversation.preview ?? ""}`.toLowerCase();
       return text.includes(normalized);
     });
   }, [query, sortedConversations]);
 
   const unreadTotal = React.useMemo(
-    () => conversations.reduce((total, conversation) => total + Math.max(0, conversation.unreadCount), 0),
-    [conversations]
+    () =>
+      conversations.reduce(
+        (total, conversation) => total + Math.max(0, conversation.unreadCount),
+        0,
+      ),
+    [conversations],
   );
 
   const handleListScroll = React.useCallback(
@@ -117,12 +135,14 @@ export function AppSidebar({
 
       const target = event.currentTarget;
       const threshold = 120;
-      const isNearBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - threshold;
+      const isNearBottom =
+        target.scrollTop + target.clientHeight >=
+        target.scrollHeight - threshold;
       if (isNearBottom) {
         onLoadMore();
       }
     },
-    [hasMore, isLoadingMore, onLoadMore]
+    [hasMore, isLoadingMore, onLoadMore],
   );
 
   React.useEffect(() => {
@@ -143,8 +163,12 @@ export function AppSidebar({
             <Eye className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold leading-none">Oftalog Chat</p>
-            <p className="text-muted-foreground truncate pt-1 text-xs">WhatsApp CRM</p>
+            <p className="truncate text-sm font-semibold leading-none">
+              OFT ChatBot
+            </p>
+            <p className="text-muted-foreground truncate pt-1 text-xs">
+              WhatsApp CRM
+            </p>
           </div>
         </div>
         <div className="relative">
@@ -160,18 +184,30 @@ export function AppSidebar({
 
       <SidebarContent>
         <SidebarGroup className="flex min-h-0 flex-1 pt-0">
-          <div ref={listContainerRef} className="h-full space-y-1 overflow-y-auto pr-1" onScroll={handleListScroll}>
+          <div
+            ref={listContainerRef}
+            className="h-full space-y-1 overflow-y-auto pr-1"
+            onScroll={handleListScroll}
+          >
             {isLoading ? (
               <div className="space-y-1 px-1">
                 {Array.from({ length: 7 }).map((_, index) => (
-                  <SidebarMenuSkeleton key={index} showIcon className="h-16 rounded-lg" />
+                  <SidebarMenuSkeleton
+                    key={index}
+                    showIcon
+                    className="h-16 rounded-lg"
+                  />
                 ))}
               </div>
             ) : filteredConversations.length > 0 ? (
               filteredConversations.map((conversation) => {
                 const isActive = selectedChatId === conversation.id;
-                const timeLabel = formatConversationTime(conversation.lastMessageAt);
+                const timeLabel = formatConversationTime(
+                  conversation.lastMessageAt,
+                );
                 const unreadCount = Math.max(0, conversation.unreadCount);
+                const funnelStage =
+                  conversation.funnelStage ?? "primeiro-contato";
 
                 return (
                   <button
@@ -182,7 +218,7 @@ export function AppSidebar({
                       "focus-visible:ring-sidebar-ring w-full rounded-xl border px-2.5 py-2 text-left outline-hidden transition-colors focus-visible:ring-2",
                       isActive
                         ? "bg-sidebar-accent border-sidebar-border"
-                        : "border-transparent hover:bg-sidebar-accent/70"
+                        : "border-transparent hover:bg-sidebar-accent/70",
                     )}
                   >
                     <div className="flex items-start gap-2.5">
@@ -191,7 +227,9 @@ export function AppSidebar({
                       </div>
                       <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-medium">{conversation.name || "Contato sem nome"}</p>
+                          <p className="truncate text-sm font-medium">
+                            {conversation.name || "Contato sem nome"}
+                          </p>
                           {conversation.isPinned ? (
                             <Pin className="text-muted-foreground size-3.5 shrink-0" />
                           ) : null}
@@ -199,10 +237,20 @@ export function AppSidebar({
                             <Archive className="text-muted-foreground size-3.5 shrink-0" />
                           ) : null}
                           {timeLabel ? (
-                            <span className="text-muted-foreground ml-auto shrink-0 text-[11px]">{timeLabel}</span>
+                            <span className="text-muted-foreground ml-auto shrink-0 text-[11px]">
+                              {timeLabel}
+                            </span>
                           ) : null}
                         </div>
                         <div className="flex items-center gap-2">
+                          <Badge
+                            className={cn(
+                              "rounded-full border-0 px-2 py-0.5 text-[10px] whitespace-nowrap",
+                              getFunnelToneClass(funnelStage),
+                            )}
+                          >
+                            {funnelStageLabels[funnelStage]}
+                          </Badge>
                           <p className="text-muted-foreground line-clamp-1 text-xs">
                             {conversation.preview || "Sem mensagens recentes"}
                           </p>
@@ -225,7 +273,11 @@ export function AppSidebar({
             {!isLoading && isLoadingMore ? (
               <div className="space-y-1 px-1 pt-1">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <SidebarMenuSkeleton key={`load-more-${index}`} showIcon className="h-16 rounded-lg" />
+                  <SidebarMenuSkeleton
+                    key={`load-more-${index}`}
+                    showIcon
+                    className="h-16 rounded-lg"
+                  />
                 ))}
               </div>
             ) : null}
@@ -245,7 +297,14 @@ export function AppSidebar({
             </Badge>
           </div>
           <div className="mt-2 flex items-center justify-between">
-            <Badge className={cn("rounded-full border-0 px-2 py-0.5 text-[11px]", sessionToneClassName)}>{sessionLabel}</Badge>
+            <Badge
+              className={cn(
+                "rounded-full border-0 px-2 py-0.5 text-[11px]",
+                sessionToneClassName,
+              )}
+            >
+              {sessionLabel}
+            </Badge>
             <span className="text-muted-foreground text-[11px]">
               {unreadTotal > 0 ? `${unreadTotal} não lidas` : "Inbox zerada"}
             </span>
