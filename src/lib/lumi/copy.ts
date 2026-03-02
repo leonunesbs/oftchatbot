@@ -1,17 +1,18 @@
-import { nonDiagnosticDisclaimer } from "@/lib/lumi/guardrails";
 import type { LumiCollectedData, SlotOption } from "@/lib/lumi/types";
+
+import { nonDiagnosticDisclaimer } from "@/lib/lumi/guardrails";
 
 export function introGreeting(name?: string) {
   if (name) {
-    return `Oi, ${name}. Sou a Lumi da Clínica Oft Leonardo. Posso te ajudar com dúvidas gerais ou agendamento.`;
+    return `Oi, ${name}. Meu nome é Lumi da Clínica OFT Leonardo. Posso te ajudar com dúvidas gerais ou agendamento.`;
   }
-  return "Oi. Sou a Lumi da Clínica Oft Leonardo. Posso te ajudar com dúvidas gerais ou agendamento.";
+  return "Oi. Meu nome é Lumi da Clínica OFT Leonardo. Posso te ajudar com dúvidas gerais ou agendamento.";
 }
 
 export function askMissingField(field: keyof LumiCollectedData) {
   switch (field) {
     case "fullName":
-      return "Perfeito. Para seguir, me informa seu nome completo?";
+      return "Perfeito. Para seguir, como você prefere ser chamado?";
     case "phone":
       return "Entendi. Só preciso do seu telefone com DDD para confirmar, pode me informar?";
     case "email":
@@ -47,11 +48,16 @@ export function handoffReply(reason: string) {
 }
 
 export function slotOptionsReply(options: SlotOption[]) {
-  const lines = options.slice(0, 4).map((slot, index) => `${index + 1}) ${slot.label}`);
+  const lines = options
+    .slice(0, 4)
+    .map((slot, index) => `${index + 1}) ${slot.label}`);
   return `Encontrei estes horários:\n${lines.join("\n")}\n\nMe diz o número da opção que você prefere.`;
 }
 
-export function confirmationReply(data: LumiCollectedData, selectedSlot?: SlotOption) {
+export function confirmationReply(
+  data: LumiCollectedData,
+  selectedSlot?: SlotOption,
+) {
   const summary = [
     `Nome: ${data.fullName ?? "não informado"}`,
     `Telefone: ${data.phone ?? "não informado"}`,

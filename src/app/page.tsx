@@ -245,6 +245,20 @@ function getNextFunnelStage(stage: FunnelStage) {
   return funnelStages[currentIndex + 1] ?? stage;
 }
 
+function getContactInitials(name?: string) {
+  if (!name) {
+    return "CT";
+  }
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "CT";
+  }
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export default function Page() {
   const [session, setSession] = React.useState<WahaSession | null>(null);
   const [conversations, setConversations] = React.useState<WahaConversation[]>(
@@ -926,30 +940,67 @@ export default function Page() {
   const isContactProfileDirty =
     funnelStageDraft !== (contactProfile?.funnelStage ?? "primeiro-contato") ||
     notesDraft !== (contactProfile?.notes ?? "");
-  const renderContactProfilePanel = (idPrefix: string) => (
+  const renderContactProfilePanel = (idPrefix: string, includeFooter = true) => (
     <div className="space-y-4 px-4 pb-4">
-      <div className="space-y-1">
-        <p className="text-muted-foreground text-xs uppercase">Contato</p>
-        <p className="text-sm font-medium">
-          {activeConversation?.name ?? "Nenhum contato selecionado"}
-        </p>
-        <p className="text-muted-foreground text-xs">
-          {contactProfile?.phoneNumber ?? "--"}
-        </p>
-        <p className="text-muted-foreground text-xs">Push name: {contactProfile?.pushName ?? "--"}</p>
-        <p className="text-muted-foreground text-xs">Short name: {contactProfile?.shortName ?? "--"}</p>
-        <p className="text-muted-foreground text-xs">Perfil comercial: {contactProfile?.isBusiness ? "Sim" : "Não"}</p>
-        <p className="text-muted-foreground text-xs">Na agenda: {contactProfile?.isMyContact ? "Sim" : "Não"}</p>
-        <p className="text-muted-foreground text-xs">Nome comercial: {contactProfile?.businessName ?? "--"}</p>
-        <p className="text-muted-foreground text-xs">Sobre: {contactProfile?.about ?? "--"}</p>
+      <div className="rounded-xl border bg-muted/20 p-3">
+        <div className="flex items-start gap-3">
+          <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+            {getContactInitials(activeConversation?.name)}
+          </div>
+          <div className="min-w-0 space-y-1">
+            <p className="truncate text-sm font-semibold">
+              {activeConversation?.name ?? "Nenhum contato selecionado"}
+            </p>
+            <p className="text-muted-foreground text-xs">
+              {contactProfile?.phoneNumber ?? "--"}
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              <Badge variant="secondary" className="text-[10px]">
+                {contactProfile?.isBusiness ? "Perfil comercial" : "Pessoa física"}
+              </Badge>
+              <Badge variant="secondary" className="text-[10px]">
+                {contactProfile?.isMyContact ? "Na agenda" : "Não salvo na agenda"}
+              </Badge>
+            </div>
+          </div>
+        </div>
         {contactProfile?.avatarUrl ? (
-          <a href={contactProfile.avatarUrl} target="_blank" rel="noreferrer" className="text-xs text-sky-600 hover:underline">
-            Abrir avatar
+          <a
+            href={contactProfile.avatarUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-flex text-xs text-sky-600 hover:underline"
+          >
+            Ver avatar no WhatsApp
           </a>
         ) : null}
       </div>
 
-      <div className="space-y-2">
+      <div className="rounded-xl border p-3">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Dados do contato
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
+          <div>
+            <p className="text-muted-foreground text-[11px]">Push name</p>
+            <p className="truncate text-xs">{contactProfile?.pushName ?? "--"}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px]">Short name</p>
+            <p className="truncate text-xs">{contactProfile?.shortName ?? "--"}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Nome comercial</p>
+            <p className="truncate text-xs">{contactProfile?.businessName ?? "--"}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground text-[11px]">Sobre</p>
+            <p className="line-clamp-2 text-xs">{contactProfile?.about ?? "--"}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-xl border p-3">
         <Label htmlFor={`${idPrefix}-funnel-stage`}>Status do funil</Label>
         <Select
           value={funnelStageDraft}
@@ -969,49 +1020,58 @@ export default function Page() {
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-xl border p-3">
         <Label htmlFor={`${idPrefix}-contact-notes`}>Anotações</Label>
         <Textarea
           id={`${idPrefix}-contact-notes`}
           placeholder="Ex.: paciente já enviou exames, prefere atendimento às quartas..."
-          rows={8}
+          rows={7}
           value={notesDraft}
           disabled={!activeConversation || isLoadingProfile}
           onChange={(event) => setNotesDraft(event.target.value)}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-contact-raw`}>Dados brutos do contato (WAHA)</Label>
-        <Textarea
-          id={`${idPrefix}-contact-raw`}
-          rows={8}
-          value={rawDetailsPreview}
-          readOnly
-          className="font-mono text-[11px]"
-        />
-      </div>
+      <details className="rounded-xl border p-3">
+        <summary className="cursor-pointer text-sm font-medium">
+          Dados brutos do contato (WAHA)
+        </summary>
+        <div className="mt-2 space-y-2">
+          <Label htmlFor={`${idPrefix}-contact-raw`} className="text-xs text-muted-foreground">
+            Visualização técnica
+          </Label>
+          <Textarea
+            id={`${idPrefix}-contact-raw`}
+            rows={8}
+            value={rawDetailsPreview}
+            readOnly
+            className="font-mono text-[11px]"
+          />
+        </div>
+      </details>
 
-      <div className="space-y-2">
-        <Button
-          type="button"
-          className="w-full"
-          onClick={() => void saveContactProfile()}
-          disabled={
-            !activeConversation ||
-            isLoadingProfile ||
-            isSavingProfile ||
-            !isContactProfileDirty
-          }
-        >
-          {isSavingProfile ? "Salvando..." : "Salvar perfil"}
-        </Button>
-        <p className="text-muted-foreground text-xs">
-          {contactProfile?.updatedAt
-            ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`
-            : "Sem dados salvos no SQLite"}
-        </p>
-      </div>
+      {includeFooter ? (
+        <div className="space-y-2">
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => void saveContactProfile()}
+            disabled={
+              !activeConversation ||
+              isLoadingProfile ||
+              isSavingProfile ||
+              !isContactProfileDirty
+            }
+          >
+            {isSavingProfile ? "Salvando..." : "Salvar perfil"}
+          </Button>
+          <p className="text-muted-foreground text-xs">
+            {contactProfile?.updatedAt
+              ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`
+              : "Sem dados salvos no SQLite"}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 
@@ -1112,16 +1172,42 @@ export default function Page() {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="w-full sm:max-w-md xl:hidden"
+                    className="w-full overflow-hidden p-0 sm:max-w-md xl:hidden"
                   >
-                    <SheetHeader>
-                      <SheetTitle>Perfil do contato</SheetTitle>
-                      <SheetDescription>
-                        Atualize o funil de vendas e registre anotações de
-                        consulta oftalmologia.
-                      </SheetDescription>
-                    </SheetHeader>
-                    {renderContactProfilePanel("mobile")}
+                    <div className="flex h-full min-h-0 flex-col">
+                      <SheetHeader className="shrink-0 border-b px-4 py-3">
+                        <SheetTitle>Perfil do contato</SheetTitle>
+                        <SheetDescription>
+                          Atualize o funil de vendas e registre anotações de
+                          consulta oftalmologia.
+                        </SheetDescription>
+                      </SheetHeader>
+
+                      <div className="min-h-0 flex-1 overflow-y-auto py-4">
+                        {renderContactProfilePanel("mobile", false)}
+                      </div>
+
+                      <div className="shrink-0 overflow-y-auto border-t px-4 py-3">
+                        <Button
+                          type="button"
+                          className="w-full"
+                          onClick={() => void saveContactProfile()}
+                          disabled={
+                            !activeConversation ||
+                            isLoadingProfile ||
+                            isSavingProfile ||
+                            !isContactProfileDirty
+                          }
+                        >
+                          {isSavingProfile ? "Salvando..." : "Salvar perfil"}
+                        </Button>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          {contactProfile?.updatedAt
+                            ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`
+                            : "Sem dados salvos no SQLite"}
+                        </p>
+                      </div>
+                    </div>
                   </SheetContent>
                 </Sheet>
               </div>
@@ -1146,7 +1232,7 @@ export default function Page() {
             </section>
 
             <aside className="border-border/70 hidden w-88 shrink-0 overflow-hidden rounded-2xl border bg-white shadow-sm xl:flex xl:flex-col">
-              <div className="border-border/70 shrink-0 border-b px-4 py-3">
+              <div className="border-border/70 shrink-0 overflow-y-auto border-b px-4 py-3">
                 <h2 className="text-lg font-semibold text-foreground">
                   Perfil do contato
                 </h2>
@@ -1156,7 +1242,27 @@ export default function Page() {
                 </p>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto pt-4">
-                {renderContactProfilePanel("desktop")}
+                {renderContactProfilePanel("desktop", false)}
+              </div>
+              <div className="shrink-0 overflow-y-auto border-t px-4 py-3">
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() => void saveContactProfile()}
+                  disabled={
+                    !activeConversation ||
+                    isLoadingProfile ||
+                    isSavingProfile ||
+                    !isContactProfileDirty
+                  }
+                >
+                  {isSavingProfile ? "Salvando..." : "Salvar perfil"}
+                </Button>
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {contactProfile?.updatedAt
+                    ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`
+                    : "Sem dados salvos no SQLite"}
+                </p>
               </div>
             </aside>
           </div>

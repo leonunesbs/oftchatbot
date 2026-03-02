@@ -78,10 +78,32 @@ function resolveFaqTopic(text: string) {
   return topics.find((topic) => normalized.includes(topic));
 }
 
+function extractContextualEntities(messageText: string, state: LumiState): Partial<LumiCollectedData> {
+  const extracted: Partial<LumiCollectedData> = {};
+  const trimmed = messageText.trim().replaceAll(/\s+/g, " ");
+  if (!trimmed) {
+    return extracted;
+  }
+
+  if (state === "SCHEDULING_COLLECT_NAME") {
+    const looksLikeName = /^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'\-\s]{1,79}$/.test(trimmed) && !/\d/.test(trimmed);
+    if (looksLikeName) {
+      extracted.fullName = trimmed;
+    }
+  }
+
+  return extracted;
+}
+
 export async function runLumiTurn(input: LumiTurnInput): Promise<LumiTurnDecision> {
   const currentSession = contactProfileStore.getLumiSession(input.chatId) ?? defaultSession(input.chatId, input.now);
   const intent = detectIntent(input.messageText);
-  const entities = extractEntities(input.messageText);
+  const extractedEntities = extractEntities(input.messageText);
+  const contextualEntities = extractContextualEntities(input.messageText, currentSession.state);
+  const entities: Partial<LumiCollectedData> = {
+    ...contextualEntities,
+    ...extractedEntities,
+  };
   const merged = mergeCollectedData(currentSession.collected, entities);
 
   trackLumiEvent("intent_detected", {

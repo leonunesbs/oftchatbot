@@ -29,7 +29,7 @@ Se detectar sinais como dor ocular intensa, perda súbita de visão, trauma ocul
 
 A LUMI coleta progressivamente:
 
-- nome completo
+- como a pessoa prefere ser chamada
 - telefone
 - e-mail (opcional)
 - local

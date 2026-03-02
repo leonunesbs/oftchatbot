@@ -213,6 +213,44 @@ async function markIncomingAsSeen(chatId: string, session?: string) {
   });
 }
 
+async function startTyping(chatId: string, session?: string) {
+  await requestWaha({
+    path: "startTyping",
+    method: "POST",
+    body: {
+      chatId,
+      session: session ?? serverEnv.WAHA_DEFAULT_SESSION,
+    },
+  }).catch((error) => {
+    console.warn(
+      "[LUMI webhook] startTyping failed",
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "unknown",
+        chatId,
+      })
+    );
+  });
+}
+
+async function stopTyping(chatId: string, session?: string) {
+  await requestWaha({
+    path: "stopTyping",
+    method: "POST",
+    body: {
+      chatId,
+      session: session ?? serverEnv.WAHA_DEFAULT_SESSION,
+    },
+  }).catch((error) => {
+    console.warn(
+      "[LUMI webhook] stopTyping failed",
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "unknown",
+        chatId,
+      })
+    );
+  });
+}
+
 export async function POST(request: NextRequest) {
   const callerIp = request.headers.get("x-forwarded-for") ?? "unknown";
   const limiter = rateLimit(`waha-webhook:${callerIp}`, 60_000, 600);
@@ -238,6 +276,7 @@ export async function POST(request: NextRequest) {
   console.info("[WAHA webhook]", JSON.stringify({ event: event.event, eventId: event.id, session: event.session }));
 
   if (incomingMessage) {
+    let typingStarted = false;
     try {
       if (!registerIncomingMessage(incomingMessage.messageKey)) {
         return NextResponse.json({ ok: true, eventId: event.id, duplicate: true });
@@ -245,6 +284,9 @@ export async function POST(request: NextRequest) {
 
       // WAHA anti-blocking: acknowledge message as seen before processing.
       await markIncomingAsSeen(incomingMessage.chatId, event.session);
+      // Improve UX: show typing immediately while the assistant processes the turn.
+      await startTyping(incomingMessage.chatId, event.session);
+      typingStarted = true;
 
       const turn = await runLumiTurn({
         chatId: incomingMessage.chatId,
@@ -276,6 +318,10 @@ export async function POST(request: NextRequest) {
           chatId: incomingMessage.chatId,
         })
       );
+    } finally {
+      if (typingStarted) {
+        await stopTyping(incomingMessage.chatId, event.session);
+      }
     }
   }
 
