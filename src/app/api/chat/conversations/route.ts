@@ -5,18 +5,6 @@ import { chatsDomain } from "@/lib/waha/domains/chats";
 import type { WahaConversation } from "@/lib/waha/types";
 import { WahaHttpError } from "@/lib/waha/http-client";
 
-const fallbackConversations = [
-  {
-    id: "5511999999999@c.us",
-    name: "WAHA Demo",
-    unreadCount: 0,
-    preview: "Conecte o WAHA para ver suas conversas reais.",
-    lastMessageAt: new Date().toISOString(),
-    isPinned: true,
-    isArchived: false,
-  },
-];
-
 function withFunnelStage(conversations: WahaConversation[]) {
   return conversations.map((conversation) => {
     const profile = contactProfileStore.get(conversation.id, conversation.name);
@@ -47,10 +35,7 @@ export async function GET(request: Request) {
     if (error instanceof WahaHttpError) {
       return NextResponse.json(
         {
-          conversations:
-            offset === 0
-              ? withFunnelStage(fallbackConversations)
-              : [],
+          conversations: [],
           limit,
           offset,
           hasMore: false,
@@ -63,8 +48,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       {
-        conversations:
-          offset === 0 ? withFunnelStage(fallbackConversations) : [],
+        conversations: [],
         limit,
         offset,
         hasMore: false,

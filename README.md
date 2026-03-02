@@ -1,227 +1,195 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/26466516/141659551-d7ba5630-7200-46fe-863b-87818dae970a.png" alt="Next.js TypeScript Starter">
-</p>
+# LUMI — Chatbot da Clínica Oft Leonardo (MVP WhatsApp)
 
-<br />
+LUMI é o chatbot da clínica `oftleonardo.com.br`, implementado em modo clássico (sem LLM), com foco em:
 
-<div align="center"><strong>Non-opinionated TypeScript starter for Next.js</strong></div>
-<div align="center">Highly scalable foundation with the best DX. All the tools you need to build your Next project.</div>
+- responder dúvidas principais da clínica
+- apoiar agendamento de consulta
+- detectar sinais de urgência oftalmológica
+- encaminhar para atendimento humano quando necessário
 
-<br />
+O MVP atual processa mensagens recebidas no WhatsApp via WAHA.
 
-<div align="center">
-  <img src="https://img.shields.io/static/v1?label=PRs&message=welcome&style=flat-square&color=5e17eb&labelColor=000000" alt="PRs welcome!" />
+## Escopo funcional
 
-  <img alt="License" src="https://img.shields.io/github/license/jpedroschmitz/typescript-nextjs-starter?style=flat-square&color=5e17eb&labelColor=000000">
+### 1) Informações gerais
 
-  <a href="https://x.com/intent/follow?screen_name=jpedroschmitz">
-    <img src="https://img.shields.io/twitter/follow/jpedroschmitz?style=flat-square&color=5e17eb&labelColor=000000" alt="Follow @jpedroschmitz" />
-  </a>
-</div>
+- horário de atendimento
+- local e como chegar
+- política de valores (texto informativo)
+- dúvidas de serviços oftalmológicos (nível educativo)
 
-<div align="center">
-  <sub>Created by <a href="https://x.com/jpedroschmitz">João Pedro</a> with the help of many <a href="https://github.com/jpedroschmitz/typescript-nextjs-starter/graphs/contributors">wonderful contributors</a>.</sub>
-</div>
+### 2) Triagem de urgência
 
-<br />
+Se detectar sinais como dor ocular intensa, perda súbita de visão, trauma ocular, flashes/sombras ou produto químico no olho, a LUMI:
 
-## Features
+- orienta pronto atendimento imediato
+- interrompe fluxo de agendamento
 
-- ⚡️ Next.js 16 (App Router)
-- ⚛️ React 19
-- ⛑ TypeScript
-- 📏 Oxlint — To find and fix problems in your code
-- 💖 Oxfmt — High-performance formatter for consistent style
-- 🐶 Husky — For running scripts before committing
-- 🚓 Commitlint — To make sure your commit messages follow the convention
-- 🖌 Renovate — To keep your dependencies up to date
-- 🚫 lint-staged — Run Oxlint and Oxfmt against staged Git files
-- 👷 PR Workflow — Run Type Check & Linters on Pull Requests
-- ⚙️ EditorConfig - Consistent coding styles across editors and IDEs
-- 🗂 Path Mapping — Import components or images using the `@` prefix
-- 🔐 CSP — Content Security Policy for enhanced security (default minimal policy)
-- 🧳 T3 Env — Type-safe environment variables
-- 🪧 Redirects — Easily add redirects to your application
+### 3) Agendamento
 
-## Quick Start
+A LUMI coleta progressivamente:
 
-The best way to start with this template is using [Create Next App](https://nextjs.org/docs/api-reference/create-next-app).
+- nome completo
+- telefone
+- e-mail (opcional)
+- local
+- tipo de consulta
+- preferência de data/turno
 
-```
-# pnpm
-pnpm create next-app -e https://github.com/jpedroschmitz/typescript-nextjs-starter
-# yarn
-yarn create next-app -e https://github.com/jpedroschmitz/typescript-nextjs-starter
-# npm
-npx create-next-app -e https://github.com/jpedroschmitz/typescript-nextjs-starter
-```
+Regras:
 
-### Development
+- captura múltiplas entidades na mesma frase
+- pergunta apenas o que faltar
+- confirma resumo antes da conclusão
+- usa resposta curta e natural (uma pergunta principal por mensagem)
 
-To start the project locally, run:
+### 4) Reagendamento/cancelamento e handoff
+
+Situações encaminhadas para humano via WhatsApp:
+
+- pedido explícito por atendente
+- reagendamento/cancelamento
+- pergunta específica de preço/convênio
+- fora de escopo
+- falhas de validação persistentes
+
+## Fora do escopo clínico
+
+A LUMI não:
+
+- diagnostica
+- prescreve tratamento
+- interpreta exame individual
+- dá conduta médica personalizada
+
+## LGPD e privacidade
+
+- coleta mínima para agendamento
+- aviso padrão: `Seus dados serão usados apenas para agendamento.`
+- telemetria sem conteúdo sensível de conversa
+- timezone operacional: `America/Fortaleza`
+
+## Arquitetura implementada
+
+### Núcleo LUMI
+
+Arquivos em `src/lib/lumi`:
+
+- `types.ts` — tipos de intent, estado, sessão e telemetria
+- `patterns.ts` — normalização e padrões de termos
+- `intents.ts` — classificador por regras com prioridade
+- `entities.ts` — extração simples de entidades (nome, telefone, email, local, tipo, data/turno)
+- `guardrails.ts` — bloqueio de conduta médica personalizada
+- `copy.ts` — mensagens da persona LUMI
+- `state-machine.ts` — orquestração do fluxo completo
+- `telemetry.ts` — eventos não sensíveis
+- `config/clinic.ts` — dados configuráveis da clínica
+- `integrations/calcom.ts` — adapter Cal.com com fallback mock
+
+### Persistência de estado conversacional
+
+Foi adicionada a tabela `lumi_sessions` no SQLite usado por `contact-profile`, com:
+
+- estado da conversa
+- entidades coletadas (JSON)
+- falhas de validação
+- status de handoff
+- último intent e timestamps
+
+Arquivo: `src/lib/contact-profile/store.ts`.
+
+### Integração com WAHA
+
+No webhook `POST /api/waha/webhook`, mensagens de usuário elegíveis são processadas pela máquina de estados LUMI e a resposta é enviada com o domínio de chat já existente.
+
+Arquivo: `src/app/api/waha/webhook/route.ts`.
+
+## API do MVP
+
+### `GET /api/slots`
+
+Consulta horários por:
+
+- `location`
+- `consultationType`
+- `date` (opcional)
+- `period` (opcional: `manha|tarde|noite`)
+
+Resposta:
+
+- `slots`: lista de opções
+- `count`: total
+
+Arquivo: `src/app/api/slots/route.ts`.
+
+### `POST /api/book`
+
+Confirma agendamento com:
+
+- `slotId`
+- `fullName`
+- `phone`
+- `email` (opcional)
+- `location`
+- `consultationType`
+
+Resposta:
+
+- `ok`
+- `confirmation.protocol`
+- `confirmation.source` (`calcom|mock`)
+
+Arquivo: `src/app/api/book/route.ts`.
+
+## Variáveis de ambiente
+
+Além das variáveis WAHA, o MVP suporta integração Cal.com:
+
+- `CALCOM_API_BASE_URL` (opcional)
+- `CALCOM_API_KEY` (opcional)
+
+Os event types são buscados diretamente na API do Cal.com. Se as variáveis não estiverem definidas (ou se não houver event types disponíveis), o fluxo usa fallback mock.
+
+Para webhook automático da sessão WAHA, você também pode configurar:
+
+- `WAHA_WEBHOOK_URL` (opcional, padrão: `http://host.docker.internal:3030/api/waha/webhook`)
+
+## Telemetria
+
+Eventos:
+
+- `intent_detected`
+- `scheduling_started`
+- `scheduling_completed`
+- `urgent_triage_triggered`
+- `handoff_triggered`
+- `fallback_hit`
+
+Arquivo: `src/lib/lumi/telemetry.ts`.
+
+## Testes de diálogo (30 cenários)
+
+Arquivo: `tests/lumi/dialogs.spec.ts`.
+
+Cobertura:
+
+- sinônimos e erros de digitação
+- múltiplas informações na mesma frase
+- urgência
+- fuga de fluxo e retomada
+- pedido direto de humano
+- confirmações curtas (`sim`, `ok`)
+
+## Rodando localmente
 
 ```bash
 pnpm dev
 ```
 
-Open `http://localhost:3030` with your browser to see the result.
-
-## WAHA ARM64 setup
-
-This repository includes local WAHA infrastructure for Apple Silicon / ARM64 in `infra/waha`.
-
-1. Pull the ARM64 image:
-   - `pnpm waha:pull`
-2. Generate WAHA defaults:
-   - `pnpm waha:init`
-   - Keep `infra/waha/.env` as base config, but set access credentials in project root `.env` (`WAHA_API_KEY`, `WAHA_DASHBOARD_*`, `WHATSAPP_SWAGGER_*`).
-3. Start the WAHA stack:
-   - `pnpm waha:up`
-4. Open the dashboard:
-   - `http://localhost:3000/dashboard`
-5. Start `default` session, scan QR, and wait for `WORKING` status.
-
-For more details, check `infra/waha/README.md`.
-
-## Next + WAHA integration
-
-### 1) Configure app env
-
-Copy `.env.example` to `.env.local` and provide valid WAHA values:
-
-- `WAHA_BASE_URL` (default `http://localhost:3000/api`)
-- `WAHA_API_KEY`
-- `WAHA_TIMEOUT_MS`
-- `WAHA_DEFAULT_SESSION`
-- `WAHA_WEBHOOK_SECRET`
-- `WAHA_CONTACTS_DB_PATH` (optional, default `.data/contact-profiles.sqlite`)
-- `WAHA_DASHBOARD_USERNAME`
-- `WAHA_DASHBOARD_PASSWORD`
-- `WHATSAPP_SWAGGER_USERNAME`
-- `WHATSAPP_SWAGGER_PASSWORD`
-
-### 2) Start the Next app
+Para validação de tipos:
 
 ```bash
-pnpm dev
+pnpm type-check
 ```
 
-Open `http://localhost:3030/dashboard`.
-
-### 3) API surface
-
-- WAHA proxy (server-side only): `/api/waha/[...path]`
-- Available WAHA domains index: `/api/waha/domains`
-- Frontend chat endpoints:
-  - `/api/chat/session`
-  - `/api/chat/conversations`
-  - `/api/chat/messages?chatId=<chat-id>`
-  - `POST /api/chat/send-text`
-  - `/api/chat/contact-profile?chatId=<chat-id>` (GET/PUT)
-- Real-time event stream (SSE): `/api/realtime/waha-events`
-- Webhook receiver for WAHA events: `POST /api/waha/webhook` (`x-waha-secret` when `WAHA_WEBHOOK_SECRET` is set)
-
-### 4) Smoke tests
-
-With both WAHA and Next running locally:
-
-```bash
-pnpm waha:smoke
-```
-
-## Testimonials
-
-> [**“This starter is by far the best TypeScript starter for Next.js. Feature packed but un-opinionated at the same time!”**](https://github.com/jpedroschmitz/typescript-nextjs-starter/issues/87#issue-789642190)<br>
-> — Arafat Zahan
-
-> [**“I can really recommend the Next.js Typescript Starter repo as a solid foundation for your future Next.js projects.”**](https://corfitz.medium.com/create-a-custom-create-next-project-command-2a6b35a1c8e6)<br>
-> — Corfitz
-
-> [**“Brilliant work!”**](https://github.com/jpedroschmitz/typescript-nextjs-starter/issues/87#issuecomment-769314539)<br>
-> — Soham Dasgupta
-
-## Showcase
-
-List of websites that started off with Next.js TypeScript Starter:
-
-- [FreeInvoice.dev](https://freeinvoice.dev)
-- [Notion Avatar Maker](https://github.com/Mayandev/notion-avatar)
-- [IKEA Low Price](https://github.com/Mayandev/ikea-low-price)
-- [hygraph.com](https://hygraph.com)
-- [rocketseat.com.br](https://www.rocketseat.com.br)
-- [vagaschapeco.com](https://vagaschapeco.com)
-- [unfork.vercel.app](https://unfork.vercel.app)
-- [Add yours](https://github.com/jpedroschmitz/typescript-nextjs-starter/edit/main/README.md)
-
-## Documentation
-
-### Requirements
-
-- Node.js >= 24
-- pnpm 10
-
-### Directory Structure
-
-- [`.github`](.github) — GitHub configuration including the CI workflow.<br>
-- [`.husky`](.husky) — Husky configuration and hooks.<br>
-- [`public`](./public) — Static assets such as robots.txt, images, and favicon.<br>
-- [`src`](./src) — Application source code, including pages, components, styles.
-
-### Scripts
-
-- `pnpm dev` — Starts the application in development mode at `http://localhost:3030`.
-- `pnpm build` — Creates an optimized production build of your application.
-- `pnpm build:analyze` — Analyze the production build to see the bundle size.
-- `pnpm start` — Starts the application in production mode.
-- `pnpm type-check` — Validate code using TypeScript compiler.
-- `pnpm lint` — Runs Oxlint for all files in the `src` directory.
-- `pnpm lint:fix` — Runs Oxlint fix for all files in the `src` directory.
-- `pnpm format` — Runs Oxfmt for all files in the `src` directory.
-- `pnpm format:check` — Check Oxfmt list of files that need to be formatted.
-- `pnpm format:ci` — Oxfmt check for CI.
-
-### Path Mapping
-
-TypeScript are pre-configured with custom path mappings. To import components or files, use the `@` prefix.
-
-```tsx
-import { Button } from '@/components/Button';
-// To import images or other files from the public folder
-import avatar from '@/public/avatar.png';
-```
-
-### Switch to Yarn/npm
-
-This starter uses pnpm by default, but this choice is yours. If you'd like to switch to Yarn/npm, delete the `pnpm-lock.yaml` file, install the dependencies with Yarn/npm, change the CI workflow, and Husky Git hooks to use Yarn/npm commands.
-
-> **Note:** If you use Yarn, make sure to follow these steps from the [Husky documentation](https://typicode.github.io/husky/troubleshoot.html#yarn-on-windows) so that Git hooks do not fail with Yarn on Windows.
-
-### Environment Variables
-
-We use [T3 Env](https://env.t3.gg/) to manage environment variables. Create a `.env.local` file in the root of the project and add your environment variables there.
-
-When adding additional environment variables, the schema in `./src/lib/env/client.ts` or `./src/lib/env/server.ts` should be updated accordingly.
-
-### Redirects
-
-To add redirects, update the `redirects` array in `./redirects.ts`. It's typed, so you'll get autocompletion for the properties.
-
-### CSP (Content Security Policy)
-
-The Content Security Policy (CSP) is a security layer that helps to detect and mitigate certain types of attacks, including Cross-Site Scripting (XSS) and data injection attacks. The CSP is implemented in the `next.config.ts` file.
-
-It contains a default and minimal policy that you can customize to fit your application needs. It's a foundation to build upon.
-
-### Husky
-
-Husky is a tool that helps us run scrips before Git events. We have 3 hooks:
-
-- `pre-commit` — (Disabled by default) Runs lint-staged to lint and format the files.
-- `commit-msg` — Runs commitlint to check if the commit message follows the conventional commit message format.
-- `post-merge` — Runs pnpm install to update the dependencies if there was a change in the `pnpm-lock.yaml` file.
-
-> Important note: Husky is disabled by default in the pre-commit hook. This is intention because most developers don't want to run lint-staged on every commit. If you want to enable it, run `echo 'HUSKY_ENABLED=true' > .husky/_/pre-commit.options`.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for more information.
+Observação: atualmente o projeto possui erros pré-existentes em hooks legados não relacionados ao LUMI.

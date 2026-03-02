@@ -5,6 +5,8 @@ import { DatabaseSync } from "node:sqlite";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { normalizeFunnelStage } from "@/lib/contact-profile/types";
 import { serverEnv } from "@/lib/env/server";
+import { lumiIntents } from "@/lib/lumi/types";
+import type { LumiIntent, LumiSession, LumiState } from "@/lib/lumi/types";
 
 const DEFAULT_DB_PATH = ".data/contact-profiles.sqlite";
 const dbPath = serverEnv.WAHA_CONTACTS_DB_PATH ?? DEFAULT_DB_PATH;
@@ -37,6 +39,18 @@ function getDb() {
       raw_details TEXT NOT NULL DEFAULT '{}',
       funnel_stage TEXT NOT NULL DEFAULT 'primeiro-contato',
       notes TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL
+    );
+  `);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS lumi_sessions (
+      chat_id TEXT PRIMARY KEY,
+      state TEXT NOT NULL DEFAULT 'START',
+      collected_json TEXT NOT NULL DEFAULT '{}',
+      validation_failures INTEGER NOT NULL DEFAULT 0,
+      handoff_active INTEGER NOT NULL DEFAULT 0,
+      last_intent TEXT,
+      last_interaction_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
   `);
@@ -102,6 +116,17 @@ type ContactProfileRow = {
   updatedAt: string;
 };
 
+type LumiSessionRow = {
+  chatId: string;
+  state: string;
+  collectedJson?: string | Record<string, unknown>;
+  validationFailures: number;
+  handoffActive?: number | boolean;
+  lastIntent?: string;
+  lastInteractionAt: string;
+  updatedAt: string;
+};
+
 function normalizeRawDetails(value: unknown): Record<string, unknown> {
   if (!value) {
     return {};
@@ -133,6 +158,20 @@ function normalizeSqliteBoolean(value: unknown) {
     return value === 1;
   }
   return false;
+}
+
+function normalizeState(value: unknown): LumiState {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value as LumiState;
+  }
+  return "START";
+}
+
+function normalizeIntent(value: unknown): LumiIntent | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  return lumiIntents.includes(value as LumiIntent) ? (value as LumiIntent) : undefined;
 }
 
 export const contactProfileStore = {
@@ -257,5 +296,77 @@ export const contactProfileStore = {
     );
 
     return nextProfile;
+  },
+  getLumiSession(chatId: string): LumiSession | null {
+    const statement = getDb().prepare(`
+      SELECT
+        chat_id AS chatId,
+        state,
+        collected_json AS collectedJson,
+        validation_failures AS validationFailures,
+        handoff_active AS handoffActive,
+        last_intent AS lastIntent,
+        last_interaction_at AS lastInteractionAt,
+        updated_at AS updatedAt
+      FROM lumi_sessions
+      WHERE chat_id = ?
+      LIMIT 1
+    `);
+
+    const result = statement.get(chatId) as LumiSessionRow | undefined;
+    if (!result) {
+      return null;
+    }
+
+    return {
+      chatId: result.chatId,
+      state: normalizeState(result.state),
+      collected: normalizeRawDetails(result.collectedJson),
+      validationFailures: Number(result.validationFailures) || 0,
+      handoffActive: normalizeSqliteBoolean(result.handoffActive),
+      lastIntent: normalizeIntent(result.lastIntent),
+      lastInteractionAt: result.lastInteractionAt,
+      updatedAt: result.updatedAt,
+    };
+  },
+  upsertLumiSession(input: LumiSession): LumiSession {
+    const statement = getDb().prepare(`
+      INSERT INTO lumi_sessions (
+        chat_id,
+        state,
+        collected_json,
+        validation_failures,
+        handoff_active,
+        last_intent,
+        last_interaction_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(chat_id) DO UPDATE SET
+        state = excluded.state,
+        collected_json = excluded.collected_json,
+        validation_failures = excluded.validation_failures,
+        handoff_active = excluded.handoff_active,
+        last_intent = excluded.last_intent,
+        last_interaction_at = excluded.last_interaction_at,
+        updated_at = excluded.updated_at
+    `);
+
+    statement.run(
+      input.chatId,
+      input.state,
+      JSON.stringify(input.collected ?? {}),
+      Math.max(0, Math.floor(input.validationFailures)),
+      input.handoffActive ? 1 : 0,
+      input.lastIntent ?? null,
+      input.lastInteractionAt,
+      input.updatedAt
+    );
+
+    return input;
+  },
+  clearLumiSession(chatId: string) {
+    const statement = getDb().prepare("DELETE FROM lumi_sessions WHERE chat_id = ?");
+    statement.run(chatId);
   },
 };

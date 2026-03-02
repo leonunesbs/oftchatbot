@@ -274,7 +274,7 @@ export const chatsDomain = {
     });
     return normalizeMessages(response.body, chatId);
   },
-  async sendText(input: { chatId: string; text: string; session?: string }) {
+  async sendText(input: { chatId: string; text: string; session?: string }, options?: { allowBotFollowUp?: boolean }) {
     const parsed = sendTextInputSchema.parse(input);
     const session = parsed.session ?? serverEnv.WAHA_DEFAULT_SESSION;
     const rateStateKey = getRateStateKey(session, parsed.chatId);
@@ -302,10 +302,23 @@ export const chatsDomain = {
     }
 
     if (latestOutgoing && latestOutgoing.timestamp >= latestIncoming.timestamp) {
-      throw new WahaSendPolicyError(
-        "Envio bloqueado por segurança: aguarde uma nova mensagem do contato antes de responder novamente.",
-        409
+      if (!options?.allowBotFollowUp) {
+        throw new WahaSendPolicyError(
+          "Envio bloqueado por segurança: aguarde uma nova mensagem do contato antes de responder novamente.",
+          409
+        );
+      }
+
+      // Allow only one internal follow-up after the first reply in the same turn.
+      const outgoingAfterLatestIncoming = recentMessages.filter(
+        (message) => message.fromMe && message.timestamp >= latestIncoming.timestamp
       );
+      if (outgoingAfterLatestIncoming.length >= 2) {
+        throw new WahaSendPolicyError(
+          "Envio bloqueado por segurança: limite de follow-up excedido para esta mensagem recebida.",
+          409
+        );
+      }
     }
 
     if (state.sentInWindow >= MAX_MESSAGES_PER_WINDOW) {

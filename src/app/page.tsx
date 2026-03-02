@@ -61,8 +61,11 @@ type ConversationActionResponse = {
 
 const CONVERSATIONS_PAGE_SIZE = 30;
 const MESSAGES_PAGE_SIZE = 40;
-const CONVERSATIONS_REFRESH_INTERVAL_MS = 10_000;
-const MESSAGES_REFRESH_INTERVAL_MS = 3_000;
+const CONVERSATIONS_REFRESH_INTERVAL_MS = 30_000;
+const MESSAGES_REFRESH_INTERVAL_MS = 15_000;
+const BACKGROUND_REFRESH_INTERVAL_MS = 60_000;
+const REALTIME_RECENT_WINDOW_MS = 20_000;
+const REALTIME_CONVERSATIONS_REFRESH_THROTTLE_MS = 2_000;
 const OPTIMISTIC_MESSAGE_ID_PREFIX = "optimistic:";
 const MESSAGE_DUPLICATE_WINDOW_MS = 15_000;
 
@@ -279,6 +282,10 @@ export default function Page() {
   const messagesRequestRef = React.useRef(0);
   const isRefreshingConversationsRef = React.useRef(false);
   const isRefreshingMessagesRef = React.useRef(false);
+  const isPageVisibleRef = React.useRef(true);
+  const isRealtimeConnectedRef = React.useRef(false);
+  const lastRealtimeEventAtRef = React.useRef(0);
+  const lastRealtimeConversationRefreshAtRef = React.useRef(0);
 
   const activeConversation = React.useMemo(
     () =>
@@ -724,7 +731,34 @@ export default function Page() {
   }, []);
 
   React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden;
+      if (!isPageVisibleRef.current) {
+        return;
+      }
+      void refreshConversations();
+      if (selectedChatId) {
+        void refreshMessages(selectedChatId);
+      }
+    };
+
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [selectedChatId]);
+
+  React.useEffect(() => {
     const intervalId = window.setInterval(() => {
+      if (!isPageVisibleRef.current) {
+        return;
+      }
+      const hasRecentRealtimeEvent =
+        Date.now() - lastRealtimeEventAtRef.current < REALTIME_RECENT_WINDOW_MS;
+      if (isRealtimeConnectedRef.current && hasRecentRealtimeEvent) {
+        return;
+      }
       void refreshConversations();
     }, CONVERSATIONS_REFRESH_INTERVAL_MS);
 
@@ -760,8 +794,18 @@ export default function Page() {
     }
 
     const intervalId = window.setInterval(() => {
+      if (!isPageVisibleRef.current) {
+        return;
+      }
+      const hasRecentRealtimeEvent =
+        Date.now() - lastRealtimeEventAtRef.current < REALTIME_RECENT_WINDOW_MS;
+      if (isRealtimeConnectedRef.current && hasRecentRealtimeEvent) {
+        return;
+      }
       void refreshMessages(selectedChatId);
-    }, MESSAGES_REFRESH_INTERVAL_MS);
+    }, isRealtimeConnectedRef.current
+      ? MESSAGES_REFRESH_INTERVAL_MS
+      : BACKGROUND_REFRESH_INTERVAL_MS);
 
     return () => {
       window.clearInterval(intervalId);
@@ -771,6 +815,18 @@ export default function Page() {
   React.useEffect(() => {
     const source = new EventSource("/api/realtime/waha-events");
 
+    source.addEventListener("open", () => {
+      isRealtimeConnectedRef.current = true;
+      void refreshConversations();
+      if (selectedChatId) {
+        void refreshMessages(selectedChatId);
+      }
+    });
+
+    source.addEventListener("error", () => {
+      isRealtimeConnectedRef.current = false;
+    });
+
     source.addEventListener("waha-event", (rawEvent) => {
       const event = rawEvent as MessageEvent<string>;
       const parsed = JSON.parse(event.data) as {
@@ -778,6 +834,18 @@ export default function Page() {
         chatId?: string;
         payload?: Record<string, unknown>;
       };
+      if (!isPageVisibleRef.current) {
+        return;
+      }
+
+      lastRealtimeEventAtRef.current = Date.now();
+      if (
+        Date.now() - lastRealtimeConversationRefreshAtRef.current >=
+        REALTIME_CONVERSATIONS_REFRESH_THROTTLE_MS
+      ) {
+        lastRealtimeConversationRefreshAtRef.current = Date.now();
+        void refreshConversations();
+      }
 
       if (
         !parsed.chatId ||
@@ -811,6 +879,7 @@ export default function Page() {
     });
 
     return () => {
+      isRealtimeConnectedRef.current = false;
       source.close();
     };
   }, [selectedChatId]);
