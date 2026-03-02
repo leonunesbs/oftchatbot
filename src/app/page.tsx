@@ -1178,8 +1178,8 @@ export default function Page() {
                       <SheetHeader className="shrink-0 border-b px-4 py-3">
                         <SheetTitle>Perfil do contato</SheetTitle>
                         <SheetDescription>
-                          Atualize o funil de vendas e registre anotações de
-                          consulta oftalmologia.
+                          Atualize a etapa do funil e registre anotações da
+                          consulta oftalmológica.
                         </SheetDescription>
                       </SheetHeader>
 
@@ -1237,8 +1237,8 @@ export default function Page() {
                   Perfil do contato
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Atualize o funil de vendas e registre anotações de consulta
-                  oftalmologia.
+                  Atualize a etapa do funil e registre anotações da consulta
+                  oftalmológica.
                 </p>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto pt-4">
