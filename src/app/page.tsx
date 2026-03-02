@@ -17,6 +17,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { funnelStageLabels, funnelStages } from "@/lib/contact-profile/types";
@@ -662,6 +663,7 @@ export default function Page() {
               <div className="border-border/70 flex shrink-0 items-center justify-between gap-3 border-b px-2 py-3 md:px-3">
                 <div className="flex min-w-0 items-start gap-2">
                   <SidebarTrigger className="mt-0.5 md:hidden" />
+                  <Separator orientation="vertical" className="my-0.5 h-6 md:hidden" />
                   <div className="min-w-0 space-y-1">
                     <p className="truncate text-sm font-semibold tracking-tight md:text-base">
                       {activeConversation?.name ?? "Nenhuma conversa selecionada"}
