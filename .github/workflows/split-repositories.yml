@@ -20,6 +20,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+          run_install: false
+
       - name: Prepare pnpm config for subtree
         run: |
           awk '
@@ -33,8 +39,18 @@ jobs:
             exit 1
           fi
 
-          git add oftagenda/pnpm-workspace.yaml
-          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config for oftagenda split"
+          (
+            cd oftagenda
+            pnpm install --lockfile-only --ignore-scripts
+          )
+
+          if [ ! -s oftagenda/pnpm-lock.yaml ]; then
+            echo "Failed to generate oftagenda/pnpm-lock.yaml"
+            exit 1
+          fi
+
+          git add oftagenda/pnpm-workspace.yaml oftagenda/pnpm-lock.yaml
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftagenda split"
 
       - name: Push subtree to leonunesbs/oftagenda
         env:
@@ -58,6 +74,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+          run_install: false
+
       - name: Prepare pnpm config for subtree
         run: |
           awk '
@@ -71,8 +93,18 @@ jobs:
             exit 1
           fi
 
-          git add oftleonardo/pnpm-workspace.yaml
-          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config for oftleonardo split"
+          (
+            cd oftleonardo
+            pnpm install --lockfile-only --ignore-scripts
+          )
+
+          if [ ! -s oftleonardo/pnpm-lock.yaml ]; then
+            echo "Failed to generate oftleonardo/pnpm-lock.yaml"
+            exit 1
+          fi
+
+          git add oftleonardo/pnpm-workspace.yaml oftleonardo/pnpm-lock.yaml
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftleonardo split"
 
       - name: Push subtree to leonunesbs/oftleonardo
         env:
