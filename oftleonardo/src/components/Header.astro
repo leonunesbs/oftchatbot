@@ -1,0 +1,277 @@
+---
+import { siteConfig } from "@/config/site";
+import MobileMenu from "./MobileMenu";
+import ThemeToggle from "./ThemeToggle";
+import WhatsAppModal from "./WhatsAppModal";
+---
+
+<header
+  id="main-header"
+  class="fixed top-0 z-40 w-full border-b border-border/70 bg-background/92 backdrop-blur-xl backdrop-saturate-150"
+>
+  <div
+    id="header-inner"
+    class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6"
+  >
+    <a href="/" class="logo-link" aria-label="Página inicial">
+      <div class="logo-full">
+        <img
+          src="/logo_horizontal_light.svg"
+          alt={`${siteConfig.name} – ${siteConfig.title}`}
+          class="h-10 w-auto dark:hidden sm:h-12"
+          width="227"
+          height="48"
+          fetchpriority="high"
+        />
+        <img
+          src="/logo_horizontal_dark.svg"
+          alt={`${siteConfig.name} – ${siteConfig.title}`}
+          class="hidden h-10 w-auto dark:block sm:h-12"
+          width="227"
+          height="48"
+          fetchpriority="high"
+        />
+      </div>
+      <div class="logo-mono">
+        <img
+          src="/mono_light.svg"
+          alt={`${siteConfig.name}`}
+          class="h-8 w-auto dark:hidden"
+          width="32"
+          height="32"
+        />
+        <img
+          src="/mono_dark.svg"
+          alt={`${siteConfig.name}`}
+          class="hidden h-8 w-auto dark:block"
+          width="32"
+          height="32"
+        />
+      </div>
+    </a>
+
+    <nav
+      class="hidden items-center gap-1 md:flex"
+      aria-label="Navegação principal"
+    >
+      {
+        siteConfig.navLinks
+          .filter((link) => link.label !== "Consulta")
+          .map((link) => (
+            <a
+              href={link.href}
+              class="rounded-md px-3 py-2 text-sm font-medium text-foreground/85 transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </a>
+          ))
+      }
+      <details id="tools-menu" class="group relative">
+        <summary
+          class="list-none cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:text-foreground"
+        >
+          Ferramentas
+        </summary>
+        <div
+          class="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-border/60 bg-background/95 p-2 opacity-0 shadow-lg backdrop-blur transition duration-150 group-open:visible group-open:opacity-100"
+        >
+          <a
+            href="/acuidade-visual"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Teste Visual
+          </a>
+          <a
+            href="/tela-de-amsler"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Tela de Amsler
+          </a>
+          <a
+            href="/agendamento-online"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Agendamento Online
+          </a>
+        </div>
+      </details>
+      <ThemeToggle client:media="(min-width: 768px)" />
+      <div class="ml-2">
+        <WhatsAppModal
+          client:media="(min-width: 768px)"
+          size="sm"
+          className="h-9 rounded-full px-4 text-sm"
+        >
+          Agendar Consulta
+        </WhatsAppModal>
+      </div>
+    </nav>
+
+    <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
+      <WhatsAppModal
+        client:media="(max-width: 767px)"
+        size="sm"
+        className="h-8 rounded-full px-3 text-xs"
+      >
+        Agendar
+      </WhatsAppModal>
+      <ThemeToggle client:media="(max-width: 767px)" />
+      <MobileMenu client:media="(max-width: 767px)" />
+    </div>
+  </div>
+</header>
+<div class="h-18" aria-hidden="true"></div>
+
+<style>
+  #main-header {
+    --p: 0;
+    contain: layout;
+    box-shadow: 0 calc(var(--p) * 14px) calc(var(--p) * 36px)
+      color-mix(in oklch, var(--foreground) 14%, transparent);
+    transition: box-shadow 220ms ease;
+  }
+
+  #header-inner {
+    height: calc(4.75rem - var(--p) * 1.6rem);
+    transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .logo-link {
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .logo-full,
+  .logo-mono {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    will-change: opacity, transform;
+  }
+
+  .logo-full {
+    opacity: calc(1 - var(--p));
+    transform: translateX(calc(var(--p) * -100%));
+  }
+
+  .logo-mono {
+    opacity: min(calc(var(--p) * 1.2), 1);
+    transform: translateX(calc((1 - var(--p)) * -100%));
+  }
+
+  nav[aria-label="Navegação principal"] {
+    transform: translateY(calc(var(--p) * -2px));
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #mobile-controls {
+    transform: translateX(calc(var(--p) * 0.5rem));
+    will-change: transform;
+  }
+
+  @media (min-width: 768px) {
+    #header-inner {
+      height: 5.15rem;
+      transition: none;
+    }
+
+    .logo-full {
+      opacity: 1;
+      transform: none;
+    }
+
+    .logo-mono {
+      opacity: 0;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const header = document.getElementById("main-header");
+  const toolsMenu = document.getElementById("tools-menu");
+  const SCROLL_RANGE_MOBILE = 80;
+  const MAX_FPS = 60;
+  const FRAME_TIME = 1000 / MAX_FPS;
+  const SMOOTHING = 0.2;
+  const SCROLL_DELTA_THRESHOLD = 0.5;
+  let currentP = 0;
+  let targetP = 0;
+  let rafId = 0;
+  let lastFrameTime = 0;
+  let lastScrollY = window.scrollY;
+  let mobileCompact = window.scrollY > 0;
+
+  function getTargetProgress() {
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop) return 0;
+
+    const scrollY = Math.max(window.scrollY, 0);
+    const delta = scrollY - lastScrollY;
+
+    if (delta > SCROLL_DELTA_THRESHOLD && scrollY > 0) {
+      mobileCompact = true;
+    } else if (delta < -SCROLL_DELTA_THRESHOLD) {
+      mobileCompact = false;
+    }
+
+    lastScrollY = scrollY;
+    return mobileCompact ? Math.min(scrollY / SCROLL_RANGE_MOBILE, 1) : 0;
+  }
+
+  function animate(timestamp: number) {
+    if (!header) return;
+    if (timestamp - lastFrameTime < FRAME_TIME) {
+      rafId = requestAnimationFrame(animate);
+      return;
+    }
+
+    lastFrameTime = timestamp;
+    currentP += (targetP - currentP) * SMOOTHING;
+
+    if (Math.abs(targetP - currentP) < 0.001) {
+      currentP = targetP;
+    }
+
+    header.style.setProperty("--p", `${currentP}`);
+
+    if (currentP !== targetP) {
+      rafId = requestAnimationFrame(animate);
+      return;
+    }
+
+    rafId = 0;
+  }
+
+  function updateTarget() {
+    targetP = getTargetProgress();
+    if (!rafId) {
+      lastFrameTime = 0;
+      rafId = requestAnimationFrame(animate);
+    }
+  }
+
+  window.addEventListener("scroll", updateTarget, { passive: true });
+  window.addEventListener("resize", updateTarget, { passive: true });
+
+  // Keep native <details> semantics, but close when user clicks away.
+  document.addEventListener("click", (event) => {
+    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
+    if (!toolsMenu.open) return;
+
+    const target = event.target;
+    if (target instanceof Node && !toolsMenu.contains(target)) {
+      toolsMenu.open = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
+    if (event.key === "Escape" && toolsMenu.open) {
+      toolsMenu.open = false;
+    }
+  });
+
+  updateTarget();
+</script>

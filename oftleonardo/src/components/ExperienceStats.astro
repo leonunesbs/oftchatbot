@@ -1,0 +1,103 @@
+---
+import AnimatedSection from "./AnimatedSection";
+import CountUp from "./CountUp";
+---
+
+<section id="formacao" class="py-16 sm:py-20">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6">
+    <AnimatedSection client:visible>
+      <div class="text-center">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+          Hospital Geral de Fortaleza · HGF/SESA
+        </p>
+        <h2
+          class="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+        >
+          Formação que se traduz em experiência e segurança
+        </h2>
+      </div>
+    </AnimatedSection>
+
+    <AnimatedSection client:visible delay={0.15}>
+      <div
+        class="mt-10 flex flex-col items-center justify-center gap-8 sm:flex-row sm:gap-0"
+      >
+        <div class="flex-1 text-center">
+          <p
+            class="text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl"
+          >
+            <CountUp client:visible to={3} duration={1.5} />
+          </p>
+          <p class="mt-2 text-sm font-medium text-muted-foreground">
+            anos de residência médica
+          </p>
+        </div>
+
+        <div class="hidden h-16 w-px bg-border sm:block" aria-hidden="true">
+        </div>
+
+        <div class="flex-1 text-center">
+          <p
+            class="text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl"
+          >
+            <CountUp client:visible to={12000} duration={2} />
+          </p>
+          <p class="mt-2 text-sm font-medium text-muted-foreground">
+            atendimentos realizados
+          </p>
+        </div>
+
+        <div class="hidden h-16 w-px bg-border sm:block" aria-hidden="true">
+        </div>
+
+        <div class="flex-1 text-center">
+          <p
+            class="text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl"
+          >
+            <CountUp client:visible to={1000} duration={2} suffix="+" />
+          </p>
+          <p class="mt-2 text-sm font-medium text-muted-foreground">
+            cirurgias e procedimentos
+          </p>
+        </div>
+      </div>
+    </AnimatedSection>
+
+    <AnimatedSection client:visible delay={0.25}>
+      <div class="mt-8 py-1 flex flex-wrap items-center justify-center gap-2">
+        <span
+          class="rounded-full border border-brand/20 bg-brand/5 px-3.5 py-1 text-xs font-medium text-brand"
+        >
+          Cirurgia de catarata
+        </span>
+        <span
+          class="rounded-full border border-brand/20 bg-brand/5 px-3.5 py-1 text-xs font-medium text-brand"
+        >
+          Doenças da retina
+        </span>
+        <span
+          class="rounded-full border border-brand/20 bg-brand/5 px-3.5 py-1 text-xs font-medium text-brand"
+        >
+          Laser ocular
+        </span>
+        <span
+          class="rounded-full border border-brand/20 bg-brand/5 px-3.5 py-1 text-xs font-medium text-brand"
+        >
+          Cirurgias oculares
+        </span>
+      </div>
+    </AnimatedSection>
+
+    <AnimatedSection client:visible delay={0.3}>
+      <p
+        class="mx-auto mt-6 max-w-xl text-center text-sm leading-relaxed text-muted-foreground"
+      >
+        Três anos de residência médica em um dos maiores e mais tradicionais
+        hospitais públicos do Ceará, com vivência diária em centro cirúrgico,
+        ambulatório e emergência — da cirurgia de catarata ao tratamento de
+        doenças complexas da retina. Formação que prioriza o rigor técnico, a
+        segurança do paciente e a atualização constante.
+      </p>
+    </AnimatedSection>
+  </div>
+</section>

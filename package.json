@@ -1,0 +1,30 @@
+{
+  "name": "oftcore",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm run dev:all:web",
+    "dev:all": "pnpm run dev:all:web",
+    "dev:all:web": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo dev:web",
+    "dev:all:full": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo dev",
+    "dev:agenda": "pnpm --filter ./oftagenda dev:web",
+    "dev:agenda:full": "pnpm --filter ./oftagenda dev",
+    "dev:leonardo": "pnpm --filter ./oftleonardo dev",
+    "build": "pnpm -r --filter ./oftagenda --filter ./oftleonardo build",
+    "build:agenda": "pnpm --filter ./oftagenda build",
+    "build:leonardo": "pnpm --filter ./oftleonardo build",
+    "preview:leonardo": "pnpm --filter ./oftleonardo preview",
+    "lint": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo lint",
+    "type-check": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo type-check"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3",
+      "@vercel/routing-utils>path-to-regexp": "^6.3.0",
+      "@ts-morph/common>minimatch": "^10.2.4",
+      "@modelcontextprotocol/sdk>hono": "^4.12.3"
+    }
+  }
+}

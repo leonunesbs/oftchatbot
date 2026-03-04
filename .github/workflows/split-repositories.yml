@@ -1,0 +1,53 @@
+name: Split Monorepo Repositories
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  split-oftagenda:
+    name: Sync oftagenda repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push subtree to leonunesbs/oftagenda
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTAGENDA_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTAGENDA_REPO_TOKEN"
+            exit 1
+          fi
+
+          git subtree split --prefix=oftagenda --branch split-oftagenda
+          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftagenda.git" split-oftagenda:main
+
+  split-oftleonardo:
+    name: Sync oftleonardo repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push subtree to leonunesbs/oftleonardo
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTLEONARDO_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTLEONARDO_REPO_TOKEN"
+            exit 1
+          fi
+
+          git subtree split --prefix=oftleonardo --branch split-oftleonardo
+          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftleonardo.git" split-oftleonardo:main

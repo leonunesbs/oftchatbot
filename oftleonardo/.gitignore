@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.astro/
+.vercel/
+
+# caches
+.cache/
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# local/temporary artifacts
+.cursor_tmp/
+tmp/
+temp/
+
+# IDE/editor
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

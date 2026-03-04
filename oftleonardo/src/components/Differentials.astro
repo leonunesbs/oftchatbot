@@ -1,0 +1,48 @@
+---
+import { siteConfig } from "@/config/site";
+import AnimatedSection from "./AnimatedSection";
+import { Heart, ClipboardCheck, Monitor, ShieldCheck } from "lucide-react";
+
+const iconMap: Record<string, typeof Heart> = {
+  Heart,
+  ClipboardCheck,
+  Monitor,
+  ShieldCheck,
+};
+---
+
+<section id="diferenciais" class="py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <AnimatedSection client:visible>
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Por que escolher o Dr. Leonardo
+        </h2>
+        <p class="mt-4 text-muted-foreground">
+          Experiência clínica, rigor técnico e uma prática que coloca o paciente no centro de cada decisão.
+        </p>
+      </div>
+    </AnimatedSection>
+
+    <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {siteConfig.differentials.map((item, index) => {
+        const Icon = iconMap[item.icon];
+        return (
+          <AnimatedSection client:visible delay={index * 0.1}>
+            <div class="group flex flex-col items-center rounded-2xl border border-border/50 bg-card p-6 text-center transition-all hover:border-border hover:shadow-sm">
+              <span class="mb-4 flex size-12 items-center justify-center rounded-2xl bg-secondary text-foreground transition-colors group-hover:bg-brand/10 group-hover:text-brand">
+                {Icon && <Icon className="size-5" />}
+              </span>
+              <h3 class="mb-2 text-base font-semibold text-foreground">
+                {item.title}
+              </h3>
+              <p class="text-sm leading-relaxed text-muted-foreground">
+                {item.description}
+              </p>
+            </div>
+          </AnimatedSection>
+        );
+      })}
+    </div>
+  </div>
+</section>

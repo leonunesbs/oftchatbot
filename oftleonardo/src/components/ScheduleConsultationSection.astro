@@ -1,0 +1,40 @@
+---
+import WhatsAppModal from "@/components/WhatsAppModal";
+
+interface Props {
+  id?: string;
+  title: string;
+  description: string;
+  whatsappMessageTemplate: string;
+  triggerLabel?: string;
+}
+
+const {
+  id = "agendar",
+  title,
+  description,
+  whatsappMessageTemplate,
+  triggerLabel = "Agendar consulta",
+} = Astro.props as Props;
+---
+
+<section id={id} class="space-y-4 text-center">
+  <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
+    {title}
+  </h2>
+  <p class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
+    {description}
+  </p>
+  <div class="flex justify-center">
+    <WhatsAppModal
+      client:visible
+      size="lg"
+      className="h-12 rounded-full px-8 text-base font-medium"
+      triggerAriaLabel={title}
+      whatsappMessageTemplate={whatsappMessageTemplate}
+      showOnlineBookingCta={true}
+    >
+      {triggerLabel}
+    </WhatsAppModal>
+  </div>
+</section>

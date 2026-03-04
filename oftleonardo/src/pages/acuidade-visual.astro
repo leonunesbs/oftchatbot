@@ -1,0 +1,468 @@
+---
+import Footer from "@/components/Footer.astro";
+import Header from "@/components/Header.astro";
+import ScheduleConsultationSection from "@/components/ScheduleConsultationSection.astro";
+import VisualAcuityApp from "@/components/visual-acuity/VisualAcuityApp";
+import { siteConfig } from "@/config/site";
+import Layout from "@/layouts/Layout.astro";
+import { Font } from "astro:assets";
+
+const title =
+  "Teste de Acuidade Visual Online Grátis | Leonardo Nunes · Oftalmologista";
+const description =
+  "Faça o teste de acuidade visual online e gratuito pelo celular. Tabela de Snellen e Tumbling E com calibração precisa da tela. Resultado imediato com escala logMAR. Avalie sua visão agora.";
+const keywords =
+  "teste de acuidade visual online, teste de visão online, teste visual gratuito, teste de visão pelo celular, acuidade visual, tabela de snellen online, optotipo tumbling e, escala logMAR, teste de visão de perto, triagem visual, oftalmologista fortaleza, teste ocular online, exame de vista online, acuidade visual snellen, teste de olho online";
+
+const canonical = new URL("/acuidade-visual", siteConfig.canonical).href;
+
+const faqItems = [
+  {
+    question:
+      "O teste de acuidade visual online substitui uma consulta oftalmológica?",
+    answer:
+      "Não. O teste online é uma ferramenta de triagem que oferece uma estimativa da acuidade visual. Ele não substitui um exame oftalmológico completo, que inclui avaliação de pressão ocular, fundo de olho, refração e outras análises que só podem ser realizadas por um médico oftalmologista com equipamentos especializados.",
+  },
+  {
+    question: "Como funciona o teste de acuidade visual pelo celular?",
+    answer:
+      "O teste utiliza optotipos (letras de Snellen ou Tumbling E) exibidos em tamanhos calibrados na tela do seu dispositivo. Primeiro, você calibra o tamanho da tela usando um cartão de crédito como referência. Depois, seleciona a distância de leitura e testa cada olho separadamente, identificando os menores símbolos que consegue enxergar.",
+  },
+  {
+    question: "O que é a escala de Snellen e como interpretar o resultado?",
+    answer:
+      "A escala de Snellen expressa a acuidade visual como uma fração (ex: 20/20). O numerador indica a distância do teste e o denominador, a distância em que uma pessoa com visão normal leria a mesma linha. Visão 20/20 é considerada normal. Valores como 20/40 indicam que você precisa estar a 20 pés para ler o que uma pessoa normal lê a 40 pés, sugerindo redução da acuidade.",
+  },
+  {
+    question: "O que é o optotipo Tumbling E e para quem é indicado?",
+    answer:
+      "O Tumbling E é um optotipo em formato de letra E que aparece em quatro orientações (cima, baixo, esquerda, direita). É especialmente indicado para crianças em fase de alfabetização, pessoas não alfabetizadas ou pacientes com dificuldade em identificar letras, pois exige apenas indicar a direção da abertura do E.",
+  },
+  {
+    question: "Preciso usar óculos ou lentes de contato durante o teste?",
+    answer:
+      "Sim. O teste deve ser realizado com a melhor correção óptica disponível. Se você usa óculos ou lentes de contato, mantenha-os durante todo o teste. O objetivo é medir a acuidade visual corrigida, ou seja, a melhor visão que você consegue com sua correção atual.",
+  },
+  {
+    question: "A calibração da tela é necessária? Como funciona?",
+    answer:
+      "Sim, a calibração é essencial para resultados confiáveis. O teste solicita que você posicione um cartão de crédito ou débito sobre a tela e ajuste um marcador até que coincida com o tamanho real do cartão. Isso permite calcular a densidade de pixels da sua tela e exibir os optotipos no tamanho fisicamente correto.",
+  },
+  {
+    question: "Com que frequência devo fazer um teste de acuidade visual?",
+    answer:
+      "Para adultos sem queixas visuais, recomenda-se avaliação oftalmológica anual. Pacientes com diabetes, hipertensão, histórico familiar de glaucoma ou acima de 40 anos devem manter acompanhamento regular. Este teste online pode ser usado como triagem entre consultas, mas não substitui o exame profissional.",
+  },
+  {
+    question: "Qual a diferença entre acuidade visual de perto e de longe?",
+    answer:
+      "A acuidade visual de longe avalia a capacidade de enxergar objetos distantes (geralmente a 6 metros / 20 pés), sendo o padrão clínico mais comum. A acuidade de perto avalia a leitura a distâncias curtas (30-70 cm), sendo essencial para detectar presbiopia (vista cansada). Este teste online mede a acuidade visual de perto em distâncias calibradas.",
+  },
+];
+
+const howToSteps = [
+  {
+    name: "Calibre sua tela",
+    text: "Use um cartão de crédito como referência para calibrar o tamanho exato dos pixels da sua tela, garantindo que os optotipos sejam exibidos no tamanho correto.",
+  },
+  {
+    name: "Selecione a distância",
+    text: "Escolha a distância de leitura (30 cm, 50 cm ou 70 cm) e posicione o celular à distância selecionada dos seus olhos.",
+  },
+  {
+    name: "Escolha o tipo de optotipo",
+    text: "Selecione entre Letras de Snellen (para adultos alfabetizados) ou Tumbling E (para crianças e não alfabetizados).",
+  },
+  {
+    name: "Teste cada olho separadamente",
+    text: "Cubra um olho com a palma da mão e identifique os menores optotipos que consegue enxergar. Repita com o outro olho.",
+  },
+  {
+    name: "Receba seu resultado",
+    text: "Veja sua acuidade visual estimada na escala de Snellen para cada olho, com interpretação do resultado e opção de agendar uma consulta oftalmológica.",
+  },
+];
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Início",
+      item: siteConfig.canonical,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Teste de Acuidade Visual",
+      item: canonical,
+    },
+  ],
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Teste de Acuidade Visual Online",
+  description:
+    "Ferramenta gratuita de triagem visual com optotipos Snellen e Tumbling E, calibração de tela e escala logMAR. Teste de visão de perto pelo celular.",
+  url: canonical,
+  applicationCategory: "HealthApplication",
+  operatingSystem: "All",
+  browserRequirements: "Requires JavaScript. Requires a modern web browser.",
+  inLanguage: "pt-BR",
+  isAccessibleForFree: true,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "BRL",
+  },
+  author: {
+    "@type": "Physician",
+    name: siteConfig.name,
+    url: siteConfig.canonical,
+    medicalSpecialty: "Ophthalmology",
+  },
+  provider: {
+    "@type": "MedicalBusiness",
+    name: `${siteConfig.name} · ${siteConfig.title}`,
+    url: siteConfig.canonical,
+  },
+};
+
+const medicalPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  name: "Teste de Acuidade Visual Online Gratuito",
+  description,
+  url: canonical,
+  inLanguage: "pt-BR",
+  isPartOf: {
+    "@type": "WebSite",
+    name: `${siteConfig.name} · ${siteConfig.title}`,
+    url: siteConfig.canonical,
+  },
+  about: {
+    "@type": "MedicalCondition",
+    name: "Acuidade Visual",
+    alternateName: "Visual Acuity",
+  },
+  audience: {
+    "@type": "PeopleAudience",
+    healthCondition: {
+      "@type": "MedicalCondition",
+      name: "Deficiência Visual",
+    },
+  },
+  lastReviewed: new Date().toISOString().split("T")[0],
+  reviewedBy: {
+    "@type": "Physician",
+    name: siteConfig.name,
+    url: siteConfig.canonical,
+  },
+  specialty: {
+    "@type": "MedicalSpecialty",
+    name: "Ophthalmology",
+  },
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Como fazer o teste de acuidade visual online pelo celular",
+  description:
+    "Passo a passo para realizar o teste de acuidade visual de perto usando o celular, com calibração da tela e optotipos Snellen ou Tumbling E.",
+  totalTime: "PT5M",
+  tool: [
+    { "@type": "HowToTool", name: "Celular ou tablet com tela calibrada" },
+    {
+      "@type": "HowToTool",
+      name: "Cartão de crédito ou débito para calibração",
+    },
+  ],
+  step: howToSteps.map((s, i) => ({
+    "@type": "HowToStep",
+    position: i + 1,
+    name: s.name,
+    text: s.text,
+  })),
+};
+
+const allSchemas = [
+  breadcrumbSchema,
+  webAppSchema,
+  medicalPageSchema,
+  faqSchema,
+  howToSchema,
+];
+---
+
+<Layout
+  title={title}
+  description={description}
+  keywords={keywords}
+  ogType="article"
+>
+  <Font slot="head" cssVariable="--font-sloan-optotype" />
+  {
+    allSchemas.map((schema) => (
+      <script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))
+  }
+  <meta slot="head" name="subject" content="Teste de Acuidade Visual Online" />
+  <meta slot="head" name="topic" content="Oftalmologia - Teste de Visão" />
+  <meta slot="head" name="classification" content="Health" />
+  <meta slot="head" name="category" content="Saúde - Oftalmologia" />
+  <link slot="head" rel="preconnect" href="https://api.whatsapp.com" />
+
+  <Header />
+
+  <main
+    id="conteudo-principal"
+    tabindex="-1"
+  class="relative mx-auto max-w-3xl overflow-x-clip pt-4 sm:pt-6"
+  >
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="Breadcrumb" class="px-4 pt-4 pb-2">
+      <ol class="flex items-center gap-1 text-xs text-muted-foreground">
+        <li>
+          <a href="/" class="transition-colors hover:text-foreground">Início</a>
+        </li>
+        <li aria-hidden="true" class="select-none">/</li>
+        <li>
+          <span class="font-medium text-foreground" aria-current="page"
+            >Teste de Acuidade Visual</span
+          >
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Interactive app with CLS-safe skeleton -->
+    <div class="va-app-wrapper min-h-[80dvh]">
+      <VisualAcuityApp client:only="react" />
+      <div
+        class="va-skeleton flex min-h-[80dvh] flex-col items-center justify-center gap-8 px-4 py-8"
+      >
+        <div class="max-w-md space-y-3 text-center">
+          <div class="mx-auto h-7 w-52 animate-pulse rounded-lg bg-muted"></div>
+          <div class="mx-auto h-4 w-72 animate-pulse rounded bg-muted"></div>
+        </div>
+        <div class="grid w-full max-w-sm gap-4">
+          <div
+            class="h-30 animate-pulse rounded-xl border-2 border-muted bg-muted/20"
+          >
+          </div>
+          <div
+            class="h-30 animate-pulse rounded-xl border-2 border-muted bg-muted/20"
+          >
+          </div>
+        </div>
+        <div
+          class="flex max-w-sm items-center gap-3 rounded-lg border border-muted bg-muted/10 p-3"
+        >
+          <div class="size-4 shrink-0 animate-pulse rounded bg-muted"></div>
+          <div class="h-3 w-64 animate-pulse rounded bg-muted"></div>
+        </div>
+        <div class="mt-2 h-11 w-40 animate-pulse rounded-md bg-muted"></div>
+      </div>
+    </div>
+
+    <!-- SSR SEO content -->
+    <article class="space-y-12 px-4 py-12">
+      <header class="space-y-4 text-center">
+        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+          Teste de Acuidade Visual Online e Gratuito
+        </h1>
+        <p
+          class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+        >
+          Avalie sua visão de perto diretamente pelo celular com este teste de
+          acuidade visual com <strong>progressão logarítmica dos optotipos</strong
+          > e resultado em <strong>escala de Snellen</strong> (20/20, 20/40,
+          20/60), utilizando optotipos
+          <strong>Snellen</strong> e <strong>Tumbling E</strong>. Ferramenta de
+          triagem desenvolvida pelo <strong
+            >Leonardo Nunes, oftalmologista</strong
+          > especialista em retina e catarata.
+        </p>
+      </header>
+
+      <!-- How it works -->
+      <section class="space-y-8" id="como-funciona">
+        <div class="space-y-2 text-center">
+          <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
+            Como Funciona o Teste de Acuidade Visual
+          </h2>
+          <p class="text-sm text-muted-foreground">
+            5 passos simples para avaliar sua visão
+          </p>
+        </div>
+
+        <ol class="relative mx-auto max-w-xl space-y-0">
+          {
+            howToSteps.map((step, i) => (
+              <li class="relative flex gap-5 pb-8 last:pb-0">
+                {/* Vertical connector line */}
+                {i < howToSteps.length - 1 && (
+                  <div
+                    class="absolute left-[19px] top-10 bottom-0 w-px bg-border"
+                    aria-hidden="true"
+                  />
+                )}
+                {/* Step number circle */}
+                <div class="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-brand bg-brand/10 text-sm font-bold text-brand">
+                  {i + 1}
+                </div>
+                {/* Content */}
+                <div class="flex flex-col gap-1 pt-1.5">
+                  <h3 class="text-sm font-semibold leading-tight">
+                    {step.name}
+                  </h3>
+                  <p class="text-sm leading-relaxed text-muted-foreground">
+                    {step.text}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <!-- About the test -->
+      <section class="space-y-4">
+        <h2 class="text-center text-xl font-bold tracking-tight sm:text-2xl">
+          Sobre o Teste de Visão Online
+        </h2>
+        <div
+          class="mx-auto max-w-2xl space-y-3 text-sm leading-relaxed text-muted-foreground"
+        >
+          <p>
+            Este teste de acuidade visual de perto utiliza a mesma metodologia
+            empregada em consultórios oftalmológicos, adaptada para dispositivos
+            digitais. A calibração da tela com um
+            cartão de crédito permite calcular a densidade de pixels e exibir os
+            optotipos no tamanho fisicamente correto para a distância
+            selecionada.
+          </p>
+          <p>
+            Os resultados são apresentados na <strong>escala de Snellen</strong> (ex:
+            20/20, 20/40) e classificados em faixas de normalidade. A acuidade visual
+            é testada de
+            <strong>20/200 até 20/15</strong>, abrangendo desde reduções
+            importantes até visão acima do normal.
+          </p>
+          <p>
+            O teste oferece dois modos de optotipos: <strong
+              >Letras de Snellen</strong
+            > (C, D, E, F, L, N, O, P, R, T, Z — conjunto de Sloan) para adultos alfabetizados,
+            e
+            <strong>Tumbling E</strong> para crianças e pacientes não alfabetizados.
+            Ambos seguem padrões reconhecidos internacionalmente para avaliação da
+            acuidade visual.
+          </p>
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="space-y-6" id="perguntas-frequentes">
+        <h2 class="text-center text-xl font-bold tracking-tight sm:text-2xl">
+          Perguntas Frequentes sobre Acuidade Visual
+        </h2>
+        <div
+          class="mx-auto max-w-2xl divide-y divide-border rounded-xl border border-border"
+        >
+          {
+            faqItems.map((item) => (
+              <details class="group px-5 py-4">
+                <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                  <span class="pr-4">{item.question}</span>
+                  <svg
+                    class="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m19 9-7 7-7-7"
+                    />
+                  </svg>
+                </summary>
+                <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {item.answer}
+                </p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <ScheduleConsultationSection
+        id="agendar"
+        title="Agende sua Consulta Oftalmológica"
+        description="O teste de acuidade visual online é uma ferramenta de triagem. Para um diagnóstico completo, agende uma consulta com Leonardo Nunes em uma de nossas cidades de atendimento."
+        whatsappMessageTemplate="Olá, Dr. Leonardo! Gostaria de agendar uma consulta oftalmológica em {city}."
+        triggerLabel="Agendar consulta"
+      />
+
+      <!-- Medical disclaimer and internal links -->
+      <footer class="space-y-6 border-t border-border pt-8">
+        <div
+          class="mx-auto max-w-2xl rounded-lg border border-amber-500/20 bg-amber-500/5 p-4"
+        >
+          <p class="text-center text-xs leading-relaxed text-muted-foreground">
+            <strong>Aviso médico:</strong> Este teste é uma ferramenta de triagem
+            e não substitui uma consulta oftalmológica profissional. Os resultados
+            podem variar conforme a calibração da tela e condições de iluminação.
+            Para diagnóstico e tratamento, consulte um médico oftalmologista.
+          </p>
+        </div>
+        <nav
+          aria-label="Links relacionados"
+          class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground"
+        >
+          <a href="/" class="transition-colors hover:text-foreground"
+            >Página Inicial</a
+          >
+          <a href="/#atuacao" class="transition-colors hover:text-foreground"
+            >Especialidades</a
+          >
+          <a
+            href="/#atendimento"
+            class="transition-colors hover:text-foreground"
+            >Cidades de Atendimento</a
+          >
+          <a href="/#faq" class="transition-colors hover:text-foreground"
+            >FAQ Geral</a
+          >
+        </nav>
+      </footer>
+    </article>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style is:global>
+  .va-app-wrapper:has(astro-island > *) .va-skeleton {
+    display: none;
+  }
+</style>

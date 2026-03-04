@@ -1,0 +1,78 @@
+---
+import { siteConfig } from "@/config/site";
+import AnimatedSection from "./AnimatedSection";
+---
+
+<section id="consulta" class="bg-secondary/30 py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <AnimatedSection client:visible>
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Como funciona sua consulta
+        </h2>
+        <p class="mt-4 text-muted-foreground">
+          Do agendamento ao acompanhamento, cada etapa é pensada para que você se sinta informado, acolhido e seguro.
+        </p>
+      </div>
+    </AnimatedSection>
+
+    <!-- Mobile: vertical timeline (step left, content right) -->
+    <div class="relative mt-14 lg:hidden">
+      <div class="absolute bottom-0 left-5 top-0 w-px bg-border" aria-hidden="true"></div>
+
+      <div class="flex flex-col gap-8">
+        {siteConfig.howItWorks.map((item, index) => (
+          <AnimatedSection client:visible delay={index * 0.12}>
+            <div class="relative flex gap-4">
+              <div class="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-sm font-bold text-foreground">
+                {item.step}
+              </div>
+              <div class="flex-1 rounded-2xl border border-border/50 bg-card p-5 transition-all hover:border-border hover:shadow-sm">
+                <h3 class="mb-1.5 text-base font-semibold text-foreground">
+                  {item.title}
+                </h3>
+                <p class="text-sm leading-relaxed text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          </AnimatedSection>
+        ))}
+      </div>
+    </div>
+
+    <!-- Desktop: alternating centered timeline -->
+    <div class="relative mt-14 hidden lg:block">
+      <div class="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-border" aria-hidden="true"></div>
+
+      <div class="grid gap-12">
+        {siteConfig.howItWorks.map((item, index) => (
+          <AnimatedSection
+            client:visible
+            delay={index * 0.12}
+            direction={index % 2 === 0 ? "left" : "right"}
+          >
+            <div class={`relative flex items-center gap-6 ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
+              <div class={`flex-1 ${index % 2 === 0 ? "text-right" : "text-left"}`}>
+                <div class="rounded-2xl border border-border/50 bg-card p-6 transition-all hover:border-border hover:shadow-sm">
+                  <h3 class="mb-2 text-base font-semibold text-foreground">
+                    {item.title}
+                  </h3>
+                  <p class="text-sm leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+
+              <div class="z-10 flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-sm font-bold text-foreground">
+                {item.step}
+              </div>
+
+              <div class="flex-1"></div>
+            </div>
+          </AnimatedSection>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
