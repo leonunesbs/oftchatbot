@@ -20,6 +20,22 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Prepare pnpm config for subtree
+        run: |
+          awk '
+            /^onlyBuiltDependencies:/ { print; copy = 1; next }
+            copy == 1 && /^  - / { print; next }
+            copy == 1 { exit }
+          ' pnpm-workspace.yaml > oftagenda/pnpm-workspace.yaml
+
+          if [ ! -s oftagenda/pnpm-workspace.yaml ]; then
+            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
+            exit 1
+          fi
+
+          git add oftagenda/pnpm-workspace.yaml
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config for oftagenda split"
+
       - name: Push subtree to leonunesbs/oftagenda
         env:
           TARGET_TOKEN: ${{ secrets.OFTAGENDA_REPO_TOKEN }}
@@ -41,6 +57,22 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Prepare pnpm config for subtree
+        run: |
+          awk '
+            /^onlyBuiltDependencies:/ { print; copy = 1; next }
+            copy == 1 && /^  - / { print; next }
+            copy == 1 { exit }
+          ' pnpm-workspace.yaml > oftleonardo/pnpm-workspace.yaml
+
+          if [ ! -s oftleonardo/pnpm-workspace.yaml ]; then
+            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
+            exit 1
+          fi
+
+          git add oftleonardo/pnpm-workspace.yaml
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config for oftleonardo split"
 
       - name: Push subtree to leonunesbs/oftleonardo
         env:
