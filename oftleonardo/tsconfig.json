@@ -3,7 +3,7 @@
   "include": [".astro/**/*.d.ts", "src/env.d.ts", "**/*"],
   "exclude": ["dist"],
   "compilerOptions": {
-    "types": ["astro/client", "astro/astro-jsx"],
+    "types": ["astro/client"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
