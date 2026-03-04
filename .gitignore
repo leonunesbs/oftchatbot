@@ -1,4 +1,34 @@
-node_modules
-.pnpm-store
+# dependencies
+node_modules/
+.pnpm-store/
+
+# workspace/build caches
+.turbo/
+.cache/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# test coverage
+coverage/
+
+# environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# local temp artifacts
+tmp/
+temp/
+
+# IDE/editor
+.idea/
+.vscode/
+
+# OS files
 .DS_Store
-.turbo
+Thumbs.db

@@ -99,7 +99,9 @@ Cada app deve ser configurado como um projeto independente na Vercel, apontando 
 ### Configuração sugerida
 
 - Framework detectado automaticamente por app (Next.js e Astro).
-- Install Command: `pnpm install --frozen-lockfile`
+- Install Command:
+  - deploy direto do monorepo: `pnpm install --frozen-lockfile`
+  - deploy via repositório espelho (subtree split): `pnpm install --no-frozen-lockfile` (ou versionar um `pnpm-lock.yaml` dentro do repo espelho)
 - Build Command:
   - `oftagenda`: `pnpm --filter ./oftagenda build`
   - `oftleonardo`: `pnpm --filter ./oftleonardo build`
