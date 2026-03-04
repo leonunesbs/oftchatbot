@@ -2,7 +2,9 @@
 import { siteConfig } from "@/config/site";
 import MobileMenu from "./MobileMenu";
 import ThemeToggle from "./ThemeToggle";
-import WhatsAppModal from "./WhatsAppModal";
+import WhatsAppModalComponent from "./WhatsAppModal";
+
+const WhatsAppModal = WhatsAppModalComponent as any;
 ---
 
 <header
@@ -21,7 +23,6 @@ import WhatsAppModal from "./WhatsAppModal";
           class="h-10 w-auto dark:hidden sm:h-12"
           width="227"
           height="48"
-          fetchpriority="high"
         />
         <img
           src="/logo_horizontal_dark.svg"
@@ -29,7 +30,6 @@ import WhatsAppModal from "./WhatsAppModal";
           class="hidden h-10 w-auto dark:block sm:h-12"
           width="227"
           height="48"
-          fetchpriority="high"
         />
       </div>
       <div class="logo-mono">
@@ -93,9 +93,23 @@ import WhatsAppModal from "./WhatsAppModal";
           >
             Agendamento Online
           </a>
+          <a
+            href="/conteudos"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Hub de Conteúdos
+          </a>
         </div>
       </details>
       <ThemeToggle client:media="(min-width: 768px)" />
+      <a
+        href={siteConfig.partnerApps.oftagenda}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="ml-2 inline-flex h-9 items-center rounded-full border border-border/70 px-4 text-sm font-medium text-foreground/90 transition-colors hover:bg-accent hover:text-foreground"
+      >
+        Minha Agenda
+      </a>
       <div class="ml-2">
         <WhatsAppModal
           client:media="(min-width: 768px)"
@@ -115,6 +129,14 @@ import WhatsAppModal from "./WhatsAppModal";
       >
         Agendar
       </WhatsAppModal>
+      <a
+        href={siteConfig.partnerApps.oftagenda}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex h-8 items-center rounded-full border border-border/70 px-3 text-xs font-medium text-foreground/90 transition-colors hover:bg-accent"
+      >
+        Agenda
+      </a>
       <ThemeToggle client:media="(max-width: 767px)" />
       <MobileMenu client:media="(max-width: 767px)" />
     </div>

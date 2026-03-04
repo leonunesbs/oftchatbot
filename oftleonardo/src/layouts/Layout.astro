@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import { siteConfig } from "@/config/site";
 import JsonLd from "@/components/JsonLd.astro";
-import { Font } from "astro:assets";
+import TrackingAndConsent from "@/components/TrackingAndConsent.astro";
 
 interface Props {
   title?: string;
@@ -75,12 +75,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.canonical);
     <meta name="geo.placename" content="Fortaleza" />
 
     <JsonLd includeFAQ={includeFAQSchema} />
-    <Font
-      cssVariable="--font-noto-sans"
-      preload={[
-        { subset: "latin", weight: "400", style: "normal" },
-      ]}
-    />
+    <TrackingAndConsent />
     <slot name="head" />
     <script is:inline>
       (function () {

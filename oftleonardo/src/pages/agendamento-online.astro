@@ -564,6 +564,24 @@ const allSchemas = [breadcrumbSchema, medicalWebPageSchema, faqSchema];
           }
         </div>
       </section>
+
+      <section class="mt-6 rounded-2xl border border-border/50 bg-card p-5 sm:p-6">
+        <h2 class="text-base font-semibold text-foreground">Conteúdos relacionados</h2>
+        <nav
+          aria-label="Links relacionados"
+          class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+        >
+          <a href="/acuidade-visual" class="transition-colors hover:text-foreground">
+            Teste de acuidade visual
+          </a>
+          <a href="/tela-de-amsler" class="transition-colors hover:text-foreground">
+            Tela de Amsler
+          </a>
+          <a href="/conteudos" class="transition-colors hover:text-foreground">
+            Hub de conteúdos
+          </a>
+        </nav>
+      </section>
     </div>
   </main>
 
@@ -1504,6 +1522,25 @@ const allSchemas = [breadcrumbSchema, medicalWebPageSchema, faqSchema];
           start: bookingStart,
           status: bookingStatus,
         });
+        const analyticsWindow = window as Window & {
+          gtag?: (...args: unknown[]) => void;
+          dataLayer?: Array<Record<string, unknown>>;
+        };
+        if (typeof analyticsWindow.gtag === "function") {
+          analyticsWindow.gtag("event", "submit_booking", {
+            city: cityName,
+            channel: "online",
+            status: bookingStatus,
+          });
+        }
+        if (analyticsWindow.dataLayer) {
+          analyticsWindow.dataLayer.push({
+            event: "submit_booking",
+            city: cityName,
+            channel: "online",
+            status: bookingStatus,
+          });
+        }
         window.location.href = `/agendamento-pendente?${redirectQuery.toString()}`;
         return;
       } catch (error) {

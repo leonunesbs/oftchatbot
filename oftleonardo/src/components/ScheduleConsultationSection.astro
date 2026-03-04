@@ -1,5 +1,6 @@
 ---
-import WhatsAppModal from "@/components/WhatsAppModal";
+import WhatsAppModalComponent from "@/components/WhatsAppModal";
+import { siteConfig } from "@/config/site";
 
 interface Props {
   id?: string;
@@ -7,6 +8,7 @@ interface Props {
   description: string;
   whatsappMessageTemplate: string;
   triggerLabel?: string;
+  showAgendaCta?: boolean;
 }
 
 const {
@@ -15,7 +17,10 @@ const {
   description,
   whatsappMessageTemplate,
   triggerLabel = "Agendar consulta",
+  showAgendaCta = true,
 } = Astro.props as Props;
+
+const WhatsAppModal = WhatsAppModalComponent as any;
 ---
 
 <section id={id} class="space-y-4 text-center">
@@ -25,7 +30,7 @@ const {
   <p class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
     {description}
   </p>
-  <div class="flex justify-center">
+  <div class="flex flex-wrap justify-center gap-3">
     <WhatsAppModal
       client:visible
       size="lg"
@@ -36,5 +41,17 @@ const {
     >
       {triggerLabel}
     </WhatsAppModal>
+    {
+      showAgendaCta && (
+        <a
+          href={siteConfig.partnerApps.oftagenda}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-12 items-center rounded-full border border-border/70 px-8 text-base font-medium text-foreground transition-colors hover:bg-accent"
+        >
+          Abrir Minha Agenda
+        </a>
+      )
+    }
   </div>
 </section>

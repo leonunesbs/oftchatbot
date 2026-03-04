@@ -7,6 +7,16 @@ export const siteConfig = {
   email: "contato@oftleonardo.com.br",
   domains: ["oftleonardo.com.br"],
   canonical: "https://oftleonardo.com.br",
+  partnerApps: {
+    oftagenda:
+      "https://agenda.oftleonardo.com.br/?utm_source=oftleonardo&utm_medium=referral&utm_campaign=crossdomain_seo",
+  },
+  analytics: {
+    ga4Id: import.meta.env.PUBLIC_GA4_ID ?? "",
+    gtmId: import.meta.env.PUBLIC_GTM_ID ?? "",
+    metaPixelId: import.meta.env.PUBLIC_META_PIXEL_ID ?? "",
+    googleAdsId: import.meta.env.PUBLIC_GOOGLE_ADS_ID ?? "",
+  },
 
   social: {
     instagram: "https://www.instagram.com/oftleonardo",

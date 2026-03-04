@@ -1,0 +1,117 @@
+---
+import { siteConfig } from "@/config/site";
+
+const { ga4Id, gtmId, metaPixelId, googleAdsId } = siteConfig.analytics;
+const hasTracking = Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
+---
+
+{
+  hasTracking && (
+    <>
+      <script is:inline>
+        {`window.dataLayer = window.dataLayer || [];`}
+      </script>
+      <script is:inline>
+        {`(function () {
+  var consentKey = "oftcore:consent:v1";
+  function hasPii(value) {
+    return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(value) || /\+?\d[\d\s().-]{7,}\d/.test(value);
+  }
+  function sanitizeUrlParams() {
+    var url = new URL(window.location.href);
+    var changed = false;
+    url.searchParams.forEach(function(value, key){
+      if (hasPii(value) || /email|phone|telefone|celular|nome/i.test(key)) {
+        url.searchParams.set(key, "[redacted]");
+        changed = true;
+      }
+    });
+    if (changed) {
+      window.history.replaceState({}, "", url.toString());
+    }
+  }
+  function loadScript(src) {
+    var script = document.createElement("script");
+    script.async = true;
+    script.src = src;
+    document.head.appendChild(script);
+  }
+  function enableTracking() {
+    var ga4Id = ${JSON.stringify(ga4Id)};
+    var gtmId = ${JSON.stringify(gtmId)};
+    var metaPixelId = ${JSON.stringify(metaPixelId)};
+    var googleAdsId = ${JSON.stringify(googleAdsId)};
+
+    if (gtmId) {
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer',gtmId);
+    }
+
+    if (ga4Id) {
+      loadScript("https://www.googletagmanager.com/gtag/js?id=" + ga4Id);
+      window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+      window.gtag("js", new Date());
+      window.gtag("config", ga4Id, { anonymize_ip: true });
+    }
+
+    if (metaPixelId) {
+      !(function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);})(window, document,
+      "script","https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", metaPixelId);
+      window.fbq("track", "PageView");
+    }
+
+    if (googleAdsId && window.gtag) {
+      window.gtag("config", googleAdsId);
+    }
+  }
+
+  function renderBanner() {
+    if (document.getElementById("consent-banner")) return;
+    var banner = document.createElement("div");
+    banner.id = "consent-banner";
+    banner.style.position = "fixed";
+    banner.style.left = "16px";
+    banner.style.right = "16px";
+    banner.style.bottom = "16px";
+    banner.style.zIndex = "9999";
+    banner.style.maxWidth = "760px";
+    banner.style.margin = "0 auto";
+    banner.style.padding = "12px";
+    banner.style.borderRadius = "12px";
+    banner.style.border = "1px solid rgba(148,163,184,0.35)";
+    banner.style.background = "rgba(15,23,42,0.96)";
+    banner.style.color = "#f8fafc";
+    banner.innerHTML = '<p style="margin:0 0 8px 0;font-size:14px;line-height:1.4">Usamos cookies para mensuração e melhoria contínua da experiência. Você pode aceitar ou recusar rastreamento não essencial.</p><div style="display:flex;gap:8px;justify-content:flex-end"><button id="consent-denied" style="border:1px solid rgba(148,163,184,0.55);background:transparent;color:#f8fafc;padding:8px 12px;border-radius:8px;cursor:pointer">Recusar</button><button id="consent-granted" style="border:0;background:#2563eb;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer">Aceitar</button></div>';
+    document.body.appendChild(banner);
+
+    document.getElementById("consent-denied")?.addEventListener("click", function () {
+      localStorage.setItem(consentKey, "denied");
+      banner.remove();
+    });
+    document.getElementById("consent-granted")?.addEventListener("click", function () {
+      localStorage.setItem(consentKey, "granted");
+      banner.remove();
+      enableTracking();
+    });
+  }
+
+  var savedConsent = localStorage.getItem(consentKey);
+  sanitizeUrlParams();
+  if (savedConsent === "granted") {
+    enableTracking();
+  } else if (savedConsent !== "denied") {
+    renderBanner();
+  }
+})();`}
+      </script>
+    </>
+  )
+}
+

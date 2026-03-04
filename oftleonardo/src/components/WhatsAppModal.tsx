@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    dataLayer?: Array<Record<string, unknown>>;
   }
 }
 
@@ -35,11 +36,12 @@ function buildWhatsAppUrl(whatsappNumber: string, messageText: string) {
 }
 
 function trackClick(cityName: string) {
-  window.gtag?.("event", "whatsapp_click", {
-    event_category: "conversion",
-    event_label: cityName,
+  const payload = {
     city: cityName,
-  });
+    channel: "whatsapp",
+  };
+  window.dataLayer?.push({ event: "start_booking", ...payload });
+  window.gtag?.("event", "start_booking", payload);
 }
 
 interface Props {

@@ -5,7 +5,6 @@ import ScheduleConsultationSection from "@/components/ScheduleConsultationSectio
 import VisualAcuityApp from "@/components/visual-acuity/VisualAcuityApp";
 import { siteConfig } from "@/config/site";
 import Layout from "@/layouts/Layout.astro";
-import { Font } from "astro:assets";
 
 const title =
   "Teste de Acuidade Visual Online Grátis | Leonardo Nunes · Oftalmologista";
@@ -218,7 +217,6 @@ const allSchemas = [
   keywords={keywords}
   ogType="article"
 >
-  <Font slot="head" cssVariable="--font-sloan-optotype" />
   {
     allSchemas.map((schema) => (
       <script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />
@@ -452,6 +450,12 @@ const allSchemas = [
           >
           <a href="/#faq" class="transition-colors hover:text-foreground"
             >FAQ Geral</a
+          >
+          <a href="/tela-de-amsler" class="transition-colors hover:text-foreground"
+            >Tela de Amsler</a
+          >
+          <a href="/conteudos" class="transition-colors hover:text-foreground"
+            >Hub de Conteúdos</a
           >
         </nav>
       </footer>

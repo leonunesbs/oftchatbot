@@ -142,3 +142,33 @@ Assim, você mantém isolamento de acesso (cada token só publica em um repo).
 - Fazer alterações apenas no monorepo.
 - Não editar diretamente os repositórios espelho.
 - Cada push para `main` dispara a sincronização dos dois repos.
+
+## SEO, mídia paga e mensuração
+
+### Eventos padronizados (GTM/GA4/Meta/Ads)
+
+- `view_content`
+- `select_city`
+- `start_booking`
+- `submit_booking`
+- `booking_confirmed`
+
+### Variáveis de ambiente recomendadas
+
+- `oftagenda` (`NEXT_PUBLIC_*`)
+  - `NEXT_PUBLIC_GA4_ID`
+  - `NEXT_PUBLIC_GTM_ID`
+  - `NEXT_PUBLIC_META_PIXEL_ID`
+  - `NEXT_PUBLIC_GOOGLE_ADS_ID`
+- `oftleonardo` (`PUBLIC_*`)
+  - `PUBLIC_GA4_ID`
+  - `PUBLIC_GTM_ID`
+  - `PUBLIC_META_PIXEL_ID`
+  - `PUBLIC_GOOGLE_ADS_ID`
+
+### Regras de governança (LGPD-first)
+
+- Não enviar PII (email, telefone, nome) em eventos de analytics.
+- Evitar query params com PII em URLs públicas.
+- Separar segredos por app e por ambiente (dev/staging/prod).
+- Revisar tags de terceiros periodicamente.
