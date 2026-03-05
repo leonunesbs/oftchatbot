@@ -75,6 +75,8 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
 
   function renderBanner() {
     if (document.getElementById("consent-banner")) return;
+    var mountTarget = document.body;
+    if (!mountTarget) return;
     var banner = document.createElement("div");
     banner.id = "consent-banner";
     banner.style.position = "fixed";
@@ -90,7 +92,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     banner.style.background = "rgba(15,23,42,0.96)";
     banner.style.color = "#f8fafc";
     banner.innerHTML = '<p style="margin:0 0 8px 0;font-size:14px;line-height:1.4">Usamos cookies para mensuração e melhoria contínua da experiência. Você pode aceitar ou recusar rastreamento não essencial.</p><div style="display:flex;gap:8px;justify-content:flex-end"><button id="consent-denied" style="border:1px solid rgba(148,163,184,0.55);background:transparent;color:#f8fafc;padding:8px 12px;border-radius:8px;cursor:pointer">Recusar</button><button id="consent-granted" style="border:0;background:#2563eb;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer">Aceitar</button></div>';
-    document.body.appendChild(banner);
+    mountTarget.appendChild(banner);
 
     document.getElementById("consent-denied")?.addEventListener("click", function () {
       localStorage.setItem(consentKey, "denied");
@@ -108,7 +110,11 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   if (savedConsent === "granted") {
     enableTracking();
   } else if (savedConsent !== "denied") {
-    renderBanner();
+    if (document.body) {
+      renderBanner();
+    } else {
+      document.addEventListener("DOMContentLoaded", renderBanner, { once: true });
+    }
   }
 })();
       </script>
