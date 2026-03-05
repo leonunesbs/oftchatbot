@@ -2,7 +2,7 @@
 import { siteConfig } from "@/config/site";
 
 const { ga4Id, gtmId, metaPixelId, googleAdsId } = siteConfig.analytics;
-const hasTracking = Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
+const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
 ---
 
 {
