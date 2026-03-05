@@ -10,6 +10,7 @@ export const siteConfig = {
   partnerApps: {
     oftagenda:
       "https://agenda.oftleonardo.com.br/?utm_source=oftleonardo&utm_medium=referral&utm_campaign=crossdomain_seo",
+    oftagendaEmbed: "https://agenda.oftleonardo.com.br/embed/agendar",
   },
   analytics: {
     ga4Id: import.meta.env.PUBLIC_GA4_ID ?? "",
@@ -50,7 +51,6 @@ export const siteConfig = {
       name: "Fortaleza",
       state: "CE",
       slug: "fortaleza",
-      calEventTypeSlug: "consulta-fortaleza",
       whatsappNumber: "5585999853811",
       description:
         "Consultas oftalmológicas completas na capital cearense com avaliação detalhada, exames de alta resolução — incluindo OCT, retinografia e campimetria — e acesso a cirurgia de catarata e tratamento especializado de doenças da retina. Ambiente equipado para diagnóstico e acompanhamento em todas as faixas etárias. Atendimento particular e por convênios selecionados.",
@@ -64,7 +64,6 @@ export const siteConfig = {
       name: "São Domingos do Maranhão",
       state: "MA",
       slug: "sao-domingos-do-maranhao",
-      calEventTypeSlug: "consulta-sd",
       whatsappNumber: "5585999853811",
       description:
         "Atendimento oftalmológico de referência no interior do Maranhão, com a mesma excelência técnica e cuidado individualizado oferecido na capital. Avaliação ocular completa, diagnóstico e acompanhamento de doenças da retina, glaucoma e indicação cirúrgica de catarata. Atendimento especializado sem necessidade de deslocamento para grandes centros.",
@@ -77,7 +76,6 @@ export const siteConfig = {
       name: "Fortuna",
       state: "MA",
       slug: "fortuna-ma",
-      calEventTypeSlug: "consulta-fortuna",
       whatsappNumber: "5585999853811",
       description:
         "Oftalmologia completa em Fortuna com atendimento dedicado e humanizado. Consultas detalhadas, investigação de doenças oculares — incluindo catarata, glaucoma e alterações de retina — e acompanhamento contínuo para garantir a melhor conduta para a saúde dos seus olhos.",

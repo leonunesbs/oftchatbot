@@ -46,25 +46,21 @@ import WhatsAppModal from "./WhatsAppModal";
         </p>
       </AnimatedSection>
 
-      <AnimatedSection client:idle mode="none">
-        <div
-          class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
+      <div class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+        <WhatsAppModal
+          client:idle
+          size="lg"
+          className="h-12 rounded-full px-8 text-base font-medium"
         >
-          <WhatsAppModal
-            client:idle
-            size="lg"
-            className="h-12 rounded-full px-8 text-base font-medium"
-          >
-            Agendar Consulta
-          </WhatsAppModal>
-          <a
-            href="#atuacao"
-            class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Conheça as especialidades &darr;
-          </a>
-        </div>
-      </AnimatedSection>
+          Agendar Consulta
+        </WhatsAppModal>
+        <a
+          href="/agendamento-online"
+          class="inline-flex h-12 items-center rounded-full border border-border px-8 text-base font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-foreground"
+        >
+          Agendar online
+        </a>
+      </div>
 
       <AnimatedSection client:idle mode="none">
         <div
