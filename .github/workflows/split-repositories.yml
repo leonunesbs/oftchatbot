@@ -50,7 +50,11 @@ jobs:
           fi
 
           git add oftagenda/pnpm-workspace.yaml oftagenda/pnpm-lock.yaml
-          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftagenda split"
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftagenda split"
+          else
+            echo "No changes detected in oftagenda pnpm files"
+          fi
 
       - name: Push subtree to leonunesbs/oftagenda
         env:
@@ -104,7 +108,11 @@ jobs:
           fi
 
           git add oftleonardo/pnpm-workspace.yaml oftleonardo/pnpm-lock.yaml
-          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftleonardo split"
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftleonardo split"
+          else
+            echo "No changes detected in oftleonardo pnpm files"
+          fi
 
       - name: Push subtree to leonunesbs/oftleonardo
         env:
