@@ -96,14 +96,14 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     banner.style.right = "16px";
     banner.style.bottom = "16px";
     banner.style.zIndex = "9999";
-    banner.style.maxWidth = "760px";
+    banner.style.maxWidth = "780px";
     banner.style.margin = "0 auto";
-    banner.style.padding = "12px";
-    banner.style.borderRadius = "12px";
+    banner.style.padding = "16px";
+    banner.style.borderRadius = "16px";
     banner.style.border = "1px solid rgba(148,163,184,0.35)";
     banner.style.background = "rgba(15,23,42,0.96)";
     banner.style.color = "#f8fafc";
-    banner.innerHTML = '<p style="margin:0 0 8px 0;font-size:14px;line-height:1.4">Usamos cookies para mensuração e melhoria contínua da experiência. Você pode aceitar ou recusar rastreamento não essencial.</p><div style="display:flex;gap:8px;justify-content:flex-end"><button id="consent-denied" style="border:1px solid rgba(148,163,184,0.55);background:transparent;color:#f8fafc;padding:8px 12px;border-radius:8px;cursor:pointer">Recusar</button><button id="consent-granted" style="border:0;background:#2563eb;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer">Aceitar</button></div>';
+    banner.innerHTML = '<p style="margin:0;font-size:14px;font-weight:600;line-height:1.3">Sua privacidade em primeiro lugar</p><p style="margin:6px 0 0 0;font-size:14px;line-height:1.45;color:#cbd5e1">Usamos cookies opcionais para entender o que funciona melhor e melhorar sua experiência. Se preferir, você pode continuar somente com os essenciais sem afetar as funcionalidades principais.</p><p style="margin:8px 0 0 0;font-size:12px;line-height:1.4;color:#cbd5e1">Saiba mais em <a href="/politica-de-privacidade" style="color:#bfdbfe;text-decoration:underline;text-underline-offset:2px">Política de Privacidade</a>.</p><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px"><button id="consent-denied" style="border:1px solid rgba(148,163,184,0.55);background:transparent;color:#f8fafc;padding:8px 12px;border-radius:8px;cursor:pointer">Apenas essenciais</button><button id="consent-granted" style="border:0;background:#2563eb;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer">Aceitar e continuar</button></div>';
     mountTarget.appendChild(banner);
 
     document.getElementById("consent-denied")?.addEventListener("click", function () {
