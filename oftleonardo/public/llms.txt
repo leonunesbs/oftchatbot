@@ -1,59 +1,30 @@
 # Leonardo Nunes · Oftalmologista
 
-> Médico oftalmologista especialista em retina clínica e cirúrgica e cirurgia de catarata. Formação pelo Hospital Geral de Fortaleza. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). CRM-CE 27.199 | CRM-PI 10.051.
+> Site institucional do Dr. Leonardo Nunes, oftalmologista com foco em retina clinica e cirurgica e cirurgia de catarata. Atendimento em Fortaleza (CE), Sao Domingos do Maranhao (MA) e Fortuna (MA).
 
-## Sobre
+## Paginas principais
 
-Leonardo Nunes é médico oftalmologista com atuação clínica e cirúrgica, especializado em doenças da retina e cirurgia de catarata. Oferece consultas completas com exames de alta precisão — incluindo OCT, retinografia digital e campimetria computadorizada — em um atendimento humanizado que dedica tempo real para ouvir, examinar e orientar cada paciente com clareza e segurança.
+- [Inicio](https://oftleonardo.com.br/): Apresentacao do medico, especialidades, cidades de atendimento e CTAs para agendamento.
+- [Conteudos](https://oftleonardo.com.br/conteudos): Hub de conteudos educativos em oftalmologia.
+- [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): Triagem visual orientativa (nao substitui consulta).
+- [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): Triagem orientativa para distorcoes centrais (nao substitui consulta).
+- [Agendamento Pendente](https://oftleonardo.com.br/agendamento-pendente): Estado de carregamento/contingencia para integracao de agendamento.
+- [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): Condicoes de uso do site e responsabilidades.
+- [Politica de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): Tratamento de dados e cookies em conformidade com a LGPD.
 
-## Especialidades
+## Agendamento
 
-- **Retina Clínica e Cirúrgica**: Diagnóstico e tratamento de retinopatia diabética, degeneração macular (DMRI), descolamento de retina e oclusões vasculares com OCT, retinografia e angiografia.
-- **Cirurgia de Catarata**: Facoemulsificação minimamente invasiva com implante de lente intraocular personalizada, avaliação pré-operatória completa e acompanhamento pós-operatório rigoroso.
-- **Oftalmologia Clínica**: Consulta completa com acuidade visual, refração, biomicroscopia, tonometria e fundoscopia.
-- **Glaucoma**: Investigação e acompanhamento com tonometria, campimetria computadorizada, paquimetria e avaliação do nervo óptico.
-- **Mapeamento de Retina**: Avaliação detalhada da retina periférica e central para detecção de lesões, degenerações e alterações vasculares.
-- **Oftalmopediatria**: Avaliação oftalmológica infantil incluindo teste do reflexo vermelho, estrabismo e ambliopia.
+- CTA principal direciona para a Minha Agenda em `https://agenda.oftleonardo.com.br/` (plataforma oficial de agendamento).
+- Contatos complementares podem ocorrer via WhatsApp em pontos especificos da experiencia.
 
-## Locais de Atendimento
+## Descoberta tecnica
 
-- **Fortaleza, CE**: Consultas completas, exames de alta resolução (OCT, retinografia, campimetria), cirurgia de catarata e tratamento de retina. Atendimento particular e convênios selecionados.
-- **São Domingos do Maranhão, MA**: Atendimento oftalmológico de referência no interior do Maranhão com avaliação ocular completa e acompanhamento de retina, glaucoma e catarata.
-- **Fortuna, MA**: Oftalmologia completa com consultas detalhadas e acompanhamento contínuo de doenças oculares.
-
-## Diferenciais
-
-- Atendimento humanizado com consulta sem pressa e linguagem clara
-- Avaliação minuciosa com investigação detalhada de cada estrutura ocular
-- Tecnologia de alta precisão com equipamentos de última geração
-- Protocolos cirúrgicos rigorosos com acompanhamento integral
-
-## Perguntas Frequentes
-
-- A cirurgia de catarata é segura? Sim, é um dos procedimentos mais realizados e seguros da medicina, com anestesia local, duração de 15 a 20 minutos e recuperação rápida.
-- Tenho diabetes, com que frequência devo examinar os olhos? Pelo menos uma vez por ano, mesmo sem queixas visuais, para detecção precoce da retinopatia diabética.
-- O Dr. Leonardo atende por convênio? Sim, além de particular, aceita convênios selecionados que variam por cidade.
-- Com que frequência devo consultar um oftalmologista? Pelo menos uma vez ao ano para adultos; pacientes com diabetes, hipertensão ou acima de 40 anos devem manter acompanhamento regular.
-
-## Páginas
-
-- [Página Inicial](https://oftleonardo.com.br/): Apresentação de Leonardo Nunes, especialidades, diferenciais, locais de atendimento, como funciona o agendamento e perguntas frequentes.
-- [Teste de Acuidade Visual Online](https://oftleonardo.com.br/acuidade-visual): Ferramenta gratuita de triagem visual com tabela de Snellen e Tumbling E, calibração precisa da tela e resultado em escala logMAR. Não substitui consulta oftalmológica.
-- [Tela de Amsler Online](https://oftleonardo.com.br/tela-de-amsler): Grade de Amsler 20x20 com ponto central para triagem visual orientativa de distorções centrais. Não substitui consulta oftalmológica.
-- [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): Condições de uso do site, responsabilidades e informações sobre o conteúdo disponibilizado.
-- [Política de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): Informações sobre tratamento de dados dos visitantes em conformidade com a LGPD.
-
-## Descoberta do Site
-
-- Sitemap index: https://oftleonardo.com.br/sitemap.xml
-- Sitemap principal: https://oftleonardo.com.br/sitemap-0.xml
+- Sitemap: https://oftleonardo.com.br/sitemap.xml
 - Robots: https://oftleonardo.com.br/robots.txt
+- LLM short file: https://oftleonardo.com.br/llm.txt
 
 ## Contato
 
-- WhatsApp: [+55 85 99985-3811](https://api.whatsapp.com/send?phone=5585999853811)
-- Site: [oftleonardo.com.br](https://oftleonardo.com.br)
+- WhatsApp: https://api.whatsapp.com/send?phone=5585999853811
 - E-mail: contato@oftleonardo.com.br
-- Instagram: [@oftleonardo](https://www.instagram.com/oftleonardo)
-- Threads: [@oftleonardo](https://www.threads.net/@oftleonardo)
-- LinkedIn: [oftleonardo](https://www.linkedin.com/in/oftleonardo)
+- Instagram: https://www.instagram.com/oftleonardo

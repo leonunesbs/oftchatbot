@@ -20,7 +20,7 @@ import { siteConfig } from "@/config/site";
       Termos de Uso
     </h1>
     <p class="mt-2 text-sm text-muted-foreground">
-      Última atualização: 22 de fevereiro de 2026
+      Última atualização: 05 de março de 2026
     </p>
 
     <div class="mt-10 space-y-8 text-muted-foreground leading-relaxed [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
@@ -39,9 +39,9 @@ import { siteConfig } from "@/config/site";
           Este Site é uma página institucional e informativa do Dr. {siteConfig.name}, médico
           oftalmologista ({siteConfig.crm}), com atuação nas especialidades de retina clínica e
           cirúrgica, cirurgia de catarata, glaucoma, oftalmologia clínica, mapeamento de retina e
-          oftalmopediatria. O Site tem como finalidade apresentar informações sobre o profissional,
-          suas áreas de atuação, cidades de atendimento e fornecer um canal de agendamento de
-          consultas via WhatsApp.
+          oftalmopediatria. O Site tem como finalidade apresentar informações sobre o profissional e
+          suas áreas de atuação, além de direcionar o usuário para o fluxo oficial de agendamento
+          online da Minha Agenda.
         </p>
       </section>
 
@@ -60,18 +60,16 @@ import { siteConfig } from "@/config/site";
       </section>
 
       <section>
-        <h2>4. Agendamento via WhatsApp</h2>
+        <h2>4. Agendamento Online (Minha Agenda)</h2>
         <p>
-          O Site oferece a funcionalidade de agendamento de consultas por meio de redirecionamento
-          para o aplicativo WhatsApp. Ao clicar no botão "Agendar Consulta" e selecionar a cidade
-          desejada, você será direcionado para uma conversa no WhatsApp com a equipe do
-          Dr. {siteConfig.name}.
+          Ao clicar em "Agendar Consulta", o usuário é direcionado para a página de agendamento
+          online, que incorpora a plataforma Minha Agenda ({siteConfig.partnerApps.oftagendaEmbed}).
+          Nessa etapa, o usuário escolhe local, data e horário para solicitar a reserva.
         </p>
         <p class="mt-3">
-          O agendamento está sujeito à disponibilidade de horários. O Site não realiza coleta de
-          dados pessoais durante este redirecionamento — as informações trocadas via WhatsApp estão
-          sujeitas aos termos de uso e política de privacidade da plataforma WhatsApp (Meta
-          Platforms, Inc.).
+          O agendamento está sujeito à disponibilidade de horários. Parte do processamento pode ser
+          realizada em serviços de terceiros essenciais para operação do fluxo (como infraestrutura,
+          autenticação e mensuração), de acordo com as respectivas políticas.
         </p>
       </section>
 
@@ -117,9 +115,9 @@ import { siteConfig } from "@/config/site";
       <section>
         <h2>8. Links para Serviços de Terceiros</h2>
         <p>
-          O Site pode conter links para plataformas externas, como WhatsApp e Google Fonts. Esses
-          serviços possuem políticas de privacidade e termos de uso próprios, sobre os quais o
-          Dr. {siteConfig.name} não possui controle ou responsabilidade.
+          O Site pode conter links para plataformas externas, como Minha Agenda, WhatsApp e serviços
+          do ecossistema Google. Esses serviços possuem políticas de privacidade e termos de uso
+          próprios, sobre os quais o Dr. {siteConfig.name} não possui controle integral.
         </p>
       </section>
 

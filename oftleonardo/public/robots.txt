@@ -14,3 +14,5 @@ User-agent: Twitterbot
 Allow: /
 
 Sitemap: https://oftleonardo.com.br/sitemap.xml
+Host: https://oftleonardo.com.br
+# LLM profile: https://oftleonardo.com.br/llms.txt

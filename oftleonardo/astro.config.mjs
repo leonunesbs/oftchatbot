@@ -71,8 +71,10 @@ export default defineConfig({
 
         const pageRules = {
           "/": { changefreq: "weekly", priority: 1.0 },
+          "/conteudos": { changefreq: "weekly", priority: 0.8 },
           "/acuidade-visual": { changefreq: "weekly", priority: 1.0 },
           "/tela-de-amsler": { changefreq: "weekly", priority: 1.0 },
+          "/agendamento-pendente": { changefreq: "monthly", priority: 0.5 },
           "/politica-de-privacidade": { changefreq: "yearly", priority: 0.4 },
           "/termos-de-uso": { changefreq: "yearly", priority: 0.4 },
         };

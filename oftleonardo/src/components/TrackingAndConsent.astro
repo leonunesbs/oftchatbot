@@ -43,6 +43,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     document.head.appendChild(script);
   }
   function ensureGtagStub() {
+    window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
   }
   function setConsent(granted) {
