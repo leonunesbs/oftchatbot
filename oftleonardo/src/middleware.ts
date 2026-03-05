@@ -5,8 +5,9 @@ const cspDirectives = [
   "base-uri 'none'",
   "object-src 'none'",
   "frame-ancestors 'none'",
+  "frame-src https://agenda.oftleonardo.com.br",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' 'report-sample'",
+  "script-src 'self' 'unsafe-inline' 'report-sample' https:",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
@@ -25,7 +26,7 @@ export const onRequest = defineMiddleware(async (_, next) => {
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set(
       "Permissions-Policy",
-      "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "camera=(), microphone=(), geolocation=(), usb=()",
     );
   }
 

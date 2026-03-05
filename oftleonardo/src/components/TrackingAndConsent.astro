@@ -11,8 +11,8 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
       <script is:inline>
         {`window.dataLayer = window.dataLayer || [];`}
       </script>
-      <script is:inline>
-        {`(function () {
+      <script is:inline define:vars={{ ga4Id, gtmId, metaPixelId, googleAdsId }}>
+        (function () {
   var consentKey = "oftcore:consent:v1";
   function hasPii(value) {
     return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(value) || /\+?\d[\d\s().-]{7,}\d/.test(value);
@@ -37,11 +37,6 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     document.head.appendChild(script);
   }
   function enableTracking() {
-    var ga4Id = ${JSON.stringify(ga4Id)};
-    var gtmId = ${JSON.stringify(gtmId)};
-    var metaPixelId = ${JSON.stringify(metaPixelId)};
-    var googleAdsId = ${JSON.stringify(googleAdsId)};
-
     if (gtmId) {
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -109,7 +104,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   } else if (savedConsent !== "denied") {
     renderBanner();
   }
-})();`}
+})();
       </script>
     </>
   )
