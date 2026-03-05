@@ -34,11 +34,11 @@ const imageStyles: Record<string, string> = {
       </div>
     </AnimatedSection>
 
-    <div class="mt-14 grid gap-8 lg:grid-cols-3">
-      {siteConfig.cities.map((city, index) => {
-        const importedImage = cityImages[city.slug];
-        return (
-          <AnimatedSection client:visible delay={index * 0.12}>
+    <AnimatedSection client:visible>
+      <div class="mt-14 grid gap-8 lg:grid-cols-3">
+        {siteConfig.cities.map((city) => {
+          const importedImage = cityImages[city.slug];
+          return (
             <div class="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all hover:border-border hover:shadow-md">
               {/* Photo area */}
               <div class="relative aspect-16/10 w-full overflow-hidden bg-secondary/60">
@@ -102,9 +102,9 @@ const imageStyles: Record<string, string> = {
                 </div>
               </div>
             </div>
-          </AnimatedSection>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </AnimatedSection>
   </div>
 </section>

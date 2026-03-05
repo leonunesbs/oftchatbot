@@ -1,5 +1,5 @@
 ---
-import WhatsAppModalComponent from "@/components/WhatsAppModal";
+import WhatsAppModal from "@/components/WhatsAppModal";
 import { siteConfig } from "@/config/site";
 
 interface Props {
@@ -20,7 +20,6 @@ const {
   showAgendaCta = true,
 } = Astro.props as Props;
 
-const WhatsAppModal = WhatsAppModalComponent as any;
 ---
 
 <section id={id} class="space-y-4 text-center">
