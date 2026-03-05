@@ -63,13 +63,16 @@ export default defineConfig({
       changefreq: 'monthly',
       priority: 0.7,
       lastmod: new Date(),
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/\/$/, '') || '/';
+        return path !== '/agendamento-online';
+      },
       serialize(item) {
         const path = new URL(item.url).pathname.replace(/\/$/, '') || '/';
         const lastmod = new Date().toISOString();
 
         const pageRules = {
           '/': { changefreq: 'weekly', priority: 1.0 },
-          '/agendamento-online': { changefreq: 'weekly', priority: 0.9 },
           '/acuidade-visual': { changefreq: 'weekly', priority: 1.0 },
           '/tela-de-amsler': { changefreq: 'weekly', priority: 1.0 },
           '/politica-de-privacidade': { changefreq: 'yearly', priority: 0.4 },

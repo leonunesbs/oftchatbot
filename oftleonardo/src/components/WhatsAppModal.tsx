@@ -123,7 +123,7 @@ export default function WhatsAppModal({
               poucos cliques.
             </p>
             <Button asChild className="mt-3 w-full">
-              <a href="/agendamento-online">Agendar online</a>
+              <a href={siteConfig.partnerApps.oftagenda}>Agendar online</a>
             </Button>
           </div>
         )}

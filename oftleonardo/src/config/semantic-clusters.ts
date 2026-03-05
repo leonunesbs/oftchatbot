@@ -1,3 +1,5 @@
+import { siteConfig } from "./site";
+
 export type ClusterTopic = {
   slug: string;
   title: string;
@@ -34,7 +36,7 @@ export const clusterTopics: ClusterTopic[] = [
     title: "Agendamento online de consulta oftalmológica",
     description:
       "Fluxo para escolher cidade, data e horário de consulta com confirmação digital.",
-    href: "/agendamento-online",
+    href: siteConfig.partnerApps.oftagenda,
     intent: "transactional",
     procedure: "Consulta Oftalmológica",
   },

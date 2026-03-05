@@ -79,7 +79,7 @@ export default function MobileMenu() {
             Tela de Amsler
           </a>
         <a
-          href="/agendamento-online"
+          href={siteConfig.partnerApps.oftagenda}
           onClick={() => setOpen(false)}
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
         >
