@@ -1,9 +1,3 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import type { ReactNode } from "react";
@@ -24,27 +18,14 @@ export default function BookingPopup({
   triggerAriaLabel,
 }: Props) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant={variant}
-          size={size}
-          className={className}
-          aria-label={triggerAriaLabel}
-        >
-          {children}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 sm:rounded-2xl">
-        <DialogTitle className="sr-only">Agendamento Online</DialogTitle>
-        <iframe
-          src={siteConfig.partnerApps.oftagendaEmbed}
-          width="100%"
-          style={{ height: "600px", border: 0 }}
-          allow="payment"
-          title="Agendamento de consulta oftalmológica"
-        />
-      </DialogContent>
-    </Dialog>
+    <Button
+      asChild
+      variant={variant}
+      size={size}
+      className={className}
+      aria-label={triggerAriaLabel}
+    >
+      <a href={siteConfig.partnerApps.oftagenda}>{children}</a>
+    </Button>
   );
 }

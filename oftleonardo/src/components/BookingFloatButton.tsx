@@ -26,7 +26,7 @@ export default function BookingFloatButton() {
       <BookingPopup
         size="lg"
         className="h-14 gap-2 rounded-full px-5 shadow-lg hover:shadow-xl"
-        triggerAriaLabel="Abrir agendamento online"
+        triggerAriaLabel="Ir para o agendamento online"
       >
         <CalendarIcon className="size-5" />
         <span className="hidden sm:inline">Agendar Online</span>

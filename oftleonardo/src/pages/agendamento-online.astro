@@ -77,7 +77,7 @@ const medicalWebPageSchema = {
     name: "Agendar consulta oftalmológica",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: canonical,
+      urlTemplate: siteConfig.partnerApps.oftagenda,
       inLanguage: "pt-BR",
       actionPlatform: [
         "https://schema.org/DesktopWebPlatform",
@@ -195,14 +195,24 @@ const allSchemas = [breadcrumbSchema, medicalWebPageSchema, faqSchema];
       </section>
 
       <section class="mt-8">
-        <iframe
-          id="oftagenda-embed"
-          src={siteConfig.partnerApps.oftagendaEmbed}
-          width="100%"
-          style="height:700px;border:0;"
-          allow="payment"
-          title="Agendamento de consulta oftalmológica"
-        ></iframe>
+        <div
+          class="rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
+        >
+          <h2 class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            Iniciar agendamento
+          </h2>
+          <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Clique no botao abaixo para continuar no sistema de agendamento e
+            escolher cidade, data e horario da sua consulta.
+          </p>
+          <a
+            href={siteConfig.partnerApps.oftagenda}
+            class="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Ir para a pagina de agendamento"
+          >
+            Agendar consulta
+          </a>
+        </div>
       </section>
 
       <section class="mt-12">
@@ -226,22 +236,6 @@ const allSchemas = [breadcrumbSchema, medicalWebPageSchema, faqSchema];
       </section>
     </div>
   </main>
-
-  <script>
-    const iframe = document.getElementById(
-      "oftagenda-embed",
-    ) as HTMLIFrameElement | null;
-    if (iframe) {
-      window.addEventListener("message", (event) => {
-        if (event.data?.type === "oftagenda:booking:resize") {
-          const height = event.data.height as number | undefined;
-          if (typeof height === "number" && height > 0) {
-            iframe.style.height = `${height}px`;
-          }
-        }
-      });
-    }
-  </script>
 
   <Footer />
   <WhatsAppFloat client:idle />
