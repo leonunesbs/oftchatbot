@@ -1,82 +1,80 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
-import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
-import vercel from '@astrojs/vercel';
+import { defineConfig, fontProviders } from "astro/config";
 
-import tailwindcss from '@tailwindcss/vite';
+import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
+import vercel from "@astrojs/vercel";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: 'https://oftleonardo.com.br',
+  site: "https://oftleonardo.com.br",
   experimental: {
     fonts: [
       {
         provider: fontProviders.google(),
-        name: 'Noto Sans',
-        cssVariable: '--font-noto-sans',
-        styles: ['normal'],
+        name: "Noto Sans",
+        cssVariable: "--font-noto-sans",
+        styles: ["normal"],
         weights: [400, 700],
-        subsets: ['latin'],
-        formats: ['woff2'],
-        display: 'optional',
-        fallbacks: ['sans-serif'],
+        subsets: ["latin"],
+        formats: ["woff2"],
+        display: "optional",
+        fallbacks: ["sans-serif"],
         options: {
           experimental: {
-            glyphs: ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:!?()[]{}+-=*/"\'@#%&_`~|\\<>$^~áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ'],
+            glyphs: [
+              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:!?()[]{}+-=*/\"'@#%&_`~|\\<>$^~áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ",
+            ],
           },
         },
       },
       {
         provider: fontProviders.local(),
-        name: 'Sloan Optotype',
-        cssVariable: '--font-sloan-optotype',
+        name: "Sloan Optotype",
+        cssVariable: "--font-sloan-optotype",
         weights: [400],
-        styles: ['normal'],
+        styles: ["normal"],
         options: {
           variants: [
             {
               weight: 400,
-              style: 'normal',
-              src: ['./public/fonts/Sloan.woff2'],
+              style: "normal",
+              src: ["./public/fonts/Sloan.woff2"],
             },
           ],
         },
       },
     ],
   },
-  output: 'server',
+  output: "server",
   adapter: vercel(),
   compressHTML: true,
   build: {
-    inlineStylesheets: 'always',
+    inlineStylesheets: "always",
   },
   prefetch: {
     prefetchAll: false,
   },
   image: {
     domains: [],
-    remotePatterns: [{ protocol: 'https' }],
+    remotePatterns: [{ protocol: "https" }],
   },
   integrations: [
     react(),
     sitemap({
-      changefreq: 'monthly',
+      changefreq: "monthly",
       priority: 0.7,
       lastmod: new Date(),
-      filter: (page) => {
-        const path = new URL(page).pathname.replace(/\/$/, '') || '/';
-        return path !== '/agendamento-online';
-      },
       serialize(item) {
-        const path = new URL(item.url).pathname.replace(/\/$/, '') || '/';
+        const path = new URL(item.url).pathname.replace(/\/$/, "") || "/";
         const lastmod = new Date().toISOString();
 
         const pageRules = {
-          '/': { changefreq: 'weekly', priority: 1.0 },
-          '/acuidade-visual': { changefreq: 'weekly', priority: 1.0 },
-          '/tela-de-amsler': { changefreq: 'weekly', priority: 1.0 },
-          '/politica-de-privacidade': { changefreq: 'yearly', priority: 0.4 },
-          '/termos-de-uso': { changefreq: 'yearly', priority: 0.4 },
+          "/": { changefreq: "weekly", priority: 1.0 },
+          "/acuidade-visual": { changefreq: "weekly", priority: 1.0 },
+          "/tela-de-amsler": { changefreq: "weekly", priority: 1.0 },
+          "/politica-de-privacidade": { changefreq: "yearly", priority: 0.4 },
+          "/termos-de-uso": { changefreq: "yearly", priority: 0.4 },
         };
 
         if (pageRules[path]) {
@@ -95,8 +93,8 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: {
-            'framer-motion': ['framer-motion'],
-            'react-vendor': ['react', 'react-dom'],
+            "framer-motion": ["framer-motion"],
+            "react-vendor": ["react", "react-dom"],
           },
         },
       },
