@@ -9,12 +9,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 After completing any task, always ask: **"Quer fazer commit e push?"**
 
+## Design decisions
+
+### oftleonardo booking flow
+Single booking flow: all CTAs (Hero, Header desktop/mobile) point to `/agendamento-online`, which embeds the oftagenda form via iframe. WhatsAppModal was removed from Hero and Header — it remains only in CTAFinal, Cities, ScheduleConsultationSection, and ResultsStep. Do not add a second booking CTA alongside the primary "Agendar Consulta" link.
+
+### oftagenda booking form
+No auto-selection of default date/time. The user must explicitly choose location → date → time. The `useEffect` auto-selects were removed from `booking-form.tsx`.
+
 ## Repository structure
 
 This is a pnpm monorepo (`oftcore`) with two packages:
 
 - **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + Stripe. Runs on port 3001 by default.
-- **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Integrates with Cal.com for booking.
+- **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Booking via iframe embed of oftagenda (`/agendamento-online` → `/embed/agendar`).
 
 ### Monorepo split & deploy strategy
 
