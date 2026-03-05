@@ -42,6 +42,18 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     script.src = src;
     document.head.appendChild(script);
   }
+  function ensureGtagStub() {
+    window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+  }
+  function setConsent(granted) {
+    ensureGtagStub();
+    window.gtag("consent", "update", {
+      ad_storage: granted ? "granted" : "denied",
+      ad_user_data: granted ? "granted" : "denied",
+      ad_personalization: granted ? "granted" : "denied",
+      analytics_storage: granted ? "granted" : "denied",
+    });
+  }
   function enableTracking() {
     if (resolvedGtmId) {
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -53,7 +65,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
 
     if (resolvedGa4Id) {
       loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGa4Id);
-      window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+      ensureGtagStub();
       window.gtag("js", new Date());
       window.gtag("config", resolvedGa4Id, { anonymize_ip: true });
     }
@@ -96,20 +108,32 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
 
     document.getElementById("consent-denied")?.addEventListener("click", function () {
       localStorage.setItem(consentKey, "denied");
+      setConsent(false);
       banner.remove();
     });
     document.getElementById("consent-granted")?.addEventListener("click", function () {
       localStorage.setItem(consentKey, "granted");
+      setConsent(true);
       banner.remove();
-      enableTracking();
     });
   }
 
   var savedConsent = localStorage.getItem(consentKey);
   sanitizeUrlParams();
+  ensureGtagStub();
+  window.gtag("consent", "default", {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: "denied",
+    wait_for_update: 500,
+  });
+  enableTracking();
   if (savedConsent === "granted") {
-    enableTracking();
-  } else if (savedConsent !== "denied") {
+    setConsent(true);
+  } else if (savedConsent === "denied") {
+    setConsent(false);
+  } else {
     if (document.body) {
       renderBanner();
     } else {
