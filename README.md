@@ -71,6 +71,24 @@ pnpm run type-check
 pnpm run preview:leonardo
 ```
 
+### Comandos do oftchatbot via root
+
+```bash
+pnpm run start:chatbot
+pnpm run test:chatbot
+pnpm run type-check:chatbot
+pnpm run lint:chatbot
+pnpm run lint:fix:chatbot
+pnpm run format:chatbot
+pnpm run format:check:chatbot
+pnpm run waha:init
+pnpm run waha:up
+pnpm run waha:down
+pnpm run waha:logs
+pnpm run waha:pull
+pnpm run waha:smoke
+```
+
 ## Portas padronizadas
 
 Para evitar conflito ao executar simultaneamente:
