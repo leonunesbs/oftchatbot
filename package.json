@@ -18,6 +18,7 @@
     "start": "next start -p 3030",
     "test": "pnpm test:lumi",
     "test:lumi": "SKIP_ENV_VALIDATION=1 tsx --test tests/lumi/dialogs.spec.ts",
+    "test:fox": "OPENAI_API_KEY=fox-test-key SKIP_ENV_VALIDATION=1 tsx --test tests/fox/dialogs.spec.ts",
     "waha:init": "cd infra/waha && docker run --rm -v \"$(pwd)\":/app/env devlikeapro/waha:arm init-waha /app/env",
     "waha:up": "docker compose --env-file .env -f infra/waha/docker-compose.yml up -d",
     "waha:down": "docker compose --env-file .env -f infra/waha/docker-compose.yml down",
