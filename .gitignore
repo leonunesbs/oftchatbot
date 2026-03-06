@@ -33,3 +33,7 @@ temp/
 # OS files
 .DS_Store
 Thumbs.db
+
+# local encryption keys / secrets
+triage-e2e-*.pem
+oftagenda/.secrets/
