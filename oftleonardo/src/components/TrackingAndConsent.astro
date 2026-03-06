@@ -25,15 +25,18 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   }
   function sanitizeUrlParams() {
     var url = new URL(window.location.href);
-    var changed = false;
+    var keysToRemove = [];
     url.searchParams.forEach(function(value, key){
       if (hasPii(value) || /email|phone|telefone|celular|nome/i.test(key)) {
-        url.searchParams.set(key, "[redacted]");
-        changed = true;
+        keysToRemove.push(key);
       }
     });
-    if (changed) {
-      window.history.replaceState({}, "", url.toString());
+    if (keysToRemove.length > 0) {
+      keysToRemove.forEach(function (key) {
+        url.searchParams.delete(key);
+      });
+      var sanitizedUrl = url.pathname + url.search + url.hash;
+      window.history.replaceState({}, "", sanitizedUrl);
     }
   }
   function loadScript(src) {

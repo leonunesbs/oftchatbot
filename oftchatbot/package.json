@@ -13,6 +13,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3030",
+    "dev:web": "next dev -p 3030",
     "build": "next build",
     "start": "next start -p 3030",
     "test": "pnpm test:lumi",

@@ -4,6 +4,7 @@ Monorepo para os projetos:
 
 - `oftagenda` (Next.js + Convex)
 - `oftleonardo` (Astro)
+- `oftchatbot` (Next.js)
 
 ## Estrutura
 
@@ -11,6 +12,7 @@ Monorepo para os projetos:
 .
 ├── oftagenda
 ├── oftleonardo
+├── oftchatbot
 ├── package.json
 └── pnpm-workspace.yaml
 ```
@@ -47,6 +49,7 @@ pnpm run dev:all:full
 pnpm run dev:agenda
 pnpm run dev:agenda:full
 pnpm run dev:leonardo
+pnpm run dev:chatbot
 ```
 
 `dev:agenda` e `dev:agenda:full` iniciam o painel completo do `oftagenda` (Next.js + Convex).
@@ -57,6 +60,7 @@ pnpm run dev:leonardo
 pnpm run build
 pnpm run build:agenda
 pnpm run build:leonardo
+pnpm run build:chatbot
 ```
 
 ### Outros
@@ -73,6 +77,7 @@ Para evitar conflito ao executar simultaneamente:
 
 - `oftagenda` (Next.js): `http://localhost:3001`
 - `oftleonardo` (Astro): `http://localhost:4331`
+- `oftchatbot` (Next.js): `http://localhost:3030`
 - `Convex dev` (dentro do `oftagenda`): mantém a porta padrão do Convex no processo de desenvolvimento
 
 Obs.: as portas podem ser sobrescritas por variável de ambiente:
@@ -121,13 +126,15 @@ Ele sincroniza automaticamente:
 
 - `oftagenda/` -> `leonunesbs/oftagenda`
 - `oftleonardo/` -> `leonunesbs/oftleonardo`
+- `oftchatbot/` -> `leonunesbs/oftchatbot`
 
 ### Como configurar no GitHub
 
-No repositório monorepo (`oftcore`), adicione dois secrets de Actions:
+No repositório monorepo (`oftcore`), adicione três secrets de Actions:
 
 - `OFTAGENDA_REPO_TOKEN`
 - `OFTLEONARDO_REPO_TOKEN`
+- `OFTCHATBOT_REPO_TOKEN`
 
 Recomendação:
 
@@ -141,7 +148,7 @@ Assim, você mantém isolamento de acesso (cada token só publica em um repo).
 
 - Fazer alterações apenas no monorepo.
 - Não editar diretamente os repositórios espelho.
-- Cada push para `main` dispara a sincronização dos dois repos.
+- Cada push para `main` dispara a sincronização dos três repos.
 
 ## SEO, mídia paga e mensuração
 

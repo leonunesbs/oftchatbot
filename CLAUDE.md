@@ -19,19 +19,21 @@ No auto-selection of default date/time. The user must explicitly choose location
 
 ## Repository structure
 
-This is a pnpm monorepo (`oftcore`) with two packages:
+This is a pnpm monorepo (`oftcore`) with three packages:
 
 - **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + Stripe. Runs on port 3001 by default.
 - **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Booking via iframe embed of oftagenda (`/agendamento-online` → `/embed/agendar`).
+- **`oftchatbot/`** — Clinic chatbot app (Next.js). Runs on port 3030 by default.
 
 ### Monorepo split & deploy strategy
 
-On every push to `main`, `.github/workflows/split-repositories.yml` runs two parallel jobs that use `git subtree split` to push each package to its own standalone repo:
+On every push to `main`, `.github/workflows/split-repositories.yml` runs parallel jobs that use `git subtree split` to push each package to its own standalone repo:
 
 | Package | Target repo | Secret required |
 |---------|-------------|-----------------|
 | `oftagenda/` | `leonunesbs/oftagenda` | `OFTAGENDA_REPO_TOKEN` |
 | `oftleonardo/` | `leonunesbs/oftleonardo` | `OFTLEONARDO_REPO_TOKEN` |
+| `oftchatbot/` | `leonunesbs/oftchatbot` | `OFTCHATBOT_REPO_TOKEN` |
 
 Each job also generates a standalone `pnpm-workspace.yaml` and `pnpm-lock.yaml` inside the package directory (extracted from the root workspace config) so the target repo can install dependencies independently. Deployments (Vercel, Convex, etc.) are triggered from those individual repos, not from this monorepo.
 
@@ -44,14 +46,15 @@ Each job also generates a standalone `pnpm-workspace.yaml` and `pnpm-lock.yaml` 
 Run from the monorepo root (`/Users/leonunesbs/Documents/Github/oftcore.nosync`):
 
 ```bash
-pnpm dev                  # dev both apps (Next.js web only + Astro)
-pnpm dev:all:full         # dev both apps including Convex backend
+pnpm dev                  # dev all apps (Next.js web + Astro + chatbot)
+pnpm dev:all:full         # dev all apps including Convex backend
 pnpm dev:agenda           # only oftagenda (Next.js only, no Convex)
 pnpm dev:agenda:full      # only oftagenda + Convex dev
 pnpm dev:leonardo         # only oftleonardo
-pnpm build                # build both packages
-pnpm lint                 # lint both packages (oxlint)
-pnpm type-check           # type-check both packages
+pnpm dev:chatbot          # only oftchatbot
+pnpm build                # build all packages
+pnpm lint                 # lint all packages (oxlint)
+pnpm type-check           # type-check all packages
 ```
 
 From `oftagenda/`:

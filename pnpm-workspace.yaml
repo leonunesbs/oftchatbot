@@ -1,6 +1,7 @@
 packages:
   - "oftagenda"
   - "oftleonardo"
+  - "oftchatbot"
 
 onlyBuiltDependencies:
   - esbuild

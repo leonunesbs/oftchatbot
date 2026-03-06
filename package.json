@@ -6,17 +6,19 @@
   "scripts": {
     "dev": "pnpm run dev:all:web",
     "dev:all": "pnpm run dev:all:web",
-    "dev:all:web": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo dev:web",
-    "dev:all:full": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo dev",
+    "dev:all:web": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo --filter ./oftchatbot dev:web",
+    "dev:all:full": "pnpm -r --parallel --filter ./oftagenda --filter ./oftleonardo --filter ./oftchatbot dev",
     "dev:agenda": "pnpm --filter ./oftagenda dev:web",
     "dev:agenda:full": "pnpm --filter ./oftagenda dev",
     "dev:leonardo": "pnpm --filter ./oftleonardo dev",
-    "build": "pnpm -r --filter ./oftagenda --filter ./oftleonardo build",
+    "dev:chatbot": "pnpm --filter ./oftchatbot dev",
+    "build": "pnpm -r --filter ./oftagenda --filter ./oftleonardo --filter ./oftchatbot build",
     "build:agenda": "pnpm --filter ./oftagenda build",
     "build:leonardo": "pnpm --filter ./oftleonardo build",
+    "build:chatbot": "pnpm --filter ./oftchatbot build",
     "preview:leonardo": "pnpm --filter ./oftleonardo preview",
-    "lint": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo lint",
-    "type-check": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo type-check"
+    "lint": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo --filter ./oftchatbot lint",
+    "type-check": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo --filter ./oftchatbot type-check"
   },
   "pnpm": {
     "overrides": {

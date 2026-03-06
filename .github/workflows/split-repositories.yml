@@ -125,3 +125,61 @@ jobs:
 
           git subtree split --prefix=oftleonardo --branch split-oftleonardo
           git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftleonardo.git" split-oftleonardo:main
+
+  split-oftchatbot:
+    name: Sync oftchatbot repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4.2.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.2.0
+        with:
+          version: 10.28.0
+          run_install: false
+
+      - name: Prepare pnpm config for subtree
+        run: |
+          awk '
+            /^onlyBuiltDependencies:/ { print; copy = 1; next }
+            copy == 1 && /^  - / { print; next }
+            copy == 1 { exit }
+          ' pnpm-workspace.yaml > oftchatbot/pnpm-workspace.yaml
+
+          if [ ! -s oftchatbot/pnpm-workspace.yaml ]; then
+            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
+            exit 1
+          fi
+
+          (
+            cd oftchatbot
+            pnpm install --lockfile-only --ignore-scripts
+          )
+
+          if [ ! -s oftchatbot/pnpm-lock.yaml ]; then
+            echo "Failed to generate oftchatbot/pnpm-lock.yaml"
+            exit 1
+          fi
+
+          git add oftchatbot/pnpm-workspace.yaml oftchatbot/pnpm-lock.yaml
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftchatbot split"
+          else
+            echo "No changes detected in oftchatbot pnpm files"
+          fi
+
+      - name: Push subtree to leonunesbs/oftchatbot
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTCHATBOT_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTCHATBOT_REPO_TOKEN"
+            exit 1
+          fi
+
+          git subtree split --prefix=oftchatbot --branch split-oftchatbot
+          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftchatbot.git" split-oftchatbot:main
