@@ -110,7 +110,7 @@
     {
       "parameters": {
         "toolDescription": "Lista os locais ativos de atendimento no oftagenda. Use no início do fluxo de agendamento para apresentar as unidades disponíveis.",
-        "url": "https://agenda.oftagenda.com.br/api/integrations/n8n/locations",
+        "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/locations",
         "sendQuery": false,
         "options": {}
       },
@@ -126,7 +126,7 @@
     {
       "parameters": {
         "toolDescription": "Consulta disponibilidade no oftagenda por local. Retorna as próximas datas e os horários de cada data em options.dates[].times. Requer location e pode receber daysAhead (1-30, padrão 14).",
-        "url": "https://agenda.oftagenda.com.br/api/integrations/n8n/availability",
+        "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/availability",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -154,7 +154,7 @@
     {
       "parameters": {
         "toolDescription": "Busca os agendamentos de um paciente pelo número de telefone. Requer phone e pode incluir histórico com includeHistory=true.",
-        "url": "https://agenda.oftagenda.com.br/api/integrations/n8n/appointments",
+        "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/appointments",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -183,7 +183,7 @@
       "parameters": {
         "toolDescription": "Gera o link de resumo no oftagenda com location, date e time. Sempre valide ok===true e valid===true antes de enviar o summaryUrl ao paciente.",
         "method": "POST",
-        "url": "https://agenda.oftagenda.com.br/api/integrations/n8n/resumo-link",
+        "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/resumo-link",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido (ex: fortaleza)'),\n  date: $fromAI('date', 'Data no formato YYYY-MM-DD'),\n  time: $fromAI('time', 'Horário no formato HH:mm'),\n  source: 'whatsapp-n8n'\n}) }}",
