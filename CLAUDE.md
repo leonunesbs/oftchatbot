@@ -17,6 +17,9 @@ Single booking flow: all CTAs (Hero, Header desktop/mobile) point to `/agendamen
 ### oftagenda booking form
 No auto-selection of default date/time. The user must explicitly choose location → date → time. The `useEffect` auto-selects were removed from `booking-form.tsx`.
 
+### Destructive actions in UI
+Any destructive user action (delete, clear, reset, irreversible state change) must require explicit confirmation via shadcn/radix `AlertDialog` in the UI. Do not rely on `window.confirm` for product flows.
+
 ## Repository structure
 
 This is a pnpm monorepo (`oftcore`) with three packages:
@@ -67,6 +70,20 @@ pnpm lint             # oxlint --type-aware
 pnpm lint:fix         # oxlint --fix --type-aware
 pnpm format           # oxfmt --write
 pnpm type-check       # next typegen && tsc --noEmit
+```
+
+From `oftchatbot/`:
+
+```bash
+pnpm dev              # start chatbot app on port 3030
+pnpm test             # run Lumi dialog tests
+pnpm test:lumi        # run node test suite for Lumi scenarios
+pnpm waha:up          # start WAHA stack (Docker)
+pnpm waha:down        # stop WAHA stack
+pnpm waha:logs        # tail WAHA logs
+pnpm type-check       # next typegen && tsc --noEmit
+pnpm lint             # oxlint --type-aware
+pnpm format           # oxfmt --write
 ```
 
 ## oftagenda architecture
@@ -121,6 +138,40 @@ Build auto-deploys Convex when `CONVEX_DEPLOY_KEY` is set.
 ## oftleonardo architecture
 
 Astro 5 static site (SSR via `@astrojs/vercel` adapter). React islands for interactive components. Booking via iframe embed of oftagenda (`/embed/agendar`). Live session feature in `src/lib/live-session/` and `src/pages/api/live-session/`. Rate limiting in `src/lib/api/rate-limit.ts`.
+
+## oftchatbot architecture
+
+### Core concept
+`oftchatbot` powers the clinic WhatsApp operation and CRM panel. **Lumi** is the deterministic assistant (source of truth for business decisions). **Fox** can optionally wrap Lumi replies via OpenAI for conversational tone while preserving the same deterministic decision.
+
+### Tech stack
+- **Next.js 16** App Router + React 19 + TypeScript
+- **WAHA** integration for WhatsApp transport/events
+- **SQLite** persistence for contact profile and Lumi session state
+- **Oxlint/Oxfmt** for linting and formatting
+
+### Key directories
+- `src/lib/lumi/` — intent detection, entities extraction, guardrails, copy, state machine, telemetry, clinic config, Cal.com adapter
+- `src/lib/contact-profile/store.ts` — SQLite store including `lumi_sessions` state
+- `src/app/api/waha/webhook/route.ts` — webhook entrypoint that executes Lumi turn logic
+- `src/app/api/book/route.ts` and `src/app/api/slots/route.ts` — booking and availability endpoints
+- `src/app/page.tsx` — operator CRM inbox (conversations, messages, profile panel)
+- `tests/lumi/dialogs.spec.ts` — dialog regression suite
+
+### Behavioral guardrails
+- Urgency signs (e.g. sudden vision loss, trauma, severe pain, chemical exposure) must trigger immediate emergency guidance and stop scheduling flow.
+- Clinical conduct is educational only; do not diagnose, prescribe, or provide personalized medical treatment.
+- Pricing, insurance, explicit human request, cancellation/reschedule, or repeated validation failures should trigger human handoff.
+
+### Integration notes
+- `POST /api/waha/webhook` processes eligible inbound messages and sends Lumi responses through WAHA.
+- Optional Fox mode rewrites Lumi outbound text with OpenAI and falls back to Lumi text on failure/timeout.
+- Cal.com integration is optional and can fall back to mock mode when credentials/event types are unavailable.
+- Keep telemetry non-sensitive (`intent_detected`, `scheduling_started`, `scheduling_completed`, `urgent_triage_triggered`, `handoff_triggered`, `fallback_hit`).
+
+### Environment variables (oftchatbot)
+Core: WAHA environment keys used by chat/session endpoints and webhook.
+Optional: `CALCOM_API_BASE_URL`, `CALCOM_API_KEY`, `NEXT_PUBLIC_STRIPE_PUBLIC_KEY`, `STRIPE_PRIVATE_KEY`, `WAHA_WEBHOOK_URL`.
 
 ## Commit conventions
 

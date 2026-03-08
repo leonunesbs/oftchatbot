@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import type { ReactNode } from "react";
+import {
+  GEO_CITY_COOKIE_NAME,
+  type SupportedGeoCitySlug,
+} from "@/lib/geo/constants";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 declare global {
   interface Window {
@@ -44,6 +48,21 @@ function trackClick(cityName: string) {
   window.gtag?.("event", "start_booking", payload);
 }
 
+function readCookieValue(cookieName: string) {
+  if (typeof document === "undefined") return null;
+
+  const encodedName = encodeURIComponent(cookieName);
+  const cookiePart = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${encodedName}=`));
+
+  if (!cookiePart) return null;
+
+  const value = cookiePart.slice(encodedName.length + 1);
+  return decodeURIComponent(value);
+}
+
 interface Props {
   children: ReactNode;
   variant?: "default" | "outline" | "ghost" | "secondary";
@@ -67,6 +86,28 @@ export default function WhatsAppModal({
   whatsappMessageTemplate = "Olá, Dr. Leonardo! Gostaria de agendar uma consulta oftalmológica em {city}.",
   showOnlineBookingCta = true,
 }: Props) {
+  const [preferredCitySlug, setPreferredCitySlug] = useState<SupportedGeoCitySlug | null>(null);
+
+  useEffect(() => {
+    const cookieValue = readCookieValue(GEO_CITY_COOKIE_NAME);
+    if (
+      cookieValue &&
+      siteConfig.cities.some((city) => city.slug === cookieValue)
+    ) {
+      setPreferredCitySlug(cookieValue as SupportedGeoCitySlug);
+    }
+  }, []);
+
+  const orderedCities = useMemo(() => {
+    if (!preferredCitySlug) return siteConfig.cities;
+
+    return [...siteConfig.cities].sort((cityA, cityB) => {
+      if (cityA.slug === preferredCitySlug) return -1;
+      if (cityB.slug === preferredCitySlug) return 1;
+      return 0;
+    });
+  }, [preferredCitySlug]);
+
   const buildCityWhatsAppUrl = (cityName: string, whatsappNumber: string) =>
     buildWhatsAppUrl(
       whatsappNumber,
@@ -93,7 +134,7 @@ export default function WhatsAppModal({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-4">
-          {siteConfig.cities.map((city) => (
+          {orderedCities.map((city) => (
             <a
               key={city.slug}
               href={buildCityWhatsAppUrl(city.name, city.whatsappNumber)}

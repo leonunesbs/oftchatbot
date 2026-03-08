@@ -37,7 +37,7 @@ export const dialogScenarios: DialogScenario[] = [
     id: '05-retina-typo',
     turns: ['tenho duvida de retna'],
     expectedState: 'FAQ_ROUTER',
-    expectReplyIncludes: ['retina'],
+    expectReplyIncludes: ['Posso te ajudar'],
   },
   {
     id: '06-glaucoma',
@@ -139,7 +139,7 @@ export const dialogScenarios: DialogScenario[] = [
       'Olá, Dr. Leonardo! Gostaria de agendar uma consulta oftalmológica em Fortaleza.',
       'sou João Silva',
     ],
-    expectedState: 'END',
+    expectedState: 'SCHEDULING_COLLECT_EMAIL',
     expectReplyIncludes: ['e-mail'],
   },
   {
@@ -197,7 +197,7 @@ export const dialogScenarios: DialogScenario[] = [
       'retina',
       'carla@teste.com',
     ],
-    expectedState: 'SCHEDULING_COLLECT_EMAIL',
+    expectedState: 'END',
     expectReplyIncludes: ['link oficial de agendamento'],
   },
   {

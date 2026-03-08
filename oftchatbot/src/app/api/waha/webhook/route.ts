@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { contactProfileStore } from "@/lib/contact-profile/store";
 import { serverEnv } from "@/lib/env/server";
+import { wrapWithFox } from "@/lib/fox/openai-wrap";
 import { runLumiTurn } from "@/lib/lumi";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { requestWaha } from "@/lib/waha/http-client";
@@ -85,6 +87,17 @@ function asRecord(value: unknown) {
 
 function asString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function getCallerIp(request: NextRequest) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor && forwardedFor.trim().length > 0) {
+    const first = forwardedFor.split(",")[0]?.trim();
+    if (first) {
+      return first;
+    }
+  }
+  return request.headers.get("x-real-ip") ?? undefined;
 }
 
 function isLikelyChatId(value: unknown) {
@@ -252,7 +265,7 @@ async function stopTyping(chatId: string, session?: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const callerIp = request.headers.get("x-forwarded-for") ?? "unknown";
+  const callerIp = getCallerIp(request) ?? "unknown";
   const limiter = rateLimit(`waha-webhook:${callerIp}`, 60_000, 600);
   if (!limiter.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -288,24 +301,44 @@ export async function POST(request: NextRequest) {
       await startTyping(incomingMessage.chatId, event.session);
       typingStarted = true;
 
+      const assistantForChat = contactProfileStore.getAssistantForChat(
+        incomingMessage.chatId,
+      );
       const turn = await runLumiTurn({
         chatId: incomingMessage.chatId,
         messageText: incomingMessage.text,
         contactName: incomingMessage.contactName,
+        sourceIp: callerIp,
+        assistant: assistantForChat,
       });
-      if (turn.shouldSend && turn.replyText.trim().length > 0) {
+      const wrappedReplyText = await wrapWithFox({
+        assistant: assistantForChat,
+        userMessage: incomingMessage.text,
+        deterministicReply: turn.replyText,
+        contactName: incomingMessage.contactName,
+      });
+      const wrappedStrategicReplyText = turn.strategicReplyText
+        ? await wrapWithFox({
+            assistant: assistantForChat,
+            userMessage: incomingMessage.text,
+            deterministicReply: turn.strategicReplyText,
+            contactName: incomingMessage.contactName,
+          })
+        : undefined;
+
+      if (turn.shouldSend && wrappedReplyText.trim().length > 0) {
         await chatsDomain.sendText({
           chatId: incomingMessage.chatId,
-          text: turn.replyText,
+          text: wrappedReplyText,
           session: event.session,
         });
 
-        if (turn.strategicReplyText && turn.strategicReplyText.trim().length > 0) {
+        if (wrappedStrategicReplyText && wrappedStrategicReplyText.trim().length > 0) {
           const strategicDelayMs = randomBetween(250, 550);
           await sleep(strategicDelayMs);
           await chatsDomain.sendText({
             chatId: incomingMessage.chatId,
-            text: turn.strategicReplyText,
+            text: wrappedStrategicReplyText,
             session: event.session,
           }, { allowBotFollowUp: true });
         }

@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import Cities from "@/components/Cities.astro";
 import CTAFinal from "@/components/CTAFinal.astro";
@@ -14,10 +14,22 @@ import ParallaxArtifacts from "@/components/ParallaxArtifacts";
 import Services from "@/components/Services.astro";
 import VisualAcuityFloat from "@/components/VisualAcuityFloat";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import { buildHomeSeoFromCity, resolveGeoCity } from "@/lib/geo";
 import Layout from "@/layouts/Layout.astro";
+
+const geoCity = await resolveGeoCity({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
 ---
 
-<Layout includeFAQSchema={true}>
+<Layout
+  includeFAQSchema={true}
+  title={dynamicSeo.title}
+  description={dynamicSeo.description}
+>
   <Header />
   <main
     id="conteudo-principal"

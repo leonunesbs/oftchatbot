@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 
-import { calComAdapter } from "@/lib/lumi/integrations/calcom";
+import { oftagendaAdapter } from "@/lib/lumi/integrations/oftagenda";
 
 const slotsSearchSchema = z.object({
   location: z.string().trim().min(2),
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const slots = await calComAdapter.getSlots({
+  const slots = await oftagendaAdapter.getSlots({
     location: parsed.data.location,
     consultationType: parsed.data.consultationType,
     dateIso: parsed.data.date,

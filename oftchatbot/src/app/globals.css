@@ -135,3 +135,14 @@
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
+.chat-thread-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.chat-thread-scroll::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}

@@ -6,13 +6,13 @@ import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { funnelStageLabels } from "@/lib/contact-profile/types";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,7 @@ type AppSidebarProps = ComponentProps<typeof Sidebar> & {
   onLoadMore?: () => void;
   sessionLabel: string;
   sessionToneClassName: string;
+  sessionQrScannerHref?: string | null;
 };
 
 function formatConversationTime(value?: string) {
@@ -85,6 +86,27 @@ function getFunnelToneClass(stage?: WahaConversation["funnelStage"]) {
   }
 }
 
+function ConversationCardSkeleton() {
+  return (
+    <div className="bg-sidebar-accent/35 border-sidebar-border h-[122px] rounded-xl border px-2.5 py-2">
+      <div className="flex items-start gap-2.5">
+        <Skeleton className="size-9 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3.5 w-30 max-w-[60%]" />
+            <Skeleton className="ml-auto h-3 w-10" />
+          </div>
+          <Skeleton className="h-4 w-24 rounded-full" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3 w-36 max-w-[75%]" />
+            <Skeleton className="ml-auto h-4 w-6 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AppSidebar({
   conversations,
   selectedChatId,
@@ -99,6 +121,7 @@ export function AppSidebar({
   onLoadMore,
   sessionLabel,
   sessionToneClassName,
+  sessionQrScannerHref,
   ...props
 }: AppSidebarProps) {
   const [query, setQuery] = React.useState("");
@@ -201,13 +224,9 @@ export function AppSidebar({
             onScroll={handleListScroll}
           >
             {isLoading ? (
-              <div className="space-y-1 px-1">
-                {Array.from({ length: 7 }).map((_, index) => (
-                  <SidebarMenuSkeleton
-                    key={index}
-                    showIcon
-                    className="h-16 rounded-lg"
-                  />
+              <div className="space-y-2 px-1">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <ConversationCardSkeleton key={index} />
                 ))}
               </div>
             ) : filteredConversations.length > 0 ? (
@@ -237,7 +256,7 @@ export function AppSidebar({
                   <div
                     key={conversation.id}
                     className={cn(
-                      "w-full rounded-xl border px-2.5 py-2 transition-colors",
+                      "h-[122px] w-full rounded-xl border px-2.5 py-2 transition-colors",
                       isActive
                         ? "bg-sidebar-accent border-sidebar-border"
                         : "border-transparent hover:bg-sidebar-accent/70",
@@ -249,47 +268,47 @@ export function AppSidebar({
                       className="focus-visible:ring-sidebar-ring w-full rounded-md text-left outline-hidden focus-visible:ring-2"
                     >
                       <div className="flex items-start gap-2.5">
-                      <div className="bg-sidebar-primary/15 text-sidebar-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-                        {getConversationInitials(conversation.name)}
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-medium">
-                            {conversation.name || "Contato sem nome"}
-                          </p>
-                          {conversation.isPinned ? (
-                            <Pin className="text-muted-foreground size-3.5 shrink-0" />
-                          ) : null}
-                          {conversation.isArchived ? (
-                            <Archive className="text-muted-foreground size-3.5 shrink-0" />
-                          ) : null}
-                          {timeLabel ? (
-                            <span className="text-muted-foreground ml-auto shrink-0 text-[11px]">
-                              {timeLabel}
-                            </span>
-                          ) : null}
+                        <div className="bg-sidebar-primary/15 text-sidebar-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                          {getConversationInitials(conversation.name)}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            className={cn(
-                              "rounded-full border-0 px-2 py-0.5 text-[10px] whitespace-nowrap",
-                              getFunnelToneClass(funnelStage),
-                            )}
-                          >
-                            {funnelStageLabels[funnelStage]}
-                          </Badge>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-medium">
+                              {conversation.name || "Contato sem nome"}
+                            </p>
+                            {conversation.isPinned ? (
+                              <Pin className="text-muted-foreground size-3.5 shrink-0" />
+                            ) : null}
+                            {conversation.isArchived ? (
+                              <Archive className="text-muted-foreground size-3.5 shrink-0" />
+                            ) : null}
+                            {timeLabel ? (
+                              <span className="text-muted-foreground ml-auto shrink-0 text-[11px]">
+                                {timeLabel}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              className={cn(
+                                "rounded-full border-0 px-2 py-0.5 text-[10px] whitespace-nowrap",
+                                getFunnelToneClass(funnelStage),
+                              )}
+                            >
+                              {funnelStageLabels[funnelStage]}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-muted-foreground line-clamp-1 text-xs">
+                              {conversation.preview || "Sem mensagens recentes"}
+                            </p>
+                            {unreadCount > 0 ? (
+                              <span className="bg-sidebar-primary text-sidebar-primary-foreground ml-auto inline-flex min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-muted-foreground line-clamp-1 text-xs">
-                            {conversation.preview || "Sem mensagens recentes"}
-                          </p>
-                          {unreadCount > 0 ? (
-                            <span className="bg-sidebar-primary text-sidebar-primary-foreground ml-auto inline-flex min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold">
-                              {unreadCount > 99 ? "99+" : unreadCount}
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
                       </div>
                     </button>
                     <div className="mt-2 flex items-center gap-1">
@@ -333,13 +352,9 @@ export function AppSidebar({
               </div>
             )}
             {!isLoading && isLoadingMore ? (
-              <div className="space-y-1 px-1 pt-1">
+              <div className="space-y-2 px-1 pt-1">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <SidebarMenuSkeleton
-                    key={`load-more-${index}`}
-                    showIcon
-                    className="h-16 rounded-lg"
-                  />
+                  <ConversationCardSkeleton key={`load-more-${index}`} />
                 ))}
               </div>
             ) : null}
@@ -359,14 +374,33 @@ export function AppSidebar({
             </Badge>
           </div>
           <div className="mt-2 flex items-center justify-between">
-            <Badge
-              className={cn(
-                "rounded-full border-0 px-2 py-0.5 text-[11px]",
-                sessionToneClassName,
-              )}
-            >
-              {sessionLabel}
-            </Badge>
+            {sessionQrScannerHref ? (
+              <a
+                href={sessionQrScannerHref}
+                target="_blank"
+                rel="noreferrer"
+                title="Abrir ferramenta de escanear QR code"
+                className="focus-visible:ring-sidebar-ring rounded-full outline-hidden focus-visible:ring-2"
+              >
+                <Badge
+                  className={cn(
+                    "rounded-full border-0 px-2 py-0.5 text-[11px] hover:opacity-90",
+                    sessionToneClassName,
+                  )}
+                >
+                  {sessionLabel}
+                </Badge>
+              </a>
+            ) : (
+              <Badge
+                className={cn(
+                  "rounded-full border-0 px-2 py-0.5 text-[11px]",
+                  sessionToneClassName,
+                )}
+              >
+                {sessionLabel}
+              </Badge>
+            )}
             <span className="text-muted-foreground text-[11px]">
               {unreadTotal > 0 ? `${unreadTotal} não lidas` : "Inbox zerada"}
             </span>

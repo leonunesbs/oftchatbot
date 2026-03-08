@@ -10,7 +10,7 @@ type IntentPattern = {
 export const intentPatterns: Record<LumiIntent, IntentPattern> = {
   urgent_symptoms: {
     priority: 100,
-    keywords: ["dor intensa", "perda de visao", "trauma ocular", "flashs", "sombras", "quimico no olho"],
+    keywords: ["dor intensa", "dor ocular intensa", "perda de visao", "perdi a visao", "perdi a visao de repente", "trauma ocular", "trauma no olho", "flashs", "sombras", "quimico no olho", "produto quimico no olho"],
     synonyms: ["dor forte no olho", "visao sumiu", "batida no olho", "clarões", "cortina preta", "produto no olho"],
     typos: ["perca de visao", "flashes", "sombrar", "quimico olho"],
   },
@@ -22,7 +22,7 @@ export const intentPatterns: Record<LumiIntent, IntentPattern> = {
   },
   schedule_appointment: {
     priority: 80,
-    keywords: ["agendar", "consulta", "marcar consulta", "horario"],
+    keywords: ["agendar", "marcar consulta"],
     synonyms: ["quero marcar", "tem vaga", "agendamento"],
     typos: ["agenda", "agendarr", "consuta"],
   },
@@ -82,7 +82,7 @@ export const intentPatterns: Record<LumiIntent, IntentPattern> = {
   },
   ask_services: {
     priority: 45,
-    keywords: ["catarata", "retina", "glaucoma", "olho seco", "exame", "consulta oftalmologica"],
+    keywords: ["catarata", "retina", "glaucoma", "olho seco", "exame", "exames", "consulta oftalmologica"],
     synonyms: ["dmri", "descolamento", "pressao ocular", "fundoscopia"],
     typos: ["catarataa", "retna", "glaocoma", "olho ceco"],
   },

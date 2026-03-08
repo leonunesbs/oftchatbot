@@ -1,3 +1,5 @@
+import type { AssistantMode } from "@/lib/assistants/types";
+
 export const lumiStates = [
   'START',
   'TRIAGE',
@@ -48,7 +50,7 @@ export type SlotOption = {
   label: string;
   location: string;
   consultationType: string;
-  source: 'calcom' | 'mock';
+  source: 'mock';
 };
 
 export type EventTypeOption = {
@@ -61,7 +63,7 @@ export type EventTypeOption = {
 export type AvailableDateOption = {
   isoDate: string;
   label: string;
-  source: 'calcom' | 'mock';
+  source: 'mock';
 };
 
 export type LumiCollectedData = {
@@ -78,8 +80,8 @@ export type LumiCollectedData = {
   selectedSlotId?: string;
   slotOptions?: SlotOption[];
   latestBooking?: {
-    protocol: string;
-    source: 'calcom' | 'mock';
+    protocol?: string;
+    source: 'oftagenda_link' | 'mock';
     paymentUrl?: string;
     eventTypeId?: string;
     slotStartAt?: string;
@@ -119,6 +121,8 @@ export type LumiTurnInput = {
   chatId: string;
   messageText: string;
   contactName?: string;
+  sourceIp?: string;
+  assistant?: AssistantMode;
   now?: Date;
 };
 

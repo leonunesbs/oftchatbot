@@ -84,7 +84,7 @@ Arquivos em `src/lib/lumi`:
 - `state-machine.ts` — orquestração do fluxo completo
 - `telemetry.ts` — eventos não sensíveis
 - `config/clinic.ts` — dados configuráveis da clínica
-- `integrations/calcom.ts` — adapter Cal.com com fallback mock
+- `integrations/oftagenda.ts` — adapter de agendamento com link do oftagenda
 
 ### Persistência de estado conversacional
 
@@ -137,24 +137,40 @@ Resposta:
 
 - `ok`
 - `confirmation.protocol`
-- `confirmation.source` (`calcom|mock`)
+- `confirmation.source` (`oftagenda_link|mock`)
 
 Arquivo: `src/app/api/book/route.ts`.
 
 ## Variáveis de ambiente
 
-Além das variáveis WAHA, o MVP suporta integração Cal.com:
+Além das variáveis WAHA, o MVP usa um link-base do oftagenda:
 
-- `CALCOM_API_BASE_URL` (opcional)
-- `CALCOM_API_KEY` (opcional)
+- `OFTAGENDA_BOOKING_URL` (opcional, padrão: `https://agenda.oftleonardo.com.br/agendar`)
 - `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` (opcional)
 - `STRIPE_PRIVATE_KEY` (opcional)
 
-Os event types são buscados diretamente na API do Cal.com. Se as variáveis não estiverem definidas (ou se não houver event types disponíveis), o fluxo usa fallback mock.
+A Lumi monta o link de agendamento com parâmetros mínimos (nome, telefone, e-mail quando houver, local e tipo de consulta) e envia no WhatsApp para a pessoa concluir.
 
 Para webhook automático da sessão WAHA, você também pode configurar:
 
 - `WAHA_WEBHOOK_URL` (opcional, padrão: `http://host.docker.internal:3030/api/waha/webhook`)
+
+### Assistente Fox (OpenAI wrap da Lumi)
+
+Para manter o fluxo determinístico da Lumi e apenas reescrever a resposta com tom conversacional da Fox:
+
+- `OPENAI_API_KEY=...`
+- `FOX_OPENAI_MODEL=gpt-4.1-nano` (baixo custo)
+
+A escolha entre Lumi/Fox é feita pela interface do CRM, por botões no header do chat.
+
+Opcionais para custo/latência:
+
+- `OPENAI_BASE_URL` (default: `https://api.openai.com/v1`)
+- `FOX_MAX_OUTPUT_TOKENS` (default: `90`)
+- `FOX_REQUEST_TIMEOUT_MS` (default: `4000`)
+
+Se a API falhar, timeout ocorrer ou Fox não estiver habilitada, o sistema usa automaticamente a resposta determinística original da Lumi.
 
 ## Telemetria
 
