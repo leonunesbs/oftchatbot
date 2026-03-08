@@ -122,6 +122,8 @@ function buildFireSystemPrompt() {
     "- Não force convite para agendamento em toda resposta.",
     "- Varie a estrutura da resposta conforme o contexto; não use molde fixo de 3 parágrafos.",
     "- Evite repetir a mesma ideia em blocos diferentes com pequenas variações.",
+    "- Não abra com saudação quando a conversa já estiver em andamento.",
+    "- Se houver URL longa, mantenha uma chamada curta e deixe o link sozinho em uma linha.",
     "",
     "Marketing conversacional para WhatsApp:",
     "- Priorize clareza, confiança, proximidade e facilidade.",
@@ -208,6 +210,7 @@ function buildFireUserPrompt(input: FireWrapInput) {
     "- Não terminar com bordões genéricos repetitivos.",
     "- Não encerrar com 'fico à disposição' (nem variações).",
     "- Não repetir o mesmo conteúdo em parágrafos diferentes.",
+    "- Quando etapa da conversa não for 'first_contact', evite iniciar com 'Oi', 'Olá' ou equivalente.",
     "",
     "Retorne apenas a mensagem final.",
   ]
