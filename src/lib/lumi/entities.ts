@@ -1,14 +1,71 @@
 import type { DatePreference, LumiCollectedData } from "@/lib/lumi/types";
 
-const locationKeywords = ["fortaleza", "aldeota", "meireles", "centro", "sul", "norte"];
-const consultationTypeKeywords = [
-  "consulta geral",
-  "retina",
-  "catarata",
-  "glaucoma",
-  "olho seco",
-  "exames",
-  "revisao",
+type LocationMatcher = {
+  value: string;
+  keywords: string[];
+};
+
+type ConsultationTypeMatcher = {
+  value: string;
+  keywords: string[];
+};
+
+const locationMatchers: LocationMatcher[] = [
+  {
+    value: "Fortaleza",
+    keywords: ["fortaleza", "aldeota", "meireles", "centro", "sul", "norte"],
+  },
+  {
+    value: "São Domingos do Maranhão",
+    keywords: [
+      "sao domingos do maranhao",
+      "sao domingos",
+      "domingos do maranhao",
+    ],
+  },
+  {
+    value: "Fortuna",
+    keywords: ["fortuna", "fortuna ma"],
+  },
+];
+
+const consultationTypeMatchers: ConsultationTypeMatcher[] = [
+  {
+    value: "consulta geral",
+    keywords: [
+      "geral",
+      "consulta geral",
+      "consulta oftalmologica",
+      "avaliacao da visao central",
+      "teste de acuidade visual",
+      "acuidade visual",
+      "visao central",
+    ],
+  },
+  {
+    value: "retina",
+    keywords: ["retina"],
+  },
+  {
+    value: "catarata",
+    keywords: ["catarata"],
+  },
+  {
+    value: "glaucoma",
+    keywords: ["glaucoma"],
+  },
+  {
+    value: "olho seco",
+    keywords: ["olho seco"],
+  },
+  {
+    value: "exames",
+    keywords: ["exames", "exame"],
+  },
+  {
+    value: "revisao",
+    keywords: ["revisao"],
+  },
 ];
 
 function normalizeText(input: string) {
@@ -94,16 +151,18 @@ export function extractEntities(messageText: string): Partial<LumiCollectedData>
     }
   }
 
-  for (const location of locationKeywords) {
-    if (normalized.includes(location)) {
-      extracted.location = location.charAt(0).toUpperCase() + location.slice(1);
+  for (const location of locationMatchers) {
+    if (location.keywords.some((keyword) => normalized.includes(keyword))) {
+      extracted.location = location.value;
       break;
     }
   }
 
-  for (const consultationType of consultationTypeKeywords) {
-    if (normalized.includes(consultationType)) {
-      extracted.consultationType = consultationType;
+  for (const consultationType of consultationTypeMatchers) {
+    if (
+      consultationType.keywords.some((keyword) => normalized.includes(keyword))
+    ) {
+      extracted.consultationType = consultationType.value;
       break;
     }
   }

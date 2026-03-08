@@ -2,14 +2,11 @@ import {
   askMissingField,
   bookingStatusReply,
   bookingSuccessReply,
-  confirmationReply,
-  dateOptionsReply,
   fallbackReply,
   faqReply,
   faqStrategicReply,
   handoffReply,
   introGreeting,
-  slotOptionsReply,
   triageUrgentReply,
 } from "@/lib/lumi/copy";
 import {
@@ -25,11 +22,8 @@ import {
   detectIntent,
   isAffirmative,
   isGreetingMessage,
-  isNegative,
 } from "@/lib/lumi/intents";
 import type {
-  AvailableDateOption,
-  EventTypeOption,
   LumiCollectedData,
   LumiSession,
   LumiState,
@@ -39,7 +33,8 @@ import type {
 
 import { contactProfileStore } from "@/lib/contact-profile/store";
 import { educationalFaq } from "@/lib/lumi/config/clinic";
-import { calComAdapter } from "@/lib/lumi/integrations/calcom";
+import { oftagendaAdapter } from "@/lib/lumi/integrations/oftagenda";
+import { resolveLocationHint } from "@/lib/lumi/location-hint";
 import { trackLumiEvent } from "@/lib/lumi/telemetry";
 
 function nowIso(now?: Date) {
@@ -102,105 +97,6 @@ function stateByField(field: keyof LumiCollectedData): LumiState {
   }
 }
 
-function extractOptionNumber(text: string, maxOption: number) {
-  if (maxOption < 1) {
-    return undefined;
-  }
-  const match = text.match(/\b(\d{1,2})\b/);
-  if (!match?.[1]) {
-    return undefined;
-  }
-  const selected = Number(match[1]);
-  if (selected < 1 || selected > maxOption) {
-    return undefined;
-  }
-  return selected;
-}
-
-function trySelectSlotFromText(
-  text: string,
-  slots: NonNullable<LumiCollectedData["slotOptions"]>,
-) {
-  const selected = extractOptionNumber(text, slots.length);
-  if (!selected) {
-    return undefined;
-  }
-  const index = selected - 1;
-  return slots[index]?.id;
-}
-
-function trySelectDateFromText(
-  text: string,
-  availableDates: AvailableDateOption[],
-  maxOption = 10,
-) {
-  const selectedOption = extractOptionNumber(
-    text,
-    Math.min(availableDates.length, maxOption),
-  );
-  if (selectedOption) {
-    const index = selectedOption - 1;
-    const selected = availableDates[index];
-    if (selected) {
-      return selected.isoDate;
-    }
-  }
-
-  const isoDateMatch = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
-  if (isoDateMatch?.[1]) {
-    const selected = availableDates.find(
-      (date) => date.isoDate === isoDateMatch[1],
-    );
-    if (selected) {
-      return selected.isoDate;
-    }
-  }
-
-  const brDateMatch = text.match(/\b(\d{1,2})\/(\d{1,2})\b/);
-  if (brDateMatch) {
-    const year = new Date().getFullYear();
-    const day = Number(brDateMatch[1]);
-    const month = Number(brDateMatch[2]);
-    const isoDate = `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-    const selected = availableDates.find((date) => date.isoDate === isoDate);
-    if (selected) {
-      return selected.isoDate;
-    }
-  }
-
-  return undefined;
-}
-
-function resolveSelectedEventTypeName(data: LumiCollectedData) {
-  const selectedEventType = data.eventTypes?.find(
-    (eventType) => eventType.id === data.selectedEventTypeId,
-  );
-  return selectedEventType?.title ?? selectedEventType?.locationLabel;
-}
-
-function pickAlternativeEventType(
-  eventTypes: EventTypeOption[],
-  selectedEventTypeId?: string,
-) {
-  if (eventTypes.length === 0) {
-    return undefined;
-  }
-  return (
-    eventTypes.find((eventType) => eventType.id !== selectedEventTypeId) ??
-    eventTypes[0]
-  );
-}
-
-function isChangeEventRequest(text: string) {
-  return /trocar\s+evento|outro\s+evento|outro\s+local|local\s+de\s+atendimento/i.test(
-    text,
-  );
-}
-
-function isChangeDateRequest(text: string) {
-  return /trocar\s+data|outra\s+data/i.test(text);
-}
-
 function isUrgentIntent(text: string) {
   const intent = detectIntent(text);
   return intent.intent === "urgent_symptoms";
@@ -208,6 +104,15 @@ function isUrgentIntent(text: string) {
 
 function resolveFaqTopic(text: string) {
   const normalized = text.toLowerCase();
+  if (
+    normalized.includes("dmri") ||
+    normalized.includes("degeneracao macular") ||
+    normalized.includes("degeneração macular") ||
+    normalized.includes("macula") ||
+    normalized.includes("mácula")
+  ) {
+    return "retina";
+  }
   const topics = Object.keys(educationalFaq);
   return topics.find((topic) => normalized.includes(topic));
 }
@@ -237,6 +142,7 @@ function extractContextualEntities(
 export async function runLumiTurn(
   input: LumiTurnInput,
 ): Promise<LumiTurnDecision> {
+  const assistantMode = input.assistant ?? "lumi";
   const currentSession =
     contactProfileStore.getLumiSession(input.chatId) ??
     defaultSession(input.chatId, input.now);
@@ -398,7 +304,7 @@ export async function runLumiTurn(
       };
     }
 
-    const status = await calComAdapter.getBookingStatus({
+    const status = await oftagendaAdapter.getBookingStatus({
       protocol: latestBooking.protocol,
       paymentUrl: latestBooking.paymentUrl,
       stripeCodes: merged.stripeCodes,
@@ -441,18 +347,19 @@ export async function runLumiTurn(
     contactProfileStore.upsertLumiSession(nextSession);
     return {
       nextState: "TRIAGE",
-      replyText: introGreeting(input.contactName),
+      replyText: introGreeting(input.contactName, assistantMode),
       shouldSend: true,
     };
   }
 
   if (
-    intent.intent === "ask_services" ||
-    intent.intent === "ask_hours" ||
-    intent.intent === "ask_location"
+    !currentSession.state.startsWith("SCHEDULING_") &&
+    (intent.intent === "ask_services" ||
+      intent.intent === "ask_hours" ||
+      intent.intent === "ask_location")
   ) {
     const faqTopic = resolveFaqTopic(input.messageText);
-    let text = fallbackReply();
+    let text = fallbackReply(assistantMode);
     if (intent.intent === "ask_hours") {
       text =
         "Entendi. Nosso horário de atendimento é de segunda a sexta, 8h às 18h, e sábado, 8h às 12h.";
@@ -460,7 +367,10 @@ export async function runLumiTurn(
       text =
         "Claro. Atendemos em Fortaleza (Aldeota). Se quiser, te envio o link do mapa: https://maps.google.com/?q=Aldeota+Fortaleza";
     } else if (faqTopic) {
-      text = faqReply(faqTopic, educationalFaq[faqTopic] ?? fallbackReply());
+      text = faqReply(
+        faqTopic,
+        educationalFaq[faqTopic] ?? fallbackReply(assistantMode),
+      );
     }
 
     const nextSession: LumiSession = {
@@ -475,7 +385,7 @@ export async function runLumiTurn(
     return {
       nextState: "FAQ_ROUTER",
       replyText: text,
-      strategicReplyText: faqStrategicReply(faqTopic),
+      strategicReplyText: faqStrategicReply(faqTopic, assistantMode),
       shouldSend: true,
     };
   }
@@ -487,9 +397,7 @@ export async function runLumiTurn(
     Boolean(
       entities.datePreference ||
       entities.fullName ||
-      entities.phone ||
-      entities.consultationType ||
-      entities.location,
+      entities.phone,
     );
 
   if (!schedulingRequested) {
@@ -512,8 +420,8 @@ export async function runLumiTurn(
       nextState: "TRIAGE",
       replyText:
         intent.intent === "greeting"
-          ? introGreeting(input.contactName)
-          : fallbackReply(),
+          ? introGreeting(input.contactName, assistantMode)
+          : fallbackReply(assistantMode),
       shouldSend: true,
     };
   }
@@ -524,41 +432,6 @@ export async function runLumiTurn(
     state: currentSession.state,
     now: input.now,
   });
-
-  const slotIdFromChoice = merged.slotOptions
-    ? trySelectSlotFromText(input.messageText, merged.slotOptions.slice(0, 4))
-    : undefined;
-  if (slotIdFromChoice) {
-    merged.selectedSlotId = slotIdFromChoice;
-  }
-  const canSelectDate =
-    currentSession.state === "SCHEDULING_SHOW_DATES" || !merged.selectedDateIso;
-  const selectedDateFromText =
-    canSelectDate && merged.availableDates
-      ? trySelectDateFromText(input.messageText, merged.availableDates, 7)
-      : undefined;
-  if (selectedDateFromText) {
-    merged.selectedDateIso = selectedDateFromText;
-    merged.datePreference = {
-      raw: selectedDateFromText,
-      isoDate: selectedDateFromText,
-      period: merged.datePreference?.period,
-    };
-    merged.slotOptions = [];
-    merged.selectedSlotId = undefined;
-  } else if (
-    entities.datePreference?.isoDate &&
-    merged.availableDates?.length
-  ) {
-    const matchedDate = merged.availableDates.find(
-      (date) => date.isoDate === entities.datePreference?.isoDate,
-    );
-    if (matchedDate) {
-      merged.selectedDateIso = matchedDate.isoDate;
-      merged.slotOptions = [];
-      merged.selectedSlotId = undefined;
-    }
-  }
 
   if (entities.email && !isValidEmail(entities.email)) {
     const failures = currentSession.validationFailures + 1;
@@ -597,6 +470,13 @@ export async function runLumiTurn(
 
   const missingField = nextMissingRequiredField(merged);
   if (missingField) {
+    const locationHint =
+      missingField === "location"
+        ? await resolveLocationHint({
+            phone: merged.phone ?? contactProfile.phoneNumber,
+            sourceIp: input.sourceIp,
+          })
+        : undefined;
     const nextSession: LumiSession = {
       ...currentSession,
       state: stateByField(missingField),
@@ -608,262 +488,13 @@ export async function runLumiTurn(
     contactProfileStore.upsertLumiSession(nextSession);
     return {
       nextState: nextSession.state,
-      replyText: askMissingField(missingField),
+      replyText: askMissingField(missingField, { locationHint }),
       shouldSend: true,
     };
   }
 
-  if (!merged.selectedEventTypeId) {
-    const eventTypeResult = await calComAdapter.getEventTypes({
-      location: merged.location ?? "Fortaleza",
-      consultationType: merged.consultationType ?? "consulta geral",
-    });
-    merged.eventTypes = eventTypeResult.eventTypes;
-    merged.selectedEventTypeId = eventTypeResult.selectedEventTypeId;
-  }
-
-  if (!merged.selectedEventTypeId) {
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "HANDOFF_WHATSAPP",
-      collected: merged,
-      handoffActive: true,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: "HANDOFF_WHATSAPP",
-      replyText: handoffReply("consultar agenda disponível com precisão"),
-      shouldSend: true,
-      handoffTriggered: true,
-    };
-  }
-
-  const visibleDateOptions = merged.availableDates?.slice(0, 7) ?? [];
-  const visibleSlotOptions = merged.slotOptions?.slice(0, 4) ?? [];
-  const menuOption = extractOptionNumber(input.messageText, 12);
-
-  const shouldChangeEventFromDates =
-    currentSession.state === "SCHEDULING_SHOW_DATES" &&
-    (isChangeEventRequest(input.messageText) ||
-      menuOption === visibleDateOptions.length + 1);
-  const shouldChangeEventFromSlots =
-    currentSession.state === "SCHEDULING_SHOW_SLOTS" &&
-    (isChangeEventRequest(input.messageText) ||
-      menuOption === visibleSlotOptions.length + 2);
-
-  if (shouldChangeEventFromDates || shouldChangeEventFromSlots) {
-    const alternativeEventType = pickAlternativeEventType(
-      merged.eventTypes ?? [],
-      merged.selectedEventTypeId,
-    );
-    if (!alternativeEventType) {
-      const nextSession: LumiSession = {
-        ...currentSession,
-        state: "HANDOFF_WHATSAPP",
-        collected: merged,
-        handoffActive: true,
-        lastIntent: "schedule_appointment",
-        lastInteractionAt: nowIso(input.now),
-        updatedAt: nowIso(input.now),
-      };
-      contactProfileStore.upsertLumiSession(nextSession);
-      return {
-        nextState: "HANDOFF_WHATSAPP",
-        replyText: handoffReply("consultar agenda disponível com precisão"),
-        shouldSend: true,
-        handoffTriggered: true,
-      };
-    }
-
-    if (alternativeEventType.id !== merged.selectedEventTypeId) {
-      merged.selectedEventTypeId = alternativeEventType.id;
-    }
-    merged.selectedDateIso = undefined;
-    merged.availableDates = [];
-    merged.slotOptions = [];
-    merged.selectedSlotId = undefined;
-
-    const dates = await calComAdapter.getAvailableDates({
-      eventTypeId: merged.selectedEventTypeId,
-    });
-    merged.availableDates = dates;
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_DATES",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: "SCHEDULING_SHOW_DATES",
-      replyText: dateOptionsReply(dates, resolveSelectedEventTypeName(merged)),
-      shouldSend: true,
-    };
-  }
-
-  const shouldChangeDateFromSlots =
-    currentSession.state === "SCHEDULING_SHOW_SLOTS" &&
-    (isChangeDateRequest(input.messageText) ||
-      menuOption === visibleSlotOptions.length + 1);
-  if (shouldChangeDateFromSlots) {
-    merged.selectedDateIso = undefined;
-    merged.slotOptions = [];
-    merged.selectedSlotId = undefined;
-    if (!merged.availableDates || merged.availableDates.length === 0) {
-      merged.availableDates = await calComAdapter.getAvailableDates({
-        eventTypeId: merged.selectedEventTypeId,
-      });
-    }
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_DATES",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: "SCHEDULING_SHOW_DATES",
-      replyText: dateOptionsReply(
-        merged.availableDates,
-        resolveSelectedEventTypeName(merged),
-      ),
-      shouldSend: true,
-    };
-  }
-
-  if (!merged.availableDates || merged.availableDates.length === 0) {
-    const dates = await calComAdapter.getAvailableDates({
-      eventTypeId: merged.selectedEventTypeId,
-    });
-    merged.availableDates = dates;
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_DATES",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: nextSession.state,
-      replyText: dateOptionsReply(dates, resolveSelectedEventTypeName(merged)),
-      shouldSend: true,
-    };
-  }
-
-  if (!merged.selectedDateIso) {
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_DATES",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: "SCHEDULING_SHOW_DATES",
-      replyText: dateOptionsReply(
-        merged.availableDates,
-        resolveSelectedEventTypeName(merged),
-      ),
-      shouldSend: true,
-    };
-  }
-
-  if (!merged.slotOptions || merged.slotOptions.length === 0) {
-    const slots = await calComAdapter.getSlots({
-      eventTypeId: merged.selectedEventTypeId,
-      location: merged.location ?? "Fortaleza",
-      consultationType: merged.consultationType ?? "consulta geral",
-      dateIso: merged.selectedDateIso,
-      period: merged.datePreference?.period,
-    });
-
-    merged.slotOptions = slots;
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_SLOTS",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: nextSession.state,
-      replyText: slotOptionsReply(slots),
-      shouldSend: true,
-    };
-  }
-
-  if (!merged.selectedSlotId) {
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_SHOW_SLOTS",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-    return {
-      nextState: "SCHEDULING_SHOW_SLOTS",
-      replyText: slotOptionsReply(merged.slotOptions),
-      shouldSend: true,
-    };
-  }
-
-  const selectedSlot = merged.slotOptions.find(
-    (slot) => slot.id === merged.selectedSlotId,
-  );
-  if (
-    currentSession.state !== "SCHEDULING_CONFIRM" ||
-    !isAffirmative(input.messageText)
-  ) {
-    const nextSession: LumiSession = {
-      ...currentSession,
-      state: "SCHEDULING_CONFIRM",
-      collected: merged,
-      lastIntent: "schedule_appointment",
-      lastInteractionAt: nowIso(input.now),
-      updatedAt: nowIso(input.now),
-    };
-    contactProfileStore.upsertLumiSession(nextSession);
-
-    if (isNegative(input.messageText)) {
-      merged.selectedSlotId = undefined;
-      merged.slotOptions = [];
-      contactProfileStore.upsertLumiSession({
-        ...nextSession,
-        state: "SCHEDULING_SHOW_SLOTS",
-        collected: merged,
-      });
-      return {
-        nextState: "SCHEDULING_SHOW_SLOTS",
-        replyText: "Tudo bem. Vou buscar novas opções de horário para você.",
-        shouldSend: true,
-      };
-    }
-
-    return {
-      nextState: "SCHEDULING_CONFIRM",
-      replyText: confirmationReply(merged, selectedSlot),
-      shouldSend: true,
-    };
-  }
-
-  const booking = await calComAdapter.book({
-    slotId: selectedSlot?.startAt ?? merged.selectedSlotId,
-    eventTypeId: merged.selectedEventTypeId,
+  const booking = await oftagendaAdapter.book({
+    slotId: `direct-link-${Date.now()}`,
     fullName: merged.fullName ?? "Paciente",
     phone: merged.phone ?? "",
     email: merged.email,
@@ -875,9 +506,6 @@ export async function runLumiTurn(
     protocol: booking.protocol,
     source: booking.source,
     paymentUrl: booking.paymentUrl,
-    eventTypeId: merged.selectedEventTypeId,
-    slotStartAt: selectedSlot?.startAt ?? merged.selectedSlotId,
-    slotEndAt: selectedSlot?.endAt,
     location: merged.location,
     consultationType: merged.consultationType,
     bookedAt: nowIso(input.now),
@@ -903,12 +531,9 @@ export async function runLumiTurn(
 
   return {
     nextState: "END",
-    replyText: bookingSuccessReply(
-      booking.protocol,
-      booking.paymentUrl,
-      merged.phone,
-    ),
+    replyText: bookingSuccessReply(booking.paymentUrl, merged.phone),
     shouldSend: true,
     endFlow: true,
   };
+
 }

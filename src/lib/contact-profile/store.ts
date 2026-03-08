@@ -2,6 +2,8 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
+import { defaultAssistantMode } from "@/lib/assistants/types";
+import type { AssistantMode } from "@/lib/assistants/types";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { normalizeFunnelStage } from "@/lib/contact-profile/types";
 import { serverEnv } from "@/lib/env/server";
@@ -10,6 +12,12 @@ import type { LumiIntent, LumiSession, LumiState } from "@/lib/lumi/types";
 
 const DEFAULT_DB_PATH = ".data/contact-profiles.sqlite";
 const dbPath = serverEnv.WAHA_CONTACTS_DB_PATH ?? DEFAULT_DB_PATH;
+const ASSISTANT_SETTING_KEY = "active-assistant";
+const ASSISTANT_CHAT_SETTING_PREFIX = "assistant:";
+
+function assistantChatSettingKey(chatId: string) {
+  return `${ASSISTANT_CHAT_SETTING_PREFIX}${chatId}`;
+}
 
 function ensureDbDirectory() {
   mkdirSync(dirname(dbPath), { recursive: true });
@@ -51,6 +59,13 @@ function getDb() {
       handoff_active INTEGER NOT NULL DEFAULT 0,
       last_intent TEXT,
       last_interaction_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
   `);
@@ -181,6 +196,13 @@ function sanitizeLumiCollectedForStorage(collected: LumiSession["collected"]) {
   }
   const { phone: _phone, ...rest } = collected as Record<string, unknown>;
   return rest;
+}
+
+function normalizeAssistantMode(value: unknown): AssistantMode {
+  if (value === "fire" || value === "fox") {
+    return "fire";
+  }
+  return defaultAssistantMode;
 }
 
 export const contactProfileStore = {
@@ -385,5 +407,66 @@ export const contactProfileStore = {
   clearLumiSession(chatId: string) {
     const statement = getDb().prepare("DELETE FROM lumi_sessions WHERE chat_id = ?");
     statement.run(chatId);
+  },
+  clearContactData(chatId: string) {
+    const database = getDb();
+    database.prepare("DELETE FROM contact_profiles WHERE chat_id = ?").run(chatId);
+    database.prepare("DELETE FROM lumi_sessions WHERE chat_id = ?").run(chatId);
+    database
+      .prepare("DELETE FROM app_settings WHERE key = ?")
+      .run(assistantChatSettingKey(chatId));
+  },
+  getActiveAssistant(): AssistantMode {
+    const statement = getDb().prepare(`
+      SELECT value
+      FROM app_settings
+      WHERE key = ?
+      LIMIT 1
+    `);
+    const row = statement.get(ASSISTANT_SETTING_KEY) as
+      | { value?: unknown }
+      | undefined;
+    return normalizeAssistantMode(row?.value);
+  },
+  setActiveAssistant(assistant: AssistantMode): AssistantMode {
+    const nextValue = normalizeAssistantMode(assistant);
+    const updatedAt = new Date().toISOString();
+    const statement = getDb().prepare(`
+      INSERT INTO app_settings (key, value, updated_at)
+      VALUES (?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET
+        value = excluded.value,
+        updated_at = excluded.updated_at
+    `);
+    statement.run(ASSISTANT_SETTING_KEY, nextValue, updatedAt);
+    return nextValue;
+  },
+  getAssistantForChat(chatId: string): AssistantMode {
+    const statement = getDb().prepare(`
+      SELECT value
+      FROM app_settings
+      WHERE key = ?
+      LIMIT 1
+    `);
+    const row = statement.get(assistantChatSettingKey(chatId)) as
+      | { value?: unknown }
+      | undefined;
+    if (row?.value !== undefined) {
+      return normalizeAssistantMode(row.value);
+    }
+    return defaultAssistantMode;
+  },
+  setAssistantForChat(chatId: string, assistant: AssistantMode): AssistantMode {
+    const nextValue = normalizeAssistantMode(assistant);
+    const updatedAt = new Date().toISOString();
+    const statement = getDb().prepare(`
+      INSERT INTO app_settings (key, value, updated_at)
+      VALUES (?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET
+        value = excluded.value,
+        updated_at = excluded.updated_at
+    `);
+    statement.run(assistantChatSettingKey(chatId), nextValue, updatedAt);
+    return nextValue;
   },
 };

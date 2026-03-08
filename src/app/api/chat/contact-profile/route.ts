@@ -15,6 +15,10 @@ const updateContactProfileSchema = z.object({
   funnelStage: z.enum(funnelStages),
   notes: z.string().max(5000).default(""),
 });
+const clearContactProfileSchema = z.object({
+  chatId: z.string().min(5),
+  contactName: z.string().trim().optional(),
+});
 
 function asRecord(value: unknown) {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
@@ -235,5 +239,25 @@ export async function PUT(request: NextRequest) {
   }
 
   const profile = contactProfileStore.upsert(parsed.data);
+  return NextResponse.json({ profile });
+}
+
+export async function DELETE(request: NextRequest) {
+  const payload = await request.json();
+  const parsed = clearContactProfileSchema.safeParse(payload);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      },
+      { status: 400 }
+    );
+  }
+
+  const { chatId, contactName } = parsed.data;
+  contactProfileStore.clearContactData(chatId);
+  const profile = contactProfileStore.get(chatId, contactName);
   return NextResponse.json({ profile });
 }

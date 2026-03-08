@@ -19,10 +19,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import type { AssistantMode } from "@/lib/assistants/types";
 import type { ContactProfile, FunnelStage } from "@/lib/contact-profile/types";
 import { funnelStageLabels, funnelStages } from "@/lib/contact-profile/types";
 import type {
@@ -58,14 +70,17 @@ type ConversationAction = "mark-unread" | "archive" | "advance-funnel";
 type ConversationActionResponse = {
   profile?: ContactProfile;
 };
+type AssistantConfigResponse = {
+  assistant: AssistantMode;
+};
 
 const CONVERSATIONS_PAGE_SIZE = 30;
 const MESSAGES_PAGE_SIZE = 40;
 const CONVERSATIONS_REFRESH_INTERVAL_MS = 30_000;
 const MESSAGES_REFRESH_INTERVAL_MS = 15_000;
 const BACKGROUND_REFRESH_INTERVAL_MS = 60_000;
-const REALTIME_RECENT_WINDOW_MS = 20_000;
 const REALTIME_CONVERSATIONS_REFRESH_THROTTLE_MS = 2_000;
+const REALTIME_ACTIVE_CHAT_REFRESH_THROTTLE_MS = 2_000;
 const OPTIMISTIC_MESSAGE_ID_PREFIX = "optimistic:";
 const MESSAGE_DUPLICATE_WINDOW_MS = 15_000;
 
@@ -260,6 +275,9 @@ function getContactInitials(name?: string) {
 }
 
 export default function Page() {
+  const [assistantMode, setAssistantMode] = React.useState<AssistantMode>("lumi");
+  const [isUpdatingAssistantMode, setIsUpdatingAssistantMode] =
+    React.useState(false);
   const [session, setSession] = React.useState<WahaSession | null>(null);
   const [conversations, setConversations] = React.useState<WahaConversation[]>(
     [],
@@ -286,6 +304,7 @@ export default function Page() {
   const [messagesOffset, setMessagesOffset] = React.useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = React.useState(false);
   const [isSavingProfile, setIsSavingProfile] = React.useState(false);
+  const [isResettingProfile, setIsResettingProfile] = React.useState(false);
   const [lastSyncAt, setLastSyncAt] = React.useState<Date | null>(null);
   const [pendingConversationActions, setPendingConversationActions] =
     React.useState<Record<string, Partial<Record<ConversationAction, boolean>>>>(
@@ -298,14 +317,67 @@ export default function Page() {
   const isRefreshingMessagesRef = React.useRef(false);
   const isPageVisibleRef = React.useRef(true);
   const isRealtimeConnectedRef = React.useRef(false);
-  const lastRealtimeEventAtRef = React.useRef(0);
   const lastRealtimeConversationRefreshAtRef = React.useRef(0);
+  const lastRealtimeActiveChatRefreshAtRef = React.useRef(0);
 
   const activeConversation = React.useMemo(
     () =>
       conversations.find((conversation) => conversation.id === selectedChatId),
     [conversations, selectedChatId],
   );
+  async function loadAssistantMode(chatId?: string) {
+    const search = chatId
+      ? `?chatId=${encodeURIComponent(chatId)}`
+      : "";
+    const response = await fetch(`/api/chat/assistant${search}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      return;
+    }
+    const data = (await response.json()) as AssistantConfigResponse;
+    if (data.assistant === "fire" || data.assistant === "lumi") {
+      setAssistantMode(data.assistant);
+    }
+  }
+
+  async function updateAssistantMode(nextAssistant: AssistantMode) {
+    if (
+      isUpdatingAssistantMode ||
+      nextAssistant === assistantMode ||
+      !selectedChatId
+    ) {
+      return;
+    }
+    const previousAssistant = assistantMode;
+    setAssistantMode(nextAssistant);
+    setIsUpdatingAssistantMode(true);
+
+    try {
+      const response = await fetch("/api/chat/assistant", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assistant: nextAssistant,
+          chatId: selectedChatId,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update assistant mode");
+      }
+      const data = (await response.json()) as AssistantConfigResponse;
+      if (data.assistant === "fire" || data.assistant === "lumi") {
+        setAssistantMode(data.assistant);
+      }
+    } catch {
+      setAssistantMode(previousAssistant);
+    } finally {
+      setIsUpdatingAssistantMode(false);
+    }
+  }
+
   async function loadSession() {
     const response = await fetch("/api/chat/session", { cache: "no-store" });
 
@@ -557,6 +629,44 @@ export default function Page() {
     }
   }
 
+  async function resetContactProfile() {
+    if (!selectedChatId || !activeConversation || isResettingProfile) {
+      return;
+    }
+
+    setIsResettingProfile(true);
+    try {
+      const response = await fetch("/api/chat/contact-profile", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatId: selectedChatId,
+          contactName: activeConversation.name,
+        }),
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as ContactProfileResponse;
+      setContactProfile(data.profile);
+      setNotesDraft(data.profile.notes);
+      setFunnelStageDraft(data.profile.funnelStage);
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === selectedChatId
+            ? { ...conversation, funnelStage: data.profile.funnelStage }
+            : conversation,
+        ),
+      );
+    } finally {
+      setIsResettingProfile(false);
+    }
+  }
+
   function setConversationActionPending(
     chatId: string,
     action: ConversationAction,
@@ -745,6 +855,10 @@ export default function Page() {
   }, []);
 
   React.useEffect(() => {
+    void loadAssistantMode(selectedChatId);
+  }, [selectedChatId]);
+
+  React.useEffect(() => {
     const handleVisibilityChange = () => {
       isPageVisibleRef.current = !document.hidden;
       if (!isPageVisibleRef.current) {
@@ -766,11 +880,6 @@ export default function Page() {
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
       if (!isPageVisibleRef.current) {
-        return;
-      }
-      const hasRecentRealtimeEvent =
-        Date.now() - lastRealtimeEventAtRef.current < REALTIME_RECENT_WINDOW_MS;
-      if (isRealtimeConnectedRef.current && hasRecentRealtimeEvent) {
         return;
       }
       void refreshConversations();
@@ -811,11 +920,6 @@ export default function Page() {
       if (!isPageVisibleRef.current) {
         return;
       }
-      const hasRecentRealtimeEvent =
-        Date.now() - lastRealtimeEventAtRef.current < REALTIME_RECENT_WINDOW_MS;
-      if (isRealtimeConnectedRef.current && hasRecentRealtimeEvent) {
-        return;
-      }
       void refreshMessages(selectedChatId);
     }, isRealtimeConnectedRef.current
       ? MESSAGES_REFRESH_INTERVAL_MS
@@ -843,22 +947,40 @@ export default function Page() {
 
     source.addEventListener("waha-event", (rawEvent) => {
       const event = rawEvent as MessageEvent<string>;
-      const parsed = JSON.parse(event.data) as {
+      let parsed: {
         event?: string;
         chatId?: string;
         payload?: Record<string, unknown>;
       };
+      try {
+        parsed = JSON.parse(event.data) as {
+          event?: string;
+          chatId?: string;
+          payload?: Record<string, unknown>;
+        };
+      } catch {
+        return;
+      }
       if (!isPageVisibleRef.current) {
         return;
       }
 
-      lastRealtimeEventAtRef.current = Date.now();
       if (
         Date.now() - lastRealtimeConversationRefreshAtRef.current >=
         REALTIME_CONVERSATIONS_REFRESH_THROTTLE_MS
       ) {
         lastRealtimeConversationRefreshAtRef.current = Date.now();
         void refreshConversations();
+      }
+
+      if (
+        selectedChatId &&
+        Date.now() - lastRealtimeActiveChatRefreshAtRef.current >=
+        REALTIME_ACTIVE_CHAT_REFRESH_THROTTLE_MS
+      ) {
+        lastRealtimeActiveChatRefreshAtRef.current = Date.now();
+        void refreshMessages(selectedChatId);
+        void loadContactProfile(selectedChatId, activeConversation?.name);
       }
 
       if (
@@ -931,6 +1053,14 @@ export default function Page() {
         return "Desconhecido";
     }
   }, [session?.status]);
+  const sessionQrScannerHref = React.useMemo(() => {
+    if (session?.status !== "SCAN_QR" && session?.status !== "SCAN_QR_CODE") {
+      return null;
+    }
+
+    const sessionName = encodeURIComponent(session?.name ?? "default");
+    return `/api/waha/sessions/${sessionName}/auth/qr?format=image`;
+  }, [session?.name, session?.status]);
 
   const currentFunnelStage = contactProfile?.funnelStage ?? "primeiro-contato";
   const rawDetailsPreview = React.useMemo(
@@ -1120,7 +1250,7 @@ export default function Page() {
             <p className="truncate text-xs">{String(lumiStripeCodes?.invoiceId ?? "--")}</p>
           </div>
           <div className="col-span-2">
-            <p className="text-muted-foreground text-[11px]">Link de pagamento</p>
+            <p className="text-muted-foreground text-[11px]">Link de agendamento</p>
             {lumiPaymentUrl ? (
               <a
                 href={lumiPaymentUrl}
@@ -1246,6 +1376,7 @@ export default function Page() {
         onLoadMore={() => void loadConversations({ append: true })}
         sessionLabel={sessionLabel}
         sessionToneClassName={sessionTone}
+        sessionQrScannerHref={sessionQrScannerHref}
       />
       <SidebarInset className="h-dvh overflow-hidden bg-white md:my-1 md:h-[calc(100dvh-0.5rem)]">
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white px-0 py-0 md:px-5 md:py-1 lg:px-7">
@@ -1282,7 +1413,48 @@ export default function Page() {
                   </div>
                 </div>
 
-                <Sheet>
+                <div className="flex shrink-0 items-center gap-2">
+                  <div className="border-border/70 bg-muted/40 hidden items-center gap-1 rounded-xl border p-1 sm:flex">
+                    <Button
+                      size="sm"
+                      variant={assistantMode === "lumi" ? "default" : "ghost"}
+                      className="h-8 px-2.5 text-[11px] md:h-9 md:px-3"
+                      disabled={isUpdatingAssistantMode}
+                      onClick={() => void updateAssistantMode("lumi")}
+                    >
+                      Lumi
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={assistantMode === "fire" ? "default" : "ghost"}
+                      className="h-8 px-2.5 text-[11px] md:h-9 md:px-3"
+                      disabled={isUpdatingAssistantMode}
+                      onClick={() => void updateAssistantMode("fire")}
+                    >
+                      Fire
+                    </Button>
+                  </div>
+                  <div className="border-border/70 bg-muted/40 flex items-center gap-1 rounded-xl border p-1 sm:hidden">
+                    <Button
+                      size="sm"
+                      variant={assistantMode === "lumi" ? "default" : "ghost"}
+                      className="h-8 px-2 text-[11px]"
+                      disabled={isUpdatingAssistantMode}
+                      onClick={() => void updateAssistantMode("lumi")}
+                    >
+                      L
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={assistantMode === "fire" ? "default" : "ghost"}
+                      className="h-8 px-2 text-[11px]"
+                      disabled={isUpdatingAssistantMode}
+                      onClick={() => void updateAssistantMode("fire")}
+                    >
+                      F
+                    </Button>
+                  </div>
+                  <Sheet>
                   <SheetTrigger asChild>
                     <Button
                       size="sm"
@@ -1324,6 +1496,51 @@ export default function Page() {
                         >
                           {isSavingProfile ? "Salvando..." : "Salvar perfil"}
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="mt-2 w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              disabled={
+                                !activeConversation ||
+                                isLoadingProfile ||
+                                isSavingProfile ||
+                                isResettingProfile
+                              }
+                            >
+                              {isResettingProfile
+                                ? "Excluindo dados..."
+                                : "Limpar dados e reiniciar fluxo"}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent size="sm">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Confirmar limpeza dos dados?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação remove os dados salvos do contato e
+                                reinicia o fluxo da Lumi. Não é possível
+                                desfazer.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={isResettingProfile}>
+                                Cancelar
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                variant="destructive"
+                                disabled={isResettingProfile}
+                                onClick={() => void resetContactProfile()}
+                              >
+                                {isResettingProfile
+                                  ? "Excluindo..."
+                                  : "Confirmar exclusão"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                         <p className="text-muted-foreground mt-2 text-xs">
                           {contactProfile?.updatedAt
                             ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`
@@ -1332,7 +1549,8 @@ export default function Page() {
                       </div>
                     </div>
                   </SheetContent>
-                </Sheet>
+                  </Sheet>
+                </div>
               </div>
 
               <div className="min-h-0 overflow-hidden">
@@ -1381,6 +1599,50 @@ export default function Page() {
                 >
                   {isSavingProfile ? "Salvando..." : "Salvar perfil"}
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-2 w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={
+                        !activeConversation ||
+                        isLoadingProfile ||
+                        isSavingProfile ||
+                        isResettingProfile
+                      }
+                    >
+                      {isResettingProfile
+                        ? "Excluindo dados..."
+                        : "Limpar dados e reiniciar fluxo"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Confirmar limpeza dos dados?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação remove os dados salvos do contato e reinicia
+                        o fluxo da Lumi. Não é possível desfazer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isResettingProfile}>
+                        Cancelar
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        disabled={isResettingProfile}
+                        onClick={() => void resetContactProfile()}
+                      >
+                        {isResettingProfile
+                          ? "Excluindo..."
+                          : "Confirmar exclusão"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <p className="text-muted-foreground mt-2 text-xs">
                   {contactProfile?.updatedAt
                     ? `Última atualização: ${new Date(contactProfile.updatedAt).toLocaleString()}`

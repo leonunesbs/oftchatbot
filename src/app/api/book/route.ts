@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 
-import { calComAdapter } from "@/lib/lumi/integrations/calcom";
+import { oftagendaAdapter } from "@/lib/lumi/integrations/oftagenda";
 
 const bookPayloadSchema = z.object({
   slotId: z.string().trim().min(2),
@@ -26,12 +26,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const booking = await calComAdapter.book(parsed.data);
+  const booking = await oftagendaAdapter.book(parsed.data);
   return NextResponse.json({
     ok: true,
     confirmation: {
-      protocol: booking.protocol,
+      ...(booking.protocol ? { protocol: booking.protocol } : {}),
       source: booking.source,
+      bookingUrl: booking.paymentUrl,
     },
   });
 }
