@@ -122,7 +122,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
           "Content-Security-Policy": cspDirectives,
           "Referrer-Policy": "strict-origin-when-cross-origin",
           "X-Content-Type-Options": "nosniff",
-          "Permissions-Policy": "camera=(), microphone=(), geolocation=(), usb=()",
+          "Permissions-Policy":
+            "camera=(), microphone=(), geolocation=(), usb=()",
         },
       },
     );
