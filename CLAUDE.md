@@ -7,6 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Dev Thinker** — leonunesbs (the user): defines requirements, plans, reviews, decides direction.
 - **Dev Coder** — Claude: implements what is planned, asks for clarification when needed, never makes architectural decisions unilaterally.
 
+## Writing quality (user-visible text)
+
+- Any text shown to end users (UI labels, messages, dialogs, chatbot replies, notifications, emails, docs shown in product) must be reviewed before delivery.
+- Always correct grammar, spelling, punctuation, and accentuation according to standard Brazilian Portuguese when the text is in PT-BR.
+- Prefer clear, natural wording and avoid awkward literal translations.
+
 After completing any task, always ask: **"Quer fazer commit e push?"**
 
 ## Design decisions

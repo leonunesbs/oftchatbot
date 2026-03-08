@@ -17,5 +17,7 @@ alwaysApply: false
 - Keep clinical safety guardrails: no diagnosis/prescription/personalized medical conduct.
 - Urgency triggers (pain, trauma, sudden vision loss, flashes/sombras, chemical exposure) must prioritize emergency guidance and stop scheduling.
 - Handoff to human for pricing/insurance, cancellation/reschedule, explicit human request, and persistent validation failures.
+- Any user-visible text must be linguistically reviewed before delivery.
+- Always fix grammar, spelling, punctuation, and accentuation (PT-BR when the text is in Portuguese).
 - When changing dialogs or state machine behavior, update and run `tests/lumi/dialogs.spec.ts`.
 - Destructive actions in UI (delete/clear/reset) must use shadcn `AlertDialog` confirmation; avoid `window.confirm`.
