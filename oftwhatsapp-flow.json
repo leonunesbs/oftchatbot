@@ -1,0 +1,287 @@
+{
+  "version": "7.3",
+  "data_api_version": "3.0",
+  "routing_model": {
+    "SELECT_SLOT": ["PATIENT_DETAILS"],
+    "PATIENT_DETAILS": ["SUMMARY"],
+    "SUMMARY": []
+  },
+  "screens": [
+    {
+      "id": "SELECT_SLOT",
+      "title": "Agendamento",
+      "data": {
+        "location_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" }
+            }
+          },
+          "__example__": [
+            { "id": "consulta", "title": "Consulta Oftalmológica" }
+          ]
+        },
+        "date_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" }
+            }
+          },
+          "__example__": [
+            { "id": "2026-03-09", "title": "09/03 (seg.)" },
+            { "id": "2026-03-10", "title": "10/03 (ter.)" },
+            { "id": "2026-03-11", "title": "11/03 (qua.)" }
+          ]
+        },
+        "time_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" }
+            }
+          },
+          "__example__": [
+            { "id": "08:00", "title": "08:00" },
+            { "id": "09:30", "title": "09:30" },
+            { "id": "14:00", "title": "14:00" }
+          ]
+        },
+        "is_date_enabled": {
+          "type": "boolean",
+          "__example__": true
+        },
+        "is_time_enabled": {
+          "type": "boolean",
+          "__example__": true
+        }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "select_slot_form",
+            "children": [
+              {
+                "type": "Dropdown",
+                "label": "Local",
+                "name": "location",
+                "required": true,
+                "data-source": "${data.location_options}",
+                "on-select-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "trigger": "load_dates_from_oftagenda_api",
+                    "integration": "oftagenda",
+                    "resource": "availability",
+                    "location": "${form.location}",
+                    "daysAhead": 14
+                  }
+                }
+              },
+              {
+                "type": "Dropdown",
+                "label": "Data",
+                "name": "date",
+                "required": "${data.is_date_enabled}",
+                "enabled": "${data.is_date_enabled}",
+                "data-source": "${data.date_options}",
+                "on-select-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "trigger": "load_times_from_oftagenda_api",
+                    "integration": "oftagenda",
+                    "resource": "availability",
+                    "location": "${form.location}",
+                    "date": "${form.date}",
+                    "daysAhead": 14
+                  }
+                }
+              },
+              {
+                "type": "Dropdown",
+                "label": "Horário",
+                "name": "time",
+                "required": "${data.is_time_enabled}",
+                "enabled": "${data.is_time_enabled}",
+                "data-source": "${data.time_options}",
+                "on-select-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "trigger": "validate_time_with_oftagenda_api",
+                    "integration": "oftagenda",
+                    "resource": "availability",
+                    "location": "${form.location}",
+                    "date": "${form.date}",
+                    "time": "${form.time}"
+                  }
+                }
+              },
+              {
+                "type": "Footer",
+                "label": "Continuar",
+                "on-click-action": {
+                  "name": "navigate",
+                  "next": {
+                    "type": "screen",
+                    "name": "PATIENT_DETAILS"
+                  },
+                  "payload": {
+                    "location": "${form.location}",
+                    "date": "${form.date}",
+                    "time": "${form.time}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PATIENT_DETAILS",
+      "title": "Seus dados",
+      "data": {
+        "location": { "type": "string", "__example__": "fortaleza" },
+        "date": { "type": "string", "__example__": "2026-03-10" },
+        "time": { "type": "string", "__example__": "09:30" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "patient_details_form",
+            "children": [
+              {
+                "type": "TextInput",
+                "label": "Nome completo",
+                "name": "name",
+                "required": true
+              },
+              {
+                "type": "TextInput",
+                "label": "E-mail",
+                "name": "email",
+                "input-type": "email",
+                "required": true
+              },
+              {
+                "type": "TextInput",
+                "label": "Telefone",
+                "name": "phone",
+                "input-type": "phone",
+                "required": true
+              },
+              {
+                "type": "TextArea",
+                "label": "Observações (opcional)",
+                "name": "reason",
+                "required": false
+              },
+              {
+                "type": "Footer",
+                "label": "Revisar",
+                "on-click-action": {
+                  "name": "navigate",
+                  "next": {
+                    "type": "screen",
+                    "name": "SUMMARY"
+                  },
+                  "payload": {
+                    "location": "${data.location}",
+                    "date": "${data.date}",
+                    "time": "${data.time}",
+                    "name": "${form.name}",
+                    "email": "${form.email}",
+                    "phone": "${form.phone}",
+                    "reason": "${form.reason}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SUMMARY",
+      "title": "Confirmação",
+      "terminal": true,
+      "refresh_on_back": true,
+      "data": {
+        "location": { "type": "string", "__example__": "fortaleza" },
+        "date": { "type": "string", "__example__": "2026-03-10" },
+        "time": { "type": "string", "__example__": "09:30" },
+        "name": { "type": "string", "__example__": "João da Silva" },
+        "email": { "type": "string", "__example__": "joao@email.com" },
+        "phone": { "type": "string", "__example__": "5585999999999" },
+        "reason": { "type": "string", "__example__": "Primeira consulta." }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "summary_form",
+            "children": [
+              {
+                "type": "TextHeading",
+                "text": "Revise seus dados"
+              },
+              {
+                "type": "TextBody",
+                "text": "Local: ${data.location}\nData: ${data.date}\nHorário: ${data.time}"
+              },
+              {
+                "type": "TextBody",
+                "text": "Nome: ${data.name}\nE-mail: ${data.email}\nTelefone: ${data.phone}"
+              },
+              {
+                "type": "TextBody",
+                "text": "Observações: ${data.reason}"
+              },
+              {
+                "type": "OptIn",
+                "name": "accept_terms",
+                "label": "Li e concordo com os termos de atendimento.",
+                "required": true,
+                "on-click-action": {
+                  "name": "open_url",
+                  "url": "https://oftleonardo.com.br/termos"
+                }
+              },
+              {
+                "type": "Footer",
+                "label": "Confirmar agendamento",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "location": "${data.location}",
+                    "date": "${data.date}",
+                    "time": "${data.time}",
+                    "name": "${data.name}",
+                    "email": "${data.email}",
+                    "phone": "${data.phone}",
+                    "reason": "${data.reason}",
+                    "source": "whatsapp-flow",
+                    "integration": "oftagenda",
+                    "acceptTerms": "${form.accept_terms}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
