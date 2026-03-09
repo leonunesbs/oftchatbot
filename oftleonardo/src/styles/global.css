@@ -218,6 +218,36 @@
   }
 }
 
+@keyframes card-scroll-diagonal-left {
+  from {
+    transform: translate3d(-14px, 18px, 0) scale(0.992);
+    opacity: 0;
+  }
+  60% {
+    transform: translate3d(1px, -1px, 0) scale(1);
+    opacity: 0.93;
+  }
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes card-scroll-diagonal-right {
+  from {
+    transform: translate3d(14px, 18px, 0) scale(0.992);
+    opacity: 0;
+  }
+  60% {
+    transform: translate3d(-1px, -1px, 0) scale(1);
+    opacity: 0.93;
+  }
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
 @layer utilities {
   .defer-render {
     content-visibility: auto;
@@ -258,6 +288,12 @@
     opacity: 1;
   }
 
+  .scroll-card-diagonal-left,
+  .scroll-card-diagonal-right {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+
   @supports (animation-timeline: view()) {
     .scroll-reveal {
       animation-name: section-reveal;
@@ -270,6 +306,18 @@
 
     .scroll-card-motion {
       animation: card-scroll-lift linear both;
+      animation-timeline: view(block);
+      animation-range: entry 10% cover 35%;
+    }
+
+    .scroll-card-diagonal-left {
+      animation: card-scroll-diagonal-left linear both;
+      animation-timeline: view(block);
+      animation-range: entry 10% cover 35%;
+    }
+
+    .scroll-card-diagonal-right {
+      animation: card-scroll-diagonal-right linear both;
       animation-timeline: view(block);
       animation-range: entry 10% cover 35%;
     }
@@ -326,6 +374,8 @@
     }
     .scroll-reveal,
     .scroll-card-motion,
+    .scroll-card-diagonal-left,
+    .scroll-card-diagonal-right,
     .parallax-layer,
     .parallax-layer--slow,
     .parallax-layer--fast {
