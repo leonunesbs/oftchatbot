@@ -85,6 +85,9 @@ export default defineConfig({
         if (pageRules[path]) {
           item.changefreq = pageRules[path].changefreq;
           item.priority = pageRules[path].priority;
+        } else if (path.startsWith("/conteudos/")) {
+          item.changefreq = "monthly";
+          item.priority = 0.9;
         }
 
         item.lastmod = lastmod;
