@@ -30,7 +30,8 @@
         "text": "={{ $json.messages[0].text.body }}",
         "options": {
           "systemMessage": "Você é a Fire, assistente virtual da Clínica OFT Leonardo.\n\nAPRESENTAÇÃO (apenas na primeira mensagem):\n\"Oi! Sou a Fire, assistente virtual da Clínica OFT Leonardo. Como posso ajudar você hoje?\"\n\nOBJETIVO:\nConduzir o agendamento em 3 etapas (local -> data -> horário) e gerar o link de resumo.\n\nREGRAS ESSENCIAIS:\n- Nunca invente dados, links, datas, horários ou valores.\n- Sempre use ferramentas antes de responder com locais, datas, horários, histórico ou link.\n- Não reutilize memória para disponibilidade; sempre consultar API novamente.\n- Não confirmar/agendar dentro do chat; apenas enviar link para o paciente concluir no site.\n- Evitar \"fico/estou à disposição\" e evitar emojis em mensagens de erro.\n- Responder de forma curta, clara e direta (economia de tokens).\n\nFLUXO:\n1) Local: usar Get Locations Tool e listar opções numeradas.\n2) Data: usar Check Availability Tool e listar datas em DD/MM (sem dia da semana).\n3) Horário: usar Check Availability Tool e listar horários numerados.\n4) Finalização: usar Generate Summary Link Tool.\n\nREGRAS DO LINK:\n- Se existir summaryUrl e ok !== false, enviar o link.\n- Linha obrigatória: \"Link de agendamento: <summaryUrl>\".\n- Próximo passo deve ficar claro: clicar no link para abrir o resumo e concluir no site.\n- Só usar mensagem de erro quando realmente não houver summaryUrl.\n\nOUTRAS FERRAMENTAS:\n- Get Appointments Tool: usar apenas quando o paciente pedir consulta de agendamentos existentes.\n\nBASE DE CONHECIMENTO (links oficiais):\n- FAQ: https://oftleonardo.com.br/#faq\n- Conteúdos: https://oftleonardo.com.br/conteudos\n- Acuidade visual: https://oftleonardo.com.br/acuidade-visual\n- Tela de Amsler: https://oftleonardo.com.br/tela-de-amsler\n- Agendamento: https://agenda.oftleonardo.com.br/agendar\n- Status: https://agenda.oftleonardo.com.br/status\n- Instagram: https://www.instagram.com/oftleonardo\n- LinkedIn: https://www.linkedin.com/in/oftleonardo\n- Facebook: https://www.facebook.com/leonunesbs\n- Threads: https://www.threads.net/@oftleonardo\n- X: https://x.com/oftleonardo"
-        }
+        },
+        "requireSpecificOutputFormat": true
       },
       "id": "d05491eb-20c0-408c-8e74-7e49e6601e66",
       "name": "Fire AI Agent",
@@ -225,12 +226,12 @@
     },
     {
       "parameters": {
-        "toolDescription": "Gera o link de resumo no oftagenda com location, date e time, incluindo parâmetros UTM para tracking. Sempre valide ok===true e valid===true antes de enviar o summaryUrl ao paciente.",
+        "toolDescription": "Gera o link de resumo no oftagenda com location, date e time, incluindo parâmetros UTM para tracking. Use exatamente os valores retornados pelas ferramentas (location em slug, date em YYYY-MM-DD e time em HH:mm com zero à esquerda). Sempre valide ok===true e summaryUrl preenchido antes de enviar o link ao paciente.",
         "method": "POST",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/resumo-link",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido (ex: fortaleza)'),\n  date: $fromAI('date', 'Data no formato YYYY-MM-DD'),\n  time: $fromAI('time', 'Horário no formato HH:mm'),\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'fire_assistente'\n}) }}",
+        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido exatamente como retornado em locations[].value (ex: fortaleza)'),\n  date: $fromAI('date', 'Data exatamente como retornada em options.dates[].isoDate (YYYY-MM-DD)'),\n  time: $fromAI('time', 'Horário exatamente como retornado em options.dates[].times[] (HH:mm, ex: 08:00)'),\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'fire_assistente'\n}) }}",
         "options": {}
       },
       "id": "b2aba3e2-2b36-49ea-a376-5c21b4067cc9",
@@ -286,7 +287,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"reply\": \"Mensagem final para o paciente\",\n  \"summaryUrl\": \"https://agenda.oftleonardo.com.br/agendar/resumo?...\",\n  \"ok\": true,\n  \"valid\": true\n}"
+        "jsonSchemaExample": "{\n  \"reply\": \"Mensagem final para o paciente\",\n  \"summaryUrl\": \"https://agenda.oftleonardo.com.br/agendar/resumo?...\",\n  \"ok\": true\n}"
       },
       "id": "03f5d724-b62b-4c41-a89f-99743071828e",
       "name": "Structured Output Parser",
