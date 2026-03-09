@@ -246,35 +246,19 @@ import BookingPopup from "./BookingPopup";
     requestAnimationFrame(syncHeaderProgress);
   }
 
-  function easeInOutCubic(progress: number) {
-    return progress < 0.5
-      ? 4 * progress * progress * progress
-      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-  }
-
-  function animateScrollTo(top: number, duration: number) {
-    const start = window.scrollY;
-    const delta = top - start;
-    const startTime = performance.now();
-
-    function step(now: number) {
-      const elapsed = now - startTime;
-      const progress = clamp(elapsed / duration, 0, 1);
-      const easedProgress = easeInOutCubic(progress);
-      window.scrollTo(0, start + delta * easedProgress);
-
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
+  function setupSectionLinkSmoothScroll() {
+    const sectionLinks = new Set<HTMLAnchorElement>();
+    if (header) {
+      const headerSectionLinks =
+        header.querySelectorAll<HTMLAnchorElement>('a[href^="/#"]');
+      headerSectionLinks.forEach((link) => sectionLinks.add(link));
     }
 
-    requestAnimationFrame(step);
-  }
+    const taggedSectionLinks = document.querySelectorAll<HTMLAnchorElement>(
+      "a[data-section-scroll]",
+    );
+    taggedSectionLinks.forEach((link) => sectionLinks.add(link));
 
-  function setupSectionLinkSmoothScroll() {
-    if (!header) return;
-
-    const sectionLinks = header.querySelectorAll<HTMLAnchorElement>('a[href^="/#"]');
     sectionLinks.forEach((link) => {
       link.addEventListener("click", (event) => {
         if (
@@ -305,11 +289,7 @@ import BookingPopup from "./BookingPopup";
 
         event.preventDefault();
         history.pushState(null, "", url.hash);
-
-        const targetTop = target.getBoundingClientRect().top + window.scrollY;
-        const distance = Math.abs(targetTop - window.scrollY);
-        const duration = clamp(distance * 0.8, 520, 1200);
-        animateScrollTo(targetTop, duration);
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
   }
