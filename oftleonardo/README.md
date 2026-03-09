@@ -273,7 +273,7 @@ Esse procedimento assegura consistência intra-sessão para cada combinação de
 Em `VisualAcuityTest.tsx`:
 
 - falha na primeira linha implica desfecho `< 20/200`;
-- leitura completa até o nível final implica melhor acuidade (`20/15`);
+- leitura completa até o nível final implica melhor acuidade (`20/16`);
 - resultados são armazenados por olho (`od`, `os`).
 
 Em `ResultsStep.tsx`, a classificação é baseada no denominador Snellen:

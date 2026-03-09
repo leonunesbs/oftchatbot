@@ -17,14 +17,17 @@ export const DISTANCE_STORAGE_KEY = "va-distance";
 
 export const ACUITY_LEVELS = [
   { snellen: "20/200", denominator: 200 },
+  { snellen: "20/160", denominator: 160 },
+  { snellen: "20/125", denominator: 125 },
   { snellen: "20/100", denominator: 100 },
   { snellen: "20/80", denominator: 80 },
-  { snellen: "20/60", denominator: 60 },
+  { snellen: "20/63", denominator: 63 },
+  { snellen: "20/50", denominator: 50 },
   { snellen: "20/40", denominator: 40 },
-  { snellen: "20/30", denominator: 30 },
+  { snellen: "20/32", denominator: 32 },
   { snellen: "20/25", denominator: 25 },
   { snellen: "20/20", denominator: 20 },
-  { snellen: "20/15", denominator: 15 },
+  { snellen: "20/16", denominator: 16 },
 ] as const;
 
 export type AcuityLevel = (typeof ACUITY_LEVELS)[number];

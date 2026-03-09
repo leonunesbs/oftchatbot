@@ -19,6 +19,7 @@ interface OptotypeCardProps {
 }
 
 const OPTOTYPE_COUNT = 5;
+const HORIZONTAL_OPTOTYPE_SPACING_RATIO = 1;
 
 export default function OptotypeCard({
   level,
@@ -29,7 +30,8 @@ export default function OptotypeCard({
   eyeSide,
 }: OptotypeCardProps) {
   const sizePx = Math.max(optotypeHeightPx(level.denominator, pxPerMm, distanceM), 2);
-  const gapPx = sizePx;
+  // Messias et al. (2010): spacing between adjacent optotypes (x) equals optotype size (y).
+  const gapPx = sizePx * HORIZONTAL_OPTOTYPE_SPACING_RATIO;
   const rowWidthPx = OPTOTYPE_COUNT * sizePx + (OPTOTYPE_COUNT - 1) * gapPx;
   const seedBase = `${chartSeed}-${mode}-${eyeSide}-${level.snellen}`;
   const orientations = useMemo(() => generateSeededOrientations(OPTOTYPE_COUNT, seedBase), [seedBase]);
