@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { Eye } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
@@ -38,5 +38,27 @@ export default function VisualAcuityFloat() {
     };
   }, []);
 
-  return <Toaster position="bottom-left" closeButton richColors />;
+  return (
+    <Toaster
+      position="bottom-left"
+      closeButton
+      toastOptions={{
+        classNames: {
+          toast: "!bg-popover !text-popover-foreground !border-border",
+          title: "!text-popover-foreground",
+          description: "!text-muted-foreground",
+          actionButton: "!bg-primary !text-primary-foreground",
+          closeButton: "!bg-background !text-foreground !border-border",
+        },
+      }}
+      style={
+        {
+          "--normal-bg": "var(--popover)",
+          "--normal-text": "var(--popover-foreground)",
+          "--normal-border": "var(--border)",
+          "--border-radius": "var(--radius)",
+        } as CSSProperties
+      }
+    />
+  );
 }
