@@ -5,7 +5,7 @@ export default function ParallaxArtifacts() {
       aria-hidden="true"
     >
       <div
-        className="absolute inset-0 lg:hidden"
+        className="parallax-layer parallax-layer--slow absolute inset-0 lg:hidden"
         style={{
           transform: "translate3d(0, 0, 0)",
           backgroundImage: [
@@ -22,11 +22,9 @@ export default function ParallaxArtifacts() {
         }}
       />
       <div
-        className="absolute inset-0 hidden lg:block"
+        className="parallax-layer parallax-layer--slow absolute inset-0 hidden lg:block"
         style={{
           transform: "translate3d(0, 0, 0)",
-          willChange: "transform",
-          animation: "artifacts-drift-desktop-a 20s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 3px, transparent 3px)",
             "radial-gradient(circle at 22% 16%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
@@ -42,11 +40,9 @@ export default function ParallaxArtifacts() {
         }}
       />
       <div
-        className="absolute inset-0 hidden lg:block"
+        className="parallax-layer parallax-layer--fast absolute inset-0 hidden lg:block"
         style={{
           transform: "translate3d(0, 0, 0)",
-          willChange: "transform",
-          animation: "artifacts-drift-desktop-b 24s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 12% 30%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 8px, transparent 8px)",
             "radial-gradient(circle at 34% 24%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 6px, transparent 6px)",

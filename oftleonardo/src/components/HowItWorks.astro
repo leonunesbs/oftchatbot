@@ -23,7 +23,7 @@ import { siteConfig } from "@/config/site";
             <div class="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-sm font-bold text-foreground">
               {item.step}
             </div>
-            <div class="flex-1 rounded-2xl border border-border/50 bg-card p-5 transition-all hover:border-border hover:shadow-sm">
+            <div class="surface-lift flex-1 rounded-2xl border border-border/50 bg-card p-5 hover:border-border hover:shadow-sm">
               <h3 class="mb-1.5 text-base font-semibold text-foreground">
                 {item.title}
               </h3>
@@ -44,7 +44,7 @@ import { siteConfig } from "@/config/site";
         {siteConfig.howItWorks.map((item, index) => (
           <div class={`relative flex items-center gap-6 ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
             <div class={`flex-1 ${index % 2 === 0 ? "text-right" : "text-left"}`}>
-              <div class="rounded-2xl border border-border/50 bg-card p-6 transition-all hover:border-border hover:shadow-sm">
+              <div class="surface-lift rounded-2xl border border-border/50 bg-card p-6 hover:border-border hover:shadow-sm">
                 <h3 class="mb-2 text-base font-semibold text-foreground">
                   {item.title}
                 </h3>

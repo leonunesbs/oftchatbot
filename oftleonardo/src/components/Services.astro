@@ -30,12 +30,12 @@ const iconMap: Record<string, typeof Eye> = {
 
     <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
-        siteConfig.services.map((service, index) => {
+        siteConfig.services.map((service) => {
           const Icon = iconMap[service.icon];
           return (
-            <Card className="group h-full border-border/50 transition-all hover:border-border hover:shadow-sm">
+            <Card className="surface-lift group h-full border-border/50 hover:border-border hover:shadow-sm">
               <CardHeader>
-                <div class="mb-3 flex size-11 items-center justify-center rounded-xl bg-secondary text-foreground">
+                <div class="mb-3 flex size-11 items-center justify-center rounded-xl bg-secondary text-foreground transition-transform duration-300 group-hover:-translate-y-0.5">
                   {Icon && <Icon className="size-5" />}
                 </div>
                 <div class="flex flex-col items-start gap-1.5">

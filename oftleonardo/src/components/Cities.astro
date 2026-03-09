@@ -35,7 +35,7 @@ const imageStyles: Record<string, string> = {
       {siteConfig.cities.map((city) => {
         const importedImage = cityImages[city.slug];
         return (
-          <div class="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all hover:border-border hover:shadow-md">
+          <div class="surface-lift group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card hover:border-border hover:shadow-md">
               {/* Photo area */}
               <div class="relative aspect-16/10 w-full overflow-hidden bg-secondary/60">
                 {importedImage ? (
@@ -45,7 +45,7 @@ const imageStyles: Record<string, string> = {
                     widths={[640, 800, 1200]}
                     sizes="(min-width: 1024px) 33vw, 100vw"
                     formats={["avif", "webp", "jpeg"]}
-                    class={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imageStyles[city.slug] || ""}`}
+                    class={`h-full w-full transform-gpu object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imageStyles[city.slug] || ""}`}
                   />
                 ) : city.image ? (
                   <img
@@ -55,7 +55,7 @@ const imageStyles: Record<string, string> = {
                     height={500}
                     loading="lazy"
                     decoding="async"
-                    class={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imageStyles[city.slug] || ""}`}
+                    class={`h-full w-full transform-gpu object-cover transition-transform duration-500 group-hover:scale-[1.03] ${imageStyles[city.slug] || ""}`}
                   />
                 ) : (
                   <div class="flex h-full w-full flex-col items-center justify-center gap-3 bg-linear-to-br from-secondary/80 via-secondary/40 to-brand/6">

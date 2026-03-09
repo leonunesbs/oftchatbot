@@ -22,10 +22,10 @@ const iconMap: Record<string, typeof Heart> = {
     </div>
 
     <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {siteConfig.differentials.map((item, index) => {
+      {siteConfig.differentials.map((item) => {
         const Icon = iconMap[item.icon];
         return (
-          <div class="group flex flex-col items-center rounded-2xl border border-border/50 bg-card p-6 text-center transition-all hover:border-border hover:shadow-sm">
+          <div class="surface-lift group flex flex-col items-center rounded-2xl border border-border/50 bg-card p-6 text-center hover:border-border hover:shadow-sm">
             <span class="mb-4 flex size-12 items-center justify-center rounded-2xl bg-secondary text-foreground transition-colors group-hover:bg-brand/10 group-hover:text-brand">
               {Icon && <Icon className="size-5" />}
             </span>
