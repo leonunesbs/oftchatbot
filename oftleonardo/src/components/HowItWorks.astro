@@ -14,7 +14,7 @@ import { siteConfig } from "@/config/site";
     </div>
 
     <!-- Mobile: vertical timeline (step left, content right) -->
-    <div class="relative mt-14 lg:hidden">
+    <div class="scroll-3d-stage relative mt-14 lg:hidden">
       <div class="absolute bottom-0 left-5 top-0 w-px bg-border" aria-hidden="true"></div>
 
       <div class="flex flex-col gap-8">
@@ -23,7 +23,7 @@ import { siteConfig } from "@/config/site";
             <div class="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-sm font-bold text-foreground">
               {item.step}
             </div>
-            <div class={`surface-lift flex-1 rounded-2xl border border-border/50 bg-card p-5 hover:border-border hover:shadow-sm ${index % 2 === 0 ? "scroll-card-diagonal-left" : "scroll-card-diagonal-right"}`}>
+            <div class="surface-lift scroll-card-depth scroll-card-diagonal-right flex-1 rounded-2xl border border-border/50 bg-card p-5 hover:border-border hover:shadow-sm">
               <h3 class="mb-1.5 text-base font-semibold text-foreground">
                 {item.title}
               </h3>
@@ -37,14 +37,14 @@ import { siteConfig } from "@/config/site";
     </div>
 
     <!-- Desktop: alternating centered timeline -->
-    <div class="relative mt-14 hidden lg:block">
+    <div class="scroll-3d-stage relative mt-14 hidden lg:block">
       <div class="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-border" aria-hidden="true"></div>
 
       <div class="grid gap-12">
         {siteConfig.howItWorks.map((item, index) => (
           <div class={`relative flex items-center gap-6 ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
             <div class={`flex-1 ${index % 2 === 0 ? "text-right" : "text-left"}`}>
-              <div class={`surface-lift rounded-2xl border border-border/50 bg-card p-6 hover:border-border hover:shadow-sm ${index % 2 === 0 ? "scroll-card-diagonal-left" : "scroll-card-diagonal-right"}`}>
+              <div class={`surface-lift scroll-card-depth rounded-2xl border border-border/50 bg-card p-6 hover:border-border hover:shadow-sm ${index % 2 === 0 ? "scroll-card-diagonal-left" : "scroll-card-diagonal-right"}`}>
                 <h3 class="mb-2 text-base font-semibold text-foreground">
                   {item.title}
                 </h3>
