@@ -33,45 +33,65 @@ export default function ParallaxArtifacts() {
   return (
     <div
       ref={wrapperRef}
-      className="pointer-events-none absolute inset-0 -z-1 hidden overflow-hidden motion-safe:lg:block"
+      className="pointer-events-none absolute inset-0 -z-1 hidden overflow-hidden motion-safe:block"
       aria-hidden="true"
     >
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 lg:hidden"
         style={{
-          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.06), 0)",
+          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.03), 0)",
           willChange: "transform",
           backgroundImage: [
-            "radial-gradient(circle at 6% 10%, color-mix(in oklab, var(--color-brand) 14%, transparent) 0 3px, transparent 3px)",
-            "radial-gradient(circle at 20% 12%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 6px, transparent 6px)",
-            "radial-gradient(circle at 39% 8%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 4px, transparent 4px)",
-            "radial-gradient(circle at 58% 15%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 8px, transparent 8px)",
-            "radial-gradient(circle at 84% 13%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 5px, transparent 5px)",
-            "radial-gradient(circle at 12% 45%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 7px, transparent 7px)",
-            "radial-gradient(circle at 48% 42%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
-            "radial-gradient(circle at 72% 49%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 6px, transparent 6px)",
-            "radial-gradient(circle at 90% 40%, color-mix(in oklab, var(--color-brand) 8%, transparent) 0 9px, transparent 9px)",
-            "radial-gradient(circle at 8% 80%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 5px, transparent 5px)",
-            "radial-gradient(circle at 37% 76%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 7px, transparent 7px)",
-            "radial-gradient(circle at 66% 86%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 4px, transparent 4px)",
-            "radial-gradient(circle at 92% 74%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 8px, transparent 8px)",
+            "radial-gradient(circle at 14% 12%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
+            "radial-gradient(circle at 42% 20%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 78% 16%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
+            "radial-gradient(circle at 24% 68%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 72% 74%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
+            "radial-gradient(ellipse at 50% 42%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0%, transparent 62%)",
+          ].join(", "),
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
+          opacity: 0.2,
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden lg:block"
+        style={{
+          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.045), 0)",
+          willChange: "transform",
+          backgroundImage: [
+            "radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 3px, transparent 3px)",
+            "radial-gradient(circle at 22% 16%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
+            "radial-gradient(circle at 42% 10%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
+            "radial-gradient(circle at 65% 18%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 88% 14%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 4px, transparent 4px)",
+            "radial-gradient(circle at 14% 52%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 46% 46%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 4px, transparent 4px)",
+            "radial-gradient(circle at 76% 54%, color-mix(in oklab, var(--color-brand) 9%, transparent) 0 5px, transparent 5px)",
+            "radial-gradient(circle at 26% 82%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
+            "radial-gradient(circle at 70% 84%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
           ].join(", "),
         }}
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 hidden lg:block"
         style={{
-          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.12), 0)",
+          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.085), 0)",
           willChange: "transform",
           backgroundImage: [
-            "linear-gradient(45deg, transparent 49.2%, color-mix(in oklab, var(--color-brand) 10%, transparent) 49.2% 50.8%, transparent 50.8%)",
-            "linear-gradient(-45deg, transparent 49.2%, color-mix(in oklab, var(--color-brand) 10%, transparent) 49.2% 50.8%, transparent 50.8%)",
+            "radial-gradient(circle at 12% 30%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 8px, transparent 8px)",
+            "radial-gradient(circle at 34% 24%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 58% 32%, color-mix(in oklab, var(--color-brand) 8%, transparent) 0 9px, transparent 9px)",
+            "radial-gradient(circle at 84% 26%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 20% 74%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 8px, transparent 8px)",
+            "radial-gradient(circle at 52% 70%, color-mix(in oklab, var(--color-brand) 8%, transparent) 0 6px, transparent 6px)",
+            "radial-gradient(circle at 86% 78%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 8px, transparent 8px)",
           ].join(", "),
-          backgroundSize: "220px 220px, 220px 220px",
-          backgroundPosition: "0 0, 0 0",
+          backgroundSize: "100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%",
+          backgroundPosition: "center, center, center, center, center, center, center",
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
-          opacity: 0.45,
+          opacity: 0.22,
         }}
       />
     </div>

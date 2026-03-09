@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { siteConfig } from "@/config/site";
+import WhatsAppModal from "./WhatsAppModal";
 import { CalendarCheck2, Eye, Grid3X3, Menu, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -78,14 +79,14 @@ export default function MobileMenu() {
             <Grid3X3 className="size-4" />
             Tela de Amsler
           </a>
-        <a
-          href={siteConfig.partnerApps.oftagenda}
-          onClick={() => setOpen(false)}
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-        >
-          <CalendarCheck2 className="size-4" />
-          Agendamento Online
-        </a>
+          <WhatsAppModal
+            variant="ghost"
+            className="h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent"
+            triggerAriaLabel="Agendar consulta"
+          >
+            <CalendarCheck2 className="size-4" />
+            Agendamento Online
+          </WhatsAppModal>
           <Separator className="my-4" />
           <button
             onClick={toggleTheme}

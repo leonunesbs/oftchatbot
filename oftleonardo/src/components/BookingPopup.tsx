@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { siteConfig } from "@/config/site";
+import WhatsAppModal from "./WhatsAppModal";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -18,14 +17,13 @@ export default function BookingPopup({
   triggerAriaLabel,
 }: Props) {
   return (
-    <Button
-      asChild
+    <WhatsAppModal
       variant={variant}
       size={size}
       className={className}
-      aria-label={triggerAriaLabel}
+      triggerAriaLabel={triggerAriaLabel}
     >
-      <a href={siteConfig.partnerApps.oftagenda}>{children}</a>
-    </Button>
+      {children}
+    </WhatsAppModal>
   );
 }
