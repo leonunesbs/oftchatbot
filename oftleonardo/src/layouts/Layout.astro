@@ -112,12 +112,11 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.canonical);
     <script is:inline>
       (function () {
         var t = localStorage.getItem("theme");
-        if (
+        var dark =
           t === "dark" ||
-          (!t && matchMedia("(prefers-color-scheme: dark)").matches)
-        ) {
-          document.documentElement.classList.add("dark");
-        }
+          ((t === null || t === "system") &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
       })();
     </script>
   </head>

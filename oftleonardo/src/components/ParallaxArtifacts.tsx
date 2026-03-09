@@ -18,7 +18,7 @@ export default function ParallaxArtifacts() {
           ].join(", "),
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
-          opacity: 0.2,
+          opacity: 0.36,
         }}
       />
       <div
@@ -36,7 +36,7 @@ export default function ParallaxArtifacts() {
           ].join(", "),
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
-          opacity: 0.18,
+          opacity: 0.32,
         }}
       />
       <div
@@ -76,7 +76,7 @@ export default function ParallaxArtifacts() {
           ].join(", "),
           maskImage:
             "linear-gradient(to bottom, transparent 2%, black 18%, black 84%, transparent 98%)",
-          opacity: 0.14,
+          opacity: 0.26,
         }}
       />
       <div
@@ -96,7 +96,7 @@ export default function ParallaxArtifacts() {
           backgroundPosition: "center, center, center, center, center, center, center",
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
-          opacity: 0.22,
+          opacity: 0.36,
         }}
       />
       <div
@@ -112,7 +112,7 @@ export default function ParallaxArtifacts() {
           ].join(", "),
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
-          opacity: 0.16,
+          opacity: 0.28,
         }}
       />
     </div>
