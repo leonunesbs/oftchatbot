@@ -39,7 +39,11 @@
       "@types/react-dom": "19.2.3",
       "@vercel/routing-utils>path-to-regexp": "^6.3.0",
       "@ts-morph/common>minimatch": "^10.2.4",
-      "@modelcontextprotocol/sdk>hono": "^4.12.3"
+      "@modelcontextprotocol/sdk>hono": "^4.12.3",
+      "express-rate-limit": "8.3.0",
+      "lodash": "4.17.23",
+      "svgo": "4.0.1",
+      "tar": "7.5.10"
     }
   }
 }
