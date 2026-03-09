@@ -19,7 +19,6 @@ interface OptotypeCardProps {
 }
 
 const OPTOTYPE_COUNT = 5;
-const HORIZONTAL_OPTOTYPE_SPACING_RATIO = 1;
 
 export default function OptotypeCard({
   level,
@@ -31,14 +30,19 @@ export default function OptotypeCard({
 }: OptotypeCardProps) {
   const sizePx = Math.max(optotypeHeightPx(level.denominator, pxPerMm, distanceM), 2);
   // Messias et al. (2010): spacing between adjacent optotypes (x) equals optotype size (y).
-  const gapPx = sizePx * HORIZONTAL_OPTOTYPE_SPACING_RATIO;
+  const gapPx = sizePx;
   const rowWidthPx = OPTOTYPE_COUNT * sizePx + (OPTOTYPE_COUNT - 1) * gapPx;
   const seedBase = `${chartSeed}-${mode}-${eyeSide}-${level.snellen}`;
   const orientations = useMemo(() => generateSeededOrientations(OPTOTYPE_COUNT, seedBase), [seedBase]);
   const letters = useMemo(() => generateSeededLetters(OPTOTYPE_COUNT, seedBase), [seedBase]);
 
+  const verticalPadding = Math.max(sizePx * 0.5, 24);
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-6">
+    <div
+      className="flex flex-col items-center justify-center gap-4"
+      style={{ paddingTop: `${verticalPadding}px`, paddingBottom: `${verticalPadding}px` }}
+    >
       <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
         {level.snellen}
       </span>

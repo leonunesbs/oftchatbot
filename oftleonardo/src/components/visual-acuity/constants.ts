@@ -17,40 +17,33 @@ export const DISTANCE_STORAGE_KEY = "va-distance";
 
 export const ACUITY_LEVELS = [
   { snellen: "20/200", denominator: 200 },
-  { snellen: "20/160", denominator: 160 },
-  { snellen: "20/125", denominator: 125 },
   { snellen: "20/100", denominator: 100 },
   { snellen: "20/80", denominator: 80 },
-  { snellen: "20/63", denominator: 63 },
-  { snellen: "20/50", denominator: 50 },
+  { snellen: "20/60", denominator: 60 },
   { snellen: "20/40", denominator: 40 },
-  { snellen: "20/32", denominator: 32 },
+  { snellen: "20/30", denominator: 30 },
   { snellen: "20/25", denominator: 25 },
   { snellen: "20/20", denominator: 20 },
-  { snellen: "20/16", denominator: 16 },
+  { snellen: "20/15", denominator: 15 },
 ] as const;
 
 export type AcuityLevel = (typeof ACUITY_LEVELS)[number];
 
 const ARC_MINUTE_TO_RAD = Math.PI / (180 * 60);
-const OPTOTYPE_ANGLE_ARCMIN = 5;
-
-function base20MmByDistance(distanceM: number): number {
-  // Snellen/Sloan optotype total height (y) subtends 5 arcminutes.
-  return distanceM * 1000 * Math.tan(OPTOTYPE_ANGLE_ARCMIN * ARC_MINUTE_TO_RAD);
-}
+const STROKES_PER_OPTOTYPE = 5;
 
 /**
- * Computes optotype total height in mm using the visual-angle definition:
- * 20/20 optotype = 5 arcminutes, then scaled by denominator/20.
- * This matches the values in the calibration table for each distance.
+ * Optotype total height in mm per Messias et al. (2010):
+ *   y = d × tan(5 × MAR)
+ * where MAR (minimum angle of resolution) = denominator / 20 arcminutes.
+ * The optotype subtends 5 × MAR arcminutes (5-stroke grid).
  */
 export function optotypeHeightMm(
   denominator: number,
   distanceM: number = DEFAULT_DISTANCE_M,
 ): number {
-  const base20Mm = base20MmByDistance(distanceM);
-  return base20Mm * (denominator / 20);
+  const mar = denominator / 20;
+  return distanceM * 1000 * Math.tan(STROKES_PER_OPTOTYPE * mar * ARC_MINUTE_TO_RAD);
 }
 
 export function optotypeHeightPx(

@@ -281,7 +281,7 @@ export default function VisualAcuityTest({
           <CarouselContent>
             {ACUITY_LEVELS.map((level) => (
               <CarouselItem key={level.snellen}>
-                <div className="flex min-h-[200px] items-center justify-center p-4">
+                <div className="flex min-h-[40dvh] items-center justify-center px-4 py-8">
                   <OptotypeCard
                     level={level}
                     pxPerMm={pxPerMm}
