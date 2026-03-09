@@ -1,6 +1,6 @@
 ---
 import { siteConfig } from "@/config/site";
-import CookieConsentDrawer from "@/components/CookieConsentDrawer";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 
 const { ga4Id, gtmId, metaPixelId, googleAdsId } = siteConfig.analytics;
 const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
@@ -159,7 +159,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   }
 })();
       </script>
-      <CookieConsentDrawer client:load />
+      <CookieConsentBanner client:load />
     </>
   )
 }
