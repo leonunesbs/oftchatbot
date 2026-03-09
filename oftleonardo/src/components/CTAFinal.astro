@@ -1,5 +1,4 @@
 ---
-import AnimatedSection from "./AnimatedSection";
 import WhatsAppModal from "./WhatsAppModal";
 ---
 
@@ -11,19 +10,17 @@ import WhatsAppModal from "./WhatsAppModal";
   </div>
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
     <div class="mx-auto max-w-2xl text-center">
-      <AnimatedSection client:visible>
-        <h2
-          class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-        >
-          Agende sua Consulta Oftalmológica
-        </h2>
-        <p class="mt-4 text-lg text-muted-foreground">
-          Sua visão merece atenção especializada. Muitas doenças oculares são
-          silenciosas e só são detectadas em uma consulta completa. Agende sua
-          avaliação com o Dr. Leonardo e tenha clareza sobre a saúde dos seus
-          olhos.
-        </p>
-      </AnimatedSection>
+      <h2
+        class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+      >
+        Agende sua Consulta Oftalmológica
+      </h2>
+      <p class="mt-4 text-lg text-muted-foreground">
+        Sua visão merece atenção especializada. Muitas doenças oculares são
+        silenciosas e só são detectadas em uma consulta completa. Agende sua
+        avaliação com o Dr. Leonardo e tenha clareza sobre a saúde dos seus
+        olhos.
+      </p>
       <div class="mt-8">
         <WhatsAppModal
           client:visible

@@ -1,7 +1,6 @@
 ---
 import { Picture } from "astro:assets";
 import { siteConfig } from "@/config/site";
-import AnimatedSection from "./AnimatedSection";
 import WhatsAppModal from "./WhatsAppModal";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Camera } from "lucide-react";
@@ -23,23 +22,20 @@ const imageStyles: Record<string, string> = {
 
 <section id="atendimento" class="bg-secondary/30 py-20 sm:py-28">
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
-    <AnimatedSection client:visible>
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Cidades de Atendimento
-        </h2>
-        <p class="mt-4 text-muted-foreground">
-          O mesmo padrão de excelência, tecnologia e dedicação em cada cidade de atendimento.
-        </p>
-      </div>
-    </AnimatedSection>
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Cidades de Atendimento
+      </h2>
+      <p class="mt-4 text-muted-foreground">
+        O mesmo padrão de excelência, tecnologia e dedicação em cada cidade de atendimento.
+      </p>
+    </div>
 
-    <AnimatedSection client:visible>
-      <div class="mt-14 grid gap-8 lg:grid-cols-3">
-        {siteConfig.cities.map((city) => {
-          const importedImage = cityImages[city.slug];
-          return (
-            <div class="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all hover:border-border hover:shadow-md">
+    <div class="mt-14 grid gap-8 lg:grid-cols-3">
+      {siteConfig.cities.map((city) => {
+        const importedImage = cityImages[city.slug];
+        return (
+          <div class="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all hover:border-border hover:shadow-md">
               {/* Photo area */}
               <div class="relative aspect-16/10 w-full overflow-hidden bg-secondary/60">
                 {importedImage ? (
@@ -100,10 +96,9 @@ const imageStyles: Record<string, string> = {
                   </WhatsAppModal>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </AnimatedSection>
+          </div>
+        );
+      })}
+    </div>
   </div>
 </section>
