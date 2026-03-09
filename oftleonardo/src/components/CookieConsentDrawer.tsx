@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -7,7 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -39,14 +39,14 @@ export default function CookieConsentDrawer() {
   }
 
   return (
-    <Drawer open={open} dismissible={false}>
+    <Drawer open={open} onOpenChange={(v) => !v && handleGrant()}>
       <DrawerContent className="mx-auto max-w-3xl">
         <DrawerHeader>
           <DrawerTitle>Sua privacidade em primeiro lugar</DrawerTitle>
           <DrawerDescription>
             Usamos cookies opcionais para entender o que funciona melhor e
-            melhorar sua experiência. Se preferir, você pode continuar somente
-            com os essenciais sem afetar as funcionalidades principais.
+            melhorar sua experiência. Ao continuar navegando, você concorda com
+            nossa política de privacidade e o uso de cookies.
           </DrawerDescription>
           <p className="mt-1 text-xs text-muted-foreground">
             Saiba mais em{" "}
