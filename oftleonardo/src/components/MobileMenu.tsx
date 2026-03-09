@@ -1,15 +1,24 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import WhatsAppModal from "./WhatsAppModal";
-import { CalendarCheck2, Eye, Grid3X3, Menu, Moon, Sun } from "lucide-react";
+import {
+  CalendarCheck2,
+  Eye,
+  Grid3X3,
+  Menu,
+  Moon,
+  Sun,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function MobileMenu() {
@@ -25,11 +34,29 @@ export default function MobileMenu() {
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
+
+    const toggles = document.querySelectorAll(".theme-toggle");
+    toggles.forEach((toggle) => {
+      const sun = toggle.querySelector(".theme-icon-sun");
+      const moon = toggle.querySelector(".theme-icon-moon");
+      if (!sun || !moon) return;
+      if (next) {
+        sun.classList.add("hidden");
+        moon.classList.remove("hidden");
+        moon.classList.add("inline-flex");
+        sun.classList.remove("inline-flex");
+      } else {
+        moon.classList.add("hidden");
+        sun.classList.remove("hidden");
+        sun.classList.add("inline-flex");
+        moon.classList.remove("inline-flex");
+      }
+    });
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Drawer direction="right" open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -38,18 +65,23 @@ export default function MobileMenu() {
         >
           <Menu className="size-5" />
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex h-full w-72 flex-col overflow-hidden">
-        <SheetHeader>
-          <SheetTitle className="text-left">
+      </DrawerTrigger>
+      <DrawerContent className="flex h-full flex-col overflow-hidden">
+        <DrawerHeader className="flex-row items-start justify-between">
+          <DrawerTitle className="text-left">
             <span className="block text-xs font-normal uppercase tracking-widest text-muted-foreground">
               Oftalmologista
             </span>
             <span className="text-lg font-semibold">Leonardo Nunes</span>
-          </SheetTitle>
-        </SheetHeader>
-        <Separator className="my-4" />
-        <div className="min-h-0 flex-1 overflow-y-auto">
+          </DrawerTitle>
+          <DrawerClose asChild>
+            <Button variant="ghost" size="icon" aria-label="Fechar menu">
+              <X className="size-4" />
+            </Button>
+          </DrawerClose>
+        </DrawerHeader>
+        <Separator />
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <nav className="flex flex-col gap-1">
             {siteConfig.navLinks.map((link) => (
               <a
@@ -96,7 +128,7 @@ export default function MobileMenu() {
             {dark ? "Modo claro" : "Modo escuro"}
           </button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
