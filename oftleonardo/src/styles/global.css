@@ -172,8 +172,12 @@
 
 @keyframes section-reveal {
   from {
-    opacity: 0.01;
+    opacity: 0;
     transform: translate3d(0, 18px, 0) scale(0.99);
+  }
+  65% {
+    opacity: 0.94;
+    transform: translate3d(0, 1px, 0) scale(0.998);
   }
   to {
     opacity: 1;
@@ -183,30 +187,30 @@
 
 @keyframes parallax-shift-slow {
   from {
-    transform: translate3d(0, -2.5%, 0);
+    transform: translate3d(0, -4.5%, 0);
   }
   to {
-    transform: translate3d(0, 2.5%, 0);
+    transform: translate3d(0, 4.5%, 0);
   }
 }
 
 @keyframes parallax-shift-fast {
   from {
-    transform: translate3d(0, -6%, 0);
+    transform: translate3d(0, -10%, 0);
   }
   to {
-    transform: translate3d(0, 6%, 0);
+    transform: translate3d(0, 10%, 0);
   }
 }
 
 @keyframes card-scroll-lift {
   from {
     transform: translate3d(0, 18px, 0) scale(0.992);
-    opacity: 0.02;
+    opacity: 0;
   }
   55% {
     transform: translate3d(0, -2px, 0) scale(1);
-    opacity: 1;
+    opacity: 0.92;
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
