@@ -246,6 +246,74 @@ import BookingPopup from "./BookingPopup";
     requestAnimationFrame(syncHeaderProgress);
   }
 
+  function easeInOutCubic(progress: number) {
+    return progress < 0.5
+      ? 4 * progress * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+  }
+
+  function animateScrollTo(top: number, duration: number) {
+    const start = window.scrollY;
+    const delta = top - start;
+    const startTime = performance.now();
+
+    function step(now: number) {
+      const elapsed = now - startTime;
+      const progress = clamp(elapsed / duration, 0, 1);
+      const easedProgress = easeInOutCubic(progress);
+      window.scrollTo(0, start + delta * easedProgress);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  function setupSectionLinkSmoothScroll() {
+    if (!header) return;
+
+    const sectionLinks = header.querySelectorAll<HTMLAnchorElement>('a[href^="/#"]');
+    sectionLinks.forEach((link) => {
+      link.addEventListener("click", (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        const href = link.getAttribute("href");
+        if (!href) return;
+
+        const url = new URL(href, window.location.origin);
+        if (url.pathname !== window.location.pathname || !url.hash) {
+          return;
+        }
+
+        const target = document.querySelector<HTMLElement>(url.hash);
+        if (!target) return;
+
+        event.preventDefault();
+        history.pushState(null, "", url.hash);
+
+        const targetTop = target.getBoundingClientRect().top + window.scrollY;
+        const distance = Math.abs(targetTop - window.scrollY);
+        const duration = clamp(distance * 0.8, 520, 1200);
+        animateScrollTo(targetTop, duration);
+      });
+    });
+  }
+
   window.addEventListener("scroll", updateTarget, { passive: true });
   window.addEventListener("resize", updateTarget, { passive: true });
 
@@ -268,6 +336,7 @@ import BookingPopup from "./BookingPopup";
   });
 
   updateTarget();
+  setupSectionLinkSmoothScroll();
 
   function setThemeState(theme: "light" | "dark") {
     document.documentElement.classList.toggle("dark", theme === "dark");
