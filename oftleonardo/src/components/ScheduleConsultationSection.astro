@@ -1,5 +1,6 @@
 ---
 import WhatsAppModal from "@/components/WhatsAppModal";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 
 interface Props {
@@ -33,7 +34,7 @@ const {
     <WhatsAppModal
       client:visible
       size="lg"
-      className="h-12 rounded-full px-8 text-base font-medium"
+      className="h-12 px-8 text-base"
       triggerAriaLabel={title}
       whatsappMessageTemplate={whatsappMessageTemplate}
       showOnlineBookingCta={true}
@@ -46,7 +47,7 @@ const {
           href={siteConfig.partnerApps.oftagenda}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex h-12 items-center rounded-full border border-border/70 px-8 text-base font-medium text-foreground transition-colors hover:bg-accent"
+          class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}
         >
           Abrir Minha Agenda
         </a>

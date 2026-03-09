@@ -19,7 +19,7 @@ export default function WhatsAppFloat() {
       <WhatsAppModal
         variant="default"
         size="lg"
-        className="h-14 gap-2 rounded-full bg-green-600 px-5 text-white shadow-lg transition-all hover:bg-green-700 hover:shadow-xl"
+        className="h-14 gap-2 bg-green-600 px-5 text-white shadow-lg transition-all hover:bg-green-700 hover:shadow-xl"
         triggerAriaLabel="Agendar consulta pelo WhatsApp"
       >
         <WhatsAppIcon className="size-5" />

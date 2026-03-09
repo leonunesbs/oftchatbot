@@ -47,7 +47,10 @@ export default defineConfig({
     ],
   },
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({
+    imageService: true,
+    devImageService: "sharp",
+  }),
   compressHTML: true,
   build: {
     inlineStylesheets: "always",
