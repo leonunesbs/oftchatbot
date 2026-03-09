@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/config/site";
 import MobileMenu from "./MobileMenu";
+import BookingPopup from "./BookingPopup";
 ---
 
 <header
@@ -99,36 +100,58 @@ import MobileMenu from "./MobileMenu";
       </details>
       <button
         type="button"
-        class="theme-toggle relative inline-flex size-9 items-center justify-center rounded-md text-foreground/90 transition-colors hover:bg-accent hover:text-foreground"
+        class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
         aria-label="Alternar tema"
       >
-        <span class="theme-icon-sun text-base leading-none">☀</span>
-        <span class="theme-icon-moon hidden text-base leading-none">☾</span>
+        <span
+          class="theme-icon-sun flex size-7 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 transition-transform duration-300 group-hover:scale-105 dark:bg-amber-400/10 dark:text-amber-300"
+          aria-hidden="true"
+        >
+          ☀
+        </span>
+        <span
+          class="theme-icon-moon hidden size-7 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 transition-transform duration-300 group-hover:scale-105 dark:bg-indigo-400/15 dark:text-indigo-300"
+          aria-hidden="true"
+        >
+          ☾
+        </span>
       </button>
-      <a
-        href="/agendamento-online"
-        class="ml-2 inline-flex h-10 items-center rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        aria-label="Agendar consulta"
+      <BookingPopup
+        client:visible
+        size="default"
+        className="ml-2 inline-flex h-10 rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        triggerAriaLabel="Agendar consulta"
       >
         Agendar Consulta
-      </a>
+      </BookingPopup>
     </nav>
 
     <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
-      <a
-        href="/agendamento-online"
-        class="inline-flex h-8 items-center rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        aria-label="Agendar consulta"
+      <BookingPopup
+        client:visible
+        size="sm"
+        className="inline-flex h-8 rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        triggerAriaLabel="Agendar consulta"
       >
         Agendar
-      </a>
+      </BookingPopup>
       <button
         type="button"
-        class="theme-toggle relative inline-flex size-9 items-center justify-center rounded-md text-foreground/90 transition-colors hover:bg-accent hover:text-foreground"
+        class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
         aria-label="Alternar tema"
       >
-        <span class="theme-icon-sun text-base leading-none">☀</span>
-        <span class="theme-icon-moon hidden text-base leading-none">☾</span>
+        <span
+          class="theme-icon-sun flex size-7 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 transition-transform duration-300 group-hover:scale-105 dark:bg-amber-400/10 dark:text-amber-300"
+          aria-hidden="true"
+        >
+          ☀
+        </span>
+        <span
+          class="theme-icon-moon hidden size-7 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 transition-transform duration-300 group-hover:scale-105 dark:bg-indigo-400/15 dark:text-indigo-300"
+          aria-hidden="true"
+        >
+          ☾
+        </span>
       </button>
       <MobileMenu client:media="(max-width: 767px)" />
     </div>
@@ -301,9 +324,13 @@ import MobileMenu from "./MobileMenu";
       if (theme === "dark") {
         sun.classList.add("hidden");
         moon.classList.remove("hidden");
+        moon.classList.add("inline-flex");
+        sun.classList.remove("inline-flex");
       } else {
         moon.classList.add("hidden");
         sun.classList.remove("hidden");
+        sun.classList.add("inline-flex");
+        moon.classList.remove("inline-flex");
       }
     });
   }

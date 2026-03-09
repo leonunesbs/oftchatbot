@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
+import BookingPopup from "./BookingPopup";
 ---
 
 <section class="relative">
@@ -36,13 +37,9 @@ import { siteConfig } from "@/config/site";
       </p>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <a
-          href="/agendamento-online"
-          class={`${buttonVariants({ size: "lg" })} h-12 px-8 text-base`}
-          aria-label="Agendar consulta"
-        >
+        <BookingPopup client:visible size="lg" className="h-12 px-8 text-base">
           Agendar Consulta
-        </a>
+        </BookingPopup>
         <a
           href="#atuacao"
           class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}
