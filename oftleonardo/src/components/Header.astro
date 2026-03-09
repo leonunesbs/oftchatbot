@@ -100,7 +100,7 @@ import ThemeToggle from "./ThemeToggle";
       </details>
       <ThemeToggle client:idle />
       <a
-        href="/agendamento-online"
+        href={siteConfig.partnerApps.oftagenda}
         class="ml-2 inline-flex h-10 items-center rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
       >
         Agendar Consulta
@@ -109,7 +109,7 @@ import ThemeToggle from "./ThemeToggle";
 
     <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
       <a
-        href="/agendamento-online"
+        href={siteConfig.partnerApps.oftagenda}
         class="inline-flex h-8 items-center rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
       >
         Agendar

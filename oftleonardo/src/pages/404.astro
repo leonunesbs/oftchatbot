@@ -1,6 +1,7 @@
 ---
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
+import { buttonVariants } from "@/components/ui/button";
 import Layout from "@/layouts/Layout.astro";
 
 const title = "Página não encontrada | Leonardo Nunes · Oftalmologista";
@@ -40,13 +41,13 @@ const description =
         <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/"
-            class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90"
+            class={`${buttonVariants({ size: "lg" })} px-6`}
           >
             Voltar para o início
           </a>
           <a
             href="/acuidade-visual"
-            class="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-6 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground"
+            class={`${buttonVariants({ variant: "outline", size: "lg" })} px-6`}
           >
             Fazer teste de acuidade visual
           </a>

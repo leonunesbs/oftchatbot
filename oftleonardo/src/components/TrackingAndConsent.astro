@@ -104,10 +104,9 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
       if (!(link instanceof HTMLAnchorElement)) return;
 
       var href = link.getAttribute("href") || "";
-      var isPrimaryBookingPath = href === "/agendamento-online";
       var isPartnerBookingLink = href.indexOf("agenda.oftleonardo.com.br") !== -1;
 
-      if (!isPrimaryBookingPath && !isPartnerBookingLink) return;
+      if (!isPartnerBookingLink) return;
 
       var ctaText = (link.textContent || "").trim().slice(0, 80);
       window.dataLayer = window.dataLayer || [];
