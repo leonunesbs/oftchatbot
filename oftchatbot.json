@@ -158,12 +158,12 @@
     },
     {
       "parameters": {
-        "toolDescription": "Gera o link de resumo no oftagenda com location, date e time. Sempre valide ok===true e valid===true antes de enviar o summaryUrl ao paciente.",
+        "toolDescription": "Gera o link de resumo no oftagenda com location, date e time, incluindo parâmetros UTM para tracking. Sempre valide ok===true e valid===true antes de enviar o summaryUrl ao paciente.",
         "method": "POST",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/resumo-link",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido (ex: fortaleza)'),\n  date: $fromAI('date', 'Data no formato YYYY-MM-DD'),\n  time: $fromAI('time', 'Horário no formato HH:mm'),\n  source: 'whatsapp-n8n'\n}) }}",
+        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido (ex: fortaleza)'),\n  date: $fromAI('date', 'Data no formato YYYY-MM-DD'),\n  time: $fromAI('time', 'Horário no formato HH:mm'),\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'fire_assistente'\n}) }}",
         "options": {}
       },
       "id": "b2aba3e2-2b36-49ea-a376-5c21b4067cc9",
