@@ -49,9 +49,10 @@ jobs:
             exit 1
           fi
 
+          SOURCE_SHA="$(git rev-parse --short HEAD)"
           git add oftagenda/pnpm-workspace.yaml oftagenda/pnpm-lock.yaml
           if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftagenda split"
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftagenda): sync pnpm config and lockfile from ${SOURCE_SHA}"
           else
             echo "No changes detected in oftagenda pnpm files"
           fi
@@ -107,9 +108,10 @@ jobs:
             exit 1
           fi
 
+          SOURCE_SHA="$(git rev-parse --short HEAD)"
           git add oftleonardo/pnpm-workspace.yaml oftleonardo/pnpm-lock.yaml
           if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftleonardo split"
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftleonardo): sync pnpm config and lockfile from ${SOURCE_SHA}"
           else
             echo "No changes detected in oftleonardo pnpm files"
           fi
@@ -165,9 +167,10 @@ jobs:
             exit 1
           fi
 
+          SOURCE_SHA="$(git rev-parse --short HEAD)"
           git add oftchatbot/pnpm-workspace.yaml oftchatbot/pnpm-lock.yaml
           if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore: sync pnpm config and lockfile for oftchatbot split"
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftchatbot): sync pnpm config and lockfile from ${SOURCE_SHA}"
           else
             echo "No changes detected in oftchatbot pnpm files"
           fi
