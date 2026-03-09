@@ -199,6 +199,21 @@
   }
 }
 
+@keyframes card-scroll-lift {
+  from {
+    transform: translate3d(0, 18px, 0) scale(0.992);
+    opacity: 0.02;
+  }
+  55% {
+    transform: translate3d(0, -2px, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
 @layer utilities {
   .defer-render {
     content-visibility: auto;
@@ -234,6 +249,11 @@
     backface-visibility: hidden;
   }
 
+  .scroll-card-motion {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+
   @supports (animation-timeline: view()) {
     .scroll-reveal {
       animation-name: section-reveal;
@@ -242,6 +262,12 @@
       animation-timing-function: linear;
       animation-timeline: view(block);
       animation-range: entry 8% cover 28%;
+    }
+
+    .scroll-card-motion {
+      animation: card-scroll-lift linear both;
+      animation-timeline: view(block);
+      animation-range: entry 10% cover 35%;
     }
   }
 
@@ -295,6 +321,7 @@
       transition-duration: 0.01ms !important;
     }
     .scroll-reveal,
+    .scroll-card-motion,
     .parallax-layer,
     .parallax-layer--slow,
     .parallax-layer--fast {
