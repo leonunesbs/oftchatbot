@@ -1,23 +1,22 @@
 # Leonardo Nunes · Oftalmologista
 
-> Site institucional do Dr. Leonardo Nunes, oftalmologista com foco em retina clinica e cirurgica e cirurgia de catarata. Atendimento em Fortaleza (CE), Sao Domingos do Maranhao (MA) e Fortuna (MA).
+> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica, além de cirurgia de catarata. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA).
 
-## Paginas principais
+## Páginas principais
 
-- [Inicio](https://oftleonardo.com.br/): Apresentacao do medico, especialidades, cidades de atendimento e CTAs para agendamento.
-- [Conteudos](https://oftleonardo.com.br/conteudos): Hub de conteudos educativos em oftalmologia.
-- [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): Triagem visual orientativa (nao substitui consulta).
-- [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): Triagem orientativa para distorcoes centrais (nao substitui consulta).
-- [Agendamento Pendente](https://oftleonardo.com.br/agendamento-pendente): Estado de carregamento/contingencia para integracao de agendamento.
-- [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): Condicoes de uso do site e responsabilidades.
-- [Politica de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): Tratamento de dados e cookies em conformidade com a LGPD.
+- [Início](https://oftleonardo.com.br/): apresentação do médico, especialidades, cidades de atendimento e CTAs para agendamento.
+- [Conteúdos](https://oftleonardo.com.br/conteudos): hub de conteúdos educativos em oftalmologia.
+- [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): triagem visual orientativa (não substitui consulta).
+- [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): triagem orientativa para distorções centrais (não substitui consulta).
+- [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): condições de uso do site e responsabilidades.
+- [Política de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): tratamento de dados e cookies em conformidade com a LGPD.
 
 ## Agendamento
 
-- CTA principal direciona para a Minha Agenda em `https://agenda.oftleonardo.com.br/` (plataforma oficial de agendamento).
-- Contatos complementares podem ocorrer via WhatsApp em pontos especificos da experiencia.
+- O agendamento principal acontece em [Agendamento Online](https://oftleonardo.com.br/agendamento-online), com formulário incorporado da plataforma oficial.
+- Canais complementares, como WhatsApp, podem aparecer em pontos específicos da experiência.
 
-## Descoberta tecnica
+## Descoberta técnica
 
 - Sitemap: https://oftleonardo.com.br/sitemap.xml
 - Robots: https://oftleonardo.com.br/robots.txt
