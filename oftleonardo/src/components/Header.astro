@@ -1,8 +1,6 @@
 ---
 import { siteConfig } from "@/config/site";
 import MobileMenu from "./MobileMenu";
-import ThemeToggle from "./ThemeToggle";
-import WhatsAppModal from "./WhatsAppModal";
 ---
 
 <header
@@ -85,15 +83,12 @@ import WhatsAppModal from "./WhatsAppModal";
           >
             Tela de Amsler
           </a>
-          <WhatsAppModal
-            client:idle
-            variant="ghost"
-            size="sm"
-            className="h-auto w-full justify-start rounded-md px-3 py-2 text-sm font-normal text-foreground/85 hover:bg-accent hover:text-foreground"
-            triggerAriaLabel="Agendar consulta"
+          <a
+            href="/agendamento-online"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
           >
             Agendamento Online
-          </WhatsAppModal>
+          </a>
           <a
             href="/conteudos"
             class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
@@ -102,26 +97,39 @@ import WhatsAppModal from "./WhatsAppModal";
           </a>
         </div>
       </details>
-      <ThemeToggle client:idle />
-      <WhatsAppModal
-        client:idle
-        className="ml-2 h-10 bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        triggerAriaLabel="Agendar consulta"
+      <button
+        type="button"
+        class="theme-toggle relative inline-flex size-9 items-center justify-center rounded-md text-foreground/90 transition-colors hover:bg-accent hover:text-foreground"
+        aria-label="Alternar tema"
+      >
+        <span class="theme-icon-sun text-base leading-none">☀</span>
+        <span class="theme-icon-moon hidden text-base leading-none">☾</span>
+      </button>
+      <a
+        href="/agendamento-online"
+        class="ml-2 inline-flex h-10 items-center rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        aria-label="Agendar consulta"
       >
         Agendar Consulta
-      </WhatsAppModal>
+      </a>
     </nav>
 
     <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
-      <WhatsAppModal
-        client:idle
-        size="sm"
-        className="h-8 bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        triggerAriaLabel="Agendar consulta"
+      <a
+        href="/agendamento-online"
+        class="inline-flex h-8 items-center rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        aria-label="Agendar consulta"
       >
         Agendar
-      </WhatsAppModal>
-      <ThemeToggle client:idle />
+      </a>
+      <button
+        type="button"
+        class="theme-toggle relative inline-flex size-9 items-center justify-center rounded-md text-foreground/90 transition-colors hover:bg-accent hover:text-foreground"
+        aria-label="Alternar tema"
+      >
+        <span class="theme-icon-sun text-base leading-none">☀</span>
+        <span class="theme-icon-moon hidden text-base leading-none">☾</span>
+      </button>
       <MobileMenu client:media="(max-width: 767px)" />
     </div>
   </div>
@@ -280,4 +288,39 @@ import WhatsAppModal from "./WhatsAppModal";
   });
 
   updateTarget();
+
+  function setThemeState(theme: "light" | "dark") {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+
+    const toggles = document.querySelectorAll(".theme-toggle");
+    toggles.forEach((toggle) => {
+      const sun = toggle.querySelector(".theme-icon-sun");
+      const moon = toggle.querySelector(".theme-icon-moon");
+      if (!sun || !moon) return;
+
+      if (theme === "dark") {
+        sun.classList.add("hidden");
+        moon.classList.remove("hidden");
+      } else {
+        moon.classList.add("hidden");
+        sun.classList.remove("hidden");
+      }
+    });
+  }
+
+  const initialTheme = document.documentElement.classList.contains("dark")
+    ? "dark"
+    : "light";
+  setThemeState(initialTheme);
+
+  const themeToggles = document.querySelectorAll(".theme-toggle");
+  themeToggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const nextTheme = document.documentElement.classList.contains("dark")
+        ? "light"
+        : "dark";
+      localStorage.setItem("theme", nextTheme);
+      setThemeState(nextTheme);
+    });
+  });
 </script>

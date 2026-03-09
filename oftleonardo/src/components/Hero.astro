@@ -2,7 +2,6 @@
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import WhatsAppModal from "./WhatsAppModal";
 ---
 
 <section class="relative">
@@ -37,14 +36,13 @@ import WhatsAppModal from "./WhatsAppModal";
       </p>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <WhatsAppModal
-          client:visible
-          size="lg"
-          className="h-12 px-8 text-base"
-          triggerAriaLabel="Agendar consulta"
+        <a
+          href="/agendamento-online"
+          class={`${buttonVariants({ size: "lg" })} h-12 px-8 text-base`}
+          aria-label="Agendar consulta"
         >
           Agendar Consulta
-        </WhatsAppModal>
+        </a>
         <a
           href="#atuacao"
           class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}

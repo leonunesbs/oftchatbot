@@ -1,14 +1,42 @@
+import { useEffect } from "react";
+import { Eye } from "lucide-react";
+import { Toaster, toast } from "sonner";
+
+const TOAST_ID = "visual-acuity-cta";
+const STORAGE_KEY = "visual-acuity-cta-dismissed";
+
 export default function VisualAcuityFloat() {
-  return (
-    <div className="fixed bottom-6 left-6 z-50">
-      <a
-        href="/acuidade-visual"
-        aria-label="Fazer teste de acuidade visual online"
-        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border/70 bg-background/90 px-4 text-sm font-medium text-foreground shadow-md backdrop-blur-sm transition-colors hover:bg-background"
-      >
-        <span aria-hidden="true">👁️</span>
-        <span>Teste de visão</span>
-      </a>
-    </div>
-  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const wasDismissed = window.sessionStorage.getItem(STORAGE_KEY) === "true";
+    if (wasDismissed) return;
+
+    const timer = window.setTimeout(() => {
+      toast.info("Teste de acuidade visual online", {
+        id: TOAST_ID,
+        description:
+          "Faça uma triagem rápida da sua visão pelo celular em poucos minutos.",
+        duration: 15000,
+        icon: <Eye className="size-4" />,
+        action: {
+          label: "Fazer teste",
+          onClick: () => {
+            window.sessionStorage.setItem(STORAGE_KEY, "true");
+            window.location.assign("/acuidade-visual");
+          },
+        },
+        onDismiss: () => {
+          window.sessionStorage.setItem(STORAGE_KEY, "true");
+        },
+      });
+    }, 1500);
+
+    return () => {
+      window.clearTimeout(timer);
+      toast.dismiss(TOAST_ID);
+    };
+  }, []);
+
+  return <Toaster position="bottom-left" closeButton richColors />;
 }
