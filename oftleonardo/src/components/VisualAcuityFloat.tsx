@@ -1,41 +1,14 @@
-import { Eye } from "lucide-react";
-import { useEffect } from "react";
-import { Toaster, toast } from "sonner";
-
 export default function VisualAcuityFloat() {
-  const DISMISS_KEY = "va-toast-dismissed";
-  const TOAST_ID = "visual-acuity-toast";
-
-  useEffect(() => {
-    const wasDismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (wasDismissed) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      toast("Teste sua visão", {
-        id: TOAST_ID,
-        description: "Acuidade visual online e gratuita",
-        duration: Number.POSITIVE_INFINITY,
-        icon: <Eye className="size-4" />,
-        action: {
-          label: "Iniciar teste",
-          onClick: () => {
-            sessionStorage.setItem(DISMISS_KEY, "1");
-            window.location.assign("/acuidade-visual");
-          },
-        },
-        onDismiss: () => {
-          sessionStorage.setItem(DISMISS_KEY, "1");
-        },
-      });
-    }, 3000);
-
-    return () => {
-      window.clearTimeout(timer);
-      toast.dismiss(TOAST_ID);
-    };
-  }, []);
-
-  return <Toaster position="bottom-left" closeButton={true} />;
+  return (
+    <div className="fixed bottom-6 left-6 z-50">
+      <a
+        href="/acuidade-visual"
+        aria-label="Fazer teste de acuidade visual online"
+        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border/70 bg-background/90 px-4 text-sm font-medium text-foreground shadow-md backdrop-blur-sm transition-colors hover:bg-background"
+      >
+        <span aria-hidden="true">👁️</span>
+        <span>Teste de visão</span>
+      </a>
+    </div>
+  );
 }

@@ -1,46 +1,15 @@
-import { useEffect, useRef } from "react";
-
 export default function ParallaxArtifacts() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    let ticking = false;
-    const update = () => {
-      wrapper.style.setProperty("--parallax-y", `${window.scrollY}px`);
-      ticking = false;
-    };
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
   return (
     <div
-      ref={wrapperRef}
-      className="pointer-events-none absolute inset-0 -z-1 hidden overflow-hidden motion-safe:block"
+      className="pointer-events-none absolute inset-0 -z-1 block overflow-hidden"
       aria-hidden="true"
     >
       <div
         className="absolute inset-0 lg:hidden"
         style={{
-          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.03), 0)",
+          transform: "translate3d(0, 0, 0)",
           willChange: "transform",
+          animation: "artifacts-drift-mobile 18s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 14% 12%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
             "radial-gradient(circle at 42% 20%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 6px, transparent 6px)",
@@ -57,8 +26,9 @@ export default function ParallaxArtifacts() {
       <div
         className="absolute inset-0 hidden lg:block"
         style={{
-          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.045), 0)",
+          transform: "translate3d(0, 0, 0)",
           willChange: "transform",
+          animation: "artifacts-drift-desktop-a 20s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--color-brand) 12%, transparent) 0 3px, transparent 3px)",
             "radial-gradient(circle at 22% 16%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 5px, transparent 5px)",
@@ -76,8 +46,9 @@ export default function ParallaxArtifacts() {
       <div
         className="absolute inset-0 hidden lg:block"
         style={{
-          transform: "translate3d(0, calc(var(--parallax-y, 0px) * -0.085), 0)",
+          transform: "translate3d(0, 0, 0)",
           willChange: "transform",
+          animation: "artifacts-drift-desktop-b 24s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 12% 30%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 8px, transparent 8px)",
             "radial-gradient(circle at 34% 24%, color-mix(in oklab, var(--color-brand) 7%, transparent) 0 6px, transparent 6px)",

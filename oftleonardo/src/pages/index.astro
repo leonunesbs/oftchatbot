@@ -36,22 +36,36 @@ const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
     tabindex="-1"
     class="relative isolate overflow-x-clip"
   >
-    <ParallaxArtifacts client:idle={{ timeout: 2000 }} />
+    <ParallaxArtifacts />
     <div
       class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(40%_30%_at_0%_35%,color-mix(in_oklch,var(--color-brand)_6%,transparent),transparent),radial-gradient(35%_25%_at_100%_68%,color-mix(in_oklch,var(--color-brand)_5%,transparent),transparent)]"
       aria-hidden="true"
     >
     </div>
     <Hero />
-    <Services />
-    <ExperienceStats />
-    <Differentials />
-    <Cities />
-    <HowItWorks />
-    <FAQ />
-    <CTAFinal />
+    <div class="defer-render">
+      <Services />
+    </div>
+    <div class="defer-render">
+      <ExperienceStats />
+    </div>
+    <div class="defer-render">
+      <Differentials />
+    </div>
+    <div class="defer-render">
+      <Cities />
+    </div>
+    <div class="defer-render">
+      <HowItWorks />
+    </div>
+    <div class="defer-render">
+      <FAQ />
+    </div>
+    <div class="defer-render">
+      <CTAFinal />
+    </div>
   </main>
   <Footer />
-  <VisualAcuityFloat client:idle={{ timeout: 2500 }} />
-  <WhatsAppFloat client:idle={{ timeout: 2500 }} />
+  <VisualAcuityFloat />
+  <WhatsAppFloat />
 </Layout>

@@ -132,6 +132,40 @@
   }
 }
 
+@keyframes artifacts-drift-mobile {
+  0% {
+    transform: translate3d(0, -4px, 0);
+  }
+  100% {
+    transform: translate3d(0, 8px, 0);
+  }
+}
+
+@keyframes artifacts-drift-desktop-a {
+  0% {
+    transform: translate3d(0, -8px, 0);
+  }
+  100% {
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+@keyframes artifacts-drift-desktop-b {
+  0% {
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@layer utilities {
+  .defer-render {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 900px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
