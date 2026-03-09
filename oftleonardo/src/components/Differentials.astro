@@ -12,7 +12,7 @@ const iconMap: Record<string, typeof Heart> = {
 
 <section id="diferenciais" class="py-20 sm:py-28">
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
-    <div class="mx-auto max-w-2xl text-center">
+    <div class="scroll-reveal mx-auto max-w-2xl text-center">
       <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Por que escolher o Dr. Leonardo
       </h2>
@@ -21,11 +21,11 @@ const iconMap: Record<string, typeof Heart> = {
       </p>
     </div>
 
-    <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="scroll-3d-stage mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {siteConfig.differentials.map((item) => {
         const Icon = iconMap[item.icon];
         return (
-          <div class="surface-lift group flex flex-col items-center rounded-2xl border border-border/50 bg-card p-6 text-center hover:border-border hover:shadow-sm">
+          <div class="surface-lift scroll-card-depth scroll-card-motion group flex flex-col items-center rounded-2xl border border-border/50 bg-card p-6 text-center hover:border-border hover:shadow-sm">
             <span class="mb-4 flex size-12 items-center justify-center rounded-2xl bg-secondary text-foreground transition-colors group-hover:bg-brand/10 group-hover:text-brand">
               {Icon && <Icon className="size-5" />}
             </span>
