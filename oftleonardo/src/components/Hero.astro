@@ -2,8 +2,6 @@
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import AnimatedSection from "./AnimatedSection";
-import WhatsAppModal from "./WhatsAppModal";
 ---
 
 <section class="relative">
@@ -15,46 +13,35 @@ import WhatsAppModal from "./WhatsAppModal";
 
   <div class="mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32 lg:py-40">
     <div class="mx-auto max-w-3xl text-center">
-      <AnimatedSection client:idle mode="none">
-        <Badge
-          variant="secondary"
-          className="mb-6 gap-1.5 px-3 py-1 text-xs font-medium tracking-wide"
-        >
-          Médico Oftalmologista · Retina e Catarata
-        </Badge>
-      </AnimatedSection>
+      <Badge
+        variant="secondary"
+        className="mb-6 gap-1.5 px-3 py-1 text-xs font-medium tracking-wide"
+      >
+        Médico Oftalmologista · Retina e Catarata
+      </Badge>
 
-      <AnimatedSection client:idle mode="none">
-        <h1 class="text-foreground">
-          <span
-            class="block text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
-          >
-            Leonardo Nunes
-          </span>
-          <span
-            class="mt-3 block text-lg font-medium tracking-tight text-brand sm:text-xl lg:text-2xl"
-          >
-            {siteConfig.hero.headline}
-          </span>
-        </h1>
-      </AnimatedSection>
-
-      <AnimatedSection client:idle mode="none">
-        <p
-          class="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl"
+      <h1 class="text-foreground">
+        <span class="block text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          Leonardo Nunes
+        </span>
+        <span
+          class="mt-3 block text-lg font-medium tracking-tight text-brand sm:text-xl lg:text-2xl"
         >
-          {siteConfig.hero.subheadline}
-        </p>
-      </AnimatedSection>
+          {siteConfig.hero.headline}
+        </span>
+      </h1>
+
+      <p class="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+        {siteConfig.hero.subheadline}
+      </p>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <WhatsAppModal
-          client:idle
-          size="lg"
-          className="h-12 px-8 text-base"
+        <a
+          href="/agendamento-online"
+          class={`${buttonVariants({ size: "lg" })} h-12 px-8 text-base`}
         >
           Agendar Consulta
-        </WhatsAppModal>
+        </a>
         <a
           href="#atuacao"
           class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}
@@ -63,20 +50,18 @@ import WhatsAppModal from "./WhatsAppModal";
         </a>
       </div>
 
-      <AnimatedSection client:idle mode="none">
-        <div
-          class="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
-        >
-          {
-            siteConfig.cities.map((city) => (
-              <span class="flex items-center gap-1.5">
-                <span class="size-1.5 rounded-full bg-brand/60" />
-                {city.name} – {city.state}
-              </span>
-            ))
-          }
-        </div>
-      </AnimatedSection>
+      <div
+        class="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
+      >
+        {
+          siteConfig.cities.map((city) => (
+            <span class="flex items-center gap-1.5">
+              <span class="size-1.5 rounded-full bg-brand/60" />
+              {city.name} – {city.state}
+            </span>
+          ))
+        }
+      </div>
     </div>
   </div>
 </section>

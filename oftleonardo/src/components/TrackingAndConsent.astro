@@ -18,6 +18,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   var resolvedGtmId = typeof gtmId === "string" ? gtmId : "";
   var resolvedMetaPixelId = typeof metaPixelId === "string" ? metaPixelId : "";
   var resolvedGoogleAdsId = typeof googleAdsId === "string" ? googleAdsId : "";
+  var trackingEnabled = false;
 
   var consentKey = "oftcore:consent:v1";
   function hasPii(value) {
@@ -59,6 +60,9 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     });
   }
   function enableTracking() {
+    if (trackingEnabled) return;
+    trackingEnabled = true;
+
     if (resolvedGtmId) {
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -87,6 +91,43 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     if (resolvedGoogleAdsId && window.gtag) {
       window.gtag("config", resolvedGoogleAdsId);
     }
+
+    bindPrimaryBookingTracking();
+  }
+
+  function bindPrimaryBookingTracking() {
+    document.addEventListener("click", function (event) {
+      var target = event.target;
+      if (!(target instanceof Element)) return;
+
+      var link = target.closest("a");
+      if (!(link instanceof HTMLAnchorElement)) return;
+
+      var href = link.getAttribute("href") || "";
+      var isPrimaryBookingPath = href === "/agendamento-online";
+      var isPartnerBookingLink = href.indexOf("agenda.oftleonardo.com.br") !== -1;
+
+      if (!isPrimaryBookingPath && !isPartnerBookingLink) return;
+
+      var ctaText = (link.textContent || "").trim().slice(0, 80);
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "start_booking",
+        channel: "online_booking",
+        cta_text: ctaText,
+        cta_href: href,
+        page_path: window.location.pathname,
+      });
+
+      if (window.gtag) {
+        window.gtag("event", "start_booking", {
+          channel: "online_booking",
+          cta_text: ctaText,
+          cta_href: href,
+          page_path: window.location.pathname,
+        });
+      }
+    });
   }
 
   function renderBanner() {
@@ -117,6 +158,7 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     });
     document.getElementById("consent-granted")?.addEventListener("click", function () {
       localStorage.setItem(consentKey, "granted");
+      enableTracking();
       setConsent(true);
       banner.remove();
     });
@@ -132,8 +174,8 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
     analytics_storage: "denied",
     wait_for_update: 500,
   });
-  enableTracking();
   if (savedConsent === "granted") {
+    enableTracking();
     setConsent(true);
   } else if (savedConsent === "denied") {
     setConsent(false);

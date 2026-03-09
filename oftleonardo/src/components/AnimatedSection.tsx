@@ -85,6 +85,8 @@ export default function AnimatedSection({
 
     const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
     let rafId = 0;
+    let viewportHeight = window.innerHeight || 1;
+    let elementTop = 0;
 
     const applyProgress = (progress: number) => {
       const eased = 1 - Math.pow(1 - progress, 3);
@@ -98,12 +100,17 @@ export default function AnimatedSection({
         `scale(${scale.toFixed(4)})`;
     };
 
-    const getProgress = () => {
-      const viewportHeight = window.innerHeight || 1;
+    const measureLayout = () => {
       const rect = node.getBoundingClientRect();
+      viewportHeight = window.innerHeight || 1;
+      elementTop = rect.top + window.scrollY;
+    };
+
+    const getProgress = () => {
+      const top = elementTop - window.scrollY;
       const start = viewportHeight * 0.9;
       const end = viewportHeight * 0.25;
-      const raw = (start - rect.top) / (start - end);
+      const raw = (start - top) / (start - end);
       const delayed = raw - delay * 0.45;
       return clamp(delayed);
     };
@@ -119,15 +126,25 @@ export default function AnimatedSection({
     };
 
     const onScroll = () => requestUpdate();
-    const onResize = () => requestUpdate();
+    const onResize = () => {
+      measureLayout();
+      requestUpdate();
+    };
 
+    measureLayout();
     applyProgress(getProgress());
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
+    const resizeObserver = new ResizeObserver(() => {
+      measureLayout();
+      requestUpdate();
+    });
+    resizeObserver.observe(node);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      resizeObserver.disconnect();
       if (rafId) {
         window.cancelAnimationFrame(rafId);
       }
