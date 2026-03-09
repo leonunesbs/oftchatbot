@@ -206,87 +206,36 @@ import BookingPopup from "./BookingPopup";
     transform: translateX(calc(var(--p) * 0.5rem));
     will-change: transform;
   }
-
-  @media (min-width: 768px) {
-    #header-inner {
-      height: 5.15rem;
-      transition: none;
-    }
-
-    .logo-full {
-      opacity: 1;
-      transform: none;
-    }
-
-    .logo-mono {
-      opacity: 0;
-      transform: none;
-    }
-  }
 </style>
 
 <script>
   const header = document.getElementById("main-header");
   const toolsMenu = document.getElementById("tools-menu");
   const SCROLL_RANGE_MOBILE = 80;
-  const MAX_FPS = 60;
-  const FRAME_TIME = 1000 / MAX_FPS;
-  const SMOOTHING = 0.2;
-  const SCROLL_DELTA_THRESHOLD = 0.5;
-  let currentP = 0;
-  let targetP = 0;
-  let rafId = 0;
-  let lastFrameTime = 0;
-  let lastScrollY = window.scrollY;
-  let mobileCompact = window.scrollY > 0;
+  const SCROLL_RANGE_DESKTOP = 140;
+  let ticking = false;
+
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+  }
 
   function getTargetProgress() {
     const isDesktop = window.innerWidth >= 768;
-    if (isDesktop) return 0;
-
+    const scrollRange = isDesktop ? SCROLL_RANGE_DESKTOP : SCROLL_RANGE_MOBILE;
     const scrollY = Math.max(window.scrollY, 0);
-    const delta = scrollY - lastScrollY;
-
-    if (delta > SCROLL_DELTA_THRESHOLD && scrollY > 0) {
-      mobileCompact = true;
-    } else if (delta < -SCROLL_DELTA_THRESHOLD) {
-      mobileCompact = false;
-    }
-
-    lastScrollY = scrollY;
-    return mobileCompact ? Math.min(scrollY / SCROLL_RANGE_MOBILE, 1) : 0;
+    return clamp(scrollY / scrollRange, 0, 1);
   }
 
-  function animate(timestamp: number) {
+  function syncHeaderProgress() {
     if (!header) return;
-    if (timestamp - lastFrameTime < FRAME_TIME) {
-      rafId = requestAnimationFrame(animate);
-      return;
-    }
-
-    lastFrameTime = timestamp;
-    currentP += (targetP - currentP) * SMOOTHING;
-
-    if (Math.abs(targetP - currentP) < 0.001) {
-      currentP = targetP;
-    }
-
-    header.style.setProperty("--p", `${currentP}`);
-
-    if (currentP !== targetP) {
-      rafId = requestAnimationFrame(animate);
-      return;
-    }
-
-    rafId = 0;
+    header.style.setProperty("--p", `${getTargetProgress()}`);
+    ticking = false;
   }
 
   function updateTarget() {
-    targetP = getTargetProgress();
-    if (!rafId) {
-      lastFrameTime = 0;
-      rafId = requestAnimationFrame(animate);
-    }
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(syncHeaderProgress);
   }
 
   window.addEventListener("scroll", updateTarget, { passive: true });
