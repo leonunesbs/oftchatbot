@@ -2,6 +2,7 @@
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import { clusterTopics } from "@/config/semantic-clusters";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import Layout from "@/layouts/Layout.astro";
 import { getCollection } from "astro:content";
@@ -151,7 +152,9 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
             <p class="max-w-lg text-sm leading-relaxed text-muted-foreground">
               {scheduling.description}
             </p>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-transform group-hover:scale-105">
+            <span
+              class={`${buttonVariants({ size: "lg" })} px-8 text-base transition-transform group-hover:scale-105`}
+            >
               Agendar consulta
             </span>
           </a>
