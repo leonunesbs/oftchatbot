@@ -29,9 +29,8 @@
         "promptType": "define",
         "text": "={{ $json.messages[0].text.body }}",
         "options": {
-          "systemMessage": "Você é a Fire, assistente virtual da Clínica OFT Leonardo.\n\nAPRESENTAÇÃO (apenas na primeira mensagem):\n\"Oi! Sou a Fire, assistente virtual da Clínica OFT Leonardo. Como posso ajudar você hoje?\"\n\nOBJETIVO:\nConduzir o agendamento em 3 etapas (local -> data -> horário) e gerar o link de resumo.\n\nREGRAS ESSENCIAIS:\n- Nunca invente dados, links, datas, horários ou valores.\n- Sempre use ferramentas antes de responder com locais, datas, horários, histórico ou link.\n- Não reutilize memória para disponibilidade; sempre consultar API novamente.\n- Não confirmar/agendar dentro do chat; apenas enviar link para o paciente concluir no site.\n- Evitar \"fico/estou à disposição\" e evitar emojis em mensagens de erro.\n- Responder de forma curta, clara e direta (economia de tokens).\n\nFLUXO:\n1) Local: usar Get Locations Tool e listar opções numeradas.\n2) Data: usar Check Availability Tool e listar datas em DD/MM (sem dia da semana).\n3) Horário: usar Check Availability Tool e listar horários numerados.\n4) Finalização: usar Generate Summary Link Tool.\n\nREGRAS DO LINK:\n- Se existir summaryUrl e ok !== false, enviar o link.\n- Linha obrigatória: \"Link de agendamento: <summaryUrl>\".\n- Próximo passo deve ficar claro: clicar no link para abrir o resumo e concluir no site.\n- Só usar mensagem de erro quando realmente não houver summaryUrl.\n\nOUTRAS FERRAMENTAS:\n- Get Appointments Tool: usar apenas quando o paciente pedir consulta de agendamentos existentes.\n\nBASE DE CONHECIMENTO (links oficiais):\n- FAQ: https://oftleonardo.com.br/#faq\n- Conteúdos: https://oftleonardo.com.br/conteudos\n- Acuidade visual: https://oftleonardo.com.br/acuidade-visual\n- Tela de Amsler: https://oftleonardo.com.br/tela-de-amsler\n- Agendamento: https://agenda.oftleonardo.com.br/agendar\n- Status: https://agenda.oftleonardo.com.br/status\n- Instagram: https://www.instagram.com/oftleonardo\n- LinkedIn: https://www.linkedin.com/in/oftleonardo\n- Facebook: https://www.facebook.com/leonunesbs\n- Threads: https://www.threads.net/@oftleonardo\n- X: https://x.com/oftleonardo"
-        },
-        "requireSpecificOutputFormat": true
+          "systemMessage": "Você é a Fire, assistente virtual da Clínica OFT Leonardo.\n\nObjetivo: conduzir agendamento em 3 etapas (local -> data -> horário) e enviar link de resumo.\n\nRegras:\n- Nunca invente dados, links, datas, horários ou valores.\n- Use ferramentas em tempo real antes de responder.\n- Não repita a mesma chamada de ferramenta na mesma resposta.\n- Faça no máximo 1 chamada por etapa do fluxo.\n- Responda curto e direto (máx. 4 linhas, sem emojis).\n- Não confirme agendamento no chat; apenas envie link para conclusão no site.\n\nFluxo:\n1) Local: Get Locations Tool.\n2) Data e horário: Check Availability Tool.\n3) Link final: Generate Summary Link Tool.\n\nRegra do link:\n- Se ok !== false e houver summaryUrl, enviar: \"Link de agendamento: <summaryUrl>\".\n- Se não houver summaryUrl, peça para escolher outro horário/data."
+        }
       },
       "id": "d05491eb-20c0-408c-8e74-7e49e6601e66",
       "name": "Fire AI Agent",
@@ -71,7 +70,7 @@
       "parameters": {
         "sessionIdType": "customKey",
         "sessionKey": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
-        "contextWindowLength": 10
+        "contextWindowLength": 4
       },
       "id": "f421cdaa-da22-45a3-bce9-930cca214aa8",
       "name": "Conversation Memory",
@@ -108,7 +107,7 @@
     },
     {
       "parameters": {
-        "toolDescription": "Lista os locais ativos de atendimento no oftagenda. Use no início do fluxo de agendamento para apresentar as unidades disponíveis. Sempre consulte em tempo real e não reutilize lista de locais de respostas anteriores.",
+        "toolDescription": "Lista locais ativos de atendimento. Use no início do agendamento e sempre em tempo real.",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/locations",
         "sendQuery": true,
         "options": {},
@@ -149,7 +148,7 @@
     },
     {
       "parameters": {
-        "toolDescription": "Consulta disponibilidade no oftagenda por local. Retorna as próximas datas e os horários de cada data em options.dates[].times. Requer location e pode receber daysAhead (1-30, padrão 14). Sempre consulte disponibilidade em tempo real e não reutilize datas/horários de respostas anteriores. Sempre consulte disponibilidade em tempo real para data e horário e não reutilize respostas anteriores.",
+        "toolDescription": "Consulta disponibilidade por local. Retorna datas em options.dates e horários em options.dates[].times.",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/availability",
         "sendQuery": true,
         "queryParameters": {
@@ -198,7 +197,7 @@
     },
     {
       "parameters": {
-        "toolDescription": "Busca os agendamentos de um paciente pelo número de telefone. Requer phone e pode incluir histórico com includeHistory=true.",
+        "toolDescription": "Busca agendamentos por telefone (phone), opcionalmente com histórico.",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/appointments",
         "sendQuery": true,
         "queryParameters": {
@@ -226,12 +225,12 @@
     },
     {
       "parameters": {
-        "toolDescription": "Gera o link de resumo no oftagenda com location, date e time, incluindo parâmetros UTM para tracking. Use exatamente os valores retornados pelas ferramentas (location em slug, date em YYYY-MM-DD e time em HH:mm com zero à esquerda). Sempre valide ok===true e summaryUrl preenchido antes de enviar o link ao paciente.",
+        "toolDescription": "Gera link de resumo com location, date e time. Use valores exatos retornados pelas ferramentas e envie apenas se ok=true e summaryUrl existir.",
         "method": "POST",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/resumo-link",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local escolhido exatamente como retornado em locations[].value (ex: fortaleza)'),\n  date: $fromAI('date', 'Data exatamente como retornada em options.dates[].isoDate (YYYY-MM-DD)'),\n  time: $fromAI('time', 'Horário exatamente como retornado em options.dates[].times[] (HH:mm, ex: 08:00)'),\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'fire_assistente'\n}) }}",
+        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local (exato de locations[].value)'),\n  date: $fromAI('date', 'Data em YYYY-MM-DD (exata de options.dates[].isoDate)'),\n  time: $fromAI('time', 'Horário HH:mm (exato de options.dates[].times[])'),\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'fire_assistente'\n}) }}",
         "options": {}
       },
       "id": "b2aba3e2-2b36-49ea-a376-5c21b4067cc9",
@@ -250,13 +249,13 @@
             {
               "id": "id-1",
               "name": "messageText",
-              "value": "={{ (() => {\n  const output = $json.output;\n  const steps = Array.isArray($json.intermediateSteps) ? $json.intermediateSteps : [];\n\n  const sanitize = (text) => (typeof text === 'string' ? text : '')\n    .trim()\n    .replace(/confirma(c|ç)ão do agendamento/gi, 'geração do link de agendamento')\n    .replace(/confirmar o agendamento/gi, 'gerar o link de agendamento')\n    .replace(/consulta est[aá] agendada/gi, 'agendamento está pronto para conclusão')\n    .replace(/consulta foi agendada/gi, 'agendamento está pronto para conclusão')\n    .replace(/(\\b\\d{2}\\/\\d{2})\\s*\\([^\\n)]*\\)/g, '$1');\n\n  const pickSummary = (value) => {\n    if (value == null) return null;\n\n    if (Array.isArray(value)) {\n      for (const item of value) {\n        const nested = pickSummary(item);\n        if (nested) return nested;\n      }\n      return null;\n    }\n\n    if (typeof value !== 'object') return null;\n\n    if (typeof value.summaryUrl === 'string' && value.summaryUrl.trim()) {\n      return {\n        summaryUrl: value.summaryUrl.trim(),\n        valid: value.valid,\n        ok: value.ok,\n      };\n    }\n\n    if (value.data && typeof value.data === 'object') {\n      const nested = pickSummary(value.data);\n      if (nested) return nested;\n    }\n\n    if (value.response && typeof value.response === 'object') {\n      const nested = pickSummary(value.response);\n      if (nested) return nested;\n    }\n\n    return null;\n  };\n\n  // 1) Prioriza Structured Output Parser\n  const structuredReply = typeof output === 'object' && output !== null ? sanitize(output.reply) : '';\n  const structuredSummary = typeof output === 'object' && output !== null ? pickSummary(output) : null;\n\n  if (structuredSummary?.summaryUrl && structuredSummary.ok !== false) {\n    const hasSameUrl = structuredReply.includes(structuredSummary.summaryUrl);\n    if (hasSameUrl) return structuredReply;\n\n    return [\n      structuredReply,\n      'Link de agendamento: ' + structuredSummary.summaryUrl,\n    ].filter(Boolean).join('\\n\\n');\n  }\n\n  if (structuredReply) return structuredReply;\n\n  // 2) Fallback técnico: varre tool observations\n  let latestToolResult = null;\n\n  for (let i = steps.length - 1; i >= 0; i -= 1) {\n    const observation = steps[i]?.observation;\n    if (!observation) continue;\n\n    if (typeof observation === 'object') {\n      const extracted = pickSummary(observation);\n      if (extracted) {\n        latestToolResult = extracted;\n        break;\n      }\n      continue;\n    }\n\n    if (typeof observation !== 'string') continue;\n\n    try {\n      const parsed = JSON.parse(observation);\n      const extracted = pickSummary(parsed);\n      if (extracted) {\n        latestToolResult = extracted;\n        break;\n      }\n    } catch {\n      // Ignora observações não-JSON e segue buscando.\n    }\n  }\n\n  const rawText = sanitize(typeof output === 'string' ? output : '');\n\n  if (latestToolResult?.summaryUrl && latestToolResult.ok !== false) {\n    const hasSameUrl = rawText.includes(latestToolResult.summaryUrl);\n    if (hasSameUrl) return rawText;\n\n    return [\n      rawText,\n      'Link de agendamento: ' + latestToolResult.summaryUrl,\n    ].filter(Boolean).join('\\n\\n');\n  }\n\n  return rawText;\n})() }}",
+              "value": "={{ (() => {\n  const output = $json.output;\n\n  const sanitize = (text) => (typeof text === 'string' ? text : '')\n    .trim()\n    .replace(/confirma(c|ç)ão do agendamento/gi, 'geração do link de agendamento')\n    .replace(/confirmar o agendamento/gi, 'gerar o link de agendamento')\n    .replace(/consulta est[aá] agendada/gi, 'agendamento está pronto para conclusão')\n    .replace(/consulta foi agendada/gi, 'agendamento está pronto para conclusão')\n    .replace(/(\\b\\d{2}\\/\\d{2})\\s*\\([^\\n)]*\\)/g, '$1');\n\n  if (typeof output === 'object' && output !== null) {\n    return sanitize(output.reply);\n  }\n\n  return sanitize(typeof output === 'string' ? output : '');\n})() }}",
               "type": "string"
             },
             {
               "id": "id-2",
               "name": "summaryUrl",
-              "value": "={{ (() => {\n  const output = $json.output;\n  const steps = Array.isArray($json.intermediateSteps) ? $json.intermediateSteps : [];\n\n  const pickSummary = (value) => {\n    if (value == null) return null;\n\n    if (Array.isArray(value)) {\n      for (const item of value) {\n        const nested = pickSummary(item);\n        if (nested) return nested;\n      }\n      return null;\n    }\n\n    if (typeof value !== 'object') return null;\n\n    if (typeof value.summaryUrl === 'string' && value.summaryUrl.trim()) {\n      return {\n        summaryUrl: value.summaryUrl.trim(),\n        valid: value.valid,\n        ok: value.ok,\n      };\n    }\n\n    if (value.data && typeof value.data === 'object') {\n      const nested = pickSummary(value.data);\n      if (nested) return nested;\n    }\n\n    if (value.response && typeof value.response === 'object') {\n      const nested = pickSummary(value.response);\n      if (nested) return nested;\n    }\n\n    return null;\n  };\n\n  // 1) Prioriza Structured Output Parser\n  if (typeof output === 'object' && output !== null) {\n    const structured = pickSummary(output);\n    if (structured?.summaryUrl && structured.ok !== false) return structured.summaryUrl;\n  }\n\n  // 2) Fallback técnico em observations\n  for (let i = steps.length - 1; i >= 0; i -= 1) {\n    const observation = steps[i]?.observation;\n    if (!observation) continue;\n\n    let extracted = null;\n\n    if (typeof observation === 'object') {\n      extracted = pickSummary(observation);\n    } else if (typeof observation === 'string') {\n      try {\n        extracted = pickSummary(JSON.parse(observation));\n      } catch {\n        extracted = null;\n      }\n    }\n\n    if (extracted?.summaryUrl && extracted.ok !== false) return extracted.summaryUrl;\n  }\n\n  return '';\n})() }}",
+              "value": "={{ (() => {\n  const output = $json.output;\n\n  if (typeof output === 'object' && output !== null) {\n    const url = typeof output.summaryUrl === 'string' ? output.summaryUrl.trim() : '';\n    if (url && output.ok !== false) return url;\n\n    const nestedUrl = typeof output?.data?.summaryUrl === 'string' ? output.data.summaryUrl.trim() : '';\n    if (nestedUrl && output?.data?.ok !== false) return nestedUrl;\n  }\n\n  return '';\n})() }}",
               "type": "string"
             }
           ]
@@ -274,7 +273,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst fortalezaTime = new Intl.DateTimeFormat('pt-BR', {\n  timeZone: 'America/Fortaleza',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit',\n  hour12: false,\n}).format(now);\n\nconst isoFormatted = now.toISOString();\nconst items = $input.all();\n\nreturn items.map((item) => ({\n  json: {\n    ...item.json,\n    currentDateTime: fortalezaTime,\n    currentDateTimeISO: isoFormatted,\n    timezone: 'America/Fortaleza',\n  },\n}));"
+        "jsCode": "const now = new Date();\nconst fortalezaTime = new Intl.DateTimeFormat('pt-BR', {\n  timeZone: 'America/Fortaleza',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit',\n  hour12: false,\n}).format(now);\n\nconst isoFormatted = now.toISOString();\nconst items = $input.all();\n\nconst isInboundTextMessage = (payload) => {\n  const message = payload?.messages?.[0];\n  if (!message || typeof message !== 'object') return false;\n\n  const messageType = String(message.type ?? '').toLowerCase();\n  const body = typeof message?.text?.body === 'string' ? message.text.body.trim() : '';\n  const from = typeof message.from === 'string' ? message.from.trim() : '';\n\n  // Processa apenas mensagem de texto do paciente.\n  if (!from) return false;\n  if (!body) return false;\n  return messageType === 'text';\n};\n\nreturn items\n  .filter((item) => isInboundTextMessage(item.json))\n  .map((item) => ({\n    json: {\n      ...item.json,\n      currentDateTime: fortalezaTime,\n      currentDateTimeISO: isoFormatted,\n      timezone: 'America/Fortaleza',\n    },\n  }));"
       },
       "id": "b08c6f90-5340-44f9-9b2d-f5669b589e06",
       "name": "Add Current DateTime",
