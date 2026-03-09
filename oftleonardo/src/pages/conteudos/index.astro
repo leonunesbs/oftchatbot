@@ -9,6 +9,8 @@ import { getCollection } from "astro:content";
 export const prerender = true;
 
 const articles = await getCollection("conteudos");
+const tools = clusterTopics.filter((t) => t.intent === "informational");
+const scheduling = clusterTopics.find((t) => t.intent === "transactional");
 
 const title = "Conteúdos de Oftalmologia | Retina, Catarata e Triagem Visual";
 const description =
@@ -24,28 +26,21 @@ const breadcrumbSchema = {
   ],
 };
 
-const allItems = [
-  ...clusterTopics.map((topic) => ({
-    title: topic.title,
-    description: topic.description,
-    href: topic.href,
-    intent: topic.intent,
-    condition: topic.condition,
+const schemaItems = [
+  ...tools.map((t) => ({ title: t.title, href: t.href, condition: t.condition })),
+  ...articles.map((a) => ({
+    title: a.data.title,
+    href: `/conteudos/${a.id}`,
+    condition: a.data.condition,
   })),
-  ...articles.map((article) => ({
-    title: article.data.title,
-    description: article.data.description,
-    href: `/conteudos/${article.id}`,
-    intent: "informational" as const,
-    condition: article.data.condition,
-  })),
+  ...(scheduling ? [{ title: scheduling.title, href: scheduling.href, condition: undefined }] : []),
 ];
 
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   name: "Conteúdos de Oftalmologia",
-  itemListElement: allItems.map((item, index) => ({
+  itemListElement: schemaItems.map((item, index) => ({
     "@type": "ListItem",
     position: index + 1,
     name: item.title,
@@ -53,7 +48,7 @@ const itemListSchema = {
   })),
 };
 
-const conditionSchemas = allItems
+const conditionSchemas = schemaItems
   .filter((item) => Boolean(item.condition))
   .map((item) => ({
     "@context": "https://schema.org",
@@ -84,10 +79,34 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
     <section class="rounded-2xl border border-border/60 bg-card p-6 sm:p-8">
       <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Hub de Conteúdos em Oftalmologia</h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-        Explore conteúdos sobre doenças oculares, ferramentas de triagem visual e agendamento.
-        Informações acessíveis revisadas por Leonardo Nunes, oftalmologista especialista em retina e
-        catarata.
+        Explore conteúdos sobre doenças oculares e ferramentas de triagem visual. Informações
+        acessíveis revisadas por Leonardo Nunes, oftalmologista especialista em retina e catarata.
       </p>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="mb-4 text-lg font-semibold text-foreground">Ferramentas de Triagem Visual</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {
+          tools.map((tool) => (
+            <article class="group rounded-xl border border-border/60 bg-card p-5 transition-colors hover:border-brand/30">
+              <span class="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                Ferramenta
+              </span>
+              <h3 class="mt-2 text-base font-semibold text-foreground">{tool.title}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                {tool.description}
+              </p>
+              <a
+                href={tool.href}
+                class="mt-3 inline-flex text-sm font-medium text-brand hover:underline"
+              >
+                Acessar ferramenta
+              </a>
+            </article>
+          ))
+        }
+      </div>
     </section>
 
     {
@@ -101,11 +120,10 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
                   <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
                     {article.data.readingTime}
                   </span>
-                  <span class="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Informacional
-                  </span>
                 </div>
-                <h3 class="mt-2 text-base font-semibold text-foreground">{article.data.condition}</h3>
+                <h3 class="mt-2 text-base font-semibold text-foreground">
+                  {article.data.condition}
+                </h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">
                   {article.data.description}
                 </p>
@@ -122,25 +140,24 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
       )
     }
 
-    <section class="mt-8">
-      <h2 class="mb-4 text-lg font-semibold text-foreground">Ferramentas e Agendamento</h2>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {
-          clusterTopics.map((topic) => (
-            <article class="group rounded-xl border border-border/60 bg-card p-5 transition-colors hover:border-brand/30">
-              <p class="text-[10px] font-semibold uppercase tracking-wide text-brand">
-                {topic.intent === "transactional" ? "Transacional" : "Informacional"}
-              </p>
-              <h3 class="mt-2 text-base font-semibold text-foreground">{topic.title}</h3>
-              <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">{topic.description}</p>
-              <a href={topic.href} class="mt-3 inline-flex text-sm font-medium text-brand hover:underline">
-                Abrir conteúdo
-              </a>
-            </article>
-          ))
-        }
-      </div>
-    </section>
+    {
+      scheduling && (
+        <section class="mt-8">
+          <a
+            href={scheduling.href}
+            class="group flex flex-col items-center gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-6 text-center transition-colors hover:border-brand/50 hover:bg-brand/10 sm:p-8"
+          >
+            <h2 class="text-lg font-semibold text-foreground">{scheduling.title}</h2>
+            <p class="max-w-lg text-sm leading-relaxed text-muted-foreground">
+              {scheduling.description}
+            </p>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-transform group-hover:scale-105">
+              Agendar consulta
+            </span>
+          </a>
+        </section>
+      )
+    }
   </main>
   <Footer />
 </Layout>
