@@ -400,9 +400,8 @@ const allSchemas = [breadcrumbSchema, medicalPageSchema, howToSchema, faqSchema]
       transparent
     );
     background-image:
-      linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+      linear-gradient(to right, transparent calc(100% - 1px), var(--grid-line-color) calc(100% - 1px)),
+      linear-gradient(to bottom, transparent calc(100% - 1px), var(--grid-line-color) calc(100% - 1px));
     background-size: calc(100% / 20) calc(100% / 20);
-    background-position: 0 0;
   }
 </style>
