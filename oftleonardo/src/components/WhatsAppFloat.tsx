@@ -1,3 +1,5 @@
+import WhatsAppModal from "@/components/WhatsAppModal";
+
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -14,14 +16,17 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export default function WhatsAppFloat() {
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <a
-        href="/agendamento-online"
-        aria-label="Agendar consulta online"
-        className="inline-flex h-14 items-center gap-2 rounded-xl bg-green-600 px-5 text-white shadow-lg transition-all hover:bg-green-700 hover:shadow-xl"
+      <WhatsAppModal
+        variant="default"
+        size="lg"
+        triggerAriaLabel="Agendar consulta pelo WhatsApp"
+        dialogTitle="Agendar Consulta"
+        dialogDescription="Escolha a cidade e inicie o agendamento pelo WhatsApp"
+        className="h-14 gap-2 rounded-xl bg-green-600 px-5 text-white shadow-lg transition-all hover:bg-green-700 hover:shadow-xl"
       >
         <WhatsAppIcon className="size-5" />
         <span className="hidden sm:inline">Agendar Consulta</span>
-      </a>
+      </WhatsAppModal>
     </div>
   );
 }

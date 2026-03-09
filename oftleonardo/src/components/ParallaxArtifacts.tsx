@@ -8,8 +8,6 @@ export default function ParallaxArtifacts() {
         className="absolute inset-0 lg:hidden"
         style={{
           transform: "translate3d(0, 0, 0)",
-          willChange: "transform",
-          animation: "artifacts-drift-mobile 18s ease-in-out infinite alternate",
           backgroundImage: [
             "radial-gradient(circle at 14% 12%, color-mix(in oklab, var(--color-brand) 11%, transparent) 0 4px, transparent 4px)",
             "radial-gradient(circle at 42% 20%, color-mix(in oklab, var(--color-brand) 10%, transparent) 0 6px, transparent 6px)",

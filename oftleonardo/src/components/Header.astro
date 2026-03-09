@@ -214,6 +214,7 @@ import BookingPopup from "./BookingPopup";
   const SCROLL_RANGE_MOBILE = 80;
   const SCROLL_RANGE_DESKTOP = 140;
   let ticking = false;
+  let previousProgress = -1;
 
   function clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
@@ -228,7 +229,14 @@ import BookingPopup from "./BookingPopup";
 
   function syncHeaderProgress() {
     if (!header) return;
-    header.style.setProperty("--p", `${getTargetProgress()}`);
+    const nextProgress = getTargetProgress();
+    if (Math.abs(nextProgress - previousProgress) < 0.01) {
+      ticking = false;
+      return;
+    }
+
+    previousProgress = nextProgress;
+    header.style.setProperty("--p", `${nextProgress}`);
     ticking = false;
   }
 
