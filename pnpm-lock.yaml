@@ -276,6 +276,9 @@ importers:
       '@astrojs/vercel':
         specifier: ^9.0.4
         version: 9.0.4(astro@5.18.0(@types/node@25.3.2)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.31.1)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(next@16.1.6(@babel/core@7.29.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(rollup@4.59.0)
+      '@digi4care/astro-google-tagmanager':
+        specifier: ^1.6.0
+        version: 1.6.0(astro@5.18.0(@types/node@25.3.2)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.31.1)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@fontsource-variable/noto-sans':
         specifier: ^5.2.10
         version: 5.2.10
@@ -703,6 +706,11 @@ packages:
 
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
+
+  '@digi4care/astro-google-tagmanager@1.6.0':
+    resolution: {integrity: sha512-xBEYnswcLPNDu62zRGh8W8hbRW97nK02O+SyellcopT4/NMkevygrvxv49xl0ZQeBd6dfJpwbktlBYDJDaRvWg==}
+    peerDependencies:
+      astro: ^1.2.1 || ^2.0.0 || ^3.0.0-beta.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
 
   '@dotenvx/dotenvx@1.52.0':
     resolution: {integrity: sha512-CaQcc8JvtzQhUSm9877b6V4Tb7HCotkcyud9X2YwdqtQKwgljkMRwU96fVYKnzN3V0Hj74oP7Es+vZ0mS+Aa1w==}
@@ -6361,6 +6369,10 @@ snapshots:
       picocolors: 1.1.1
 
   '@date-fns/tz@1.4.1': {}
+
+  '@digi4care/astro-google-tagmanager@1.6.0(astro@5.18.0(@types/node@25.3.2)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.31.1)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))':
+    dependencies:
+      astro: 5.18.0(@types/node@25.3.2)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.31.1)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   '@dotenvx/dotenvx@1.52.0':
     dependencies:

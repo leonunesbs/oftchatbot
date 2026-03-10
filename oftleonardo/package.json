@@ -14,6 +14,7 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.7.0",
     "@astrojs/vercel": "^9.0.4",
+    "@digi4care/astro-google-tagmanager": "^1.6.0",
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@tailwindcss/vite": "^4.2.0",
     "astro": "^5.17.1",

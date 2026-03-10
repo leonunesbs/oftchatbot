@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/config/site";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
+import { GoogleTagmanager } from "@digi4care/astro-google-tagmanager";
 
 const { ga4Id, gtmId, metaPixelId, googleAdsId } = siteConfig.analytics;
 const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
@@ -10,8 +11,18 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   hasTracking && (
     <>
       <script is:inline>
-        {`window.dataLayer = window.dataLayer || [];`}
+        {`window.dataLayer = window.dataLayer || [];
+function gtag(){window.dataLayer.push(arguments);}
+window.gtag = window.gtag || gtag;
+window.gtag("consent", "default", {
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+  analytics_storage: "denied",
+  wait_for_update: 500,
+});`}
       </script>
+      {gtmId ? <GoogleTagmanager id={gtmId} /> : null}
       <script is:inline define:vars={{ ga4Id, gtmId, metaPixelId, googleAdsId }}>
         (function () {
   var resolvedGa4Id = typeof ga4Id === "string" ? ga4Id : "";
@@ -62,14 +73,6 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   function enableTracking() {
     if (trackingEnabled) return;
     trackingEnabled = true;
-
-    if (resolvedGtmId) {
-      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer',resolvedGtmId);
-    }
 
     if (resolvedGa4Id) {
       loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGa4Id);
@@ -144,13 +147,6 @@ const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelI
   var savedConsent = localStorage.getItem(consentKey);
   sanitizeUrlParams();
   ensureGtagStub();
-  window.gtag("consent", "default", {
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-    analytics_storage: "denied",
-    wait_for_update: 500,
-  });
   if (savedConsent === "granted") {
     enableTracking();
     setConsent(true);

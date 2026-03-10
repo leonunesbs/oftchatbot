@@ -39,7 +39,15 @@ function buildWhatsAppUrl(whatsappNumber: string, messageText: string) {
   return `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`;
 }
 
+const CONSENT_KEY = "oftcore:consent:v1";
+
 function trackClick(cityName: string) {
+  try {
+    if (localStorage.getItem(CONSENT_KEY) !== "granted") return;
+  } catch {
+    return;
+  }
+
   const payload = {
     city: cityName,
     channel: "whatsapp",

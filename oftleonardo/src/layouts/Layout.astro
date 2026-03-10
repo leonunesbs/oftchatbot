@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { siteConfig } from "@/config/site";
 import JsonLd from "@/components/JsonLd.astro";
 import TrackingAndConsent from "@/components/TrackingAndConsent.astro";
+import { GoogleTagmanagerNoscript } from "@digi4care/astro-google-tagmanager";
 
 interface Props {
   title?: string;
@@ -21,6 +22,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, siteConfig.canonical);
+const shouldRenderGtmNoscript = import.meta.env.PROD && Boolean(siteConfig.analytics.gtmId);
 ---
 
 <html lang="pt-BR">
@@ -121,6 +123,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.canonical);
     </script>
   </head>
   <body>
+    {shouldRenderGtmNoscript ? <GoogleTagmanagerNoscript id={siteConfig.analytics.gtmId} /> : null}
     <a href="#conteudo-principal" class="skip-link"
       >Pular para o conteúdo principal</a
     >

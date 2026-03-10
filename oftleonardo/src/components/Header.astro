@@ -212,7 +212,6 @@ import BookingPopup from "./BookingPopup";
   const header = document.getElementById("main-header");
   const toolsMenu = document.getElementById("tools-menu");
   const SCROLL_RANGE_MOBILE = 80;
-  const SCROLL_RANGE_DESKTOP = 140;
   let ticking = false;
   let previousProgress = -1;
 
@@ -222,7 +221,8 @@ import BookingPopup from "./BookingPopup";
 
   function getTargetProgress() {
     const isDesktop = window.innerWidth >= 768;
-    const scrollRange = isDesktop ? SCROLL_RANGE_DESKTOP : SCROLL_RANGE_MOBILE;
+    if (isDesktop) return 0;
+    const scrollRange = SCROLL_RANGE_MOBILE;
     const scrollY = Math.max(window.scrollY, 0);
     return clamp(scrollY / scrollRange, 0, 1);
   }
