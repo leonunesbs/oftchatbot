@@ -3,14 +3,19 @@
   "nodes": [
     {
       "parameters": {
-        "updates": ["messages"],
+        "updates": [
+          "messages"
+        ],
         "options": {}
       },
       "id": "ec20eb80-b89c-4464-a9c7-51a09061851c",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
       "typeVersion": 1,
-      "position": [14496, 2448],
+      "position": [
+        14496,
+        2448
+      ],
       "webhookId": "5e9cc384-2fd6-499a-88b2-89e57c630e70",
       "credentials": {
         "whatsAppTriggerApi": {
@@ -31,7 +36,10 @@
       "name": "Lux AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [15200, 2448]
+      "position": [
+        15200,
+        2448
+      ]
     },
     {
       "parameters": {
@@ -47,7 +55,10 @@
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [14944, 2672],
+      "position": [
+        14944,
+        2672
+      ],
       "credentials": {
         "openAiApi": {
           "id": "a4gHNo55e1n6Bb8n",
@@ -65,21 +76,27 @@
       "name": "Conversation Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [15072, 2672]
+      "position": [
+        15072,
+        2672
+      ]
     },
     {
       "parameters": {
         "operation": "send",
         "phoneNumberId": "989729870895780",
         "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
-        "textBody": "={{ (() => {\n  const output = $json.output;\n\n  const SAFE_FALLBACK = 'Oi! Tudo bem? Como posso te ajudar com seu agendamento hoje?';\n\n  const extractSummaryUrl = (value) => {\n    if (typeof value === 'object' && value !== null) {\n      const url1 = typeof value.summaryUrl === 'string' ? value.summaryUrl.trim() : '';\n      if (url1 && value.ok !== false) return url1;\n\n      const url2 = typeof value?.data?.summaryUrl === 'string' ? value.data.summaryUrl.trim() : '';\n      if (url2 && value?.data?.ok !== false) return url2;\n\n      return '';\n    }\n\n    if (typeof value === 'string') {\n      const match = value.match(/https?:\\/\\/[^\\s)]+/i);\n      return match ? match[0].trim() : '';\n    }\n\n    return '';\n  };\n\n  const normalizeQuestion = (line) => line\n    .toLowerCase()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9\\s?]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  const removeDuplicateQuestionLines = (value) => {\n    const lines = String(value).split('\\n');\n    const result = [];\n    let lastQuestionKey = '';\n\n    for (const rawLine of lines) {\n      const line = rawLine.trimEnd();\n      if (!line.trim()) {\n        result.push(line);\n        continue;\n      }\n\n      const isQuestion = /\\?$/.test(line.trim());\n      if (!isQuestion) {\n        result.push(line);\n        continue;\n      }\n\n      const key = normalizeQuestion(line);\n      const isNearDuplicate = lastQuestionKey && (key.includes(lastQuestionKey) || lastQuestionKey.includes(key));\n\n      if (isNearDuplicate) {\n        continue;\n      }\n\n      result.push(line);\n      lastQuestionKey = key;\n    }\n\n    return result.join('\\n');\n  };\n\n  const leakMatchers = [\n    /we\\s+are\\s+the\\s+assistant/i,\n    /last\\s+user\\s+message/i,\n    /user\\s+writes/i,\n    /system\\s+ended/i,\n    /follow\\s+identity/i,\n    /use\\s+context/i,\n    /patient\\s+context\\s+earlier/i,\n    /linked\\s*=\\s*true/i,\n    /assistant\\s+provided\\s+link/i,\n    /prompt\\s+interno/i,\n  ];\n\n  const containsPromptLeak = (value) => {\n    const text = String(value ?? '').trim();\n    if (!text) return false;\n    return leakMatchers.some((matcher) => matcher.test(text));\n  };\n\n  const removePromptLeakLines = (value) => String(value)\n    .split('\\n')\n    .filter((rawLine) => {\n      const line = rawLine.trim();\n      if (!line) return true;\n      return !containsPromptLeak(line);\n    })\n    .join('\\n');\n\n  const summaryUrl = extractSummaryUrl(output);\n\n  const sanitize = (text) => removeDuplicateQuestionLines(\n    removePromptLeakLines(\n      String(text ?? '')\n        .replace(/\\r\\n/g, '\\n')\n        .replace(/\\n{3,}/g, '\\n\\n')\n        .replace(/\\s+$/gm, '')\n        .trim()\n        .replace(/consulta est[aá] agendada/gi, 'agendamento está pronto para conclusão')\n        .replace(/consulta foi agendada/gi, 'agendamento está pronto para conclusão')\n    )\n  ).trim();\n\n  let text = '';\n\n  if (typeof output === 'object' && output !== null) {\n    text = output.reply || output.text || output.message || '';\n  } else {\n    text = typeof output === 'string' ? output : '';\n  }\n\n  if (summaryUrl) {\n    text = String(text)\n      .replace(/https?:\\/\\/[^\\s)]+/gi, '')\n      .replace(/\\n{3,}/g, '\\n\\n')\n      .replace(/\\s+$/gm, '')\n      .trim();\n  }\n\n  const safeText = sanitize(text);\n\n  if (!safeText || containsPromptLeak(safeText)) {\n    return SAFE_FALLBACK;\n  }\n\n  return safeText;\n})() }}",
+        "textBody": "={{ (() => {\n  const output = $json.output;\n\n  const SAFE_FALLBACK = 'Oi! Tudo bem? Como posso te ajudar com seu agendamento hoje?';\n  const LINK_FOLLOWUP = 'Conseguiu abrir o link para concluir seu agendamento?';\n\n  const extractSummaryUrl = (value) => {\n    if (typeof value === 'object' && value !== null) {\n      const url1 = typeof value.summaryUrl === 'string' ? value.summaryUrl.trim() : '';\n      if (url1 && value.ok !== false) return url1;\n\n      const url2 = typeof value?.data?.summaryUrl === 'string' ? value.data.summaryUrl.trim() : '';\n      if (url2 && value?.data?.ok !== false) return url2;\n\n      return '';\n    }\n\n    if (typeof value === 'string') {\n      const match = value.match(/https?:\\/\\/[^\\s)]+/i);\n      return match ? match[0].trim() : '';\n    }\n\n    return '';\n  };\n\n  const pickText = (value) => {\n    if (typeof value === 'object' && value !== null) {\n      return String(value.reply || value.text || value.message || '').trim();\n    }\n\n    return typeof value === 'string' ? value.trim() : '';\n  };\n\n  const leakMatchers = [\n    /we\\s+are\\s+the\\s+assistant/i,\n    /last\\s+user\\s+message/i,\n    /user\\s+writes/i,\n    /system\\s+ended/i,\n    /follow\\s+identity/i,\n    /use\\s+context/i,\n    /patient\\s+context\\s+earlier/i,\n    /linked\\s*=\\s*true/i,\n    /assistant\\s+provided\\s+link/i,\n    /prompt\\s+interno/i,\n    /so\\s+final\\s+message/i,\n    /keep\\s+short/i,\n    /no\\s+emojis/i,\n    /i\\'?ll\\s+output\\s+that/i,\n    /use\\s+patient\\'?s\\s+name/i,\n    /mensagens?\\s+de\\s+configura[cç][aã]o/i,\n  ];\n\n  const containsPromptLeak = (value) => {\n    const text = String(value ?? '').trim();\n    if (!text) return false;\n    return leakMatchers.some((matcher) => matcher.test(text));\n  };\n\n  const removePromptLeakLines = (value) => String(value)\n    .split('\\n')\n    .filter((rawLine) => {\n      const line = rawLine.trim();\n      if (!line) return true;\n      return !containsPromptLeak(line);\n    })\n    .join('\\n');\n\n  const sanitize = (text) => removePromptLeakLines(\n    String(text ?? '')\n      .replace(/\\r\\n/g, '\\n')\n      .replace(/\\n{3,}/g, '\\n\\n')\n      .replace(/\\s+$/gm, '')\n      .trim()\n      .replace(/consulta est[aá] agendada/gi, 'agendamento está pronto para conclusão')\n      .replace(/consulta foi agendada/gi, 'agendamento está pronto para conclusão')\n  ).trim();\n\n  const summaryUrl = extractSummaryUrl(output);\n  if (summaryUrl) {\n    return LINK_FOLLOWUP;\n  }\n\n  const safeText = sanitize(pickText(output));\n\n  if (!safeText || containsPromptLeak(safeText)) {\n    return SAFE_FALLBACK;\n  }\n\n  return safeText;\n})() }}",
         "additionalFields": {}
       },
       "id": "fe810f20-b11f-4b72-b12d-994560ee3bc2",
       "name": "Send WhatsApp Response",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [16016, 2448],
+      "position": [
+        16016,
+        2448
+      ],
       "webhookId": "699e9b53-2226-43ad-ac9a-dd7b90c6d02c",
       "credentials": {
         "whatsAppApi": {
@@ -104,7 +121,10 @@
       "name": "Has Summary URL?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [15792, 2448]
+      "position": [
+        15792,
+        2448
+      ]
     },
     {
       "parameters": {
@@ -132,7 +152,10 @@
       "name": "Send WhatsApp Template Button",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [16128, 2336],
+      "position": [
+        16128,
+        2336
+      ],
       "webhookId": "bfa4f2e6-ab95-4eb7-887f-f8e660f7bb17",
       "credentials": {
         "whatsAppApi": {
@@ -177,7 +200,10 @@
       "name": "Get Locations Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15200, 2672]
+      "position": [
+        15200,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -223,7 +249,10 @@
       "name": "Check Availability Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15328, 2672]
+      "position": [
+        15328,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -248,7 +277,10 @@
       "name": "Get Appointments Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15456, 2672]
+      "position": [
+        15456,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -264,7 +296,10 @@
       "name": "Generate Summary Link Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15584, 2672]
+      "position": [
+        15584,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -285,7 +320,10 @@
       "name": "Get Patient Context Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15712, 2672]
+      "position": [
+        15712,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -301,7 +339,10 @@
       "name": "Request Phone Link Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [15840, 2672]
+      "position": [
+        15840,
+        2672
+      ]
     },
     {
       "parameters": {
@@ -311,7 +352,10 @@
       "name": "Add Current DateTime",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [14720, 2448]
+      "position": [
+        14720,
+        2448
+      ]
     }
   ],
   "pinData": {},
@@ -430,11 +474,22 @@
       "main": [
         [
           {
-            "node": "Send WhatsApp Response",
+            "node": "Send WhatsApp Template Button",
             "type": "main",
             "index": 0
           }
         ],
+        [
+          {
+            "node": "Send WhatsApp Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Template Button": {
+      "main": [
         [
           {
             "node": "Send WhatsApp Response",
