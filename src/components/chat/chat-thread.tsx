@@ -8,6 +8,7 @@ import type { WahaConversation, WahaMessage } from "@/lib/waha/types";
 type ChatThreadProps = {
   activeConversation?: WahaConversation;
   messages: WahaMessage[];
+  isTyping?: boolean;
   isLoading?: boolean;
   isLoadingOlder?: boolean;
   hasMoreOlder?: boolean;
@@ -17,6 +18,7 @@ type ChatThreadProps = {
 export function ChatThread({
   activeConversation,
   messages,
+  isTyping = false,
   isLoading,
   isLoadingOlder = false,
   hasMoreOlder = false,
@@ -186,9 +188,25 @@ export function ChatThread({
   if (!messages.length) {
     return (
       <div className="flex h-full items-center justify-center px-6">
-        <div className="bg-muted/60 border-border/70 rounded-2xl border px-6 py-8 text-center">
-          <p className="text-sm font-medium">Nenhuma mensagem nessa conversa</p>
-          <p className="text-muted-foreground mt-1 text-xs">Envie a primeira mensagem para iniciar o histórico.</p>
+        <div className="w-full max-w-md space-y-4">
+          {isTyping ? (
+            <div className="flex w-full justify-start">
+              <div className="bg-slate-50 text-foreground border-border max-w-[min(82%,42rem)] rounded-2xl rounded-bl-md border px-3 py-2.5 text-sm shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-xs font-medium">Digitando</span>
+                  <div className="flex items-center gap-1">
+                    <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full [animation-delay:-0.3s]" />
+                    <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full [animation-delay:-0.15s]" />
+                    <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <div className="bg-muted/60 border-border/70 rounded-2xl border px-6 py-8 text-center">
+            <p className="text-sm font-medium">Nenhuma mensagem nessa conversa</p>
+            <p className="text-muted-foreground mt-1 text-xs">Envie a primeira mensagem para iniciar o histórico.</p>
+          </div>
         </div>
       </div>
     );
@@ -243,6 +261,20 @@ export function ChatThread({
             </div>
           );
         })}
+        {isTyping ? (
+          <div className="flex w-full justify-start">
+            <div className="bg-slate-50 text-foreground border-border max-w-[min(82%,42rem)] rounded-2xl rounded-bl-md border px-3 py-2.5 text-sm shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-xs font-medium">Digitando</span>
+                <div className="flex items-center gap-1">
+                  <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full [animation-delay:-0.3s]" />
+                  <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full [animation-delay:-0.15s]" />
+                  <span className="bg-muted-foreground/50 size-1.5 animate-bounce rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
