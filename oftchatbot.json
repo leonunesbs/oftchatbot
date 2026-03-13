@@ -3,19 +3,14 @@
   "nodes": [
     {
       "parameters": {
-        "updates": [
-          "messages"
-        ],
+        "updates": ["messages"],
         "options": {}
       },
       "id": "ec20eb80-b89c-4464-a9c7-51a09061851c",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
       "typeVersion": 1,
-      "position": [
-        14496,
-        2448
-      ],
+      "position": [14496, 2448],
       "webhookId": "5e9cc384-2fd6-499a-88b2-89e57c630e70",
       "credentials": {
         "whatsAppTriggerApi": {
@@ -36,10 +31,7 @@
       "name": "Lux AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [
-        15200,
-        2448
-      ]
+      "position": [15200, 2448]
     },
     {
       "parameters": {
@@ -48,17 +40,14 @@
           "mode": "id",
           "value": "gpt-5-mini"
         },
-        "builtInTools": {},
+        "builtInTools": [],
         "options": {}
       },
       "id": "57a0b1d3-d156-4a43-9da2-c7bf9dd4c3de",
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [
-        14944,
-        2672
-      ],
+      "position": [14944, 2672],
       "credentials": {
         "openAiApi": {
           "id": "a4gHNo55e1n6Bb8n",
@@ -76,10 +65,7 @@
       "name": "Conversation Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
-      "position": [
-        15072,
-        2672
-      ]
+      "position": [15072, 2672]
     },
     {
       "parameters": {
@@ -93,10 +79,7 @@
       "name": "Send WhatsApp Response",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [
-        16016,
-        2448
-      ],
+      "position": [16016, 2448],
       "webhookId": "699e9b53-2226-43ad-ac9a-dd7b90c6d02c",
       "credentials": {
         "whatsAppApi": {
@@ -121,28 +104,38 @@
       "name": "Has Summary URL?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        15792,
-        2448
-      ]
+      "position": [15792, 2448]
     },
     {
       "parameters": {
         "operation": "sendTemplate",
         "phoneNumberId": "989729870895780",
-        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "recipientPhoneNumber": "={{ String($('WhatsApp Trigger').item.json.messages[0].from || '').replace(/\\D/g, '') }}",
         "template": "schedule_confirmation|pt_BR",
         "components": {
           "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  {
+                  "type": "text",
+                  "text": "={{ (() => {\n  const output = $json.output;\n  const extractUrl = (val) => {\n    if (typeof val === 'object' && val !== null) {\n      const u = val.summaryUrl || val?.data?.summaryUrl;\n      if (typeof u === 'string' && val.ok !== false) return u.trim();\n      return '';\n    }\n    if (typeof val === 'string') {\n      const m = val.match(/https?:\\/\\/[^\\s)]+/i);\n      return m ? m[0].trim() : '';\n    }\n    return '';\n  };\n\n  const formatDate = (isoDate) => {\n    if (!isoDate) return '';\n    const [y, m, d] = String(isoDate).split('-');\n    if (!y || !m || !d) return '';\n    return `${d}/${m}/${y}`;\n  };\n\n  const formatTime = (hhmm) => {\n    if (!hhmm) return '';\n    return String(hhmm).slice(0, 5);\n  };\n\n  try {\n    const url = extractUrl(output);\n    if (!url) return 'Concluir agendamento';\n    const parsed = new URL(url);\n    const date = formatDate(parsed.searchParams.get('date'));\n    const time = formatTime(parsed.searchParams.get('time'));\n    if (date && time) return `Concluir agendamento para ${date} as ${time}`;\n    if (date) return `Concluir agendamento para ${date}`;\n    return 'Concluir agendamento';\n  } catch {\n    return 'Concluir agendamento';\n  }\n})() }}"
+                  }
+                ]
+              }
+            },
             {
               "type": "button",
               "sub_type": "url",
               "index": 0,
               "buttonParameters": {
-                "parameter": {
+                "parameter": [
+                  {
                   "type": "text",
-                  "text": "={{ (() => {\n  const output = $json.output;\n  const currentPhone = String($('Add Current DateTime').item.json.patientPhoneDigits || $('WhatsApp Trigger').item.json.messages[0].from || '').replace(/\\D/g, '');\n\n  const ensurePathWithPhone = (value) => {\n    if (!value) return '';\n\n    try {\n      const base = 'https://agenda.oftleonardo.com.br';\n      const normalized = value.startsWith('http') ? value : `${base}/${value.replace(/^\\/+/g, '')}`;\n      const parsed = new URL(normalized);\n\n      if (currentPhone && !parsed.searchParams.get('phone')) {\n        parsed.searchParams.set('phone', currentPhone);\n      }\n\n      const pathAndQuery = `${parsed.pathname}${parsed.search}${parsed.hash}`;\n      return pathAndQuery.startsWith('/') ? pathAndQuery.slice(1) : pathAndQuery;\n    } catch {\n      return String(value).replace(/^https?:\\/\\/[^/]+\\//i, '').replace(/^\\/+/g, '');\n    }\n  };\n\n  const pickFromObject = (obj) => {\n    const directPath = typeof obj?.summaryPath === 'string' ? obj.summaryPath.trim() : '';\n    if (directPath && obj?.ok !== false) return directPath;\n\n    const nestedPath = typeof obj?.data?.summaryPath === 'string' ? obj.data.summaryPath.trim() : '';\n    if (nestedPath && obj?.data?.ok !== false) return nestedPath;\n\n    const directUrl = typeof obj?.summaryUrl === 'string' ? obj.summaryUrl.trim() : '';\n    if (directUrl && obj?.ok !== false) return directUrl;\n\n    const nestedUrl = typeof obj?.data?.summaryUrl === 'string' ? obj.data.summaryUrl.trim() : '';\n    if (nestedUrl && obj?.data?.ok !== false) return nestedUrl;\n\n    return '';\n  };\n\n  let raw = '';\n\n  if (typeof output === 'object' && output !== null) {\n    raw = pickFromObject(output);\n  } else if (typeof output === 'string') {\n    const match = output.match(/https?:\\/\\/[^\\s)]+/i);\n    raw = match ? match[0].trim() : '';\n  }\n\n  return ensurePathWithPhone(raw);\n})() }}"
-                }
+                  "text": "={{ (() => {\n  const output = $json.output;\n  const currentPhone = String($('Add Current DateTime').item.json.patientPhoneDigits || $('WhatsApp Trigger').item.json.messages[0].from || '').replace(/\\D/g, '');\n  const base = 'https://agenda.oftleonardo.com.br';\n\n  const extractUrl = (val) => {\n    if (typeof val === 'object' && val !== null) {\n      const u = val.summaryUrl || val?.data?.summaryUrl;\n      if (typeof u === 'string' && val.ok !== false) return u.trim();\n      const p = val.summaryPath || val?.data?.summaryPath;\n      if (typeof p === 'string' && val.ok !== false) return `${base}/${p.replace(/^\\/+/g, '')}`;\n    }\n    if (typeof val === 'string') {\n      const m = val.match(/https?:\\/\\/[^\\s)]+/i);\n      return m ? m[0].trim() : '';\n    }\n    return '';\n  };\n\n  try {\n    const url = extractUrl(output);\n    if (!url) return 'agendar/resumo';\n    const parsed = new URL(url.startsWith('http') ? url : `${base}/${String(url).replace(/^\\/+/g, '')}`);\n\n    if (currentPhone && !parsed.searchParams.get('phone')) {\n      parsed.searchParams.set('phone', currentPhone);\n    }\n\n    const shortParams = new URLSearchParams();\n    const location = parsed.searchParams.get('location');\n    const date = parsed.searchParams.get('date');\n    const time = parsed.searchParams.get('time');\n    const phone = parsed.searchParams.get('phone');\n\n    if (location) shortParams.set('location', location);\n    if (date) shortParams.set('date', date);\n    if (time) shortParams.set('time', time);\n    if (phone) shortParams.set('phone', phone);\n\n    const cleanPath = parsed.pathname.replace(/^\\/+/g, '');\n    const query = shortParams.toString();\n    return query ? `${cleanPath}?${query}` : cleanPath;\n  } catch {\n    return 'agendar/resumo';\n  }\n})() }}"
+                  }
+                ]
               }
             }
           ]
@@ -152,10 +145,7 @@
       "name": "Send WhatsApp Template Button",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [
-        16128,
-        2336
-      ],
+      "position": [16128, 2336],
       "webhookId": "bfa4f2e6-ab95-4eb7-887f-f8e660f7bb17",
       "credentials": {
         "whatsAppApi": {
@@ -200,10 +190,7 @@
       "name": "Get Locations Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15200,
-        2672
-      ]
+      "position": [15200, 2672]
     },
     {
       "parameters": {
@@ -249,10 +236,7 @@
       "name": "Check Availability Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15328,
-        2672
-      ]
+      "position": [15328, 2672]
     },
     {
       "parameters": {
@@ -277,10 +261,7 @@
       "name": "Get Appointments Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15456,
-        2672
-      ]
+      "position": [15456, 2672]
     },
     {
       "parameters": {
@@ -296,10 +277,7 @@
       "name": "Generate Summary Link Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15584,
-        2672
-      ]
+      "position": [15584, 2672]
     },
     {
       "parameters": {
@@ -320,10 +298,7 @@
       "name": "Get Patient Context Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15712,
-        2672
-      ]
+      "position": [15712, 2672]
     },
     {
       "parameters": {
@@ -339,10 +314,7 @@
       "name": "Request Phone Link Tool",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
-      "position": [
-        15840,
-        2672
-      ]
+      "position": [15840, 2672]
     },
     {
       "parameters": {
@@ -352,10 +324,17 @@
       "name": "Add Current DateTime",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        14720,
-        2448
-      ]
+      "position": [14720, 2448]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));\nconst vars = typeof $vars === 'undefined' || $vars === null ? {} : $vars;\n\nfor (const item of items) {\n  const messageId = String(item.json?.messages?.[0]?.id ?? '').trim();\n  const phoneNumberId = String(\n    item.json?.metadata?.phone_number_id ??\n      vars.WHATSAPP_PHONE_NUMBER_ID ??\n      '989729870895780'\n  ).trim();\n\n  const token = String(\n    vars.WHATSAPP_CLOUD_API_TOKEN ??\n      vars.WHATSAPP_ACCESS_TOKEN ??\n      ''\n  ).trim();\n\n  if (!messageId || !phoneNumberId || !token) {\n    continue;\n  }\n\n  try {\n    const response = await fetch(`https://graph.facebook.com/v25.0/${phoneNumberId}/messages`, {\n      method: 'POST',\n      headers: {\n        Authorization: `Bearer ${token}`,\n        'Content-Type': 'application/json',\n      },\n      body: JSON.stringify({\n        messaging_product: 'whatsapp',\n        status: 'read',\n        message_id: messageId,\n        typing_indicator: {\n          type: 'text',\n        },\n      }),\n    });\n\n    if (!response.ok) {\n      const errorText = await response.text().catch(() => '');\n      console.log('Typing indicator failed:', response.status, errorText);\n      continue;\n    }\n\n    // Small delay keeps indicator visible before sending the final reply.\n    await sleep(1200);\n  } catch (error) {\n    console.log('Typing indicator request error:', error?.message ?? error);\n  }\n}\n\nreturn items;\n"
+      },
+      "id": "c6d2b6a3-0bc9-4c43-a4ee-c2f1ce0f1d77",
+      "name": "WhatsApp Typing Indicator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [14960, 2448]
     }
   ],
   "pinData": {},
@@ -500,6 +479,17 @@
       ]
     },
     "Add Current DateTime": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Typing Indicator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Typing Indicator": {
       "main": [
         [
           {
