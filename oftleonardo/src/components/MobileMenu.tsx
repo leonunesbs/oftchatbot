@@ -15,6 +15,7 @@ import {
   Eye,
   Grid3X3,
   Menu,
+  Monitor,
   Moon,
   Sun,
   X,
@@ -23,36 +24,48 @@ import { useEffect, useState } from "react";
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  type ThemeMode = "light" | "dark" | "system";
+  const CYCLE: ThemeMode[] = ["light", "dark", "system"];
+
+  function getStoredTheme(): ThemeMode {
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    return "system";
+  }
+
+  const [theme, setTheme] = useState<ThemeMode>("system");
 
   useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
+    setTheme(getStoredTheme());
+
+    const handler = (e: Event) => {
+      const mode = (e as CustomEvent).detail?.mode;
+      if (mode) setTheme(mode);
+    };
+    window.addEventListener("theme-changed", handler);
+    return () => window.removeEventListener("theme-changed", handler);
   }, []);
 
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
+  function cycleTheme() {
+    const idx = CYCLE.indexOf(theme);
+    const next = CYCLE[(idx + 1) % CYCLE.length];
+    setTheme(next);
+    localStorage.setItem("theme", next);
 
-    const toggles = document.querySelectorAll(".theme-toggle");
-    toggles.forEach((toggle) => {
-      const sun = toggle.querySelector(".theme-icon-sun");
-      const moon = toggle.querySelector(".theme-icon-moon");
-      if (!sun || !moon) return;
-      if (next) {
-        sun.classList.add("hidden");
-        moon.classList.remove("hidden");
-        moon.classList.add("inline-flex");
-        sun.classList.remove("inline-flex");
-      } else {
-        moon.classList.add("hidden");
-        sun.classList.remove("hidden");
-        sun.classList.add("inline-flex");
-        moon.classList.remove("inline-flex");
-      }
-    });
+    const effective =
+      next === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : next;
+    document.documentElement.classList.toggle("dark", effective === "dark");
+
+    window.dispatchEvent(new CustomEvent("theme-changed", { detail: { mode: next } }));
   }
+
+  const THEME_ICONS: Record<ThemeMode, typeof Sun> = { light: Sun, dark: Moon, system: Monitor };
+  const THEME_LABELS: Record<ThemeMode, string> = { light: "Modo claro", dark: "Modo escuro", system: "Tema do sistema" };
+  const ThemeIcon = THEME_ICONS[theme];
 
   return (
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
@@ -121,11 +134,11 @@ export default function MobileMenu() {
           </WhatsAppModal>
           <Separator className="my-4" />
           <button
-            onClick={toggleTheme}
+            onClick={cycleTheme}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            {dark ? "Modo claro" : "Modo escuro"}
+            <ThemeIcon className="size-4" />
+            {THEME_LABELS[theme]}
           </button>
         </div>
       </DrawerContent>
