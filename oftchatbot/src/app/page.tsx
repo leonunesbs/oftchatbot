@@ -83,6 +83,7 @@ const REALTIME_CONVERSATIONS_REFRESH_THROTTLE_MS = 2_000;
 const REALTIME_ACTIVE_CHAT_REFRESH_THROTTLE_MS = 2_000;
 const OPTIMISTIC_MESSAGE_ID_PREFIX = "optimistic:";
 const MESSAGE_DUPLICATE_WINDOW_MS = 15_000;
+const TYPING_INDICATOR_TIMEOUT_MS = 12_000;
 
 function mergeUniqueById<T extends { id: string }>(
   current: T[],
@@ -305,6 +306,7 @@ export default function Page() {
   const [isLoadingProfile, setIsLoadingProfile] = React.useState(false);
   const [isSavingProfile, setIsSavingProfile] = React.useState(false);
   const [isResettingProfile, setIsResettingProfile] = React.useState(false);
+  const [isActiveChatTyping, setIsActiveChatTyping] = React.useState(false);
   const [lastSyncAt, setLastSyncAt] = React.useState<Date | null>(null);
   const [pendingConversationActions, setPendingConversationActions] =
     React.useState<Record<string, Partial<Record<ConversationAction, boolean>>>>(
@@ -319,12 +321,32 @@ export default function Page() {
   const isRealtimeConnectedRef = React.useRef(false);
   const lastRealtimeConversationRefreshAtRef = React.useRef(0);
   const lastRealtimeActiveChatRefreshAtRef = React.useRef(0);
+  const typingIndicatorTimeoutRef = React.useRef<number | null>(null);
 
   const activeConversation = React.useMemo(
     () =>
       conversations.find((conversation) => conversation.id === selectedChatId),
     [conversations, selectedChatId],
   );
+
+  const clearTypingIndicator = React.useCallback(() => {
+    if (typingIndicatorTimeoutRef.current !== null) {
+      window.clearTimeout(typingIndicatorTimeoutRef.current);
+      typingIndicatorTimeoutRef.current = null;
+    }
+    setIsActiveChatTyping(false);
+  }, []);
+
+  const bumpTypingIndicator = React.useCallback(() => {
+    if (typingIndicatorTimeoutRef.current !== null) {
+      window.clearTimeout(typingIndicatorTimeoutRef.current);
+    }
+    setIsActiveChatTyping(true);
+    typingIndicatorTimeoutRef.current = window.setTimeout(() => {
+      setIsActiveChatTyping(false);
+      typingIndicatorTimeoutRef.current = null;
+    }, TYPING_INDICATOR_TIMEOUT_MS);
+  }, []);
   async function loadAssistantMode(chatId?: string) {
     const search = chatId
       ? `?chatId=${encodeURIComponent(chatId)}`
@@ -892,6 +914,7 @@ export default function Page() {
 
   React.useEffect(() => {
     if (!selectedChatId) {
+      clearTypingIndicator();
       activeMessagesChatRef.current = null;
       setMessages([]);
       setMessagesOffset(0);
@@ -903,13 +926,22 @@ export default function Page() {
       return;
     }
     activeMessagesChatRef.current = selectedChatId;
+    clearTypingIndicator();
     setMessages([]);
     setMessagesOffset(0);
     setHasMoreMessages(true);
     setIsLoadingMoreMessages(false);
     void loadMessages(selectedChatId);
     void loadContactProfile(selectedChatId, activeConversation?.name);
-  }, [activeConversation?.name, selectedChatId]);
+  }, [activeConversation?.name, clearTypingIndicator, selectedChatId]);
+
+  React.useEffect(() => {
+    return () => {
+      if (typingIndicatorTimeoutRef.current !== null) {
+        window.clearTimeout(typingIndicatorTimeoutRef.current);
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!selectedChatId) {
@@ -1009,6 +1041,12 @@ export default function Page() {
         return;
       }
 
+      if (!normalized.fromMe) {
+        bumpTypingIndicator();
+      } else {
+        clearTypingIndicator();
+      }
+
       setMessages((current) =>
         mergeMessagesChronologically(current, [normalized]),
       );
@@ -1018,7 +1056,12 @@ export default function Page() {
       isRealtimeConnectedRef.current = false;
       source.close();
     };
-  }, [selectedChatId]);
+  }, [
+    activeConversation?.name,
+    bumpTypingIndicator,
+    clearTypingIndicator,
+    selectedChatId,
+  ]);
 
   const sessionTone = React.useMemo(() => {
     switch (session?.status) {
@@ -1557,6 +1600,7 @@ export default function Page() {
                 <ChatThread
                   activeConversation={activeConversation}
                   messages={messages}
+                  isTyping={isActiveChatTyping}
                   isLoading={isLoadingMessages}
                   isLoadingOlder={isLoadingMoreMessages}
                   hasMoreOlder={hasMoreMessages}
