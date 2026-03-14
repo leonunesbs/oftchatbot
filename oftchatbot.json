@@ -121,8 +121,8 @@
               "buttonParameters": {
                 "parameter": [
                   {
-                  "type": "text",
-                  "text": "={{ (() => {\n  const output = $json.output;\n  const currentPhone = String($('Add Current DateTime').item.json.patientPhoneDigits || $('WhatsApp Trigger').item.json.messages[0].from || '').replace(/\\D/g, '');\n  const base = 'https://agenda.oftleonardo.com.br';\n\n  const getDirect = () => {\n    try {\n      return $('Generate Summary Link Tool').item.json;\n    } catch {\n      return null;\n    }\n  };\n\n  const ensurePathSuffix = (value) => {\n    const normalized = String(value || '').trim().replace(/^\\/+/, '');\n    return normalized || 'agendar/resumo';\n  };\n\n  const fromObject = (val) => {\n    if (typeof val !== 'object' || val === null) return '';\n\n    const path1 = typeof val.summaryPath === 'string' ? val.summaryPath : '';\n    if (path1 && val.ok !== false) return ensurePathSuffix(path1);\n\n    const data = val.data;\n    const path2 = typeof data?.summaryPath === 'string' ? data.summaryPath : '';\n    if (path2 && data?.ok !== false) return ensurePathSuffix(path2);\n\n    const url1 = typeof val.summaryUrl === 'string' ? val.summaryUrl.trim() : '';\n    if (url1 && val.ok !== false) {\n      const parsed = new URL(url1);\n      return ensurePathSuffix(`${parsed.pathname}${parsed.search}`);\n    }\n\n    const url2 = typeof data?.summaryUrl === 'string' ? data.summaryUrl.trim() : '';\n    if (url2 && data?.ok !== false) {\n      const parsed = new URL(url2);\n      return ensurePathSuffix(`${parsed.pathname}${parsed.search}`);\n    }\n\n    return '';\n  };\n\n  const fromString = (val) => {\n    if (typeof val !== 'string') return '';\n    const match = val.match(/https?:\\/\\/[^\\s)]+/i);\n    if (!match?.[0]) return '';\n    const parsed = new URL(match[0].trim());\n    return ensurePathSuffix(`${parsed.pathname}${parsed.search}`);\n  };\n\n  try {\n    const pathSuffix =\n      fromObject(getDirect()) ||\n      fromObject(output) ||\n      fromString(output) ||\n      'agendar/resumo';\n\n    const parsed = new URL(`/${pathSuffix}`, base);\n\n    if (currentPhone && !parsed.searchParams.get('phone')) {\n      parsed.searchParams.set('phone', currentPhone);\n    }\n\n    return ensurePathSuffix(`${parsed.pathname}${parsed.search}`);\n  } catch {\n    return 'agendar/resumo';\n  }\n})() }}"
+                  "type": "payload",
+                  "payload": "{{ (function () {\n  var currentPhone = String(\n    $('Add Current DateTime').item.json.patientPhoneDigits ||\n    $('WhatsApp Trigger').item.json.messages[0].from ||\n    ''\n  ).replace(/\\D/g, '');\n\n  var source = '';\n  if (typeof $json.output === 'string') {\n    source = $json.output;\n  } else {\n    source = JSON.stringify($json);\n  }\n\n  var match = source.match(/https?:\\/\\/agenda\\.oftleonardo\\.com\\.br\\/([^\\s)\\]]+)/i);\n  if (!match || !match[1]) return 'agendar/resumo';\n\n  var suffix = String(match[1]).replace(/^\\/+/, '');\n\n  if (currentPhone && !/[?&]phone=/.test(suffix)) {\n    suffix += (suffix.indexOf('?') === -1 ? '?' : '&') + 'phone=' + currentPhone;\n  }\n\n  return suffix || 'agendar/resumo';\n})() }}"
                   }
                 ]
               }
@@ -307,6 +307,94 @@
     },
     {
       "parameters": {
+        "toolDescription": "Consulta FAQ oficial de políticas de agendamento (reserva, cancelamento, reembolso, reagendamento, privacidade). Use quando houver dúvida sobre regras e políticas para evitar respostas inventadas.",
+        "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/faq",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "_ts",
+              "value": "={{ Date.now().toString() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "Expires",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d0f7f67e-ec4c-4d27-b8f4-6c27e338dd0a",
+      "name": "Get Booking FAQ Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [15968, 2672]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Consulta referências oficiais do oftleonardo (FAQ geral + Hub de Conteúdos). Use quando o paciente tiver dúvidas informativas sobre doenças, exames, preparo, funcionamento e orientações gerais.",
+        "url": "https://oftleonardo.com.br/api/integrations/n8n/references",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "includeHomeFaq",
+              "value": "true"
+            },
+            {
+              "name": "includeArticleFaq",
+              "value": "true"
+            },
+            {
+              "name": "includeArticleBody",
+              "value": "false"
+            },
+            {
+              "name": "_ts",
+              "value": "={{ Date.now().toString() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "Expires",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3b9d59e-215f-4d72-95ec-c7413dd9c6d4",
+      "name": "Get Knowledge References Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [16096, 2672]
+    },
+    {
+      "parameters": {
         "jsCode": "const now = new Date();\nconst fortalezaTime = new Intl.DateTimeFormat('pt-BR', {\n  timeZone: 'America/Fortaleza',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit',\n  hour12: false,\n}).format(now);\n\nconst isoFormatted = now.toISOString();\nconst items = $input.all();\n\nconst normalizeInboundText = (payload) => {\n  const message = payload?.messages?.[0];\n  if (!message || typeof message !== 'object') return '';\n\n  const type = String(message.type ?? '').toLowerCase();\n\n  if (type === 'text') {\n    return String(message?.text?.body ?? '').trim();\n  }\n\n  if (type === 'button') {\n    return String(message?.button?.text ?? message?.button?.payload ?? '').trim();\n  }\n\n  if (type === 'interactive') {\n    const buttonReply = message?.interactive?.button_reply;\n    const listReply = message?.interactive?.list_reply;\n\n    if (buttonReply) {\n      return String(buttonReply.title ?? buttonReply.id ?? '').trim();\n    }\n\n    if (listReply) {\n      return String(listReply.title ?? listReply.id ?? '').trim();\n    }\n  }\n\n  return '';\n};\n\nreturn items\n  .map((item) => {\n    const message = item.json?.messages?.[0] ?? {};\n    const from = String(message.from ?? '').trim();\n    const inboundText = normalizeInboundText(item.json);\n    const messageType = String(message.type ?? '').toLowerCase();\n\n    if (!from || !inboundText) return null;\n\n    return {\n      json: {\n        ...item.json,\n        currentDateTime: fortalezaTime,\n        currentDateTimeISO: isoFormatted,\n        timezone: 'America/Fortaleza',\n        messageType,\n        inboundText,\n        patientPhone: from,\n        patientPhoneDigits: from.replace(/\\D/g, ''),\n      },\n    };\n  })\n  .filter(Boolean);\n"
       },
       "id": "9fd29307-3081-47e6-9fc8-a6dfd145f74c",
@@ -428,6 +516,28 @@
       ]
     },
     "Request Phone Link Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Lux AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Booking FAQ Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Lux AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Knowledge References Tool": {
       "ai_tool": [
         [
           {
