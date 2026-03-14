@@ -10,8 +10,38 @@ permissions:
   contents: read
 
 jobs:
+  detect-changes:
+    name: Detect changed packages
+    runs-on: ubuntu-latest
+    outputs:
+      oftagenda: ${{ steps.filter.outputs.oftagenda }}
+      oftleonardo: ${{ steps.filter.outputs.oftleonardo }}
+      oftchatbot: ${{ steps.filter.outputs.oftchatbot }}
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4.2.1
+        with:
+          fetch-depth: 0
+
+      - name: Detect path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            oftagenda:
+              - 'oftagenda/**'
+              - 'pnpm-workspace.yaml'
+            oftleonardo:
+              - 'oftleonardo/**'
+              - 'pnpm-workspace.yaml'
+            oftchatbot:
+              - 'oftchatbot/**'
+              - 'pnpm-workspace.yaml'
+
   split-oftagenda:
     name: Sync oftagenda repository
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftagenda == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout monorepo
@@ -70,6 +100,8 @@ jobs:
 
   split-oftleonardo:
     name: Sync oftleonardo repository
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftleonardo == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout monorepo
@@ -128,6 +160,8 @@ jobs:
 
   split-oftchatbot:
     name: Sync oftchatbot repository
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftchatbot == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout monorepo
