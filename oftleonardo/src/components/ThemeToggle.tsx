@@ -37,8 +37,8 @@ export default function ThemeToggle() {
     window.dispatchEvent(new CustomEvent("theme-changed", { detail: { mode: next } }));
   }
 
-  const visible = "rotate-0 scale-100 opacity-100";
-  const hidden = "rotate-90 scale-0 opacity-0";
+  const visible = "scale-100 opacity-100";
+  const hidden = "scale-90 opacity-0";
 
   return (
     <Button
@@ -53,7 +53,7 @@ export default function ThemeToggle() {
         return (
           <Icon
             key={m}
-            className={`absolute size-4 transition-all duration-300 ${mode === m ? visible : hidden}`}
+            className={`absolute size-4 transition-opacity transition-transform duration-150 ease-out motion-reduce:transition-none ${mode === m ? visible : hidden}`}
           />
         );
       })}
