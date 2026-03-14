@@ -3,11 +3,14 @@ import type {
   LumiCollectedData,
   SlotOption,
 } from "@/lib/lumi/types";
-import type { AssistantMode } from "@/lib/assistants/types";
 
+import type { AssistantMode } from "@/lib/assistants/types";
 import { nonDiagnosticDisclaimer } from "@/lib/lumi/guardrails";
 
-export function introGreeting(name?: string, assistant: AssistantMode = "lumi") {
+export function introGreeting(
+  name?: string,
+  assistant: AssistantMode = "lumi",
+) {
   if (assistant === "fire") {
     return "Oi! Meu nome é Fire, da Clínica OFT Leonardo. Como posso te ajudar hoje?";
   }
@@ -121,10 +124,7 @@ export function confirmationReply(
   return `Perfeito, organizei tudo aqui:\n${summary}\n\nPosso confirmar esse agendamento e já te enviar o link para continuar na Minha Agenda?`;
 }
 
-export function bookingSuccessReply(
-  paymentUrl?: string,
-  phone?: string,
-) {
+export function bookingSuccessReply(paymentUrl?: string, phone?: string) {
   if (paymentUrl) {
     const contactSuffix = phone ? ` no número ${phone}` : "";
     return `Perfeito. Para confirmar o agendamento${contactSuffix}, finalize no link oficial:\n${paymentUrl}\n\nSe quiser alterar data, horário ou local, me avise por aqui ou fale com o time humano: https://wa.me/5585999999999`;
