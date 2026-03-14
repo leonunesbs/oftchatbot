@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ThemeMode = "light" | "dark" | "system";
 const CYCLE: ThemeMode[] = ["light", "dark", "system"];
@@ -13,6 +13,7 @@ function resolveEffective(mode: ThemeMode): "light" | "dark" {
 }
 
 function getStoredTheme(): ThemeMode {
+  if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem("theme");
   if (stored === "light" || stored === "dark" || stored === "system") return stored;
   return "system";
@@ -22,11 +23,7 @@ const ICONS: Record<ThemeMode, typeof Sun> = { light: Sun, dark: Moon, system: M
 const LABELS: Record<ThemeMode, string> = { light: "Tema claro", dark: "Tema escuro", system: "Tema do sistema" };
 
 export default function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>("system");
-
-  useEffect(() => {
-    setMode(getStoredTheme());
-  }, []);
+  const [mode, setMode] = useState<ThemeMode>(getStoredTheme);
 
   function cycleTheme() {
     const idx = CYCLE.indexOf(mode);

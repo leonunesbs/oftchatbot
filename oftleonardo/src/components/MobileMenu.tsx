@@ -28,16 +28,15 @@ export default function MobileMenu() {
   const CYCLE: ThemeMode[] = ["light", "dark", "system"];
 
   function getStoredTheme(): ThemeMode {
+    if (typeof window === "undefined") return "system";
     const stored = localStorage.getItem("theme");
     if (stored === "light" || stored === "dark" || stored === "system") return stored;
     return "system";
   }
 
-  const [theme, setTheme] = useState<ThemeMode>("system");
+  const [theme, setTheme] = useState<ThemeMode>(getStoredTheme);
 
   useEffect(() => {
-    setTheme(getStoredTheme());
-
     const handler = (e: Event) => {
       const mode = (e as CustomEvent).detail?.mode;
       if (mode) setTheme(mode);
