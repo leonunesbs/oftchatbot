@@ -48,6 +48,17 @@ pnpm preview
 - `src/pages/api/live-session/advance.ts`: progressão do protocolo remoto.
 - `src/pages/api/live-session/stream.ts`: transmissão de estado via SSE.
 
+### 3.3 Endpoint de referências para n8n
+
+- `src/pages/api/integrations/n8n/references.ts`: expõe FAQ e Hub de Conteúdos em JSON para uso do n8n.
+
+Exemplo:
+
+```text
+GET /api/integrations/n8n/references
+GET /api/integrations/n8n/references?includeArticleBody=true
+```
+
 ## 4. Arquitetura Metodológica do Fluxo de Acuidade Visual
 
 A orquestração do protocolo é implementada em `src/components/visual-acuity/VisualAcuityApp.tsx`, com progressão sequencial pelas etapas:
