@@ -1,4 +1,4 @@
-{{ (function () {
+={{ (function () {
   var currentPhone = String(
     $('Add Current DateTime').item.json.patientPhoneDigits ||
     $('WhatsApp Trigger').item.json.messages[0].from ||
