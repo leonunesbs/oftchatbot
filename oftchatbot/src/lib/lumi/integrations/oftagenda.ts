@@ -1,5 +1,10 @@
+import type {
+  AvailableDateOption,
+  EventTypeOption,
+  SlotOption,
+} from "@/lib/lumi/types";
+
 import { serverEnv } from "@/lib/env/server";
-import type { AvailableDateOption, EventTypeOption, SlotOption } from "@/lib/lumi/types";
 
 type SlotSearchInput = {
   eventTypeId?: string;
@@ -48,7 +53,11 @@ function periodHourRange(period?: "manha" | "tarde" | "noite") {
   return { min: 8, max: 18 };
 }
 
-function formatSlotLabel(startAt: string, location: string, consultationType: string) {
+function formatSlotLabel(
+  startAt: string,
+  location: string,
+  consultationType: string,
+) {
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -67,7 +76,10 @@ function formatDateLabel(isoDate: string) {
   }).format(date);
 }
 
-function buildMockEventTypes(input: { location: string; consultationType: string }): EventTypeOption[] {
+function buildMockEventTypes(input: {
+  location: string;
+  consultationType: string;
+}): EventTypeOption[] {
   return [
     {
       id: "oftagenda-event-type",
@@ -103,7 +115,11 @@ function buildMockSlots(input: SlotSearchInput): SlotOption[] {
     ? new Date(`${input.dateIso}T00:00:00-03:00`)
     : new Date(Date.now() + 24 * 60 * 60 * 1000);
   const range = periodHourRange(input.period);
-  const mockHours = [range.min, Math.min(range.min + 2, range.max), Math.min(range.min + 4, range.max)];
+  const mockHours = [
+    range.min,
+    Math.min(range.min + 2, range.max),
+    Math.min(range.min + 4, range.max),
+  ];
 
   return mockHours.map((hour, index) => {
     const start = new Date(baseDate);

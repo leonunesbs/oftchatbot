@@ -1,3 +1,10 @@
+import type {
+  LumiCollectedData,
+  LumiSession,
+  LumiState,
+  LumiTurnDecision,
+  LumiTurnInput,
+} from "@/lib/lumi/types";
 import {
   askMissingField,
   bookingStatusReply,
@@ -10,6 +17,11 @@ import {
   triageUrgentReply,
 } from "@/lib/lumi/copy";
 import {
+  detectIntent,
+  isAffirmative,
+  isGreetingMessage,
+} from "@/lib/lumi/intents";
+import {
   extractEntities,
   isValidEmail,
   normalizePhone,
@@ -18,18 +30,6 @@ import {
   guardrailReply,
   requiresClinicalGuardrail,
 } from "@/lib/lumi/guardrails";
-import {
-  detectIntent,
-  isAffirmative,
-  isGreetingMessage,
-} from "@/lib/lumi/intents";
-import type {
-  LumiCollectedData,
-  LumiSession,
-  LumiState,
-  LumiTurnDecision,
-  LumiTurnInput,
-} from "@/lib/lumi/types";
 
 import { contactProfileStore } from "@/lib/contact-profile/store";
 import { educationalFaq } from "@/lib/lumi/config/clinic";
@@ -394,11 +394,7 @@ export async function runLumiTurn(
     currentSession.state.startsWith("SCHEDULING_") ||
     intent.intent === "schedule_appointment" ||
     isAffirmative(input.messageText) ||
-    Boolean(
-      entities.datePreference ||
-      entities.fullName ||
-      entities.phone,
-    );
+    Boolean(entities.datePreference || entities.fullName || entities.phone);
 
   if (!schedulingRequested) {
     const nextSession: LumiSession = {
@@ -535,5 +531,4 @@ export async function runLumiTurn(
     shouldSend: true,
     endFlow: true,
   };
-
 }
