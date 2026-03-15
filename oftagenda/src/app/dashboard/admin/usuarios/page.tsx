@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ActionToastForm } from "@/components/action-toast-form";
 
 function formatWhatsapp(value?: string) {
   if (!value) {
@@ -64,13 +65,18 @@ export default async function AdminUsersPage() {
                   <TableCell>{user.paymentsCount}</TableCell>
                   <TableCell>{formatMoney(user.paidAmountCents)}</TableCell>
                   <TableCell>
-                    <form action={linkWhatsappToUserAction} className="flex items-center gap-2">
+                    <ActionToastForm
+                      action={linkWhatsappToUserAction}
+                      className="flex items-center gap-2"
+                      successMessage="WhatsApp vinculado com sucesso."
+                      errorMessage="Não foi possível vincular o WhatsApp."
+                    >
                       <input type="hidden" name="clerkUserId" value={user.clerkUserId} />
                       <Input name="phone" placeholder="(85) 99999-9999 ou 5585999999999" className="h-8 text-xs" />
                       <Button type="submit" size="sm">
                         Vincular
                       </Button>
-                    </form>
+                    </ActionToastForm>
                   </TableCell>
                 </TableRow>
               ))}

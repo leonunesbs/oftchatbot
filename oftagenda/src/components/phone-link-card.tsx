@@ -2,6 +2,7 @@
 
 import { MessageCircleIcon, PhoneIcon, UnlinkIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import {
   AlertDialog,
@@ -57,12 +58,21 @@ export function PhoneLinkCard({
       });
       const data = await res.json();
       if (!data.ok) {
-        setError(data.error ?? "Falha ao solicitar vinculação.");
+        const message = data.error ?? "Falha ao solicitar vinculação.";
+        setError(message);
+        toast.error("Não foi possível solicitar a vinculação.", {
+          description: message,
+        });
         return;
       }
       setStep("sent");
+      toast.success("Solicitação enviada. Verifique seu WhatsApp.");
     } catch {
-      setError("Erro de conexão. Tente novamente.");
+      const message = "Erro de conexão. Tente novamente.";
+      setError(message);
+      toast.error("Não foi possível solicitar a vinculação.", {
+        description: message,
+      });
     } finally {
       setLoading(false);
     }
@@ -79,11 +89,20 @@ export function PhoneLinkCard({
       if (data.ok) {
         setLinked(false);
         setMaskedPhone("");
+        toast.success("WhatsApp desvinculado com sucesso.");
         return;
       }
-      setError(data.error ?? "Falha ao desvincular WhatsApp.");
+      const message = data.error ?? "Falha ao desvincular WhatsApp.";
+      setError(message);
+      toast.error("Não foi possível desvincular o WhatsApp.", {
+        description: message,
+      });
     } catch {
-      setError("Erro de conexão. Tente novamente.");
+      const message = "Erro de conexão. Tente novamente.";
+      setError(message);
+      toast.error("Não foi possível desvincular o WhatsApp.", {
+        description: message,
+      });
     } finally {
       setLoading(false);
     }
@@ -107,20 +126,22 @@ export function PhoneLinkCard({
 
   if (linked) {
     return (
-      <Card>
-        <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <PhoneIcon className="size-4" />
-            WhatsApp
-          </CardTitle>
-          <Badge
-            variant="outline"
-            className="border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
-          >
-            Vinculado
-          </Badge>
+      <Card className="ring-inset border-border/70 !gap-3 !py-3">
+        <CardHeader className="space-y-0 !px-4 pb-0">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <PhoneIcon className="size-4" />
+              WhatsApp
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className="border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+            >
+              Vinculado
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent className="flex items-center justify-between gap-4">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 !px-4 !pt-0">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">{maskedPhone}</p>
             {error ? <p className="text-xs text-destructive">{error}</p> : null}
@@ -158,15 +179,17 @@ export function PhoneLinkCard({
   }
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <PhoneIcon className="size-4" />
-          WhatsApp
-        </CardTitle>
-        <Badge variant="outline">Não vinculado</Badge>
+    <Card className="ring-inset border-border/70 !gap-3 !py-3">
+      <CardHeader className="space-y-0 !px-4 pb-0">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <PhoneIcon className="size-4" />
+            WhatsApp
+          </CardTitle>
+          <Badge variant="outline">Não vinculado</Badge>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="!px-4 !pt-0">
         <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">

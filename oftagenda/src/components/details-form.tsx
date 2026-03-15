@@ -13,12 +13,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { calculateDilatationGuidance } from "@/domain/triage/dilatation";
 import type { TriagePayload } from "@/domain/triage/schema";
 import { cn } from "@/lib/utils";
-
-const MAX_SUMMARY_LENGTH = 240;
 
 const reasons: Array<{
   value: TriagePayload["reason"];
@@ -111,10 +108,8 @@ function toggleItem<T extends string>(values: T[], target: T, checked: boolean) 
 
 export function DetailsForm() {
   const conditionsSectionRef = useRef<HTMLFieldSetElement | null>(null);
-  const summarySectionRef = useRef<HTMLFieldSetElement | null>(null);
-  const summaryTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const [reason, setReason] = useState<TriagePayload["reason"]>("routine");
+  const [reason, setReason] = useState<TriagePayload["reason"] | null>(null);
   const [selectedConditions, setSelectedConditions] = useState<
     TriagePayload["conditions"]
   >([]);
@@ -122,25 +117,19 @@ export function DetailsForm() {
     TriagePayload["symptoms"]
   >([]);
   const [lastDilation, setLastDilation] =
-    useState<TriagePayload["lastDilation"]>("unknown");
-  const [oneSentenceSummary, setOneSentenceSummary] = useState("");
+    useState<TriagePayload["lastDilation"] | null>(null);
 
-  const fallbackReason = reasons[0];
-  if (!fallbackReason) {
-    throw new Error("Reason options are required.");
-  }
-  const selectedReason = reasons.find((item) => item.value === reason) ?? fallbackReason;
+  const selectedReason = reasons.find((item) => item.value === reason);
   const hasUrgentSymptom = selectedSymptoms.includes("sudden_loss");
 
   const triagePreviewPayload = useMemo<TriagePayload>(
     () => ({
-      reason,
+      reason: reason ?? "routine",
       conditions: selectedConditions,
       symptoms: selectedSymptoms,
-      lastDilation,
-      oneSentenceSummary: oneSentenceSummary.trim() || undefined,
+      lastDilation: lastDilation ?? "unknown",
     }),
-    [lastDilation, oneSentenceSummary, reason, selectedConditions, selectedSymptoms],
+    [lastDilation, reason, selectedConditions, selectedSymptoms],
   );
 
   const previewResult = useMemo(
@@ -148,24 +137,22 @@ export function DetailsForm() {
     [triagePreviewPayload],
   );
   const hasAnyTriageInput =
-    reason !== "routine" ||
+    reason !== null ||
     selectedConditions.length > 0 ||
     selectedSymptoms.length > 0 ||
-    lastDilation !== "unknown" ||
-    oneSentenceSummary.trim().length > 0;
+    lastDilation !== null;
 
   const answeredSteps = useMemo(() => {
-    let total = 1;
+    let total = 0;
+    if (reason !== null) total += 1;
     if (selectedConditions.length > 0) total += 1;
     if (selectedSymptoms.length > 0) total += 1;
-    if (lastDilation !== "unknown") total += 1;
-    if (oneSentenceSummary.trim().length > 0) total += 1;
+    if (lastDilation !== null) total += 1;
     return total;
-  }, [lastDilation, oneSentenceSummary, selectedConditions, selectedSymptoms]);
+  }, [lastDilation, reason, selectedConditions, selectedSymptoms]);
 
-  const progressPercentage = Math.round((answeredSteps / 5) * 100);
+  const progressPercentage = Math.round((answeredSteps / 4) * 100);
   const levelLabel = levelConfig[previewResult.level].label;
-  const summaryChars = oneSentenceSummary.length;
 
   function scrollToNextInput(target: Element | null) {
     if (!target) {
@@ -178,17 +165,6 @@ export function DetailsForm() {
       behavior: prefersReducedMotion ? "auto" : "smooth",
       block: "center",
     });
-  }
-
-  function focusSummaryTextarea() {
-    if (!summaryTextareaRef.current) {
-      return;
-    }
-    try {
-      summaryTextareaRef.current.focus({ preventScroll: true });
-    } catch {
-      summaryTextareaRef.current.focus();
-    }
   }
 
   return (
@@ -227,11 +203,11 @@ export function DetailsForm() {
           <fieldset className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <Label>A) Motivo principal</Label>
-              <Badge variant="secondary">{selectedReason.label}</Badge>
+              <Badge variant="secondary">{selectedReason?.label ?? "Não selecionado"}</Badge>
             </div>
             <RadioGroup
               name="reason"
-              value={reason}
+              value={reason ?? ""}
               onValueChange={(value) => {
                 setReason(value as TriagePayload["reason"]);
                 requestAnimationFrame(() => {
@@ -325,13 +301,9 @@ export function DetailsForm() {
             <Label>D) Última dilatação</Label>
             <RadioGroup
               name="lastDilation"
-              value={lastDilation}
+              value={lastDilation ?? ""}
               onValueChange={(value) => {
                 setLastDilation(value as TriagePayload["lastDilation"]);
-                requestAnimationFrame(() => {
-                  scrollToNextInput(summarySectionRef.current);
-                  focusSummaryTextarea();
-                });
               }}
               className="grid gap-2 md:grid-cols-2"
             >
@@ -350,23 +322,6 @@ export function DetailsForm() {
                 </label>
               ))}
             </RadioGroup>
-          </fieldset>
-
-          <fieldset ref={summarySectionRef} className="space-y-2">
-            <Label htmlFor="oneSentenceSummary">
-              E) Conte em uma frase o que mais te incomoda (opcional)
-            </Label>
-            <Textarea
-              ref={summaryTextareaRef}
-              id="oneSentenceSummary"
-              maxLength={MAX_SUMMARY_LENGTH}
-              value={oneSentenceSummary}
-              onChange={(event) => setOneSentenceSummary(event.target.value)}
-              placeholder="Ex.: percebo embaçamento ao fim do dia."
-            />
-            <p className="text-right text-xs text-muted-foreground">
-              {summaryChars}/{MAX_SUMMARY_LENGTH}
-            </p>
           </fieldset>
 
           <p className="text-xs text-muted-foreground">

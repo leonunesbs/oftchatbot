@@ -49,6 +49,41 @@ function sanitizeHostname(rawUrl: string) {
   }
 }
 
+function decodeJwtClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+
+  const payload = parts[1];
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    const normalized = payload.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const decodedPayload = Buffer.from(padded, "base64").toString("utf8");
+    const parsed = JSON.parse(decodedPayload);
+    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveEmailFromClaims(claims: Record<string, unknown> | null) {
+  if (!claims) {
+    return null;
+  }
+  const candidates = [claims.email, claims.email_address, claims.primary_email_address];
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
 async function probeUrl(url: string) {
   const response = await fetch(url, {
     method: "GET",
@@ -164,6 +199,8 @@ export default async function StatusPage() {
   if (clerkEnabled && authData) {
     try {
       const token = await authData.getToken({ template: "convex" });
+      const claims = token ? decodeJwtClaims(token) : null;
+      const tokenEmail = resolveEmailFromClaims(claims);
       checks.push({
         name: "Token Clerk template convex",
         status: token ? "ok" : "error",
@@ -171,11 +208,23 @@ export default async function StatusPage() {
           ? "Template convex gerou JWT com sucesso."
           : "Template convex não retornou token.",
       });
+      checks.push({
+        name: "Claim de email no JWT convex",
+        status: tokenEmail ? "ok" : "warning",
+        detail: tokenEmail
+          ? `Email disponível no JWT: ${tokenEmail}.`
+          : "JWT gerado sem claim de email. No Clerk, adicione `email` no template `convex` com `{{user.primary_email_address}}`.",
+      });
     } catch (error) {
       checks.push({
         name: "Token Clerk template convex",
         status: "error",
         detail: formatErrorMessage(error),
+      });
+      checks.push({
+        name: "Claim de email no JWT convex",
+        status: "warning",
+        detail: "Não foi possível validar claims de email porque o JWT do template `convex` falhou.",
       });
     }
   }

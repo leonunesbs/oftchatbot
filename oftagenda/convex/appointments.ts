@@ -6,6 +6,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 
 const RESERVATION_HOLD_DURATION_MS = 15 * 60_000;
 const RESCHEDULE_MIN_NOTICE_MS = 24 * 60 * 60_000;
+const BOOKING_MIN_NOTICE_MS = 48 * 60 * 60_000;
 const RESCHEDULE_MAX_DAYS_AHEAD = 30;
 const RESCHEDULE_MAX_PER_APPOINTMENT = 1;
 const RESERVATION_FEE_PERCENT = 20;
@@ -215,6 +216,7 @@ export const getBookingOptionsByLocation = query({
       for (const groupName of activeGroupNames) {
         const assignedEventType = eventTypeByGroupName.get(groupName);
         const duration = assignedEventType ? durationByEventType.get(assignedEventType._id) ?? 30 : 30;
+        const requiresMinBookingNotice = !isUrgencyEventType(assignedEventType);
 
         const override = overrideByGroupDate.get(buildOverrideKey(groupName, isoDate));
         if (override) {
@@ -230,6 +232,18 @@ export const getBookingOptionsByLocation = query({
             );
             for (const slot of generatedSlots) {
               if (!isIsoDateTimeInFutureForTimezone(isoDate, slot, override.timezone, now)) {
+                continue;
+              }
+              if (
+                requiresMinBookingNotice &&
+                !isIsoDateTimeAtLeastMinNotice(
+                  isoDate,
+                  slot,
+                  override.timezone,
+                  now,
+                  BOOKING_MIN_NOTICE_MS,
+                )
+              ) {
                 continue;
               }
               const key = buildSlotKey(groupName, isoDate, slot);
@@ -249,6 +263,18 @@ export const getBookingOptionsByLocation = query({
           const slots = buildSlotsWithinRange(availability.startTime, availability.endTime, duration);
           for (const slot of slots) {
             if (!isIsoDateTimeInFutureForTimezone(isoDate, slot, availability.timezone, now)) {
+              continue;
+            }
+            if (
+              requiresMinBookingNotice &&
+              !isIsoDateTimeAtLeastMinNotice(
+                isoDate,
+                slot,
+                availability.timezone,
+                now,
+                BOOKING_MIN_NOTICE_MS,
+              )
+            ) {
               continue;
             }
             const key = buildSlotKey(groupName, isoDate, slot);
@@ -947,6 +973,36 @@ function isIsoDateTimeInFutureForTimezone(
   return time > currentTime;
 }
 
+function isIsoDateTimeAtLeastMinNotice(
+  isoDate: string,
+  time: string,
+  timezone: string,
+  now: number,
+  minNoticeMs: number,
+) {
+  try {
+    const slotTimestamp = parseIsoDateAndTimeToTimestamp(isoDate, time, timezone);
+    return slotTimestamp - now >= minNoticeMs;
+  } catch {
+    return false;
+  }
+}
+
+function isUrgencyEventType(
+  eventType: Pick<Doc<"event_types">, "slug" | "title" | "name"> | undefined,
+) {
+  if (!eventType) {
+    return false;
+  }
+  const normalized = [eventType.slug, eventType.title, eventType.name]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  return /(urgenc|urgente|emergenc)/.test(normalized);
+}
+
 function resolveAvailabilityGroupName(availability: { name?: string; _id?: unknown } | undefined) {
   if (!availability) {
     return "Disponibilidade";
@@ -1027,6 +1083,18 @@ async function assertSlotIsAvailable(
   }
   if (!isIsoDateTimeInFutureForTimezone(isoDate, time, referenceAvailability.timezone, now)) {
     throw new Error("Horário já está no passado. Escolha um horário futuro.");
+  }
+  if (
+    !isUrgencyEventType(eventType) &&
+    !isIsoDateTimeAtLeastMinNotice(
+      isoDate,
+      time,
+      referenceAvailability.timezone,
+      now,
+      BOOKING_MIN_NOTICE_MS,
+    )
+  ) {
+    throw new Error("Escolha um horário com no mínimo 48h de antecedência.");
   }
 
   const [allAvailabilities, allOverrides, allReservations] = await Promise.all([

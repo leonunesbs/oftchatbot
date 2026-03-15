@@ -5,6 +5,7 @@ import type { MutationCtx } from "./_generated/server";
 import { mutation } from "./_generated/server";
 
 const RESERVATION_HOLD_DURATION_MS = 30 * 60_000;
+const BOOKING_MIN_NOTICE_MS = 48 * 60 * 60_000;
 const RESERVATION_FEE_PERCENT = 20;
 
 const checkoutDraftSchema = {
@@ -770,6 +771,18 @@ async function assertSlotIsAvailable(
   if (!isIsoDateTimeInFutureForTimezone(isoDate, time, referenceAvailability.timezone, now)) {
     throw new Error("Horário já está no passado. Escolha um horário futuro.");
   }
+  if (
+    !isUrgencyEventType(eventType) &&
+    !isIsoDateTimeAtLeastMinNotice(
+      isoDate,
+      time,
+      referenceAvailability.timezone,
+      now,
+      BOOKING_MIN_NOTICE_MS,
+    )
+  ) {
+    throw new Error("Escolha um horário com no mínimo 48h de antecedência.");
+  }
 
   const [allAvailabilities, allOverrides, allReservations] = await Promise.all([
     ctx.db.query("availabilities").collect(),
@@ -1082,6 +1095,36 @@ function isIsoDateTimeInFutureForTimezone(
   }
   const currentTime = formatTimeInTimezone(now, timezone);
   return time > currentTime;
+}
+
+function isIsoDateTimeAtLeastMinNotice(
+  isoDate: string,
+  time: string,
+  timezone: string,
+  now: number,
+  minNoticeMs: number,
+) {
+  try {
+    const slotTimestamp = parseIsoDateAndTimeToTimestamp(isoDate, time, timezone);
+    return slotTimestamp - now >= minNoticeMs;
+  } catch {
+    return false;
+  }
+}
+
+function isUrgencyEventType(
+  eventType: Pick<Doc<"event_types">, "slug" | "title" | "name"> | undefined,
+) {
+  if (!eventType) {
+    return false;
+  }
+  const normalized = [eventType.slug, eventType.title, eventType.name]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  return /(urgenc|urgente|emergenc)/.test(normalized);
 }
 
 function inferPreferredPeriod(timestamp: number) {

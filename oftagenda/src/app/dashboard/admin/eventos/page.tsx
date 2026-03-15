@@ -45,6 +45,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { ActionToastForm } from "@/components/action-toast-form";
 
 const kindFilters = ["all", "consulta", "exame", "procedimento"] as const;
 
@@ -107,7 +108,12 @@ export default async function AdminEventsPage({
               <DialogTitle>Novo evento</DialogTitle>
               <DialogDescription>Preencha os dados para cadastrar um novo evento.</DialogDescription>
             </DialogHeader>
-            <form action={createEventTypeAction} className="grid gap-2">
+            <ActionToastForm
+              action={createEventTypeAction}
+              className="grid gap-2"
+              successMessage="Evento criado com sucesso."
+              errorMessage="Não foi possível criar o evento."
+            >
               <Label htmlFor="event-slug">Slug</Label>
               <Input id="event-slug" name="slug" required placeholder="consulta-oftalmologica" />
               <Label htmlFor="event-name">Nome do evento</Label>
@@ -163,7 +169,7 @@ export default async function AdminEventsPage({
               <Button type="submit" disabled={availabilityGroups.length === 0}>
                 Criar evento
               </Button>
-            </form>
+            </ActionToastForm>
           </DialogContent>
         </Dialog>
         {availabilityGroups.length === 0 ? (
@@ -234,7 +240,12 @@ export default async function AdminEventsPage({
                                 Atualize dados do evento, vínculo de disponibilidade e status.
                               </DialogDescription>
                             </DialogHeader>
-                            <form action={updateEventTypeAction} className="grid gap-2 rounded-md border p-2">
+                            <ActionToastForm
+                              action={updateEventTypeAction}
+                              className="grid gap-2 rounded-md border p-2"
+                              successMessage="Evento atualizado com sucesso."
+                              errorMessage="Não foi possível atualizar o evento."
+                            >
                               <input type="hidden" name="eventTypeId" value={eventType._id} />
                               <div className="grid grid-cols-2 gap-2">
                                 <Input name="slug" defaultValue={eventType.slug} required />
@@ -304,7 +315,7 @@ export default async function AdminEventsPage({
                               <Button variant="secondary" size="sm" type="submit">
                                 Salvar alterações
                               </Button>
-                            </form>
+                            </ActionToastForm>
 
                             <div className="rounded-md border border-dashed p-2">
                               <p className="text-xs font-medium">Disponibilidade vinculada ao evento</p>
@@ -338,7 +349,12 @@ export default async function AdminEventsPage({
                               </DialogDescription>
                             </DialogHeader>
 
-                            <form action={createReservationAction} className="grid gap-2 rounded-md border p-2">
+                            <ActionToastForm
+                              action={createReservationAction}
+                              className="grid gap-2 rounded-md border p-2"
+                              successMessage="Reserva criada com sucesso."
+                              errorMessage="Não foi possível criar a reserva."
+                            >
                               <input type="hidden" name="eventTypeId" value={eventType._id} />
                               <input type="hidden" name="availabilityId" value={eventType.availabilityId ?? ""} />
                               <Input name="clerkUserId" placeholder="user_..." required />
@@ -377,7 +393,7 @@ export default async function AdminEventsPage({
                               <Button size="sm" type="submit" disabled={!eventType.availabilityId}>
                                 Salvar reserva
                               </Button>
-                            </form>
+                            </ActionToastForm>
 
                             <div className="rounded-md border">
                               <Table>
@@ -412,7 +428,12 @@ export default async function AdminEventsPage({
                                               <DialogTitle>Editar reserva</DialogTitle>
                                               <DialogDescription>Atualize dados, horário e status da reserva.</DialogDescription>
                                             </DialogHeader>
-                                            <form action={updateReservationAction} className="grid gap-2">
+                                            <ActionToastForm
+                                              action={updateReservationAction}
+                                              className="grid gap-2"
+                                              successMessage="Reserva atualizada com sucesso."
+                                              errorMessage="Não foi possível atualizar a reserva."
+                                            >
                                               <input type="hidden" name="reservationId" value={reservation._id} />
                                               <input type="hidden" name="eventTypeId" value={eventType._id} />
                                               <input
@@ -451,8 +472,12 @@ export default async function AdminEventsPage({
                                               <Button size="sm" variant="secondary" type="submit">
                                                 Salvar reserva
                                               </Button>
-                                            </form>
-                                            <form action={deleteReservationAction}>
+                                            </ActionToastForm>
+                                            <ActionToastForm
+                                              action={deleteReservationAction}
+                                              successMessage="Reserva excluída com sucesso."
+                                              errorMessage="Não foi possível excluir a reserva."
+                                            >
                                               <input type="hidden" name="reservationId" value={reservation._id} />
                                               <AlertDialog>
                                                 <AlertDialogTrigger asChild>
@@ -473,7 +498,7 @@ export default async function AdminEventsPage({
                                                   </AlertDialogFooter>
                                                 </AlertDialogContent>
                                               </AlertDialog>
-                                            </form>
+                                            </ActionToastForm>
                                           </DialogContent>
                                         </Dialog>
                                       </TableCell>
@@ -485,14 +510,22 @@ export default async function AdminEventsPage({
                           </DialogContent>
                         </Dialog>
 
-                        <form action={setEventTypeActiveAction}>
+                        <ActionToastForm
+                          action={setEventTypeActiveAction}
+                          successMessage={eventType.active ? "Evento inativado com sucesso." : "Evento ativado com sucesso."}
+                          errorMessage="Não foi possível atualizar o status do evento."
+                        >
                           <input type="hidden" name="eventTypeId" value={eventType._id} />
                           <input type="hidden" name="active" value={String(!eventType.active)} />
                           <Button variant="outline" size="sm" type="submit">
                             {eventType.active ? "Inativar" : "Ativar"}
                           </Button>
-                        </form>
-                        <form action={deleteEventTypeAction}>
+                        </ActionToastForm>
+                        <ActionToastForm
+                          action={deleteEventTypeAction}
+                          successMessage="Evento excluído com sucesso."
+                          errorMessage="Não foi possível excluir o evento."
+                        >
                           <input type="hidden" name="eventTypeId" value={eventType._id} />
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -513,7 +546,7 @@ export default async function AdminEventsPage({
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                        </form>
+                        </ActionToastForm>
                       </div>
                     </TableCell>
                   </TableRow>

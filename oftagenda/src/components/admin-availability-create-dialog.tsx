@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { upsertAvailabilityDaySlotsAction } from "@/app/dashboard/admin/actions";
 import { Button } from "@/components/ui/button";
@@ -168,9 +169,14 @@ export function AdminAvailabilityCreateDialog({
         }
         resetForm();
         onOpenChange(false);
+        toast.success("Disponibilidade criada com sucesso.");
         router.refresh();
       } catch (error) {
-        setFeedback(error instanceof Error ? error.message : "Falha ao criar disponibilidade.");
+        const message = error instanceof Error ? error.message : "Falha ao criar disponibilidade.";
+        setFeedback(message);
+        toast.error("Não foi possível criar a disponibilidade.", {
+          description: message,
+        });
       }
     });
   }

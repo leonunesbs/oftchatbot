@@ -1,6 +1,7 @@
 "use client";
 
 import { setReservationStatusAction, updateReservationAction } from "@/app/dashboard/admin/actions";
+import { ActionToastForm } from "@/components/action-toast-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +32,8 @@ import { closeParallelRoute } from "@/lib/parallel-route-navigation";
 import {
   reservationStatusBadgeVariant,
   reservationStatusLabel,
-  type ReservationStatus,
 } from "@/lib/reservation-status";
+import type { ReservationStatus } from "@/lib/reservation-status";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -336,7 +337,13 @@ Equipe de atendimento`;
       ) : null}
 
       {mode === "reagendar" ? (
-        <form id={rescheduleFormId} action={updateReservationAction} className="grid gap-2 rounded-md border p-3">
+        <ActionToastForm
+          id={rescheduleFormId}
+          action={updateReservationAction}
+          className="grid gap-2 rounded-md border p-3"
+          successMessage="Reagendamento salvo com sucesso."
+          errorMessage="Não foi possível salvar o reagendamento."
+        >
           <input type="hidden" name="reservationId" value={reservation._id} />
           <input type="hidden" name="clerkUserId" value={reservation.clerkUserId} />
           <input type="hidden" name="eventTypeId" value={reservation.eventTypeId} />
@@ -414,11 +421,16 @@ Equipe de atendimento`;
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </form>
+        </ActionToastForm>
       ) : null}
 
       {mode === "status" ? (
-        <form action={setReservationStatusAction} className="grid gap-2 rounded-md border p-3">
+        <ActionToastForm
+          action={setReservationStatusAction}
+          className="grid gap-2 rounded-md border p-3"
+          successMessage="Status atualizado com sucesso."
+          errorMessage="Não foi possível atualizar o status."
+        >
           <input type="hidden" name="reservationId" value={reservation._id} />
           <input type="hidden" name="notifyEmail" value={reservation.patientEmail ?? ""} />
           <input type="hidden" name="notifyName" value={reservation.patientName ?? ""} />
@@ -445,14 +457,16 @@ Equipe de atendimento`;
           </p>
           <Textarea name="notes" placeholder="Observação opcional para o histórico" />
           <Button type="submit">Confirmar atualização</Button>
-        </form>
+        </ActionToastForm>
       ) : null}
 
       {mode === "cancelar" ? (
-        <form
+        <ActionToastForm
           id={cancelFormId}
           action={setReservationStatusAction}
           className="rounded-md border border-destructive/40 p-3"
+          successMessage="Agendamento cancelado com sucesso."
+          errorMessage="Não foi possível cancelar o agendamento."
         >
           <input type="hidden" name="reservationId" value={reservation._id} />
           <input type="hidden" name="status" value="cancelled" />
@@ -487,7 +501,7 @@ Equipe de atendimento`;
               </AlertDialogContent>
             </AlertDialog>
           )}
-        </form>
+        </ActionToastForm>
       ) : null}
 
       <div className="space-y-2 rounded-md border p-3">

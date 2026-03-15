@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 import {
   deleteAvailabilityDateOverrideAction,
@@ -325,10 +326,14 @@ export function AdminAvailabilityEditor({
         );
         await upsertAvailabilityDateOverridesAction(formData);
         setOverrideFeedback({ type: "success", message: "Substituição salva com sucesso." });
+        toast.success("Substituição de datas salva com sucesso.");
         router.refresh();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Falha ao salvar substituição.";
         setOverrideFeedback({ type: "error", message });
+        toast.error("Não foi possível salvar a substituição.", {
+          description: message,
+        });
       }
     });
   }
@@ -345,10 +350,14 @@ export function AdminAvailabilityEditor({
         const formData = new FormData();
         formData.set("overrideId", overrideId);
         await deleteAvailabilityDateOverrideAction(formData);
+        toast.success("Substituição removida com sucesso.");
         router.refresh();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Falha ao excluir substituição por data.";
         setOverrideFeedback({ type: "error", message });
+        toast.error("Não foi possível remover a substituição.", {
+          description: message,
+        });
       } finally {
         setDeletingOverrideId(null);
       }
@@ -406,10 +415,14 @@ export function AdminAvailabilityEditor({
           type: "success",
           message: `${totalDays} dia(s) salvo(s) com sucesso.`,
         });
+        toast.success("Disponibilidades salvas com sucesso.");
         router.refresh();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Falha ao salvar as disponibilidades.";
         setSaveFeedback({ type: "error", message });
+        toast.error("Não foi possível salvar as disponibilidades.", {
+          description: message,
+        });
       }
     });
   }

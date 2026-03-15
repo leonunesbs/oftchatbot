@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { adminCreateAppointmentAction } from "@/app/dashboard/admin/actions";
+import { ActionToastForm } from "@/components/action-toast-form";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -122,7 +123,12 @@ export function AdminCreateAppointmentForm({
   const normalizedPhone = phoneDigits ? `${selectedDdi}${phoneDigits}` : "";
 
   return (
-    <form action={adminCreateAppointmentAction} className="grid gap-3">
+    <ActionToastForm
+      action={adminCreateAppointmentAction}
+      className="grid gap-3"
+      successMessage="Agendamento criado com sucesso."
+      errorMessage="Não foi possível criar o agendamento."
+    >
       <div className="grid gap-1.5">
         <Label htmlFor="create-clerkUserId">Clerk User ID (opcional)</Label>
         <Input id="create-clerkUserId" name="clerkUserId" placeholder="user_..." />
@@ -259,6 +265,6 @@ export function AdminCreateAppointmentForm({
       </div>
 
       <Button type="submit">Confirmar agendamento</Button>
-    </form>
+    </ActionToastForm>
   );
 }

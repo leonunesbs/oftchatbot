@@ -7,6 +7,7 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { cookies } from "next/headers";
 
 import { AppHeader } from "@/components/app-header";
+import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { AnalyticsConsent } from "@/components/analytics-consent";
 import { AnalyticsPageview } from "@/components/analytics-pageview";
 import type { SessionState } from "@/components/header-auth-button";
@@ -197,6 +198,7 @@ export default async function RootLayout({
             <div className="flex min-h-screen flex-col bg-background">
               <AppHeader clerkEnabled={clerkEnabled} sessionState={sessionState} />
               <main data-app-main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 md:px-6 md:py-14">
+                <AppBreadcrumbs className="mb-6 md:mb-8" />
                 {children}
               </main>
               {legalFooter}

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -115,13 +116,14 @@ export function RescheduleAppointmentCard({
           throw new Error(data?.error ?? "Não foi possível remarcar a consulta.");
         }
         setSuccess("Consulta remarcada com sucesso.");
+        toast.success("Consulta remarcada com sucesso.");
         router.refresh();
       } catch (submitError) {
-        setError(
-          submitError instanceof Error
-            ? submitError.message
-            : "Falha ao remarcar consulta.",
-        );
+        const message = submitError instanceof Error ? submitError.message : "Falha ao remarcar consulta.";
+        setError(message);
+        toast.error("Não foi possível remarcar a consulta.", {
+          description: message,
+        });
       }
     });
   }
@@ -145,13 +147,14 @@ export function RescheduleAppointmentCard({
         setSuccess(
           "Consulta cancelada com sucesso. Você já pode iniciar uma nova reserva do zero.",
         );
+        toast.success("Consulta cancelada com sucesso.");
         router.refresh();
       } catch (submitError) {
-        setError(
-          submitError instanceof Error
-            ? submitError.message
-            : "Falha ao cancelar consulta.",
-        );
+        const message = submitError instanceof Error ? submitError.message : "Falha ao cancelar consulta.";
+        setError(message);
+        toast.error("Não foi possível cancelar a consulta.", {
+          description: message,
+        });
       }
     });
   }

@@ -1,12 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import {
+  CalendarCheck2Icon,
+  CalendarClockIcon,
+  Clock3Icon,
+  MailIcon,
+  MessageCircleHeartIcon,
+  ShieldCheckIcon,
+  StethoscopeIcon,
+} from "lucide-react";
 
 import { BookingConfirmedEvent } from "@/components/booking-confirmed-event";
+import { ActionToastForm } from "@/components/action-toast-form";
+import { BirthDatePickerField } from "@/components/birth-date-picker-field";
 import { CheckoutReturnUrlCleaner } from "@/components/checkout-return-url-cleaner";
 import { PendingReservationsList } from "@/components/pending-reservations-list";
 import { PhoneLinkCard } from "@/components/phone-link-card";
 import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-card";
 import { upsertPatientBirthDateAction } from "@/app/dashboard/actions";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getBookingBootstrapData } from "@/lib/booking-bootstrap";
 import { getUserRoleFromClerkAuth, hasConfirmedBooking } from "@/lib/access";
@@ -41,6 +52,7 @@ export default async function DashboardPage({
   const authData = await auth();
   const role = await getUserRoleFromClerkAuth(authData);
   const isAdmin = role === "admin";
+  const contactEmail = await resolveUserEmailFromAuthData(authData);
 
   let dashboardState: {
     hasConfirmedBooking: boolean;
@@ -168,8 +180,13 @@ export default async function DashboardPage({
   const nextAppointment = dashboardState.nextAppointment;
   const latestNoShow =
     !bookingConfirmed && dashboardState.history[0]?.status === "no_show";
+  const birthDate = parseBirthDate(patientBirthDate);
+  const patientAge = birthDate ? calculateAge(birthDate) : null;
+  const hasPriorityByAge = typeof patientAge === "number" && patientAge >= 65;
   const appointmentStart = resolveAppointmentStart(nextAppointment?.scheduledFor);
   const appointmentLocation = nextAppointment?.location || "Local a confirmar";
+  const appointmentDateLabel = formatDisplayDate(nextAppointment?.scheduledFor);
+  const appointmentTimeLabel = formatDisplayTime(nextAppointment?.scheduledFor);
   const calendarLinks = appointmentStart
     ? buildCalendarLinks({
         title: "Consulta com Dr Leonardo",
@@ -180,36 +197,34 @@ export default async function DashboardPage({
         durationMinutes: 60,
       })
     : null;
-  const initialPanelData = {
-    location: nextAppointment?.location ?? "",
-    date: nextAppointment?.scheduledFor
-      ? new Date(nextAppointment.scheduledFor).toISOString().slice(0, 10)
-      : "",
-    time: nextAppointment?.scheduledFor
-      ? new Date(nextAppointment.scheduledFor).toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      : "",
-    consultationType:
-      nextAppointment?.consultationType ?? "Consulta oftalmológica",
-  };
-
   return (
-    <section className="mx-auto w-full max-w-3xl space-y-6 max-md:-mx-4 max-md:max-w-none max-md:px-4">
+    <section className="mx-auto w-full max-w-5xl space-y-6 max-md:-mx-4 max-md:max-w-none max-md:px-4">
       <BookingConfirmedEvent enabled={bookingConfirmed} />
       <CheckoutReturnUrlCleaner enabled={paymentJustSucceeded} />
-      <Card variant="flat-mobile" className="border-border/70">
-        <CardHeader>
-          <CardTitle>Minha agenda</CardTitle>
+
+      <Card
+        variant="flat-mobile"
+        className="border-border/70 max-md:overflow-visible"
+      >
+        <CardHeader className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="rounded-full px-3">
+              Painel do paciente
+            </Badge>
+            {hasPriorityByAge ? (
+              <Badge className="rounded-full bg-emerald-600 text-white hover:bg-emerald-600">
+                Prioridade 65+
+              </Badge>
+            ) : null}
+          </div>
+          <CardTitle>Olá! Aqui você tem controle total do seu atendimento.</CardTitle>
           <CardDescription>
             {isAdmin
               ? "Você está em modo administrador. Use o atalho abaixo para gestão."
-              : "Resumo rápido da sua consulta e ações principais."}
+              : "Acompanhe sua consulta, organize informações e acione suporte quando precisar."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-6">
           {paymentJustSucceeded ? (
             <div className="space-y-3 rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4">
               <h3 className="font-medium text-emerald-900 dark:text-emerald-200">
@@ -248,7 +263,7 @@ export default async function DashboardPage({
           ) : null}
 
           {isAdmin ? (
-            <div className="space-y-3 rounded-xl border border-border p-4">
+            <div className="space-y-3 rounded-xl border border-border/80 bg-muted/20 p-4">
               <h3 className="font-medium">Acesso administrativo</h3>
               <Button variant="secondary" asChild>
                 <Link href="/dashboard/admin">Abrir painel admin</Link>
@@ -268,66 +283,230 @@ export default async function DashboardPage({
             </div>
           ) : null}
 
+          <div className="grid gap-4 max-md:gap-0 max-md:divide-y max-md:divide-border/60 lg:grid-cols-2">
+            <Card className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0">
+              <CardHeader className="space-y-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <ShieldCheckIcon className="size-4 text-emerald-600" />
+                  Cadastro com prioridade
+                </CardTitle>
+                <CardDescription>
+                  Informe sua data de nascimento para manter seu cadastro completo e agilizar o atendimento.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-sm">
+                  {hasPriorityByAge ? (
+                    <p className="text-emerald-900 dark:text-emerald-200">
+                      Prioridade ativa: {patientAge} anos cadastrados.
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Sua data de nascimento ajuda a validar seu cadastro e agiliza confirmações futuras.
+                    </p>
+                  )}
+                </div>
+                <ActionToastForm
+                  action={upsertPatientBirthDateAction}
+                  className="grid w-full min-w-0 gap-3"
+                  successMessage="Data de nascimento salva com sucesso."
+                  errorMessage="Não foi possível salvar a data de nascimento."
+                >
+                  <Label>Data de nascimento</Label>
+                  <BirthDatePickerField defaultValue={patientBirthDate} />
+                  <Button type="submit" variant="outline">
+                    Salvar data de nascimento
+                  </Button>
+                </ActionToastForm>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0">
+              <CardHeader className="space-y-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CalendarCheck2Icon className="size-4 text-primary" />
+                  Próximo agendamento
+                </CardTitle>
+                <CardDescription>
+                  Detalhes da sua próxima consulta e atalhos rápidos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {bookingConfirmed && nextAppointment ? (
+                  <>
+                    <div className="grid gap-3 text-sm text-muted-foreground">
+                      <p className="flex items-start gap-2">
+                        <CalendarClockIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <span>
+                          <span className="font-medium text-foreground">Data:</span>{" "}
+                          {appointmentDateLabel}
+                        </span>
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <Clock3Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <span>
+                          <span className="font-medium text-foreground">Horário:</span>{" "}
+                          {appointmentTimeLabel}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="font-medium text-foreground">Local:</span>{" "}
+                        {nextAppointment.location || "A confirmar"}
+                      </p>
+                      <p>
+                        <span className="font-medium text-foreground">Tipo:</span>{" "}
+                        {nextAppointment.consultationType ?? "Consulta oftalmológica"}
+                      </p>
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Button variant="outline" asChild>
+                        <Link href="#remarcacao-consulta">
+                          <CalendarClockIcon className="size-4" />
+                          Reagendar
+                        </Link>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="#remarcacao-consulta">
+                          <CalendarCheck2Icon className="size-4" />
+                          Cancelar
+                        </Link>
+                      </Button>
+                      <Button variant="secondary" asChild className="sm:col-span-2">
+                        <Link
+                          href="https://wa.me/5585999853811?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20minha%20consulta%20no%20painel%20do%20paciente."
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <MessageCircleHeartIcon className="size-4" />
+                          Entrar em contato
+                        </Link>
+                      </Button>
+                    </div>
+
+                    {calendarLinks ? (
+                      <div className="flex flex-wrap gap-2">
+                        <Button asChild size="sm" variant="outline">
+                          <Link
+                            href={calendarLinks.googleCalendarHref}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Salvar no Google Agenda
+                          </Link>
+                        </Button>
+                        <Button asChild size="sm" variant="outline">
+                          <a
+                            href={calendarLinks.icsHref}
+                            download="consulta-dr-leonardo.ics"
+                          >
+                            Salvar no calendário do celular
+                          </a>
+                        </Button>
+                      </div>
+                    ) : null}
+                  </>
+                ) : hasPendingReschedule ? (
+                  <div className="space-y-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+                    <p className="text-sm text-muted-foreground">
+                      Você possui um agendamento pendente de remarcação. Finalize-o para voltar a reservar.
+                    </p>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href="#agendamentos-pendentes">Ver pendentes</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 rounded-lg border border-border bg-muted/15 p-3">
+                    <p className="text-sm text-muted-foreground">
+                      Você ainda não possui consulta confirmada.
+                    </p>
+                    <Button asChild size="sm">
+                      <Link href="/agendar">Agendar consulta</Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0">
+              <CardHeader className="space-y-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <StethoscopeIcon className="size-4 text-primary" />
+                  Triagem para dilatação
+                </CardTitle>
+                <CardDescription>
+                  Verifique orientações importantes antes da consulta.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Se houver chance de exame com dilatação, preencha sua triagem para preparar o atendimento com segurança.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link href="/dashboard/detalhes">Verificar triagem e detalhes</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0">
+              <CardHeader className="space-y-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <MailIcon className="size-4 text-primary" />
+                  Conexões de contato
+                </CardTitle>
+                <CardDescription>
+                  Confira seus canais vinculados para receber avisos da clínica.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Email cadastrado no Clerk
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {contactEmail ?? "Email não disponível na sessão atual"}
+                  </p>
+                </div>
+
+                <PhoneLinkCard linked={phoneLinkStatus.linked} maskedPhone={phoneLinkStatus.phone} />
+
+                <Button variant="secondary" asChild>
+                  <Link
+                    href="https://wa.me/5585999853811?text=Ol%C3%A1!%20Vim%20pela%20Minha%20Agenda%20e%20gostaria%20de%20confirmar/reagendar%20minha%20consulta."
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <MessageCircleHeartIcon className="size-4" />
+                    Suporte via WhatsApp
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
           {bookingConfirmed && nextAppointment ? (
             <div className="space-y-4 rounded-xl border border-border p-4">
-              <h3 className="font-medium">Próxima consulta</h3>
+              <h3 className="font-medium">Resumo rápido da consulta</h3>
               <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
                 <p>
                   <span className="font-medium text-foreground">Local:</span>{" "}
-                  {initialPanelData.location || "A confirmar"}
+                  {nextAppointment.location || "A confirmar"}
                 </p>
                 <p>
                   <span className="font-medium text-foreground">Tipo:</span>{" "}
-                  {initialPanelData.consultationType}
+                  {nextAppointment.consultationType ?? "Consulta oftalmológica"}
                 </p>
                 <p>
                   <span className="font-medium text-foreground">Data:</span>{" "}
-                  {initialPanelData.date || "A confirmar"}
+                  {appointmentDateLabel}
                 </p>
                 <p>
                   <span className="font-medium text-foreground">Horário:</span>{" "}
-                  {initialPanelData.time || "A confirmar"}
+                  {appointmentTimeLabel}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" asChild>
-                  <Link href="/detalhes">Preencher detalhes opcionais</Link>
-                </Button>
-                {calendarLinks ? (
-                  <Button asChild>
-                    <Link
-                      href={calendarLinks.googleCalendarHref}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Salvar no Google Agenda
-                    </Link>
-                  </Button>
-                ) : null}
-              </div>
             </div>
-          ) : hasPendingReschedule ? (
-            <div className="space-y-4 rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
-              <h3 className="font-medium">Agendamento aguardando remarcação</h3>
-              <p className="text-sm text-muted-foreground">
-                Você já possui agendamento pendente. Enquanto ele estiver ativo,
-                não é possível criar um novo agendamento.
-              </p>
-              <Button asChild variant="outline">
-                <Link href="#agendamentos-pendentes">Ver pendentes</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4 rounded-xl border border-border p-4">
-              <h3 className="font-medium">Agendar consulta</h3>
-              <p className="text-sm text-muted-foreground">
-                Você ainda não possui agendamento confirmado.
-              </p>
-              <Button asChild>
-                <Link href="/agendar">Ir para agendamento</Link>
-              </Button>
-            </div>
-          )}
+          ) : null}
 
           {bookingConfirmed ? (
             <RescheduleAppointmentCard
@@ -338,43 +517,6 @@ export default async function DashboardPage({
               initialLocation={nextAppointment?.location}
             />
           ) : null}
-
-          <PhoneLinkCard linked={phoneLinkStatus.linked} maskedPhone={phoneLinkStatus.phone} />
-
-          <div className="space-y-3 rounded-xl border border-border p-4">
-            <h3 className="font-medium">Dados pessoais</h3>
-            <p className="text-sm text-muted-foreground">
-              Informe sua data de nascimento para facilitar conferência de cadastro e comunicação com a clínica.
-            </p>
-            <form action={upsertPatientBirthDateAction} className="grid gap-3 sm:max-w-xs">
-              <Label htmlFor="birthDate">Data de nascimento</Label>
-              <Input
-                id="birthDate"
-                name="birthDate"
-                type="date"
-                defaultValue={patientBirthDate}
-                max={new Date().toISOString().slice(0, 10)}
-              />
-              <Button type="submit" variant="outline">
-                Salvar data de nascimento
-              </Button>
-            </form>
-          </div>
-
-          <div className="space-y-3">
-            <Button variant="secondary" asChild>
-              <Link
-                href="https://wa.me/5585999853811?text=Ol%C3%A1!%20Vim%20pela%20Minha%20Agenda%20e%20gostaria%20de%20confirmar/reagendar%20minha%20consulta."
-                target="_blank"
-                rel="noreferrer"
-              >
-                Falar no WhatsApp
-              </Link>
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Em caso de urgência ou regra não atendida, o suporte humano continua disponível.
-            </p>
-          </div>
 
           <div id="agendamentos-pendentes" className="space-y-2">
             <h3 className="font-medium">Agendamentos pendentes</h3>
@@ -393,6 +535,103 @@ function resolveAppointmentStart(nextAppointmentTimestamp?: number) {
     return new Date(nextAppointmentTimestamp);
   }
   return null;
+}
+
+function formatDisplayDate(timestamp?: number) {
+  if (typeof timestamp !== "number") {
+    return "A confirmar";
+  }
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "full",
+  }).format(new Date(timestamp));
+}
+
+function formatDisplayTime(timestamp?: number) {
+  if (typeof timestamp !== "number") {
+    return "A confirmar";
+  }
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeStyle: "short",
+  }).format(new Date(timestamp));
+}
+
+function parseBirthDate(value?: string) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const [yearPart, monthPart, dayPart] = value.split("-");
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return null;
+  }
+  const parsedDate = new Date(year, month - 1, day, 12, 0, 0);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
+
+function calculateAge(birthDate: Date) {
+  const now = new Date();
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const monthDiff = now.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
+async function resolveUserEmailFromAuthData(authData: Awaited<ReturnType<typeof auth>>) {
+  const fromSession = resolveUserEmailFromClaims(authData.sessionClaims);
+  if (fromSession) {
+    return fromSession;
+  }
+
+  try {
+    const token = await authData.getToken({ template: "convex" });
+    if (!token) {
+      return null;
+    }
+    const jwtClaims = decodeJwtClaims(token);
+    return resolveUserEmailFromClaims(jwtClaims);
+  } catch {
+    return null;
+  }
+}
+
+function resolveUserEmailFromClaims(sessionClaims: unknown) {
+  if (!sessionClaims || typeof sessionClaims !== "object") {
+    return null;
+  }
+
+  const claims = sessionClaims as Record<string, unknown>;
+  const emailCandidates = [claims.email, claims.email_address, claims.primary_email_address];
+  for (const candidate of emailCandidates) {
+    if (typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function decodeJwtClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+  const payload = parts[1];
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    const normalized = payload.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const decodedPayload = Buffer.from(padded, "base64").toString("utf8");
+    const parsed = JSON.parse(decodedPayload);
+    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }
 
 function buildCalendarLinks({

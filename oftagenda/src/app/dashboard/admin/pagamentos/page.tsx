@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ActionToastForm } from "@/components/action-toast-form";
 
 export default async function AdminPaymentsPage() {
   const data = await getAdminSnapshot();
@@ -34,7 +35,12 @@ export default async function AdminPaymentsPage() {
               <DialogTitle>Novo pagamento</DialogTitle>
               <DialogDescription>Cadastre um pagamento no sistema.</DialogDescription>
             </DialogHeader>
-            <form action={createPaymentAction} className="grid gap-2 rounded-lg border p-3">
+            <ActionToastForm
+              action={createPaymentAction}
+              className="grid gap-2 rounded-lg border p-3"
+              successMessage="Pagamento salvo com sucesso."
+              errorMessage="Não foi possível salvar o pagamento."
+            >
               <Label htmlFor="payment-reservationId">ID da reserva (opcional)</Label>
               <Input id="payment-reservationId" name="reservationId" placeholder="ex: j57..." />
               <Label htmlFor="payment-clerkUserId">ID de usuário Clerk (se não houver reserva)</Label>
@@ -66,7 +72,7 @@ export default async function AdminPaymentsPage() {
               <Input name="externalId" placeholder="ID externo opcional" />
               <Input name="notes" placeholder="Observação opcional" />
               <Button type="submit">Salvar pagamento</Button>
-            </form>
+            </ActionToastForm>
           </DialogContent>
         </Dialog>
 
@@ -93,7 +99,12 @@ export default async function AdminPaymentsPage() {
                     <Badge variant={payment.status === "paid" ? "default" : "outline"}>{payment.status}</Badge>
                   </TableCell>
                   <TableCell>
-                    <form action={setPaymentStatusAction} className="grid gap-2">
+                    <ActionToastForm
+                      action={setPaymentStatusAction}
+                      className="grid gap-2"
+                      successMessage="Status do pagamento atualizado com sucesso."
+                      errorMessage="Não foi possível atualizar o pagamento."
+                    >
                       <input type="hidden" name="paymentId" value={payment._id} />
                       <select name="status" className={selectClassName} defaultValue={payment.status}>
                         <option value="pending">pending</option>
@@ -105,7 +116,7 @@ export default async function AdminPaymentsPage() {
                       <Button size="sm" type="submit">
                         Atualizar
                       </Button>
-                    </form>
+                    </ActionToastForm>
                   </TableCell>
                 </TableRow>
               ))}
