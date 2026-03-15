@@ -67,7 +67,11 @@ export function AppHeader({ clerkEnabled, sessionState }: AppHeaderProps) {
           </Button>
           <ColorModeToggle />
           <Suspense fallback={<Button variant="outline">Entrar</Button>}>
-            <HeaderAuthButton clerkEnabled={clerkEnabled} initialSessionState={sessionState} />
+            <HeaderAuthButton
+              clerkEnabled={clerkEnabled}
+              initialSessionState={sessionState}
+              triggerId="header-auth-trigger-desktop"
+            />
           </Suspense>
         </nav>
 
@@ -122,7 +126,11 @@ export function AppHeader({ clerkEnabled, sessionState }: AppHeaderProps) {
                 </SheetClose>
                 <div className="mt-2">
                   <Suspense fallback={<Button variant="outline">Entrar</Button>}>
-                    <HeaderAuthButton clerkEnabled={clerkEnabled} initialSessionState={sessionState} />
+                    <HeaderAuthButton
+                      clerkEnabled={clerkEnabled}
+                      initialSessionState={sessionState}
+                      triggerId="header-auth-trigger-mobile"
+                    />
                   </Suspense>
                 </div>
               </nav>

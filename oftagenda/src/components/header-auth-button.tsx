@@ -20,6 +20,7 @@ let sessionProbeCache: SessionState | null | undefined;
 type HeaderAuthButtonProps = {
   clerkEnabled: boolean;
   initialSessionState: SessionState;
+  triggerId?: string;
 };
 
 export type SessionState = {
@@ -29,7 +30,11 @@ export type SessionState = {
   firstName: string | null;
 };
 
-export function HeaderAuthButton({ clerkEnabled, initialSessionState }: HeaderAuthButtonProps) {
+export function HeaderAuthButton({
+  clerkEnabled,
+  initialSessionState,
+  triggerId,
+}: HeaderAuthButtonProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -118,7 +123,7 @@ export function HeaderAuthButton({ clerkEnabled, initialSessionState }: HeaderAu
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="inline-flex items-center gap-2">
+        <Button id={triggerId} variant="outline" className="inline-flex items-center gap-2">
           {avatarUrl ? (
             <img
               src={avatarUrl}

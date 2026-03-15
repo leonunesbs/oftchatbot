@@ -14,6 +14,7 @@ type ActionToastFormProps = {
   id?: string;
   children: ReactNode;
   refreshOnSuccess?: boolean;
+  onSuccess?: (formData: FormData) => void;
 };
 
 export function ActionToastForm({
@@ -24,6 +25,7 @@ export function ActionToastForm({
   id,
   children,
   refreshOnSuccess = true,
+  onSuccess,
 }: ActionToastFormProps) {
   const router = useRouter();
 
@@ -31,6 +33,7 @@ export function ActionToastForm({
     try {
       await action(formData);
       toast.success(successMessage);
+      onSuccess?.(formData);
       if (refreshOnSuccess) {
         router.refresh();
       }

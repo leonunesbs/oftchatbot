@@ -42,7 +42,8 @@ export async function GET(request: Request) {
       {
         method: "GET",
         path: "/api/integrations/n8n/appointments?phone=5599999999999&includeHistory=true",
-        description: "Consulta agendamentos por telefone do paciente.",
+        description:
+          "Consulta agendamentos e reservas por telefone do paciente (aceita variações de DDI/DDD/máscara).",
       },
       {
         method: "PATCH",

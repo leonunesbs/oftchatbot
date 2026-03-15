@@ -112,9 +112,16 @@ Resposta:
 }
 ```
 
-### 3) Consultar agendamentos por telefone
+### 3) Consultar agendamentos e reservas por telefone
 
 - `GET /api/integrations/n8n/appointments?phone=5599999999999&includeHistory=true`
+
+Normalização de telefone aceita nesta rota (entrada do n8n):
+
+- Com ou sem DDI (`+55`, `55` ou sem DDI).
+- DDD com ou sem zero à esquerda (`085` e `85` equivalentes).
+- Número com 9 dígitos ou 8 dígitos (`9XXXX-XXXX` e `XXXX-XXXX` equivalentes).
+- Com ou sem máscara/pontuação (espaços, parênteses, traços).
 
 Resposta:
 
@@ -123,9 +130,14 @@ Resposta:
   "ok": true,
   "phone": "5599999999999",
   "total": 1,
+  "totalReservations": 2,
   "activeAppointment": {
     "appointmentId": "j57...",
     "status": "confirmed"
+  },
+  "activeReservation": {
+    "reservationId": "k98...",
+    "status": "pending"
   },
   "appointments": [
     {
@@ -137,6 +149,15 @@ Resposta:
       "status": "confirmed",
       "requestedAt": 1770000000000,
       "scheduledFor": 1770003600000
+    }
+  ],
+  "reservations": [
+    {
+      "reservationId": "k98...",
+      "eventTypeTitle": "Consulta Oftalmológica",
+      "location": "fortaleza",
+      "status": "pending",
+      "startsAt": 1770003600000
     }
   ]
 }

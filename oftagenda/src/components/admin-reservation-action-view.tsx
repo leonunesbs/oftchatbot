@@ -78,6 +78,8 @@ type AdminReservationActionViewProps = {
   fromDragDrop?: boolean;
 };
 
+const DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT = "agenda-drag-drop-reschedule-confirmed";
+
 function toDateInput(timestamp: number) {
   const date = new Date(timestamp);
   const y = date.getFullYear();
@@ -118,6 +120,17 @@ function normalizePhoneForWhatsapp(phone: string) {
   return `55${digits}`;
 }
 
+function WhatsappIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className}>
+      <path
+        fill="currentColor"
+        d="M12 2a10 10 0 0 0-8.7 15l-1.1 4.1 4.2-1.1A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.5.7.7-2.4-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.2-.6-1.4-.6s-.3-.1-.5.1c-.1.2-.5.6-.6.7-.1.1-.2.1-.4 0a6.6 6.6 0 0 1-1.9-1.2 7.2 7.2 0 0 1-1.3-1.7c-.1-.2 0-.3.1-.4.1-.1.2-.2.3-.3.1-.1.2-.2.2-.3.1-.1 0-.2 0-.3s-.5-1.3-.6-1.8c-.2-.4-.3-.4-.5-.4h-.4c-.1 0-.3 0-.5.2s-.7.6-.7 1.5.7 1.8.8 2c.1.1 1.3 2 3.2 2.8.4.2.8.3 1 .4.4.1.8.1 1.1.1.3 0 1-.4 1.2-.8.2-.4.2-.8.1-.8 0-.1-.2-.1-.4-.2Z"
+      />
+    </svg>
+  );
+}
+
 function calculateAge(date: Date) {
   const today = new Date();
   let age = today.getFullYear() - date.getFullYear();
@@ -130,18 +143,30 @@ function calculateAge(date: Date) {
   return age >= 0 ? age : null;
 }
 
+function parseBirthDate(value?: string) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const [yearPart, monthPart, dayPart] = value.split("-");
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return null;
+  }
+  const parsed = new Date(year, month - 1, day, 12, 0, 0);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function formatBirthDateLabel(value?: string) {
   if (!value) {
     return "Não informada";
   }
-  const asDate = new Date(value);
-  if (!Number.isNaN(asDate.getTime())) {
-    const age = calculateAge(asDate);
-    const formattedDate = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(asDate);
-    if (age === null) {
-      return formattedDate;
-    }
-    return `${formattedDate} (${age} anos)`;
+  const parsed = parseBirthDate(value);
+  if (parsed) {
+    const age = calculateAge(parsed);
+    const formattedDate = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(parsed);
+    return age === null ? formattedDate : `${formattedDate} (${age} anos)`;
   }
   return value;
 }
@@ -251,7 +276,28 @@ Equipe de atendimento`;
         <p className="text-muted-foreground">
           {reservation.patientName ?? "Paciente"} ({reservation.clerkUserId})
         </p>
-        <p className="text-muted-foreground">Telefone: {reservation.patientPhone ?? "Não informado"}</p>
+        <p className="text-muted-foreground">E-mail: {reservation.patientEmail ?? "Não informado"}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-muted-foreground">Telefone: {reservation.patientPhone ?? "Não informado"}</p>
+          {reservation.patientPhone ? (
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-8 w-8 shrink-0 border-emerald-600/60 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+              asChild
+            >
+              <a
+                href={`https://wa.me/${normalizePhoneForWhatsapp(reservation.patientPhone)}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Abrir WhatsApp do paciente"
+                title="Abrir WhatsApp do paciente"
+              >
+                <WhatsappIcon className="size-4" />
+              </a>
+            </Button>
+          ) : null}
+        </div>
         <p className="text-muted-foreground">
           Nascimento: {formatBirthDateLabel(reservation.patientBirthDate)}
         </p>
@@ -343,6 +389,26 @@ Equipe de atendimento`;
           className="grid gap-2 rounded-md border p-3"
           successMessage="Reagendamento salvo com sucesso."
           errorMessage="Não foi possível salvar o reagendamento."
+          onSuccess={(formData) => {
+            if (!fromDragDrop) {
+              return;
+            }
+            const reservationId = formData.get("reservationId");
+            const date = formData.get("date");
+            const time = formData.get("time");
+            if (
+              typeof reservationId !== "string" ||
+              typeof date !== "string" ||
+              typeof time !== "string"
+            ) {
+              return;
+            }
+            window.dispatchEvent(
+              new CustomEvent(DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT, {
+                detail: { reservationId, date, time },
+              }),
+            );
+          }}
         >
           <input type="hidden" name="reservationId" value={reservation._id} />
           <input type="hidden" name="clerkUserId" value={reservation.clerkUserId} />

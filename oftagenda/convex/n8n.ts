@@ -29,13 +29,32 @@ export const getAppointmentsByPhone = query({
 
     const allAppointments = await ctx.db.query("appointments").collect();
     const allReservations = await ctx.db.query("reservations").collect();
+    const allEventTypes = await ctx.db.query("event_types").collect();
+    const allPhoneLinks = await ctx.db.query("phone_links").collect();
     const reservationById = new Map(allReservations.map((item) => [String(item._id), item]));
+    const eventTypeById = new Map(allEventTypes.map((item) => [String(item._id), item]));
+
+    const linkedUserIdsByPhone = new Set(
+      allPhoneLinks
+        .filter((link) => {
+          const linkKeys = buildPhoneMatchKeys(link.phone);
+          return linkKeys.some((key) => phoneKeySet.has(key));
+        })
+        .map((link) => link.clerkUserId),
+    );
 
     const matchedAppointments = allAppointments.filter((appointment) => {
       const appointmentKeys = buildPhoneMatchKeys(appointment.phone);
-      return appointmentKeys.some((key) => phoneKeySet.has(key));
+      if (appointmentKeys.some((key) => phoneKeySet.has(key))) {
+        return true;
+      }
+      return linkedUserIdsByPhone.has(appointment.clerkUserId);
     });
     const sorted = [...matchedAppointments].sort((a, b) => b.requestedAt - a.requestedAt);
+    const matchedClerkUserIds = new Set<string>([
+      ...[...linkedUserIdsByPhone],
+      ...matchedAppointments.map((item) => item.clerkUserId),
+    ]);
 
     const now = Date.now();
     const filtered = args.includeHistory
@@ -51,6 +70,38 @@ export const getAppointmentsByPhone = query({
       mapAppointmentForResponse(appointment, reservationById),
     );
 
+    const filteredReservations = allReservations.filter((reservation) => {
+      if (!matchedClerkUserIds.has(reservation.clerkUserId)) {
+        return false;
+      }
+      if (args.includeHistory) {
+        return true;
+      }
+      const hasActiveStatus =
+        reservation.status === "pending" ||
+        reservation.status === "awaiting_patient" ||
+        reservation.status === "confirmed" ||
+        reservation.status === "in_care" ||
+        reservation.status === "surgery_planned" ||
+        reservation.status === "postop_followup";
+      return hasActiveStatus && reservation.startsAt > now;
+    });
+    const reservations = filteredReservations
+      .sort((a, b) => b.startsAt - a.startsAt)
+      .map((reservation) => mapReservationForResponse(reservation, eventTypeById));
+
+    const activeReservation =
+      reservations.find(
+        (item) =>
+          (item.status === "pending" ||
+            item.status === "awaiting_patient" ||
+            item.status === "confirmed" ||
+            item.status === "in_care" ||
+            item.status === "surgery_planned" ||
+            item.status === "postop_followup") &&
+          item.startsAt > now,
+      ) ?? null;
+
     const activeAppointment =
       appointments.find(
         (item) =>
@@ -64,6 +115,9 @@ export const getAppointmentsByPhone = query({
       total: appointments.length,
       activeAppointment,
       appointments,
+      totalReservations: reservations.length,
+      activeReservation,
+      reservations,
     };
   },
 });
@@ -186,15 +240,21 @@ export const getPatientContextByPhone = query({
     phone: v.string(),
   },
   handler: async (ctx, args) => {
-    const phone = normalizePhone(args.phone);
-    if (!phone) {
+    const normalizedPhone = normalizePhone(args.phone);
+    if (!normalizedPhone) {
       return { linked: false, patient: null };
     }
+    const phoneKeys = buildPhoneMatchKeys(args.phone);
+    if (phoneKeys.length === 0) {
+      return { linked: false, patient: null };
+    }
+    const phoneKeySet = new Set(phoneKeys);
 
-    const link = await ctx.db
-      .query("phone_links")
-      .withIndex("by_phone", (q) => q.eq("phone", phone))
-      .first();
+    const links = await ctx.db.query("phone_links").collect();
+    const link = links.find((candidate) => {
+      const candidateKeys = buildPhoneMatchKeys(candidate.phone);
+      return candidateKeys.some((key) => phoneKeySet.has(key));
+    });
 
     if (!link) {
       return { linked: false, patient: null };
@@ -347,6 +407,18 @@ function buildPhoneMatchKeys(rawPhone: string) {
       keys.add(withoutNinthDigit);
       keys.add(`55${withoutNinthDigit}`);
     }
+
+    if (withoutTrunkPrefix.length === 8) {
+      const withNinthDigit = `9${withoutTrunkPrefix}`;
+      keys.add(withNinthDigit);
+      keys.add(`55${withNinthDigit}`);
+    }
+
+    if (withoutTrunkPrefix.length === 9 && withoutTrunkPrefix.startsWith("9")) {
+      const withoutNinthDigit = withoutTrunkPrefix.slice(1);
+      keys.add(withoutNinthDigit);
+      keys.add(`55${withoutNinthDigit}`);
+    }
   }
 
   return [...keys];
@@ -378,6 +450,27 @@ function mapAppointmentForResponse(
     consultationType: appointment.consultationType ?? null,
     reservationId: appointment.reservationId ? String(appointment.reservationId) : null,
     reservationStatus: reservation?.status ?? null,
+  };
+}
+
+function mapReservationForResponse(
+  reservation: Doc<"reservations">,
+  eventTypeById: Map<string, Doc<"event_types">>,
+) {
+  const eventType = eventTypeById.get(String(reservation.eventTypeId));
+  return {
+    reservationId: String(reservation._id) as Id<"reservations">,
+    clerkUserId: reservation.clerkUserId,
+    appointmentId: reservation.appointmentId ? String(reservation.appointmentId) : null,
+    eventTypeId: String(reservation.eventTypeId),
+    eventTypeTitle: eventType?.name ?? eventType?.title ?? "Consulta oftalmológica",
+    location: eventType?.location ?? "fortaleza",
+    startsAt: reservation.startsAt,
+    endsAt: reservation.endsAt,
+    status: reservation.status,
+    notes: reservation.notes ?? null,
+    createdAt: reservation.createdAt,
+    updatedAt: reservation.updatedAt,
   };
 }
 

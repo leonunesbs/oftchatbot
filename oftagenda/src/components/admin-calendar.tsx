@@ -2,7 +2,7 @@
 
 import { DndContext, type DragEndEvent, useDraggable, useDroppable } from "@dnd-kit/core";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,13 @@ type AdminCalendarProps = {
   items: CalendarItem[];
 };
 
+type OptimisticMove = {
+  reservationId: string;
+  toDate: string;
+  toTime: string;
+  status: "pending" | "confirmed";
+};
+
 const KIND_CLASS: Record<CalendarItem["kind"], string> = {
   consulta: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
   exame: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200",
@@ -57,6 +64,7 @@ const RESERVATION_ID_PREFIX = "reservation";
 const SLOT_DURATION_MINUTES = 30;
 const CALENDAR_START_HOUR = 7;
 const CALENDAR_END_HOUR = 20;
+const DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT = "agenda-drag-drop-reschedule-confirmed";
 
 function startOfWeek(date: Date) {
   const next = new Date(date);
@@ -110,18 +118,30 @@ function calculateAge(date: Date) {
   return age >= 0 ? age : null;
 }
 
+function parseBirthDate(value?: string) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const [yearPart, monthPart, dayPart] = value.split("-");
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return null;
+  }
+  const parsed = new Date(year, month - 1, day, 12, 0, 0);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function formatBirthDateLabel(value?: string) {
   if (!value) {
     return "Não informada";
   }
-  const asDate = new Date(value);
-  if (!Number.isNaN(asDate.getTime())) {
-    const age = calculateAge(asDate);
-    const formattedDate = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(asDate);
-    if (age === null) {
-      return formattedDate;
-    }
-    return `${formattedDate} (${age} anos)`;
+  const parsed = parseBirthDate(value);
+  if (parsed) {
+    const age = calculateAge(parsed);
+    const formattedDate = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(parsed);
+    return age === null ? formattedDate : `${formattedDate} (${age} anos)`;
   }
   return value;
 }
@@ -153,6 +173,31 @@ function parseReservationDragId(rawId: string) {
   return reservationId ? { reservationId } : null;
 }
 
+function toTimestampFromDateAndTime(date: string, time: string) {
+  const dateMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const timeMatch = time.match(/^(\d{2}):(\d{2})$/);
+  if (!dateMatch || !timeMatch) {
+    return null;
+  }
+  const [, year, month, day] = dateMatch;
+  const [, hour, minute] = timeMatch;
+  const parsed = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+    0,
+    0,
+  );
+  return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
+}
+
+function parseReagendarReservationId(pathname: string) {
+  const match = pathname.match(/\/reagendar\/([^/]+)/);
+  return match?.[1] ?? null;
+}
+
 function DraggableReservationCard({ item, agendaPath }: { item: CalendarItem; agendaPath: string }) {
   const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -168,9 +213,9 @@ function DraggableReservationCard({ item, agendaPath }: { item: CalendarItem; ag
     <div
       ref={setNodeRef}
       style={style}
-      className={`block w-full rounded-md px-2 py-1 text-left text-[11px] ${
+      className={`block w-full cursor-grab select-none rounded-md px-2 py-1 text-left text-[11px] active:cursor-grabbing ${
         STATUS_CARD_CLASS[item.status]
-      } ${isDragging ? "opacity-70" : ""}`}
+      } ${isDragging ? "cursor-grabbing opacity-70" : ""}`}
       onClick={() => router.push(`${agendaPath}/status/${item.reservationId}`)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -201,6 +246,7 @@ function AgendaSlotCell({
   openCreateRoute,
   agendaPath,
   liveMarkerOffsetPercent,
+  isDraggingReservation,
 }: {
   dayKey: string;
   slot: string;
@@ -209,6 +255,7 @@ function AgendaSlotCell({
   openCreateRoute: (day: Date, slot: string) => void;
   agendaPath: string;
   liveMarkerOffsetPercent: number | null;
+  isDraggingReservation: boolean;
 }) {
   const isEmptySlot = slotItems.length === 0;
   const { isOver, setNodeRef } = useDroppable({
@@ -218,9 +265,9 @@ function AgendaSlotCell({
   return (
     <div
       ref={setNodeRef}
-      className={`relative min-h-12 border-b border-l p-1 text-left ${isEmptySlot ? "cursor-pointer hover:bg-muted/40" : ""} ${
-        isOver ? "bg-primary/10" : ""
-      }`}
+      className={`relative min-h-12 border-b border-l p-1 text-left ${
+        isDraggingReservation ? "cursor-copy" : isEmptySlot ? "cursor-pointer hover:bg-muted/40" : ""
+      } ${isOver ? "bg-primary/10" : ""}`}
       role={isEmptySlot ? "button" : undefined}
       tabIndex={isEmptySlot ? 0 : undefined}
       onClick={() => {
@@ -260,6 +307,10 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [anchorDate, setAnchorDate] = useState(() => new Date());
   const [now, setNow] = useState(() => new Date());
+  const [isDraggingReservation, setIsDraggingReservation] = useState(false);
+  const [optimisticMoves, setOptimisticMoves] = useState<Record<string, OptimisticMove>>({});
+  const bodyCursorBeforeDragRef = useRef<string>("");
+  const previousPathnameRef = useRef(pathname);
   const agendaPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 
   useEffect(() => {
@@ -278,6 +329,119 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isDraggingReservation) {
+      if (bodyCursorBeforeDragRef.current !== "") {
+        document.body.style.cursor = bodyCursorBeforeDragRef.current;
+        bodyCursorBeforeDragRef.current = "";
+      } else {
+        document.body.style.removeProperty("cursor");
+      }
+      return;
+    }
+
+    bodyCursorBeforeDragRef.current = document.body.style.cursor;
+    document.body.style.cursor = "grabbing";
+    return () => {
+      if (bodyCursorBeforeDragRef.current !== "") {
+        document.body.style.cursor = bodyCursorBeforeDragRef.current;
+        bodyCursorBeforeDragRef.current = "";
+      } else {
+        document.body.style.removeProperty("cursor");
+      }
+    };
+  }, [isDraggingReservation]);
+
+  useEffect(() => {
+    function handleRescheduleConfirmed(event: Event) {
+      const customEvent = event as CustomEvent<{ reservationId?: string; date?: string; time?: string }>;
+      const { reservationId, date, time } = customEvent.detail ?? {};
+      if (!reservationId || !date || !time) {
+        return;
+      }
+      setOptimisticMoves((previous) => {
+        const current = previous[reservationId];
+        if (!current) {
+          return previous;
+        }
+        return {
+          ...previous,
+          [reservationId]: {
+            ...current,
+            toDate: date,
+            toTime: time,
+            status: "confirmed",
+          },
+        };
+      });
+    }
+
+    window.addEventListener(DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT, handleRescheduleConfirmed as EventListener);
+    return () => {
+      window.removeEventListener(DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT, handleRescheduleConfirmed as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const previousPathname = previousPathnameRef.current;
+    previousPathnameRef.current = pathname;
+
+    const previousReagendarId = parseReagendarReservationId(previousPathname);
+    const currentReagendarId = parseReagendarReservationId(pathname);
+    if (!previousReagendarId || previousReagendarId === currentReagendarId) {
+      return;
+    }
+
+    setOptimisticMoves((previous) => {
+      const move = previous[previousReagendarId];
+      if (!move || move.status === "confirmed") {
+        return previous;
+      }
+      const next = { ...previous };
+      delete next[previousReagendarId];
+      return next;
+    });
+  }, [pathname]);
+
+  useEffect(() => {
+    setOptimisticMoves((previous) => {
+      let changed = false;
+      const next = { ...previous };
+      for (const item of items) {
+        const move = previous[item.reservationId];
+        if (!move) {
+          continue;
+        }
+        const currentDate = toDateInput(new Date(item.startsAt));
+        const currentTime = toTimeInput(new Date(item.startsAt));
+        if (currentDate === move.toDate && currentTime === move.toTime) {
+          delete next[item.reservationId];
+          changed = true;
+        }
+      }
+      return changed ? next : previous;
+    });
+  }, [items]);
+
+  const displayItems = useMemo(() => {
+    return items.map((item) => {
+      const move = optimisticMoves[item.reservationId];
+      if (!move) {
+        return item;
+      }
+      const nextStartsAt = toTimestampFromDateAndTime(move.toDate, move.toTime);
+      if (nextStartsAt === null) {
+        return item;
+      }
+      const duration = item.endsAt - item.startsAt;
+      return {
+        ...item,
+        startsAt: nextStartsAt,
+        endsAt: nextStartsAt + duration,
+      };
+    });
+  }, [items, optimisticMoves]);
 
   const calendarDays = useMemo(() => {
     if (viewMode === "day") {
@@ -298,7 +462,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
     for (const day of calendarDays) {
       map.set(toDateInput(day), []);
     }
-    for (const item of items) {
+    for (const item of displayItems) {
       const dateKey = toDateInput(new Date(item.startsAt));
       if (!map.has(dateKey)) {
         continue;
@@ -314,7 +478,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       );
     }
     return map;
-  }, [calendarDays, items]);
+  }, [calendarDays, displayItems]);
 
   const timeSlots = useMemo(() => {
     const slots: string[] = [];
@@ -356,10 +520,14 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
   }
 
   const nextOperations = useMemo(
-    () => [...items].filter((item) => item.status !== "cancelled").sort((a, b) => a.startsAt - b.startsAt).slice(0, 14),
-    [items],
+    () =>
+      [...displayItems]
+        .filter((item) => item.status !== "cancelled")
+        .sort((a, b) => a.startsAt - b.startsAt)
+        .slice(0, 14),
+    [displayItems],
   );
-  const reservationById = useMemo(() => new Map(items.map((item) => [item.reservationId, item])), [items]);
+  const reservationById = useMemo(() => new Map(displayItems.map((item) => [item.reservationId, item])), [displayItems]);
 
   function handleDragEnd(event: DragEndEvent) {
     if (!event.over) {
@@ -379,6 +547,15 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
     if (currentDate === target.date && currentTime === target.time) {
       return;
     }
+    setOptimisticMoves((previous) => ({
+      ...previous,
+      [source.reservationId]: {
+        reservationId: source.reservationId,
+        toDate: target.date,
+        toTime: target.time,
+        status: "pending",
+      },
+    }));
     router.push(
       `${agendaPath}/reagendar/${source.reservationId}?date=${target.date}&time=${target.time}&fromDragDrop=true`,
     );
@@ -413,7 +590,14 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
         </div>
       </div>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext
+        onDragStart={() => setIsDraggingReservation(true)}
+        onDragCancel={() => setIsDraggingReservation(false)}
+        onDragEnd={(event) => {
+          handleDragEnd(event);
+          setIsDraggingReservation(false);
+        }}
+      >
         <div className="w-full max-w-full overflow-x-auto rounded-xl border">
           <div
             className="grid w-max"
@@ -449,6 +633,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                       liveMarkerOffsetPercent={
                         liveMarker && liveMarker.dayKey === dayKey && liveMarker.slot === slot ? liveMarker.offsetPercent : null
                       }
+                      isDraggingReservation={isDraggingReservation}
                     />
                   );
                 })}
