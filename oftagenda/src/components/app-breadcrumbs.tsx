@@ -59,7 +59,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   embed: "Embed",
 };
 
-const HIDDEN_PREFIXES = ["/api"];
+const HIDDEN_PREFIXES = ["/api", "/dashboard/admin"];
 
 function looksLikeIdentifier(segment: string): boolean {
   return (
