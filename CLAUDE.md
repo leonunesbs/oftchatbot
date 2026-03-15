@@ -190,6 +190,7 @@ Conventional commits enforced via commitlint + husky (`@commitlint/config-conven
 - Before any push in `oftagenda`, run `pnpm build` and only push if it succeeds.
 - Never proceed with commit/push when type-check or build fails.
 - If a CI/Vercel failure appears, reproduce locally first (`pnpm type-check` and `pnpm build`) before creating new commits.
+- Keep Husky checks mandatory (non-optional): pre-commit must run `lint-staged` + `pnpm type-check`, and pre-push must run `pnpm build`.
 
 ## Linting / formatting
 

@@ -1,15 +1,4 @@
-# To enable Husky pre-push, run:
-# echo 'HUSKY_ENABLED=true' > .husky/_/pre-push.options
+set -e
 
-APP_PRE_PUSH_OPTIONS="$(dirname "$0")/_/pre-push.options"
-
-# Only source the options file if it exists
-if [ -f "$APP_PRE_PUSH_OPTIONS" ]; then
-  source "$APP_PRE_PUSH_OPTIONS"
-fi
-
-if [ -n "${HUSKY_ENABLED}" ] && [ "${HUSKY_ENABLED}" == "true" ]; then
-  echo "[husky] [pre-push] [HUSKY_ENABLED]"
-  echo "[husky] [pre-push] Running build"
-  pnpm build
-fi
+echo "[husky] [pre-push] Running build"
+pnpm build

@@ -10,3 +10,4 @@ alwaysApply: true
 - Before any commit for `oftagenda`, run `pnpm type-check` and block commit if it fails.
 - Before any push for `oftagenda`, run `pnpm build` and block push if it fails.
 - Prefer reproducing CI/Vercel failures locally with `pnpm type-check` and `pnpm build` before proposing commit/push.
+- Keep Husky pre-commit and pre-push checks mandatory (without optional enable flags) to enforce local validation.
