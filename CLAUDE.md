@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prefer clear, natural wording and avoid awkward literal translations.
 - For oftleonardo references, use "Dr Leonardo" or "Leonardo Nunes". Avoid "Dr Leonardo Nunes".
 
-After completing any task, always ask: **"Quer fazer commit e push?"**
+After completing any task, ask: **"Quer fazer commit e push?"** only when commit/push has not already been executed in the current request. If commit and push were already completed, confirm success and do not repeat the question.
 
 ## Design decisions
 
