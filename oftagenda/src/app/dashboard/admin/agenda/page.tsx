@@ -24,7 +24,7 @@ export default async function AdminAgendaPage() {
       notes: reservation.notes ?? "",
       patientName: user?.name ?? "Paciente sem nome",
       patientEmail: user?.email ?? "",
-      patientPhone: user?.phone ?? "",
+      patientPhone: user?.whatsapp ?? user?.phone ?? "",
       patientBirthDate: user?.birthDate ?? "",
     };
   });

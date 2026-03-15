@@ -239,13 +239,6 @@ function ReservationActionContent({
         : mode === "cancelar"
           ? "Confirme o cancelamento com notificação por e-mail."
           : "Acesse os canais de comunicação da pessoa paciente.";
-  const operationalTags = [
-    reservation.eventKind,
-    reservationStatusLabel[reservation.status],
-    formatLocationLabel(reservation.location),
-    reservation.patientEmail ? "Com e-mail" : "Sem e-mail",
-    reservation.patientPhone ? "Com telefone" : "Sem telefone",
-  ];
   const reminder24hBody = `Olá${reservation.patientName ? `, ${reservation.patientName}` : ""}!
 
 Este é um lembrete da sua consulta de ${reservation.eventTypeTitle}.
@@ -307,14 +300,6 @@ Equipe de atendimento`;
             {reservationStatusLabel[reservation.status]}
           </Badge>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {operationalTags.map((tag) => (
-          <Badge key={tag} variant="outline">
-            {tag}
-          </Badge>
-        ))}
       </div>
 
       <div>
@@ -418,11 +403,6 @@ Equipe de atendimento`;
           <input type="hidden" name="notifyName" value={reservation.patientName ?? ""} />
           <input type="hidden" name="eventTypeTitle" value={reservation.eventTypeTitle} />
           <input name="date" type="hidden" value={toDateInput(rescheduleDate.getTime())} />
-          {fromDragDrop ? (
-            <p className="rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs text-muted-foreground">
-              Novo horário selecionado via arrastar e soltar. Revise os dados e confirme para concluir o reagendamento.
-            </p>
-          ) : null}
           <div className="grid gap-1">
             <p className="text-xs font-medium text-muted-foreground">Data</p>
             <Popover>

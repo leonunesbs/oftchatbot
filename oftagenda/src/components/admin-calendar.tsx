@@ -231,9 +231,9 @@ function DraggableReservationCard({ item, agendaPath }: { item: CalendarItem; ag
         <span className={`mr-1 inline-block rounded px-1 py-0.5 align-middle ${KIND_CLASS[item.kind]}`}>{item.kind}</span>
         <span className="align-middle">{reservationStatusLabel[item.status]}</span>
       </p>
-      <p className="truncate text-[10px] font-medium">Paciente: {item.patientName || "Sem nome"}</p>
-      <p className="truncate text-[10px]">Telefone: {formatPhoneLabel(item.patientPhone)}</p>
-      <p className="truncate text-[10px]">Nascimento: {formatBirthDateLabel(item.patientBirthDate)}</p>
+      <p className="truncate text-[10px] font-medium">{item.patientName || "Sem nome"}</p>
+      <p className="truncate text-[10px]">{formatPhoneLabel(item.patientPhone)}</p>
+      <p className="truncate text-[10px]">{formatBirthDateLabel(item.patientBirthDate)}</p>
     </div>
   );
 }
