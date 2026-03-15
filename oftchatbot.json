@@ -183,14 +183,14 @@
     },
     {
       "parameters": {
-        "toolDescription": "Consulta disponibilidade por local. Retorna datas em options.dates e horários em options.dates[].times.",
+        "toolDescription": "Consulta disponibilidade por evento selecionado. Identifique primeiro pelo nome do evento e, quando necessário, pelo endereço. Use o slug (locations[].value) apenas como resolução técnica final.",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/availability",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "location",
-              "value": "={{ $fromAI('location', 'Slug do local para verificar disponibilidade (use exatamente o value retornado em locations[])') }}"
+              "value": "={{ (() => {\n  const normalize = (value) => String(value ?? '')\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9| ]+/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  const identifier = String(\n    $fromAI(\n      'eventIdentifier',\n      'Identificador do evento escolhido: nome do evento e, quando necessário, endereço (ex.: Consulta Oftalmológica | Av. Santos Dumont 3131)'\n    )\n  ).trim();\n\n  const fallbackSlug = String(\n    $fromAI('location', 'Slug de fallback (locations[].value), apenas se não conseguir resolver pelo identificador do evento')\n  ).trim();\n\n  let locations = [];\n  try {\n    locations = $('Get Locations Tool').item.json?.locations ?? [];\n  } catch {\n    locations = [];\n  }\n\n  if (!identifier || !Array.isArray(locations) || locations.length === 0) {\n    return fallbackSlug;\n  }\n\n  const normalizedIdentifier = normalize(identifier);\n  const parts = normalizedIdentifier.split('|').map((part) => part.trim()).filter(Boolean);\n\n  const match = locations.find((loc) => {\n    const label = normalize(loc?.label);\n    const address = normalize(loc?.address);\n\n    if (parts.length >= 2) {\n      const eventName = parts[0];\n      const eventAddress = parts.slice(1).join('|');\n      return label.includes(eventName) && address.includes(eventAddress);\n    }\n\n    const combined = `${label} ${address}`.trim();\n    return label === normalizedIdentifier || combined.includes(normalizedIdentifier);\n  });\n\n  return String(match?.value ?? fallbackSlug);\n})() }}"
             },
             {
               "name": "daysAhead",
@@ -254,12 +254,12 @@
     },
     {
       "parameters": {
-        "toolDescription": "Gera link de resumo com location, date e time. Use valores exatos retornados pelas ferramentas e envie apenas se ok=true e summaryUrl existir.",
+        "toolDescription": "Gera link de resumo com location, date e time. Resolva o location pelo identificador do evento (nome + endereço quando necessário) e use valores exatos retornados pelas ferramentas. Envie apenas se ok=true e summaryUrl existir.",
         "method": "POST",
         "url": "https://agenda.oftleonardo.com.br/api/integrations/n8n/resumo-link",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ ({\n  location: $fromAI('location', 'Slug do local (exato de locations[].value)'),\n  date: $fromAI('date', 'Data em YYYY-MM-DD (exata de options.dates[].isoDate)'),\n  time: $fromAI('time', 'Horário HH:mm (exato de options.dates[].times[])'),\n  phone: $('Add Current DateTime').item.json.patientPhoneDigits || $('WhatsApp Trigger').item.json.messages[0].from,\n  source: 'whatsapp-n8n',\n  utmSource: 'whatsapp',\n  utmMedium: 'chatbot',\n  utmCampaign: 'agendamento_n8n',\n  utmContent: 'lux_assistente'\n}) }}",
+        "jsonBody": "={{ (() => {\n  const normalize = (value) => String(value ?? '')\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9| ]+/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  const identifier = String(\n    $fromAI(\n      'eventIdentifier',\n      'Identificador do evento escolhido: nome do evento e, quando necessário, endereço (ex.: Consulta Oftalmológica | Av. Santos Dumont 3131)'\n    )\n  ).trim();\n\n  const fallbackSlug = String(\n    $fromAI('location', 'Slug de fallback (locations[].value), apenas se não conseguir resolver pelo identificador do evento')\n  ).trim();\n\n  let locations = [];\n  try {\n    locations = $('Get Locations Tool').item.json?.locations ?? [];\n  } catch {\n    locations = [];\n  }\n\n  const resolveLocationSlug = () => {\n    if (!identifier || !Array.isArray(locations) || locations.length === 0) {\n      return fallbackSlug;\n    }\n\n    const normalizedIdentifier = normalize(identifier);\n    const parts = normalizedIdentifier.split('|').map((part) => part.trim()).filter(Boolean);\n\n    const match = locations.find((loc) => {\n      const label = normalize(loc?.label);\n      const address = normalize(loc?.address);\n\n      if (parts.length >= 2) {\n        const eventName = parts[0];\n        const eventAddress = parts.slice(1).join('|');\n        return label.includes(eventName) && address.includes(eventAddress);\n      }\n\n      const combined = `${label} ${address}`.trim();\n      return label === normalizedIdentifier || combined.includes(normalizedIdentifier);\n    });\n\n    return String(match?.value ?? fallbackSlug);\n  };\n\n  return {\n    location: resolveLocationSlug(),\n    date: $fromAI('date', 'Data em YYYY-MM-DD (exata de options.dates[].isoDate)'),\n    time: $fromAI('time', 'Horário HH:mm (exato de options.dates[].times[])'),\n    phone: $('Add Current DateTime').item.json.patientPhoneDigits || $('WhatsApp Trigger').item.json.messages[0].from,\n    source: 'whatsapp-n8n',\n    utmSource: 'whatsapp',\n    utmMedium: 'chatbot',\n    utmCampaign: 'agendamento_n8n',\n    utmContent: 'lux_assistente'\n  };\n})() }}",
         "options": {}
       },
       "id": "43287483-628d-480e-90c8-2f7eb570ebb8",

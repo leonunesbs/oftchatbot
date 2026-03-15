@@ -11,6 +11,8 @@ const appointmentStatusValidator = v.union(
   v.literal("completed"),
 );
 
+const DISPLAY_TIMEZONE = "America/Fortaleza";
+
 export const getAppointmentsByPhone = query({
   args: {
     phone: v.string(),
@@ -444,6 +446,7 @@ function mapAppointmentForResponse(
   const reservation = appointment.reservationId
     ? reservationById.get(String(appointment.reservationId))
     : null;
+  const scheduledForDisplay = formatTimestampForDisplay(appointment.scheduledFor);
   return {
     appointmentId: String(appointment._id) as Id<"appointments">,
     clerkUserId: appointment.clerkUserId,
@@ -454,6 +457,9 @@ function mapAppointmentForResponse(
     status: appointment.status,
     requestedAt: appointment.requestedAt,
     scheduledFor: appointment.scheduledFor ?? null,
+    scheduledForDateBr: scheduledForDisplay.dateBr,
+    scheduledForTime: scheduledForDisplay.time,
+    scheduledForDateTimeBr: scheduledForDisplay.dateTimeBr,
     consultationType: appointment.consultationType ?? null,
     reservationId: appointment.reservationId ? String(appointment.reservationId) : null,
     reservationStatus: reservation?.status ?? null,
@@ -465,6 +471,7 @@ function mapReservationForResponse(
   eventTypeById: Map<string, Doc<"event_types">>,
 ) {
   const eventType = eventTypeById.get(String(reservation.eventTypeId));
+  const startsAtDisplay = formatTimestampForDisplay(reservation.startsAt);
   return {
     reservationId: String(reservation._id) as Id<"reservations">,
     clerkUserId: reservation.clerkUserId,
@@ -473,11 +480,42 @@ function mapReservationForResponse(
     eventTypeTitle: eventType?.name ?? eventType?.title ?? "Consulta oftalmológica",
     location: eventType?.location ?? "fortaleza",
     startsAt: reservation.startsAt,
+    startsAtDateBr: startsAtDisplay.dateBr,
+    startsAtTime: startsAtDisplay.time,
+    startsAtDateTimeBr: startsAtDisplay.dateTimeBr,
     endsAt: reservation.endsAt,
     status: reservation.status,
     notes: reservation.notes ?? null,
     createdAt: reservation.createdAt,
     updatedAt: reservation.updatedAt,
+  };
+}
+
+function formatTimestampForDisplay(timestamp?: number | null) {
+  if (typeof timestamp !== "number" || !Number.isFinite(timestamp)) {
+    return {
+      dateBr: null,
+      time: null,
+      dateTimeBr: null,
+    };
+  }
+  const date = new Date(timestamp);
+  const dateBr = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: DISPLAY_TIMEZONE,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+  const time = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: DISPLAY_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+  return {
+    dateBr,
+    time,
+    dateTimeBr: `${dateBr} ${time}`,
   };
 }
 
