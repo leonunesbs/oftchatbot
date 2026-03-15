@@ -1,6 +1,7 @@
 export const reservationStatuses = [
   "pending",
   "awaiting_patient",
+  "awaiting_reschedule",
   "confirmed",
   "in_care",
   "surgery_planned",
@@ -19,6 +20,7 @@ export type ReservationStatusFilter = (typeof reservationStatusFilterOptions)[nu
 export const reservationStatusLabel: Record<ReservationStatus, string> = {
   pending: "Pendente",
   awaiting_patient: "Aguardando paciente",
+  awaiting_reschedule: "Aguardando reagendamento",
   confirmed: "Confirmado",
   in_care: "Em atendimento",
   surgery_planned: "Cirurgia planejada",
@@ -34,6 +36,7 @@ export const reservationStatusBadgeVariant: Record<
 > = {
   pending: "secondary",
   awaiting_patient: "secondary",
+  awaiting_reschedule: "secondary",
   confirmed: "default",
   in_care: "default",
   surgery_planned: "outline",

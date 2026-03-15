@@ -352,6 +352,41 @@ export function DetailsForm() {
           <p className="text-sm text-muted-foreground">
             A decisão final sobre dilatação é sempre do médico no consultório.
           </p>
+          <div className="space-y-2 rounded-lg border border-border/70 bg-muted/20 p-3">
+            <p className="text-sm font-medium text-foreground">
+              Como interpretar os sintomas na triagem
+            </p>
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              <li>
+                <strong className="text-foreground">Urgentes:</strong> perda
+                súbita de visão, flashes intensos e aumento repentino de moscas
+                volantes exigem avaliação imediata.
+              </li>
+              <li>
+                <strong className="text-foreground">Não urgentes:</strong>{" "}
+                visão embaçada progressiva, revisão de rotina e atualização de
+                óculos podem ser avaliadas na consulta agendada.
+              </li>
+            </ul>
+          </div>
+          <div className="space-y-2 rounded-lg border border-border/70 bg-muted/20 p-3">
+            <p className="text-sm font-medium text-foreground">
+              Duração esperada dos efeitos da dilatação
+            </p>
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              <li>
+                Visão embaçada para perto e sensibilidade à luz costumam durar
+                de 4 a 6 horas.
+              </li>
+              <li>
+                Em alguns casos, os efeitos podem se estender por até 24 horas.
+              </li>
+              <li>
+                Se possível, programe-se para evitar dirigir após a consulta e
+                leve óculos escuros.
+              </li>
+            </ul>
+          </div>
           {hasAnyTriageInput ? (
             <>
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground">

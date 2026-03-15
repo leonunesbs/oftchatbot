@@ -20,7 +20,9 @@ function resolveEffective(mode: ThemeMode): "light" | "dark" {
 }
 
 function applyTheme(mode: ThemeMode) {
-  document.documentElement.classList.toggle("dark", resolveEffective(mode) === "dark");
+  const root = document.documentElement;
+  root.classList.toggle("dark", resolveEffective(mode) === "dark");
+  root.classList.toggle("light", mode === "light");
 }
 
 function getStoredTheme(): ThemeMode {

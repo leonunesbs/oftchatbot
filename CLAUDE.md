@@ -184,6 +184,13 @@ Optional: `CALCOM_API_BASE_URL`, `CALCOM_API_KEY`, `NEXT_PUBLIC_STRIPE_PUBLIC_KE
 
 Conventional commits enforced via commitlint + husky (`@commitlint/config-conventional`). Pre-commit runs lint-staged (oxlint + oxfmt on JS/TS files).
 
+### Mandatory preflight before commit/push
+
+- Before any commit in `oftagenda`, run `pnpm type-check` and fix all errors.
+- Before any push in `oftagenda`, run `pnpm build` and only push if it succeeds.
+- Never proceed with commit/push when type-check or build fails.
+- If a CI/Vercel failure appears, reproduce locally first (`pnpm type-check` and `pnpm build`) before creating new commits.
+
 ## Linting / formatting
 
 Uses **oxlint** (not ESLint) and **oxfmt** (not Prettier). Config in `oftagenda/.oxlintrc.json` and `.oxfmtrc.json`.

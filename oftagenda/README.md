@@ -122,7 +122,6 @@ Referencias oficiais:
 
 - `STRIPE_SECRET_KEY` (obrigatoria)
 - `STRIPE_WEBHOOK_SECRET` (obrigatoria)
-- `STRIPE_PRICE_ID` (opcional, fallback de preco em alguns cenarios)
 
 ### Habilitacao do Link (test e live)
 

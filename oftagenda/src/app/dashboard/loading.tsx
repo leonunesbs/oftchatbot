@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { RouteLoadingShell } from "@/components/loading/route-loading-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThemedLoadingShell } from "@/components/themed-loading-shell";
 
 export default function DashboardLoading() {
   return (
-    <ThemedLoadingShell>
-      <section className="mx-auto w-full max-w-5xl space-y-6 max-md:-mx-4 max-md:max-w-none max-md:px-4">
+    <RouteLoadingShell size="lg" className="space-y-6">
         <Card
           variant="flat-mobile"
           className="border-border/70 max-md:overflow-visible"
@@ -71,7 +70,6 @@ export default function DashboardLoading() {
             </div>
           </CardContent>
         </Card>
-      </section>
-    </ThemedLoadingShell>
+    </RouteLoadingShell>
   );
 }

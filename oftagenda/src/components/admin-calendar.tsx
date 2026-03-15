@@ -49,6 +49,8 @@ const STATUS_CARD_CLASS: Record<ReservationStatus, string> = {
   pending: "border border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100",
   awaiting_patient:
     "border border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100",
+  awaiting_reschedule:
+    "border border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100",
   confirmed: "border border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100",
   in_care: "border border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100",
   surgery_planned: "border border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200",
@@ -243,7 +245,7 @@ function AgendaSlotCell({
   slot,
   slotItems,
   day,
-  openCreateRoute,
+  openBlockRoute,
   agendaPath,
   liveMarkerOffsetPercent,
   isDraggingReservation,
@@ -252,7 +254,7 @@ function AgendaSlotCell({
   slot: string;
   slotItems: CalendarItem[];
   day: Date;
-  openCreateRoute: (day: Date, slot: string) => void;
+  openBlockRoute: (day: Date, slot: string) => void;
   agendaPath: string;
   liveMarkerOffsetPercent: number | null;
   isDraggingReservation: boolean;
@@ -272,7 +274,7 @@ function AgendaSlotCell({
       tabIndex={isEmptySlot ? 0 : undefined}
       onClick={() => {
         if (isEmptySlot) {
-          openCreateRoute(day, slot);
+          openBlockRoute(day, slot);
         }
       }}
       onKeyDown={(event) => {
@@ -281,7 +283,7 @@ function AgendaSlotCell({
         }
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openCreateRoute(day, slot);
+          openBlockRoute(day, slot);
         }
       }}
     >
@@ -514,9 +516,9 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
     setAnchorDate(next);
   }
 
-  function openCreateRoute(day: Date, slot: string) {
+  function openBlockRoute(day: Date, slot: string) {
     const date = toDateInput(day);
-    router.push(`${agendaPath}/novo-agendamento?date=${date}&time=${slot}`);
+    router.push(`${agendaPath}/bloquear-horario?date=${date}&time=${slot}`);
   }
 
   const nextOperations = useMemo(
@@ -628,7 +630,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                       slot={slot}
                       slotItems={slotItems}
                       day={day}
-                      openCreateRoute={openCreateRoute}
+                      openBlockRoute={openBlockRoute}
                       agendaPath={agendaPath}
                       liveMarkerOffsetPercent={
                         liveMarker && liveMarker.dayKey === dayKey && liveMarker.slot === slot ? liveMarker.offsetPercent : null

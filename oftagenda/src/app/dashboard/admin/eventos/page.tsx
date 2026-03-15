@@ -4,7 +4,6 @@ import {
   deleteEventTypeAction,
   deleteReservationAction,
   setEventTypeActiveAction,
-  updateEventTypeAction,
   updateReservationAction,
 } from "@/app/dashboard/admin/actions";
 import {
@@ -16,7 +15,6 @@ import {
   getAdminSnapshot,
   getAvailabilityById,
   selectClassName,
-  weekdayLabels,
 } from "@/app/dashboard/admin/_lib/admin-dashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -126,10 +124,6 @@ export default async function AdminEventsPage({
                 <Label htmlFor="event-duration">Duração (min)</Label>
                 <Input id="event-duration" name="durationMinutes" type="number" min={5} defaultValue={30} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="event-stripe-price-id">Stripe Price ID</Label>
-                <Input id="event-stripe-price-id" name="stripePriceId" placeholder="price_..." />
-              </div>
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="event-kind">Tipo</Label>
@@ -227,113 +221,17 @@ export default async function AdminEventsPage({
                     <TableCell>{eventReservations.length}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              Editar
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
-                            <DialogHeader>
-                              <DialogTitle>Editar evento</DialogTitle>
-                              <DialogDescription>
-                                Atualize dados do evento, vínculo de disponibilidade e status.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <ActionToastForm
-                              action={updateEventTypeAction}
-                              className="grid gap-2 rounded-md border p-2"
-                              successMessage="Evento atualizado com sucesso."
-                              errorMessage="Não foi possível atualizar o evento."
-                            >
-                              <input type="hidden" name="eventTypeId" value={eventType._id} />
-                              <div className="grid grid-cols-2 gap-2">
-                                <Input name="slug" defaultValue={eventType.slug} required />
-                                <Input name="name" defaultValue={eventType.name ?? eventType.title} required />
-                              </div>
-                              <Input name="address" defaultValue={eventType.address ?? ""} required />
-                              <Textarea
-                                name="notes"
-                                defaultValue={eventType.notes ?? eventType.description ?? ""}
-                                placeholder="Descrição opcional"
-                              />
-                              <div className="grid grid-cols-4 gap-2">
-                                <Input name="durationMinutes" type="number" min={5} defaultValue={eventType.durationMinutes} />
-                                <Input
-                                  name="priceReais"
-                                  type="number"
-                                  min={0}
-                                  step="0.01"
-                                  defaultValue={((eventType.priceCents ?? 0) / 100).toFixed(2)}
-                                />
-                                <Input
-                                  name="stripePriceId"
-                                  placeholder="price_..."
-                                  defaultValue={eventType.stripePriceId ?? ""}
-                                />
-                                <input type="hidden" name="location" value={eventType.location} />
-                                <select name="kind" className={selectClassName} defaultValue={eventType.kind ?? "consulta"}>
-                                  <option value="consulta">consulta</option>
-                                  <option value="procedimento">procedimento</option>
-                                  <option value="exame">exame</option>
-                                </select>
-                                <select name="paymentMode" className={selectClassName} defaultValue={eventType.paymentMode ?? "booking_fee"}>
-                                  <option value="booking_fee">Taxa de reserva</option>
-                                  <option value="full_payment">Reserva completa</option>
-                                  <option value="in_person">Pagamento presencial</option>
-                                </select>
-                                <select
-                                  name="availabilityId"
-                                  className={selectClassName}
-                                  defaultValue={
-                                    eventType.availabilityId
-                                      ? availabilityGroups.find((group) =>
-                                          group.slots.some((slot) => String(slot._id) === String(eventType.availabilityId)),
-                                        )?.representativeId ?? String(eventType.availabilityId)
-                                      : ""
-                                  }
-                                  required
-                                  disabled={availabilityGroups.length === 0}
-                                >
-                                  {availabilityGroups.length === 0 ? (
-                                    <option value="">Sem disponibilidade cadastrada</option>
-                                  ) : null}
-                                  {availabilityGroups.map((group) => (
-                                    <option
-                                      key={`event-update-availability-${eventType._id}-${group.representativeId}`}
-                                      value={group.representativeId}
-                                    >
-                                      {group.name} ({group.slots.length} faixa(s))
-                                    </option>
-                                  ))}
-                                </select>
-                                <select name="active" className={selectClassName} defaultValue={String(eventType.active)}>
-                                  <option value="true">Ativo</option>
-                                  <option value="false">Inativo</option>
-                                </select>
-                              </div>
-                              <Button variant="secondary" size="sm" type="submit">
-                                Salvar alterações
-                              </Button>
-                            </ActionToastForm>
-
-                            <div className="rounded-md border border-dashed p-2">
-                              <p className="text-xs font-medium">Disponibilidade vinculada ao evento</p>
-                              {linkedAvailabilityGroup ? (
-                                <div className="mt-2 space-y-1">
-                                  <p className="text-xs font-medium">{linkedAvailabilityGroup.name}</p>
-                                  {linkedAvailabilityGroup.slots.map((slot) => (
-                                    <p key={`event-linked-slot-${eventType._id}-${slot._id}`} className="text-xs text-muted-foreground">
-                                      {weekdayLabels[slot.weekday]} - {slot.startTime} as {slot.endTime} ({slot.timezone})
-                                    </p>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="mt-2 text-xs text-muted-foreground">Este evento está sem disponibilidade vinculada.</p>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button size="sm" variant="outline" asChild>
+                          <Link
+                            href={
+                              selectedKind === "all"
+                                ? `/dashboard/admin/eventos/editar/${eventType._id}`
+                                : `/dashboard/admin/eventos/editar/${eventType._id}?kind=${selectedKind}`
+                            }
+                          >
+                            Editar
+                          </Link>
+                        </Button>
 
                         <Dialog>
                           <DialogTrigger asChild>

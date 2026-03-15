@@ -56,6 +56,24 @@ const loggedOutHeaderState: SessionState = {
 };
 
 const THEME_COOKIE_NAME = "oftagenda-theme";
+const THEME_INIT_SCRIPT = `
+(() => {
+  try {
+    const root = document.documentElement;
+    const cookieMatch = document.cookie.match(/(?:^|; )oftagenda-theme=([^;]*)/);
+    const cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+    const storageTheme = window.localStorage.getItem("oftagenda-theme");
+    const rawTheme = cookieTheme ?? storageTheme;
+    const mode =
+      rawTheme === "light" || rawTheme === "dark" || rawTheme === "system"
+        ? rawTheme
+        : "system";
+    const isDark = mode === "dark" || (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.classList.toggle("dark", isDark);
+    root.classList.toggle("light", mode === "light");
+  } catch {}
+})();
+`;
 
 async function getHeaderSessionState(clerkEnabled: boolean): Promise<SessionState> {
   if (!clerkEnabled) {
@@ -154,7 +172,8 @@ export default async function RootLayout({
   const sessionState = await getHeaderSessionState(clerkEnabled);
   const cookieStore = await cookies();
   const persistedTheme = cookieStore.get(THEME_COOKIE_NAME)?.value;
-  const initialThemeClass = persistedTheme === "dark" ? "dark" : undefined;
+  const initialThemeClass =
+    persistedTheme === "dark" || persistedTheme === "light" ? persistedTheme : undefined;
   const legalFooter = (
     <footer data-app-legal-footer className="mx-auto w-full max-w-5xl px-4 pb-8 pt-2 text-xs text-muted-foreground md:px-6">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/70 pt-4">
@@ -170,7 +189,10 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="pt-BR" className={cn("font-sans", notoSans.variable, initialThemeClass)}>
+    <html lang="pt-BR" suppressHydrationWarning className={cn("font-sans", notoSans.variable, initialThemeClass)}>
+      <head>
+        <script id="theme-init-script" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <script
           id="gtm-consent-bootstrap"

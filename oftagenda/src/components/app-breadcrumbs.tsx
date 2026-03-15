@@ -97,20 +97,23 @@ function getSegmentLabel(segment: string): string {
 function collapseCrumbs(crumbs: Crumb[], maxItems: number): DisplayItem[] {
   if (crumbs.length <= maxItems) {
     return crumbs.map((crumb) => ({
-      type: "crumb",
+      type: "crumb" as const,
       value: crumb,
     }));
   }
 
-  const head = crumbs[0];
+  const [head] = crumbs;
+  if (!head) {
+    return [];
+  }
   const tailCount = Math.max(maxItems - 2, 1);
   const tail = crumbs.slice(-tailCount);
 
   return [
-    { type: "crumb", value: head },
+    { type: "crumb" as const, value: head },
     { type: "ellipsis", key: "ellipsis" },
     ...tail.map((crumb) => ({
-      type: "crumb",
+      type: "crumb" as const,
       value: crumb,
     })),
   ];

@@ -68,6 +68,7 @@ export default async function AdminReservationsPage({
     total: reservations.length,
     pending: reservations.filter((reservation) => reservation.status === "pending").length,
     awaitingPatient: reservations.filter((reservation) => reservation.status === "awaiting_patient").length,
+    awaitingReschedule: reservations.filter((reservation) => reservation.status === "awaiting_reschedule").length,
     confirmed: reservations.filter((reservation) => reservation.status === "confirmed").length,
     inCare: reservations.filter((reservation) => reservation.status === "in_care").length,
     surgeryPlanned: reservations.filter((reservation) => reservation.status === "surgery_planned").length,

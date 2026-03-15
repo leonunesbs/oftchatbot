@@ -438,6 +438,7 @@ Equipe de atendimento`;
           >
             <option value="pending">Pendente</option>
             <option value="awaiting_patient">Aguardando paciente</option>
+            <option value="awaiting_reschedule">Aguardando reagendamento</option>
             <option value="confirmed">Confirmado</option>
             <option value="in_care">Em atendimento</option>
             <option value="surgery_planned">Cirurgia planejada</option>
@@ -489,6 +490,7 @@ Equipe de atendimento`;
           >
             <option value="pending">Pendente</option>
             <option value="awaiting_patient">Aguardando paciente</option>
+            <option value="awaiting_reschedule">Aguardando reagendamento</option>
             <option value="confirmed">Confirmado</option>
             <option value="in_care">Em atendimento</option>
             <option value="surgery_planned">Cirurgia planejada</option>

@@ -24,6 +24,7 @@ import type {
 type ReschedulePolicy = {
   canReschedule: boolean;
   canCancel: boolean;
+  isClinicInitiatedReschedule: boolean;
   cancelReason: string | null;
   requiresHumanSupport: boolean;
   reason: string | null;
@@ -69,9 +70,13 @@ export function RescheduleAppointmentCard({
   const canSubmit = Boolean(policy.canReschedule && location && selectedDate && selectedTime);
 
   const policyText = useMemo(
-    () =>
-      `1 remarcação sem custo, até ${policy.maxDaysAhead} dias e com mínimo de ${policy.minNoticeHours}h de antecedência. Cancelamentos também podem ser feitos até ${policy.minNoticeHours}h antes.`,
-    [policy.maxDaysAhead, policy.minNoticeHours],
+    () => {
+      if (policy.isClinicInitiatedReschedule) {
+        return "Seu horário original ficou indisponível. Você pode reagendar ou cancelar sem custo.";
+      }
+      return `1 remarcação sem custo, até ${policy.maxDaysAhead} dias e com mínimo de ${policy.minNoticeHours}h de antecedência. Cancelamentos também podem ser feitos até ${policy.minNoticeHours}h antes.`;
+    },
+    [policy.isClinicInitiatedReschedule, policy.maxDaysAhead, policy.minNoticeHours],
   );
 
   function handleLocationChange(nextLocation: string) {
@@ -172,8 +177,9 @@ export function RescheduleAppointmentCard({
         abatimento.
       </p>
       <p className="text-xs text-muted-foreground">
-        Cancelamentos com mais de 24h de antecedência têm reembolso integral da
-        taxa de reserva.
+        {policy.isClinicInitiatedReschedule
+          ? "Neste cenário, o cancelamento é sem custo e com reembolso integral da taxa de reserva."
+          : "Cancelamentos com mais de 24h de antecedência têm reembolso integral da taxa de reserva."}
       </p>
       <p className="text-xs text-muted-foreground">
         Em caso de não comparecimento, a taxa de reserva é retida, o agendamento
@@ -309,8 +315,9 @@ export function RescheduleAppointmentCard({
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar cancelamento?</AlertDialogTitle>
               <AlertDialogDescription>
-                Você poderá cancelar somente com antecedência mínima de 24h.
-                Após o cancelamento, será necessário iniciar uma nova reserva.
+                {policy.isClinicInitiatedReschedule
+                  ? "Seu horário original ficou indisponível. Este cancelamento será realizado sem custo."
+                  : "Você poderá cancelar somente com antecedência mínima de 24h. Após o cancelamento, será necessário iniciar uma nova reserva."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

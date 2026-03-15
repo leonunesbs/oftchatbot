@@ -1,25 +1,10 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ThemedLoadingShell } from "@/components/themed-loading-shell";
+import { BookingFormFallback } from "@/components/booking-form-fallback";
+import { RouteLoadingShell } from "@/components/loading/route-loading-shell";
 
 export default function EmbedAgendarLoading() {
   return (
-    <ThemedLoadingShell>
-      <section className="mx-auto w-full max-w-3xl px-0 py-2">
-        <Card className="border-border/70">
-          <CardHeader className="space-y-3">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-4 w-full max-w-xl" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 rounded-md" />
-            <Skeleton className="h-10 rounded-md" />
-            <Skeleton className="h-10 rounded-md" />
-            <Skeleton className="h-56 rounded-2xl" />
-            <Skeleton className="h-10 w-44 rounded-md" />
-          </CardContent>
-        </Card>
-      </section>
-    </ThemedLoadingShell>
+    <RouteLoadingShell size="md" className="px-0 py-2">
+      <BookingFormFallback embedMode />
+    </RouteLoadingShell>
   );
 }

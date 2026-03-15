@@ -76,6 +76,7 @@ const availabilityOverrideSlotValidator = v.object({
 const reservationStatusValidator = v.union(
   v.literal("pending"),
   v.literal("awaiting_patient"),
+  v.literal("awaiting_reschedule"),
   v.literal("confirmed"),
   v.literal("in_care"),
   v.literal("surgery_planned"),
@@ -124,7 +125,6 @@ export default defineSchema({
     kind: v.optional(adminEventKindValidator),
     durationMinutes: v.number(),
     priceCents: v.optional(v.number()),
-    stripePriceId: v.optional(v.string()),
     paymentMode: v.optional(paymentModeValidator),
     location: locationValidator,
     availabilityId: v.optional(v.id("availabilities")),

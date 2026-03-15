@@ -11,4 +11,6 @@ fi
 if [ -n "${HUSKY_ENABLED}" ] && [ "${HUSKY_ENABLED}" == "true" ]; then
   echo "[husky] [pre-commit] [HUSKY_ENABLED]"
   pnpm lint-staged
+  echo "[husky] [pre-commit] Running type-check"
+  pnpm type-check
 fi

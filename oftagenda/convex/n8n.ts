@@ -80,6 +80,7 @@ export const getAppointmentsByPhone = query({
       const hasActiveStatus =
         reservation.status === "pending" ||
         reservation.status === "awaiting_patient" ||
+        reservation.status === "awaiting_reschedule" ||
         reservation.status === "confirmed" ||
         reservation.status === "in_care" ||
         reservation.status === "surgery_planned" ||
@@ -95,6 +96,7 @@ export const getAppointmentsByPhone = query({
         (item) =>
           (item.status === "pending" ||
             item.status === "awaiting_patient" ||
+            item.status === "awaiting_reschedule" ||
             item.status === "confirmed" ||
             item.status === "in_care" ||
             item.status === "surgery_planned" ||
@@ -157,7 +159,12 @@ export const cancelAppointmentByPhone = mutation({
 
       if (appointment.reservationId) {
         const reservation = await ctx.db.get(appointment.reservationId);
-        if (reservation && (reservation.status === "pending" || reservation.status === "confirmed")) {
+        if (
+          reservation &&
+          (reservation.status === "pending" ||
+            reservation.status === "awaiting_reschedule" ||
+            reservation.status === "confirmed")
+        ) {
           await ctx.db.patch(reservation._id, {
             status: "cancelled",
             notes: "Cancelado via integração n8n.",

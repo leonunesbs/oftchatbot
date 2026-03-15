@@ -18,6 +18,7 @@ const availabilityStatusValidator = v.union(
 const reservationStatusValidator = v.union(
   v.literal("pending"),
   v.literal("awaiting_patient"),
+  v.literal("awaiting_reschedule"),
   v.literal("confirmed"),
   v.literal("in_care"),
   v.literal("surgery_planned"),
@@ -211,7 +212,10 @@ export const getManagementSnapshot = query({
         activeAvailabilities: availabilities.filter((item) => item.status === "active").length,
         reservations: reservations.length,
         pendingReservations: reservations.filter(
-          (item) => item.status === "pending" || item.status === "awaiting_patient",
+          (item) =>
+            item.status === "pending" ||
+            item.status === "awaiting_patient" ||
+            item.status === "awaiting_reschedule",
         ).length,
         confirmedReservations: reservations.filter((item) => item.status === "confirmed").length,
         appointments: appointments.length,
@@ -286,7 +290,6 @@ export const createEventType = mutation({
     kind: eventKindValidator,
     durationMinutes: v.number(),
     priceCents: v.number(),
-    stripePriceId: v.optional(v.string()),
     paymentMode: v.optional(paymentModeValidator),
     location: locationValidator,
     availabilityId: v.id("availabilities"),
@@ -335,7 +338,6 @@ export const createEventType = mutation({
       kind: args.kind,
       durationMinutes: args.durationMinutes,
       priceCents: normalizedPriceCents,
-      stripePriceId: args.stripePriceId?.trim() || undefined,
       paymentMode: args.paymentMode ?? "booking_fee",
       location: args.location,
       availabilityId: args.availabilityId,
@@ -358,7 +360,6 @@ export const updateEventType = mutation({
     kind: eventKindValidator,
     durationMinutes: v.number(),
     priceCents: v.number(),
-    stripePriceId: v.optional(v.string()),
     paymentMode: v.optional(paymentModeValidator),
     location: locationValidator,
     availabilityId: v.id("availabilities"),
@@ -408,7 +409,6 @@ export const updateEventType = mutation({
       kind: args.kind,
       durationMinutes: args.durationMinutes,
       priceCents: normalizedPriceCents,
-      stripePriceId: args.stripePriceId?.trim() || undefined,
       paymentMode: args.paymentMode ?? "booking_fee",
       location: args.location,
       availabilityId: args.availabilityId,
@@ -518,7 +518,7 @@ export const upsertAvailabilityDaySlots = mutation({
     slots: v.array(availabilityDaySlotInputValidator),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
 
     if (args.weekday < 0 || args.weekday > 6) {
       throw new Error("weekday deve estar entre 0 e 6");
@@ -579,6 +579,50 @@ export const upsertAvailabilityDaySlots = mutation({
     for (const slot of normalizedSlots) {
       if (slot.availabilityId) {
         keepIds.add(slot.availabilityId);
+        const current = existingById.get(slot.availabilityId);
+        if (!current) {
+          throw new Error("Uma das faixas informadas nao pertence a este grupo/dia");
+        }
+
+        const slotChanged =
+          current.weekday !== args.weekday ||
+          current.startTime !== slot.startTime ||
+          current.endTime !== slot.endTime ||
+          current.timezone !== normalizedTimezone ||
+          current.status !== slot.status;
+
+        if (slotChanged) {
+          const linkedReservations = await ctx.db
+            .query("reservations")
+            .withIndex("by_availability_id", (q) => q.eq("availabilityId", slot.availabilityId!))
+            .collect();
+          for (const reservation of linkedReservations) {
+            if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+              continue;
+            }
+            const stillCompatible = isReservationCompatibleWithAvailability({
+              reservation,
+              availability: {
+                weekday: args.weekday,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                timezone: normalizedTimezone,
+                status: slot.status,
+              },
+            });
+            if (stillCompatible) {
+              continue;
+            }
+            await moveReservationToAwaitingReschedule(ctx, {
+              reservationId: reservation._id,
+              now,
+              actorClerkUserId: identity.subject,
+              reason:
+                "Horário original indisponível após atualização da disponibilidade. Paciente com direito a reagendamento ou cancelamento sem custo.",
+            });
+          }
+        }
+
         await ctx.db.patch(slot.availabilityId, {
           name: normalizedGroupName,
           weekday: args.weekday,
@@ -621,9 +665,18 @@ export const upsertAvailabilityDaySlots = mutation({
       ]);
 
       if (reservations.length > 0) {
-        throw new Error(
-          `Nao e possivel remover a faixa ${slot.startTime}-${slot.endTime}: existem reservas vinculadas`,
-        );
+        for (const reservation of reservations) {
+          if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+            continue;
+          }
+          await moveReservationToAwaitingReschedule(ctx, {
+            reservationId: reservation._id,
+            now,
+            actorClerkUserId: identity.subject,
+            reason:
+              "Horário removido da disponibilidade. Paciente com direito a reagendamento ou cancelamento sem custo.",
+          });
+        }
       }
       if (linkedEvents.length > 0) {
         throw new Error(
@@ -666,7 +719,7 @@ export const upsertAvailabilityDateOverrides = mutation({
     slots: v.array(availabilityOverrideSlotInputValidator),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
 
     const normalizedGroupName = args.groupName.trim();
     if (!normalizedGroupName) {
@@ -719,8 +772,46 @@ export const upsertAvailabilityDateOverrides = mutation({
     const existingByDate = new Map(existingOverrides.map((override) => [override.date, override]));
 
     const now = Date.now();
+    const [allAvailabilities, allReservations] = await Promise.all([
+      ctx.db.query("availabilities").collect(),
+      ctx.db.query("reservations").collect(),
+    ]);
+    const availabilityIdsInGroup = new Set(
+      allAvailabilities
+        .filter((availability) => resolveAvailabilityGroupName(availability) === normalizedGroupName)
+        .map((availability) => availability._id),
+    );
+
     const upsertedIds: Id<"availability_overrides">[] = [];
     for (const date of normalizedDates) {
+      const affectedReservations = allReservations.filter((reservation) => {
+        if (!availabilityIdsInGroup.has(reservation.availabilityId)) {
+          return false;
+        }
+        if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+          return false;
+        }
+        return formatDateInTimezone(reservation.startsAt, normalizedTimezone) === date;
+      });
+      for (const reservation of affectedReservations) {
+        const stillCompatible = isReservationCompatibleWithOverrideDate({
+          reservation,
+          timezone: normalizedTimezone,
+          allDayUnavailable: args.allDayUnavailable,
+          slots: normalizedSlots,
+        });
+        if (stillCompatible) {
+          continue;
+        }
+        await moveReservationToAwaitingReschedule(ctx, {
+          reservationId: reservation._id,
+          now,
+          actorClerkUserId: identity.subject,
+          reason:
+            "Horário original indisponível após atualização da disponibilidade por data. Paciente com direito a reagendamento ou cancelamento sem custo.",
+        });
+      }
+
       const current = existingByDate.get(date);
       if (current) {
         await ctx.db.patch(current._id, {
@@ -775,10 +866,29 @@ export const setAvailabilityStatus = mutation({
     status: availabilityStatusValidator,
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
+    const now = Date.now();
+    if (args.status === "inactive") {
+      const linkedReservations = await ctx.db
+        .query("reservations")
+        .withIndex("by_availability_id", (q) => q.eq("availabilityId", args.availabilityId))
+        .collect();
+      for (const reservation of linkedReservations) {
+        if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+          continue;
+        }
+        await moveReservationToAwaitingReschedule(ctx, {
+          reservationId: reservation._id,
+          now,
+          actorClerkUserId: identity.subject,
+          reason:
+            "Disponibilidade inativada. Paciente com direito a reagendamento ou cancelamento sem custo.",
+        });
+      }
+    }
     await ctx.db.patch(args.availabilityId, {
       status: args.status,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
     return { ok: true };
   },
@@ -790,16 +900,36 @@ export const setAvailabilityWeekdayStatus = mutation({
     status: availabilityStatusValidator,
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
 
     const availability = await ctx.db.get(args.availabilityId);
     if (!availability) {
       throw new Error("Disponibilidade nao encontrada");
     }
 
+    const now = Date.now();
+    if (args.status === "inactive") {
+      const linkedReservations = await ctx.db
+        .query("reservations")
+        .withIndex("by_availability_id", (q) => q.eq("availabilityId", args.availabilityId))
+        .collect();
+      for (const reservation of linkedReservations) {
+        if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+          continue;
+        }
+        await moveReservationToAwaitingReschedule(ctx, {
+          reservationId: reservation._id,
+          now,
+          actorClerkUserId: identity.subject,
+          reason:
+            "Disponibilidade inativada no dia da semana. Paciente com direito a reagendamento ou cancelamento sem custo.",
+        });
+      }
+    }
+
     await ctx.db.patch(args.availabilityId, {
       status: args.status,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
 
     return { ok: true };
@@ -817,7 +947,7 @@ export const updateAvailability = mutation({
     status: availabilityStatusValidator,
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
 
     const availability = await ctx.db.get(args.availabilityId);
     if (!availability) {
@@ -832,14 +962,57 @@ export const updateAvailability = mutation({
       throw new Error("Horário inicial deve ser menor que o final");
     }
 
+    const now = Date.now();
+    const nextStartTime = args.startTime.trim();
+    const nextEndTime = args.endTime.trim();
+    const nextTimezone = args.timezone.trim();
+    const slotChanged =
+      availability.weekday !== args.weekday ||
+      availability.startTime !== nextStartTime ||
+      availability.endTime !== nextEndTime ||
+      availability.timezone !== nextTimezone ||
+      availability.status !== args.status;
+
+    if (slotChanged) {
+      const linkedReservations = await ctx.db
+        .query("reservations")
+        .withIndex("by_availability_id", (q) => q.eq("availabilityId", args.availabilityId))
+        .collect();
+      for (const reservation of linkedReservations) {
+        if (!shouldMoveReservationToAwaitingReschedule(reservation, now)) {
+          continue;
+        }
+        const stillCompatible = isReservationCompatibleWithAvailability({
+          reservation,
+          availability: {
+            weekday: args.weekday,
+            startTime: nextStartTime,
+            endTime: nextEndTime,
+            timezone: nextTimezone,
+            status: args.status,
+          },
+        });
+        if (stillCompatible) {
+          continue;
+        }
+        await moveReservationToAwaitingReschedule(ctx, {
+          reservationId: reservation._id,
+          now,
+          actorClerkUserId: identity.subject,
+          reason:
+            "Horário original indisponível após atualização da disponibilidade. Paciente com direito a reagendamento ou cancelamento sem custo.",
+        });
+      }
+    }
+
     await ctx.db.patch(args.availabilityId, {
       name: args.name.trim(),
       weekday: args.weekday,
-      startTime: args.startTime.trim(),
-      endTime: args.endTime.trim(),
-      timezone: args.timezone.trim(),
+      startTime: nextStartTime,
+      endTime: nextEndTime,
+      timezone: nextTimezone,
       status: args.status,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
 
     return { ok: true };
@@ -1337,6 +1510,7 @@ function mapReservationToAppointmentStatus(
   status:
     | "pending"
     | "awaiting_patient"
+    | "awaiting_reschedule"
     | "confirmed"
     | "in_care"
     | "surgery_planned"
@@ -1348,6 +1522,7 @@ function mapReservationToAppointmentStatus(
   if (
     status === "confirmed" ||
     status === "awaiting_patient" ||
+    status === "awaiting_reschedule" ||
     status === "in_care" ||
     status === "surgery_planned" ||
     status === "postop_followup"
@@ -1370,6 +1545,7 @@ function normalizeReservationStatusForSchedule(
   requestedStatus:
     | "pending"
     | "awaiting_patient"
+    | "awaiting_reschedule"
     | "confirmed"
     | "in_care"
     | "surgery_planned"
@@ -1387,6 +1563,119 @@ function normalizeReservationStatusForSchedule(
     return "no_show" as const;
   }
   return requestedStatus;
+}
+
+function shouldMoveReservationToAwaitingReschedule(
+  reservation: {
+    status:
+      | "pending"
+      | "awaiting_patient"
+      | "awaiting_reschedule"
+      | "confirmed"
+      | "in_care"
+      | "surgery_planned"
+      | "postop_followup"
+      | "cancelled"
+      | "completed"
+      | "no_show";
+    startsAt: number;
+  },
+  now: number,
+) {
+  if (reservation.startsAt <= now) {
+    return false;
+  }
+  return (
+    reservation.status === "pending" ||
+    reservation.status === "awaiting_patient" ||
+    reservation.status === "awaiting_reschedule" ||
+    reservation.status === "confirmed"
+  );
+}
+
+function isReservationCompatibleWithAvailability({
+  reservation,
+  availability,
+}: {
+  reservation: { startsAt: number };
+  availability: {
+    weekday: number;
+    startTime: string;
+    endTime: string;
+    timezone: string;
+    status: "active" | "inactive";
+  };
+}) {
+  if (availability.status !== "active") {
+    return false;
+  }
+  if (getWeekdayInTimezone(reservation.startsAt, availability.timezone) !== availability.weekday) {
+    return false;
+  }
+  const reservationTime = formatTimeInTimezone(reservation.startsAt, availability.timezone);
+  return reservationTime >= availability.startTime && reservationTime < availability.endTime;
+}
+
+function isReservationCompatibleWithOverrideDate({
+  reservation,
+  timezone,
+  allDayUnavailable,
+  slots,
+}: {
+  reservation: { startsAt: number };
+  timezone: string;
+  allDayUnavailable: boolean;
+  slots: Array<{ startTime: string; endTime: string; status: "active" | "inactive" }>;
+}) {
+  if (allDayUnavailable) {
+    return false;
+  }
+  const reservationTime = formatTimeInTimezone(reservation.startsAt, timezone);
+  return slots.some(
+    (slot) =>
+      slot.status === "active" &&
+      reservationTime >= slot.startTime &&
+      reservationTime < slot.endTime,
+  );
+}
+
+async function moveReservationToAwaitingReschedule(
+  ctx: MutationCtx,
+  args: {
+    reservationId: Id<"reservations">;
+    now: number;
+    actorClerkUserId: string;
+    reason: string;
+  },
+) {
+  const reservation = await ctx.db.get(args.reservationId);
+  if (!reservation) {
+    return;
+  }
+
+  await ctx.db.patch(reservation._id, {
+    status: "awaiting_reschedule",
+    notes: args.reason,
+    updatedAt: args.now,
+  });
+
+  if (!reservation.appointmentId) {
+    return;
+  }
+
+  await ctx.db.patch(reservation.appointmentId, {
+    status: "confirmed",
+    scheduledFor: undefined,
+    updatedAt: args.now,
+  });
+
+  await ctx.db.insert("appointment_events", {
+    appointmentId: reservation.appointmentId,
+    clerkUserId: args.actorClerkUserId,
+    eventType: "rescheduled",
+    notes: args.reason,
+    createdAt: args.now,
+  });
 }
 
 function parseIsoDateAndTimeToTimestamp(date: string, time: string, timezone: string) {
@@ -1477,6 +1766,32 @@ function formatTimeInTimezone(timestamp: number, timezone: string) {
     minute: "2-digit",
     hour12: false,
   }).format(new Date(timestamp));
+}
+
+function getWeekdayInTimezone(timestamp: number, timezone: string) {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    weekday: "short",
+  }).format(new Date(timestamp));
+  if (weekday === "Sun") {
+    return 0;
+  }
+  if (weekday === "Mon") {
+    return 1;
+  }
+  if (weekday === "Tue") {
+    return 2;
+  }
+  if (weekday === "Wed") {
+    return 3;
+  }
+  if (weekday === "Thu") {
+    return 4;
+  }
+  if (weekday === "Fri") {
+    return 5;
+  }
+  return 6;
 }
 
 function parseTimeToMinutes(value: string) {

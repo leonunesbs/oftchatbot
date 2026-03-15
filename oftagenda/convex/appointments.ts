@@ -61,7 +61,10 @@ export const confirmBooking = mutation({
       status: "confirmed",
       requestedAt: now,
       updatedAt: now,
-      consultationType: "Consulta oftalmologica",
+      consultationType:
+        selectedEventType.name ??
+        selectedEventType.title ??
+        selectedEventType.slug,
     });
 
     await ctx.db.insert("appointment_events", {
@@ -384,19 +387,37 @@ export const getDashboardState = query({
           _id: item._id,
           startsAt: item.startsAt,
           holdExpiresAt: getReservationHoldExpiresAt(item),
-          location: eventType?.location ?? "fortaleza",
-          consultationType: eventType?.name ?? eventType?.title ?? "Consulta oftalmologica",
+          location: eventType?.location ?? "",
+          consultationType: eventType?.name ?? eventType?.title ?? "",
           checkoutLocation: eventType?.slug ?? "",
           checkoutDate: formatDateInTimezone(item.startsAt, timezone),
           checkoutTime: formatTimeInTimezone(item.startsAt, timezone),
         };
       });
 
+    const resolvedNextAppointment = nextAppointment
+      ? {
+          ...nextAppointment,
+          eventName: nextAppointment.eventTypeId
+            ? (eventTypeById.get(String(nextAppointment.eventTypeId))?.name ??
+              eventTypeById.get(String(nextAppointment.eventTypeId))?.title ??
+              null)
+            : null,
+          eventAddress: nextAppointment.eventTypeId
+            ? (eventTypeById.get(String(nextAppointment.eventTypeId))?.address ?? null)
+            : null,
+          paymentMode: nextAppointment.eventTypeId
+            ? (eventTypeById.get(String(nextAppointment.eventTypeId))?.paymentMode ?? null)
+            : null,
+        }
+      : null;
+
     const reschedulePolicy = nextAppointment
       ? await buildReschedulePolicy(ctx, nextAppointment, now)
       : {
           canReschedule: false,
           canCancel: false,
+          isClinicInitiatedReschedule: false,
           cancelReason: "Nenhuma consulta ativa encontrada.",
           requiresHumanSupport: false,
           reason: "Nenhuma consulta ativa encontrada.",
@@ -408,7 +429,7 @@ export const getDashboardState = query({
 
     return {
       hasConfirmedBooking: nextAppointment !== null,
-      nextAppointment,
+      nextAppointment: resolvedNextAppointment,
       reschedulePolicy,
       pendingReservations,
       history: sorted.slice(0, 8).map((item) => ({
@@ -447,8 +468,9 @@ export const rescheduleOwnAppointment = mutation({
     if (!policy.canReschedule) {
       throw new Error(policy.reason ?? "Consulta indisponível para remarcação.");
     }
+    const isClinicInitiatedReschedule = policy.isClinicInitiatedReschedule === true;
     const scheduledFor = appointment.scheduledFor;
-    if (typeof scheduledFor !== "number") {
+    if (typeof scheduledFor !== "number" && !isClinicInitiatedReschedule) {
       throw new Error("Consulta ainda sem horário definido.");
     }
 
@@ -459,7 +481,12 @@ export const rescheduleOwnAppointment = mutation({
     }
 
     const slotTimestamp = parseIsoDateAndTimeToTimestamp(args.date, args.time, availability.timezone);
-    assertRescheduleWindow(slotTimestamp, now, scheduledFor);
+    assertRescheduleWindow(
+      slotTimestamp,
+      now,
+      typeof scheduledFor === "number" ? scheduledFor : null,
+      isClinicInitiatedReschedule,
+    );
     await assertSlotIsAvailable(ctx, eventType, args.date, args.time, identity.subject);
 
     const previousScheduledFor = appointment.scheduledFor ?? null;
@@ -481,10 +508,15 @@ export const rescheduleOwnAppointment = mutation({
 
     if (previousReservationId) {
       const previousReservation = await ctx.db.get(previousReservationId);
-      if (previousReservation && previousReservation.status === "confirmed") {
+      if (
+        previousReservation &&
+        (previousReservation.status === "confirmed" || previousReservation.status === "awaiting_reschedule")
+      ) {
         await ctx.db.patch(previousReservationId, {
           status: "cancelled",
-          notes: "Reserva substituída por remarcação realizada pelo paciente.",
+          notes: isClinicInitiatedReschedule
+            ? "Reserva anterior indisponível e substituída por novo horário escolhido pelo paciente."
+            : "Reserva substituída por remarcação realizada pelo paciente.",
           updatedAt: now,
         });
       }
@@ -497,7 +529,7 @@ export const rescheduleOwnAppointment = mutation({
       preferredPeriod: inferPreferredPeriod(slotTimestamp),
       status: "rescheduled",
       scheduledFor: slotTimestamp,
-      consultationType: eventType.name ?? eventType.title ?? "Consulta oftalmologica",
+      consultationType: eventType.name ?? eventType.title ?? eventType.slug,
       updatedAt: now,
     });
 
@@ -520,7 +552,7 @@ export const rescheduleOwnAppointment = mutation({
       appointmentId: appointment._id,
       scheduledFor: slotTimestamp,
       location: eventType.location,
-      consultationType: eventType.name ?? eventType.title ?? "Consulta oftalmologica",
+      consultationType: eventType.name ?? eventType.title ?? eventType.slug,
     };
   },
 });
@@ -545,28 +577,36 @@ export const cancelOwnAppointment = mutation({
       throw new Error("Nenhuma consulta ativa encontrada para cancelamento.");
     }
 
+    const linkedReservation = appointment.reservationId ? await ctx.db.get(appointment.reservationId) : null;
+    const isClinicInitiatedReschedule = linkedReservation?.status === "awaiting_reschedule";
     const scheduledFor = appointment.scheduledFor;
-    if (typeof scheduledFor !== "number") {
+    if (typeof scheduledFor !== "number" && !isClinicInitiatedReschedule) {
       throw new Error("Esta consulta ainda não possui horário definido para cancelamento automático.");
     }
-    if (scheduledFor - now < RESCHEDULE_MIN_NOTICE_MS) {
+    if (
+      !isClinicInitiatedReschedule &&
+      typeof scheduledFor === "number" &&
+      scheduledFor - now < RESCHEDULE_MIN_NOTICE_MS
+    ) {
       throw new Error("Cancelamento disponível somente com no mínimo 24h de antecedência.");
     }
 
     if (appointment.reservationId) {
-      const linkedReservation = await ctx.db.get(appointment.reservationId);
       if (
         linkedReservation &&
         (linkedReservation.status === "confirmed" ||
           linkedReservation.status === "pending" ||
           linkedReservation.status === "awaiting_patient" ||
+          linkedReservation.status === "awaiting_reschedule" ||
           linkedReservation.status === "in_care" ||
           linkedReservation.status === "surgery_planned" ||
           linkedReservation.status === "postop_followup")
       ) {
         await ctx.db.patch(linkedReservation._id, {
           status: "cancelled",
-          notes: "Reserva cancelada pelo paciente com antecedência mínima de 24h.",
+          notes: isClinicInitiatedReschedule
+            ? "Reserva cancelada sem custo pelo paciente após indisponibilidade do horário original."
+            : "Reserva cancelada pelo paciente com antecedência mínima de 24h.",
           updatedAt: now,
         });
       }
@@ -578,7 +618,9 @@ export const cancelOwnAppointment = mutation({
       if (linkedPayment?.status === "paid") {
         await ctx.db.patch(linkedPayment._id, {
           status: "refunded",
-          notes: "Reembolso integral elegível por cancelamento com mais de 24h de antecedência.",
+          notes: isClinicInitiatedReschedule
+            ? "Reembolso integral por cancelamento sem custo após indisponibilidade do horário original."
+            : "Reembolso integral elegível por cancelamento com mais de 24h de antecedência.",
           updatedAt: now,
         });
       } else if (linkedPayment?.status === "pending") {
@@ -598,8 +640,9 @@ export const cancelOwnAppointment = mutation({
       appointmentId: appointment._id,
       clerkUserId: identity.subject,
       eventType: "cancelled",
-      notes:
-        "Consulta cancelada pelo paciente no painel com antecedência mínima de 24h e elegível a reembolso integral da taxa de reserva.",
+      notes: isClinicInitiatedReschedule
+        ? "Consulta cancelada sem custo no painel após indisponibilidade do horário original."
+        : "Consulta cancelada pelo paciente no painel com antecedência mínima de 24h e elegível a reembolso integral da taxa de reserva.",
       createdAt: now,
     });
 
@@ -713,11 +756,32 @@ async function buildReschedulePolicy(
   appointment: Doc<"appointments">,
   now: number,
 ) {
+  const linkedReservation = appointment.reservationId
+    ? await ctx.db.get(appointment.reservationId)
+    : null;
+  const isClinicInitiatedReschedule = linkedReservation?.status === "awaiting_reschedule";
+
+  if (isClinicInitiatedReschedule) {
+    return {
+      canReschedule: true,
+      canCancel: true,
+      isClinicInitiatedReschedule: true,
+      cancelReason: null,
+      requiresHumanSupport: false,
+      reason: "A clínica ajustou a agenda. Escolha um novo horário ou cancele sem custo.",
+      maxReschedules: RESCHEDULE_MAX_PER_APPOINTMENT,
+      reschedulesUsed: 0,
+      minNoticeHours: 24,
+      maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+    };
+  }
+
   const scheduledFor = appointment.scheduledFor;
   if (typeof scheduledFor !== "number") {
     return {
       canReschedule: false,
       canCancel: false,
+      isClinicInitiatedReschedule: false,
       cancelReason: "Consulta ainda sem horário definido.",
       requiresHumanSupport: false,
       reason: "Consulta ainda sem horário definido.",
@@ -738,6 +802,7 @@ async function buildReschedulePolicy(
     return {
       canReschedule: false,
       canCancel: true,
+      isClinicInitiatedReschedule: false,
       cancelReason: null,
       requiresHumanSupport: false,
       reason: "Você já utilizou o limite de 1 remarcação sem custo.",
@@ -752,6 +817,7 @@ async function buildReschedulePolicy(
     return {
       canReschedule: false,
       canCancel: false,
+      isClinicInitiatedReschedule: false,
       cancelReason: "Cancelamento disponível somente a partir de 24h de antecedência da consulta.",
       requiresHumanSupport: true,
       reason: "Remarcação disponível somente a partir de 24h de antecedência da consulta.",
@@ -765,6 +831,7 @@ async function buildReschedulePolicy(
   return {
     canReschedule: true,
     canCancel: true,
+    isClinicInitiatedReschedule: false,
     cancelReason: null,
     requiresHumanSupport: false,
     reason: null,
@@ -1043,16 +1110,17 @@ async function resolveSingleActiveEventType(ctx: MutationCtx, location: string) 
 function assertRescheduleWindow(
   slotTimestamp: number,
   now: number,
-  currentAppointmentTimestamp: number,
+  currentAppointmentTimestamp: number | null,
+  isClinicInitiatedReschedule: boolean,
 ) {
   if (!Number.isFinite(slotTimestamp)) {
     throw new Error("Novo horário inválido para remarcação.");
   }
-  if (slotTimestamp - now < RESCHEDULE_MIN_NOTICE_MS) {
+  if (!isClinicInitiatedReschedule && slotTimestamp - now < RESCHEDULE_MIN_NOTICE_MS) {
     throw new Error("Escolha um horário com no mínimo 24h de antecedência.");
   }
-  const maxAllowedTimestamp =
-    currentAppointmentTimestamp + RESCHEDULE_MAX_DAYS_AHEAD * 24 * 60 * 60_000;
+  const referenceTimestamp = currentAppointmentTimestamp ?? now;
+  const maxAllowedTimestamp = referenceTimestamp + RESCHEDULE_MAX_DAYS_AHEAD * 24 * 60 * 60_000;
   if (slotTimestamp > maxAllowedTimestamp) {
     throw new Error("A nova data deve estar até 30 dias após a data do agendamento atual.");
   }

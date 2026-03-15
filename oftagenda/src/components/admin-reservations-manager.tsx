@@ -76,6 +76,7 @@ type AdminReservationsManagerProps = {
     total: number;
     pending: number;
     awaitingPatient: number;
+    awaitingReschedule: number;
     confirmed: number;
     inCare: number;
     surgeryPlanned: number;
@@ -257,6 +258,14 @@ export function AdminReservationsManager({
       tone: "text-amber-600",
       ratio: Math.round((stats.awaitingPatient / safeTotal) * 100),
       helper: "Em retorno/contato",
+    },
+    {
+      title: "Aguardando reagendamento",
+      value: stats.awaitingReschedule,
+      icon: CalendarSync,
+      tone: "text-amber-600",
+      ratio: Math.round((stats.awaitingReschedule / safeTotal) * 100),
+      helper: "Horário indisponível",
     },
     {
       title: "Confirmadas",

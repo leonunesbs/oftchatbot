@@ -40,10 +40,7 @@ export const createCheckoutDraft = mutation({
       );
     }
 
-    const consultationAmountCentsFromEvent =
-      normalizeAmountCents(eventType.priceCents) ??
-      parseLegacyAmountCentsFromStripePriceId(eventType.stripePriceId?.trim() || readStripePriceIdFromEnv());
-    const consultationAmountCents = consultationAmountCentsFromEvent;
+    const consultationAmountCents = normalizeAmountCents(eventType.priceCents);
 
     const amountCents = paymentMode === "full_payment"
       ? consultationAmountCents
@@ -1138,14 +1135,6 @@ function inferPreferredPeriod(timestamp: number) {
   return "noite" as const;
 }
 
-function readStripePriceIdFromEnv() {
-  const value = process.env.STRIPE_PRICE_ID?.trim();
-  if (!value) {
-    return undefined;
-  }
-  return value;
-}
-
 function normalizeAmountCents(value: number | undefined) {
   if (typeof value !== "number") {
     return undefined;
@@ -1163,31 +1152,6 @@ function normalizeAmountCents(value: number | undefined) {
     return value;
   }
   return value * 100;
-}
-
-function parseLegacyAmountCentsFromStripePriceId(value: string | undefined) {
-  if (!value) {
-    return undefined;
-  }
-  const normalized = value.trim();
-  if (!normalized || normalized.startsWith("price_")) {
-    return undefined;
-  }
-  if (/^\d+$/.test(normalized)) {
-    const parsedInteger = Number(normalized);
-    if (!Number.isFinite(parsedInteger) || parsedInteger <= 0) {
-      return undefined;
-    }
-    if (normalized.length >= 4) {
-      return parsedInteger;
-    }
-    return parsedInteger * 100;
-  }
-  const parsed = Number(normalized.replace(/\./g, "").replace(",", "."));
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return undefined;
-  }
-  return Math.round(parsed * 100);
 }
 
 function calculateReservationFeeCents(

@@ -60,7 +60,9 @@ export default async function DashboardPage({
       _id: string;
       scheduledFor?: number;
       location: string;
-      consultationType?: string;
+      eventName?: string | null;
+      eventAddress?: string | null;
+      paymentMode?: "booking_fee" | "full_payment" | "in_person" | null;
       status: string;
     } | null;
     pendingReservations: Array<{
@@ -76,6 +78,7 @@ export default async function DashboardPage({
     reschedulePolicy: {
       canReschedule: boolean;
       canCancel: boolean;
+      isClinicInitiatedReschedule: boolean;
       cancelReason: string | null;
       requiresHumanSupport: boolean;
       reason: string | null;
@@ -97,6 +100,7 @@ export default async function DashboardPage({
     reschedulePolicy: {
       canReschedule: false,
       canCancel: false,
+      isClinicInitiatedReschedule: false,
       cancelReason: "Nenhuma consulta ativa encontrada.",
       requiresHumanSupport: false,
       reason: "Nenhuma consulta ativa encontrada.",
@@ -137,7 +141,9 @@ export default async function DashboardPage({
             _id: data.nextAppointment._id,
             scheduledFor: data.nextAppointment.scheduledFor,
             location: data.nextAppointment.location,
-            consultationType: data.nextAppointment.consultationType,
+            eventName: data.nextAppointment.eventName ?? null,
+            eventAddress: data.nextAppointment.eventAddress ?? null,
+            paymentMode: data.nextAppointment.paymentMode ?? null,
             status: data.nextAppointment.status,
           }
         : null,
@@ -154,6 +160,7 @@ export default async function DashboardPage({
       reschedulePolicy: {
         canReschedule: data.reschedulePolicy.canReschedule,
         canCancel: data.reschedulePolicy.canCancel,
+        isClinicInitiatedReschedule: data.reschedulePolicy.isClinicInitiatedReschedule,
         cancelReason: data.reschedulePolicy.cancelReason,
         requiresHumanSupport: data.reschedulePolicy.requiresHumanSupport,
         reason: data.reschedulePolicy.reason,
@@ -184,7 +191,8 @@ export default async function DashboardPage({
   const patientAge = birthDate ? calculateAge(birthDate) : null;
   const hasPriorityByAge = typeof patientAge === "number" && patientAge >= 65;
   const appointmentStart = resolveAppointmentStart(nextAppointment?.scheduledFor);
-  const appointmentLocation = nextAppointment?.location || "Local a confirmar";
+  const appointmentLocation =
+    nextAppointment?.eventAddress || nextAppointment?.location || "Local a confirmar";
   const appointmentDateLabel = formatDisplayDate(nextAppointment?.scheduledFor);
   const appointmentTimeLabel = formatDisplayTime(nextAppointment?.scheduledFor);
   const calendarLinks = appointmentStart
@@ -198,7 +206,7 @@ export default async function DashboardPage({
       })
     : null;
   return (
-    <section className="mx-auto w-full max-w-5xl space-y-6 max-md:-mx-4 max-md:max-w-none max-md:px-4">
+    <section className="mx-auto w-full max-w-5xl space-y-6">
       <BookingConfirmedEvent enabled={bookingConfirmed} />
       <CheckoutReturnUrlCleaner enabled={paymentJustSucceeded} />
 
@@ -350,12 +358,16 @@ export default async function DashboardPage({
                         </span>
                       </p>
                       <p>
-                        <span className="font-medium text-foreground">Local:</span>{" "}
-                        {nextAppointment.location || "A confirmar"}
+                        <span className="font-medium text-foreground">Evento:</span>{" "}
+                        {nextAppointment.eventName ?? "A confirmar"}
                       </p>
                       <p>
-                        <span className="font-medium text-foreground">Tipo:</span>{" "}
-                        {nextAppointment.consultationType ?? "Consulta oftalmológica"}
+                        <span className="font-medium text-foreground">Endereço:</span>{" "}
+                        {nextAppointment.eventAddress ?? "A confirmar"}
+                      </p>
+                      <p>
+                        <span className="font-medium text-foreground">Modo de pagamento:</span>{" "}
+                        {formatPaymentModeLabel(nextAppointment.paymentMode)}
                       </p>
                     </div>
 
@@ -432,15 +444,15 @@ export default async function DashboardPage({
               <CardHeader className="space-y-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <StethoscopeIcon className="size-4 text-primary" />
-                  Triagem para dilatação
+                  Triagem de dilatação
                 </CardTitle>
                 <CardDescription>
-                  Verifique orientações importantes antes da consulta.
+                  Confira as orientações e veja se há chance de dilatação.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Se houver chance de exame com dilatação, preencha sua triagem para preparar o atendimento com segurança.
+                  Assim, você consegue se programar melhor para o dia da consulta.
                 </p>
                 <Button variant="outline" asChild>
                   <Link href="/dashboard/detalhes">Verificar triagem e detalhes</Link>
@@ -489,20 +501,20 @@ export default async function DashboardPage({
               <h3 className="font-medium">Resumo rápido da consulta</h3>
               <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
                 <p>
-                  <span className="font-medium text-foreground">Local:</span>{" "}
-                  {nextAppointment.location || "A confirmar"}
+                  <span className="font-medium text-foreground">Evento:</span>{" "}
+                  {nextAppointment.eventName ?? "A confirmar"}
                 </p>
                 <p>
-                  <span className="font-medium text-foreground">Tipo:</span>{" "}
-                  {nextAppointment.consultationType ?? "Consulta oftalmológica"}
+                  <span className="font-medium text-foreground">Endereço:</span>{" "}
+                  {nextAppointment.eventAddress ?? "A confirmar"}
                 </p>
                 <p>
                   <span className="font-medium text-foreground">Data:</span>{" "}
                   {appointmentDateLabel}
                 </p>
                 <p>
-                  <span className="font-medium text-foreground">Horário:</span>{" "}
-                  {appointmentTimeLabel}
+                  <span className="font-medium text-foreground">Modo de pagamento:</span>{" "}
+                  {formatPaymentModeLabel(nextAppointment.paymentMode)}
                 </p>
               </div>
             </div>
@@ -553,6 +565,21 @@ function formatDisplayTime(timestamp?: number) {
   return new Intl.DateTimeFormat("pt-BR", {
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+function formatPaymentModeLabel(
+  paymentMode?: "booking_fee" | "full_payment" | "in_person" | null,
+) {
+  if (paymentMode === "booking_fee") {
+    return "Sinal de reserva";
+  }
+  if (paymentMode === "full_payment") {
+    return "Pagamento integral";
+  }
+  if (paymentMode === "in_person") {
+    return "Pagamento presencial";
+  }
+  return "A confirmar";
 }
 
 function parseBirthDate(value?: string) {
