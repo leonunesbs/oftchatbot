@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import {
+  File01Icon,
   LayoutBottomIcon,
   LayoutIcon,
-  MoreVerticalCircle01Icon,
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowUpRightIcon, MenuIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ColorModeToggle } from "@/components/color-mode-toggle";
@@ -31,9 +32,18 @@ type AppHeaderProps = {
 export function AppHeader({ clerkEnabled, sessionState }: AppHeaderProps) {
   const panelHref = "/dashboard";
   const navItems = [
-    { href: "/", label: "Home", icon: LayoutIcon },
-    { href: panelHref, label: "Painel", icon: LayoutBottomIcon },
-    { href: "/agendar", label: "Agendar", icon: SearchIcon },
+    { href: "/", label: "Home", description: "Página inicial", icon: LayoutIcon },
+    { href: panelHref, label: "Painel", description: "Sua área principal", icon: LayoutBottomIcon },
+    { href: "/agendar", label: "Agendar", description: "Buscar horário disponível", icon: SearchIcon },
+  ];
+  const mobileSecondaryItems = [
+    {
+      href: `${siteConfig.social.oftleonardoSite}/conteudos?utm_source=oftagenda&utm_medium=referral&utm_campaign=crossdomain_seo`,
+      label: "Conteúdos",
+      description: "Abrir artigos e materiais",
+      icon: File01Icon,
+      external: true,
+    },
   ];
   const oftleonardoContentUrl = `${siteConfig.social.oftleonardoSite}/conteudos?utm_source=oftagenda&utm_medium=referral&utm_campaign=crossdomain_seo`;
   const mobileMenuContentId = "mobile-menu-sheet-content";
@@ -82,49 +92,89 @@ export function AppHeader({ clerkEnabled, sessionState }: AppHeaderProps) {
               <Button
                 id={mobileMenuTriggerId}
                 variant="outline"
-                size="icon-sm"
+                size="sm"
                 aria-label="Abrir menu"
                 aria-controls={mobileMenuContentId}
+                className="gap-2 px-2.5"
               >
-                <HugeiconsIcon icon={MoreVerticalCircle01Icon} strokeWidth={2} />
+                <MenuIcon className="size-4" />
+                <span>Menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent
               id={mobileMenuContentId}
               aria-labelledby={mobileMenuTriggerId}
               side="right"
-              className="w-[84vw] max-w-xs"
+              className="w-[88vw] max-w-sm"
             >
               <SheetHeader className="pb-3">
                 <SheetTitle>Menu</SheetTitle>
-                <SheetDescription>Acesse as principais páginas.</SheetDescription>
+                <SheetDescription>Acesse rapidamente as principais áreas da plataforma.</SheetDescription>
               </SheetHeader>
-              <nav className="flex flex-col gap-2 px-6 pb-6">
-                {navItems.map((item) => (
-                  <SheetClose key={item.href} asChild>
-                    <Button variant="ghost" asChild className="justify-start">
-                      <Link
-                        href={item.href}
-                        prefetch={item.href === panelHref ? false : undefined}
-                      >
-                        <HugeiconsIcon
-                          icon={item.icon}
-                          strokeWidth={2}
-                          data-icon="inline-start"
-                        />
-                        {item.label}
-                      </Link>
-                    </Button>
-                  </SheetClose>
-                ))}
-                <SheetClose asChild>
-                  <Button variant="ghost" asChild className="justify-start">
-                    <Link href={oftleonardoContentUrl} target="_blank" rel="noreferrer">
-                      Conteúdos
-                    </Link>
-                  </Button>
-                </SheetClose>
-                <div className="mt-2">
+              <nav className="flex flex-col gap-5 px-6 pb-6">
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    Navegação
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {navItems.map((item) => (
+                      <SheetClose key={item.href} asChild>
+                        <Button variant="ghost" asChild className="h-auto justify-start rounded-lg py-2.5">
+                          <Link
+                            href={item.href}
+                            prefetch={item.href === panelHref ? false : undefined}
+                            className="flex w-full items-center gap-3"
+                          >
+                            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-border/70 bg-muted/40">
+                              <HugeiconsIcon icon={item.icon} strokeWidth={2} className="size-4" />
+                            </span>
+                            <span className="flex min-w-0 flex-col text-left">
+                              <span className="truncate text-sm font-medium">{item.label}</span>
+                              <span className="truncate text-xs text-muted-foreground">
+                                {item.description}
+                              </span>
+                            </span>
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    Atalhos
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {mobileSecondaryItems.map((item) => (
+                      <SheetClose key={item.href} asChild>
+                        <Button variant="ghost" asChild className="h-auto justify-start rounded-lg py-2.5">
+                          <Link
+                            href={item.href}
+                            target={item.external ? "_blank" : undefined}
+                            rel={item.external ? "noreferrer" : undefined}
+                            className="flex w-full items-center gap-3"
+                          >
+                            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-border/70 bg-muted/40">
+                              <HugeiconsIcon icon={item.icon} strokeWidth={2} className="size-4" />
+                            </span>
+                            <span className="flex min-w-0 flex-1 flex-col text-left">
+                              <span className="truncate text-sm font-medium">{item.label}</span>
+                              <span className="truncate text-xs text-muted-foreground">
+                                {item.description}
+                              </span>
+                            </span>
+                            {item.external ? (
+                              <ArrowUpRightIcon className="size-4 shrink-0 text-muted-foreground" />
+                            ) : null}
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-border/60 pt-3">
                   <Suspense fallback={<Button variant="outline">Entrar</Button>}>
                     <HeaderAuthButton
                       clerkEnabled={clerkEnabled}

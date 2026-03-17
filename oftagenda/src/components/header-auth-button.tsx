@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { ChevronsUpDown, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -123,25 +124,34 @@ export function HeaderAuthButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button id={triggerId} variant="outline" className="inline-flex items-center gap-2">
+        <Button
+          id={triggerId}
+          variant="outline"
+          className="h-9 rounded-full border-border/70 bg-muted/30 px-2.5 text-foreground/90 shadow-xs ring-1 ring-transparent transition-all hover:border-border hover:bg-muted/60 hover:text-foreground hover:shadow-sm data-[state=open]:bg-muted data-[state=open]:ring-ring/25"
+        >
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={firstName ? `Avatar de ${firstName}` : "Avatar"}
               width={20}
               height={20}
-              className="size-5 rounded-full object-cover"
+              className="size-6 rounded-full object-cover ring-1 ring-border/60"
               referrerPolicy="no-referrer"
             />
           ) : (
             <span
               aria-hidden
-              className="inline-flex size-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold"
+              className="inline-flex size-6 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary ring-1 ring-primary/20"
             >
-              {(firstName?.trim().charAt(0) || userId?.trim().charAt(0) || "U").toUpperCase()}
+              {firstName?.trim().charAt(0) ? (
+                firstName.trim().charAt(0).toUpperCase()
+              ) : (
+                <User className="size-3.5" />
+              )}
             </span>
           )}
-          <span>{firstName ? `Olá, ${firstName}` : "Minha conta"}</span>
+          <span className="max-w-28 truncate">{firstName ? `Olá, ${firstName}` : "Minha conta"}</span>
+          <ChevronsUpDown className="size-3.5 text-muted-foreground transition-colors group-data-[state=open]/button:text-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

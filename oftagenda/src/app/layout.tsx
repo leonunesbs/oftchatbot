@@ -3,6 +3,8 @@ import "./globals.css";
 import Link from "next/link";
 import { Noto_Sans } from "next/font/google";
 import { auth } from "@clerk/nextjs/server";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ptBR } from "@clerk/localizations";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { cookies } from "next/headers";
 
@@ -81,10 +83,8 @@ async function getHeaderSessionState(clerkEnabled: boolean): Promise<SessionStat
   }
 
   try {
-    const { getToken, sessionClaims } = await auth();
-    const token = await getToken();
-
-    if (!token) {
+    const { userId, sessionClaims } = await auth();
+    if (!userId) {
       return loggedOutHeaderState;
     }
 
@@ -93,7 +93,6 @@ async function getHeaderSessionState(clerkEnabled: boolean): Promise<SessionStat
         ? (sessionClaims as Record<string, unknown>)
         : {};
 
-    const userId = typeof claims.sub === "string" ? claims.sub : null;
     const firstName =
       typeof claims.given_name === "string"
         ? claims.given_name
@@ -188,6 +187,38 @@ export default async function RootLayout({
     </footer>
   );
 
+  const appShell = (
+    <NuqsAdapter>
+      <script
+        id="website-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteSchema),
+        }}
+      />
+      <script
+        id="medical-clinic-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(medicalClinicSchema),
+        }}
+      />
+      <TooltipProvider>
+        <div className="flex min-h-screen flex-col bg-background">
+          <AppHeader clerkEnabled={clerkEnabled} sessionState={sessionState} />
+          <main data-app-main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 md:px-6 md:py-14">
+            <AppBreadcrumbs className="mb-6 md:mb-8" />
+            {children}
+          </main>
+          {legalFooter}
+          <AnalyticsPageview />
+          <AnalyticsConsent />
+          <Toaster />
+        </div>
+      </TooltipProvider>
+    </NuqsAdapter>
+  );
+
   return (
     <html lang="pt-BR" suppressHydrationWarning className={cn("font-sans", notoSans.variable, initialThemeClass)}>
       <head>
@@ -201,35 +232,13 @@ export default async function RootLayout({
           }}
         />
         {shouldLoadGtm ? <GoogleTagManager gtmId={gtmId!} /> : null}
-        <NuqsAdapter>
-          <script
-            id="website-schema"
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(websiteSchema),
-            }}
-          />
-          <script
-            id="medical-clinic-schema"
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(medicalClinicSchema),
-            }}
-          />
-          <TooltipProvider>
-            <div className="flex min-h-screen flex-col bg-background">
-              <AppHeader clerkEnabled={clerkEnabled} sessionState={sessionState} />
-              <main data-app-main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 md:px-6 md:py-14">
-                <AppBreadcrumbs className="mb-6 md:mb-8" />
-                {children}
-              </main>
-              {legalFooter}
-              <AnalyticsPageview />
-              <AnalyticsConsent />
-              <Toaster />
-            </div>
-          </TooltipProvider>
-        </NuqsAdapter>
+        {clerkEnabled ? (
+          <ClerkProvider localization={ptBR} waitlistUrl="/waitlist">
+            {appShell}
+          </ClerkProvider>
+        ) : (
+          appShell
+        )}
       </body>
     </html>
   );

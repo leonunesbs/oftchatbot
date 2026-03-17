@@ -27,13 +27,13 @@ import { closeParallelRoute } from "@/lib/parallel-route-navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 
-type AvailabilityGroupOption = {
+export type TimeBlockAvailabilityGroupOption = {
   name: string;
   timezone: string;
 };
 
 type AdminCreateTimeBlockViewProps = {
-  availabilityGroups: AvailabilityGroupOption[];
+  availabilityGroups: TimeBlockAvailabilityGroupOption[];
   initialDate?: string;
   initialTime?: string;
   asDrawer: boolean;
@@ -64,13 +64,13 @@ function isTime(value: string) {
   return /^\d{2}:\d{2}$/.test(value);
 }
 
-function TimeBlockForm({
+export function TimeBlockForm({
   availabilityGroups,
   initialDate,
   initialTime,
   backHref,
 }: {
-  availabilityGroups: AvailabilityGroupOption[];
+  availabilityGroups: TimeBlockAvailabilityGroupOption[];
   initialDate?: string;
   initialTime?: string;
   backHref: string;

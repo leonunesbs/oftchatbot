@@ -15,10 +15,8 @@ export async function GET() {
   }
 
   try {
-    const { getToken, sessionClaims } = await auth();
-    const token = await getToken();
-
-    if (!token) {
+    const { userId, sessionClaims } = await auth();
+    if (!userId) {
       return NextResponse.json({
         clerkEnabled: true,
         isAuthenticated: false,
@@ -32,7 +30,6 @@ export async function GET() {
       sessionClaims && typeof sessionClaims === "object"
         ? (sessionClaims as Record<string, unknown>)
         : {};
-    const userId = typeof claims.sub === "string" ? claims.sub : null;
     const firstName =
       typeof claims.given_name === "string"
         ? claims.given_name

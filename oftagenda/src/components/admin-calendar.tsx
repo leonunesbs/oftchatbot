@@ -256,7 +256,7 @@ function AgendaSlotCell({
   slot,
   slotItems,
   day,
-  openBlockRoute,
+  openEmptySlotRoute,
   agendaPath,
   liveMarkerOffsetPercent,
   isDraggingReservation,
@@ -266,7 +266,7 @@ function AgendaSlotCell({
   slot: string;
   slotItems: CalendarItem[];
   day: Date;
-  openBlockRoute: (day: Date, slot: string) => void;
+  openEmptySlotRoute: (day: Date, slot: string) => void;
   agendaPath: string;
   liveMarkerOffsetPercent: number | null;
   isDraggingReservation: boolean;
@@ -288,7 +288,7 @@ function AgendaSlotCell({
       tabIndex={isEmptySlot ? 0 : undefined}
       onClick={() => {
         if (isEmptySlot) {
-          openBlockRoute(day, slot);
+          openEmptySlotRoute(day, slot);
         }
       }}
       onKeyDown={(event) => {
@@ -297,7 +297,7 @@ function AgendaSlotCell({
         }
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openBlockRoute(day, slot);
+          openEmptySlotRoute(day, slot);
         }
       }}
     >
@@ -541,9 +541,9 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
     setAnchorDate(next);
   }
 
-  function openBlockRoute(day: Date, slot: string) {
+  function openEmptySlotRoute(day: Date, slot: string) {
     const date = toDateInput(day);
-    router.push(`${agendaPath}/bloquear-horario?date=${date}&time=${slot}`);
+    router.push(`${agendaPath}/celula-vazia?date=${date}&time=${slot}`);
   }
 
   const nextOperations = useMemo(
@@ -643,9 +643,10 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       >
         <div className="w-full max-w-full overflow-x-auto rounded-xl border">
           <div
-            className="grid w-max"
+            className="grid"
             style={{
-              gridTemplateColumns: `90px repeat(${calendarDays.length}, 170px)`,
+              width: `max(100%, ${90 + calendarDays.length * 140}px)`,
+              gridTemplateColumns: `90px repeat(${calendarDays.length}, minmax(140px, 1fr))`,
             }}
           >
             <div className="border-b bg-muted/40 p-2 text-xs font-medium">Horário</div>
@@ -671,7 +672,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                       slot={slot}
                       slotItems={slotItems}
                       day={day}
-                      openBlockRoute={openBlockRoute}
+                      openEmptySlotRoute={openEmptySlotRoute}
                       agendaPath={agendaPath}
                       liveMarkerOffsetPercent={
                         liveMarker && liveMarker.dayKey === dayKey && liveMarker.slot === slot ? liveMarker.offsetPercent : null

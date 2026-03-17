@@ -437,7 +437,9 @@ export function AdminAvailabilityEditor({
         <div className="flex items-center gap-2">
           {showCreateButton ? (
             <Button size="sm" asChild>
-              <Link href="/dashboard/admin/nova-disponibilidade">Nova disponibilidade</Link>
+              <Link href="/dashboard/admin/nova-disponibilidade" scroll={false}>
+                Nova disponibilidade
+              </Link>
             </Button>
           ) : null}
           <Button size="sm" type="button" onClick={saveAllAvailabilities} disabled={isPending || !hasGroups}>
@@ -629,7 +631,7 @@ export function AdminAvailabilityEditor({
               Selecione uma ou mais datas para substituir os horários da disponibilidade.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
             <div className="space-y-3 rounded-lg border border-border/70 bg-muted/10 p-3">
               <p className="text-sm font-medium">Datas da substituição</p>
               <Calendar
@@ -661,7 +663,7 @@ export function AdminAvailabilityEditor({
                 ? overrideSlots.map((slot, slotIndex) => (
                     <div
                       key={`override-slot-${slotIndex}`}
-                      className="grid grid-cols-1 items-center gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(120px,1fr)_20px_minmax(120px,1fr)_120px_100px]"
+                      className="grid grid-cols-1 items-center gap-2 sm:grid-cols-2 md:grid-cols-[minmax(0,1fr)_16px_minmax(0,1fr)_minmax(108px,auto)_auto]"
                     >
                       <Input
                         type="time"
@@ -674,7 +676,7 @@ export function AdminAvailabilityEditor({
                           })
                         }
                       />
-                      <span className="hidden text-center text-sm text-muted-foreground sm:block">-</span>
+                      <span className="hidden text-center text-sm text-muted-foreground md:block">-</span>
                       <Input
                         type="time"
                         step={300}
@@ -687,7 +689,7 @@ export function AdminAvailabilityEditor({
                         }
                       />
                       <select
-                        className={`${selectClassName} w-full`}
+                        className={`${selectClassName} h-9 w-full min-w-0`}
                         value={slot.status}
                         onChange={(event) =>
                           updateOverrideSlot(slotIndex, {
@@ -702,7 +704,7 @@ export function AdminAvailabilityEditor({
                         type="button"
                         size="sm"
                         variant="outline"
-                        className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive md:w-auto md:px-3"
                         onClick={() => removeOverrideSlot(slotIndex)}
                         disabled={overrideSlots.length === 1}
                       >

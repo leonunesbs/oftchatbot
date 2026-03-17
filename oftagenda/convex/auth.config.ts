@@ -6,7 +6,11 @@ function normalizeIssuerUrl(rawValue: string) {
     return null;
   }
 
-  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  // Support accidental values like `https:/domain.com` by normalizing to `https://domain.com`.
+  const normalizedProtocol = trimmed.replace(/^https?:\/(?!\/)/i, "https://");
+  const withProtocol = /^https?:\/\//i.test(normalizedProtocol)
+    ? normalizedProtocol
+    : `https://${normalizedProtocol}`;
   try {
     const parsed = new URL(withProtocol);
     if (!parsed.hostname) {
@@ -19,7 +23,10 @@ function normalizeIssuerUrl(rawValue: string) {
 }
 
 function resolveClerkDomain() {
-  const configuredDomain = process.env.CLERK_FRONTEND_API_URL;
+  const configuredDomain =
+    process.env.CLERK_FRONTEND_API_URL ??
+    process.env.CLERK_JWT_ISSUER_DOMAIN ??
+    process.env.NEXT_PUBLIC_CLERK_FRONTEND_API_URL;
   if (configuredDomain) {
     const normalized = normalizeIssuerUrl(configuredDomain);
     if (normalized) {
@@ -28,7 +35,7 @@ function resolveClerkDomain() {
   }
 
   throw new Error(
-    "Dominio do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
+    "Dominio emissor do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL, CLERK_JWT_ISSUER_DOMAIN ou NEXT_PUBLIC_CLERK_FRONTEND_API_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
   );
 }
 

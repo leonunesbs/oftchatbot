@@ -17,7 +17,9 @@ export default async function AdminAvailabilityPage() {
       <CardContent className="space-y-4">
         <div className="flex justify-end">
           <Button size="sm" asChild>
-            <Link href="/dashboard/admin/nova-disponibilidade">Nova disponibilidade</Link>
+            <Link href="/dashboard/admin/nova-disponibilidade" scroll={false}>
+              Nova disponibilidade
+            </Link>
           </Button>
         </div>
         <AdminAvailabilityDataTable availabilityGroups={availabilityGroups} />
