@@ -4,6 +4,16 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type PendingReservation = {
   _id: string;
@@ -29,6 +39,9 @@ export function PendingReservationsList({
   );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [reservationToCancelId, setReservationToCancelId] = useState<string | null>(
+    null,
+  );
 
   function handleRetryPayment(reservation: PendingReservation) {
     if (isPending) {
@@ -74,25 +87,26 @@ export function PendingReservationsList({
     });
   }
 
-  function handleCancelReservation(reservationId: string) {
+  function handleCancelReservationRequest(reservationId: string) {
     if (isPending) {
       return;
     }
-    const confirmed = window.confirm(
-      "Deseja realmente cancelar este agendamento pendente?",
-    );
-    if (!confirmed) {
+    setReservationToCancelId(reservationId);
+  }
+
+  function handleConfirmCancelReservation() {
+    if (isPending || !reservationToCancelId) {
       return;
     }
 
     setError(null);
-    setCurrentReservationId(reservationId);
+    setCurrentReservationId(reservationToCancelId);
     startTransition(async () => {
       try {
         const response = await fetch("/api/stripe/reservations/cancel", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reservationId }),
+          body: JSON.stringify({ reservationId: reservationToCancelId }),
         });
         const data = await response.json();
         if (!response.ok || !data?.ok) {
@@ -106,6 +120,7 @@ export function PendingReservationsList({
             : "Falha ao cancelar o agendamento.",
         );
       } finally {
+        setReservationToCancelId(null);
         setCurrentReservationId(null);
       }
     });
@@ -155,15 +170,38 @@ export function PendingReservationsList({
                   size="sm"
                   variant="outline"
                   disabled={isPending}
-                  onClick={() => handleCancelReservation(item._id)}
+                  onClick={() => handleCancelReservationRequest(item._id)}
                 >
-                  Cancelar agendamento
+                  {isCurrentAction ? "Cancelando..." : "Cancelar agendamento"}
                 </Button>
               </div>
             </li>
           );
         })}
       </ul>
+      <AlertDialog
+        open={reservationToCancelId !== null}
+        onOpenChange={(open) => {
+          if (!open && !isPending) {
+            setReservationToCancelId(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar agendamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja realmente cancelar este agendamento pendente?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Voltar</AlertDialogCancel>
+            <AlertDialogAction disabled={isPending} onClick={handleConfirmCancelReservation}>
+              Confirmar cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );
