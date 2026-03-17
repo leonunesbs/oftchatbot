@@ -135,11 +135,11 @@ export function ResumoDialog({
                 </p>
                 {consultationPriceCents > 0 ? (
                   <div className="mt-2 rounded-lg border border-border/60 bg-background/60 p-2.5">
-                    <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                       <p className="text-sm font-semibold text-foreground/90">
                         Consulta oftalmológica
                       </p>
-                      <p className="text-sm font-semibold text-foreground/90">
+                    <p className="text-sm font-semibold text-foreground/90 sm:text-right">
                         {formatConsultationPrice(consultationPriceCents)}
                       </p>
                     </div>
@@ -158,11 +158,11 @@ export function ResumoDialog({
                   Para confirmar este horário, o investimento da consulta é feito online neste momento.
                 </p>
                 <div className="mt-2 rounded-lg border border-border/60 bg-background/60 p-2.5">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                     <p className="text-sm text-foreground/90">
                       Investimento da consulta
                     </p>
-                    <p className="text-sm font-medium text-foreground/90">
+                    <p className="text-sm font-medium text-foreground/90 sm:text-right">
                       {formatConsultationPrice(consultationPriceCents)}
                     </p>
                   </div>
@@ -181,11 +181,11 @@ export function ResumoDialog({
                 </p>
                 <div className="mt-2 space-y-3 rounded-lg border border-border/60 bg-background/60 p-2.5">
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                       <p className="text-sm text-emerald-700 dark:text-emerald-400">
                         Entrada para confirmação
                       </p>
-                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 sm:text-right">
                         {formatReservationFee(reservationFeeCents)}
                       </p>
                     </div>
@@ -195,28 +195,39 @@ export function ResumoDialog({
                   </div>
                   <div className="h-px w-full bg-border/70" />
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm text-red-700 dark:text-red-400">
-                        Restante no dia da consulta
-                      </p>
-                      <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                        {formatRemainingAtConsultation(
-                          consultationPriceCents,
-                          remainingAtConsultationCents,
-                        )}
-                      </p>
+                    <div className="flex flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-x-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-foreground/90">
+                          Restante no dia da consulta
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Ajuste presencial no atendimento.
+                        </p>
+                      </div>
+                      <div className="space-y-0.5 sm:text-right">
+                        <p className="text-sm font-medium text-foreground/90">
+                          {formatRemainingInstallment(
+                            consultationPriceCents,
+                            remainingAtConsultationCents,
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Total{" "}
+                          {formatRemainingAtConsultationTotal(
+                            consultationPriceCents,
+                            remainingAtConsultationCents,
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Ajuste presencial no atendimento.
-                    </p>
                   </div>
                   <div className="h-px w-full bg-border/70" />
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                       <p className="text-sm text-foreground/90">
                         Investimento total
                       </p>
-                      <p className="text-sm font-medium text-foreground/90">
+                      <p className="text-sm font-medium text-foreground/90 sm:text-right">
                         {formatConsultationPrice(consultationPriceCents)}
                       </p>
                     </div>
@@ -304,10 +315,29 @@ function formatConsultationPrice(cents: number) {
   return formatMoney(cents);
 }
 
-function formatRemainingAtConsultation(totalCents: number, remainingCents: number) {
+function formatRemainingInstallment(totalCents: number, remainingCents: number) {
   if (totalCents <= 0) {
     return "A confirmar";
   }
 
-  return formatMoney(remainingCents);
+  if (remainingCents <= 0) {
+    return formatMoney(0);
+  }
+
+  const maxInstallmentCents = 9_999;
+  const installments = Math.max(1, Math.ceil(remainingCents / maxInstallmentCents));
+  const installmentCents = Math.floor(remainingCents / installments);
+
+  return `${installments}x de ${formatMoney(installmentCents)}`;
+}
+
+function formatRemainingAtConsultationTotal(
+  totalCents: number,
+  remainingCents: number,
+) {
+  if (totalCents <= 0) {
+    return "A confirmar";
+  }
+
+  return formatMoney(Math.max(remainingCents, 0));
 }
