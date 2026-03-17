@@ -258,7 +258,7 @@ function EventTypeEditorContent({
       </ActionToastForm>
 
       <div className="rounded-md border border-dashed p-3">
-        <p className="text-xs font-medium">Disponibilidade vinculada ao evento</p>
+        <p className="text-xs font-medium">Horários atualmente aplicados a este evento</p>
         {linkedAvailabilityGroup ? (
           <div className="mt-2 space-y-1">
             <p className="text-xs font-medium">{linkedAvailabilityGroup.name}</p>
@@ -269,7 +269,7 @@ function EventTypeEditorContent({
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-xs text-muted-foreground">Este evento está sem disponibilidade vinculada.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Este evento ainda não tem horários configurados.</p>
         )}
       </div>
     </div>

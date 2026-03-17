@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +48,9 @@ type RescheduleAppointmentCardProps = {
   dateOptions: LocationAvailabilityDate[];
   availabilityError?: string;
   displayMode?: "card" | "embedded";
+  paymentStatus?: string;
+  initialDate?: string;
+  initialTime?: string;
   onCompleted?: () => void;
 };
 
@@ -57,11 +61,17 @@ export function RescheduleAppointmentCard({
   dateOptions,
   availabilityError,
   displayMode = "card",
+  paymentStatus,
+  initialDate = "",
+  initialTime = "",
   onCompleted,
 }: RescheduleAppointmentCardProps) {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const initialDateFromQuery = dateOptions.some((item) => item.isoDate === initialDate)
+    ? initialDate
+    : "";
+  const [selectedDate, setSelectedDate] = useState(initialDateFromQuery);
+  const [selectedTime, setSelectedTime] = useState(initialTime);
   const [timesByDate, setTimesByDate] = useState<Record<string, string[]>>({});
   const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [timeLoadError, setTimeLoadError] = useState<string | null>(null);
@@ -77,6 +87,7 @@ export function RescheduleAppointmentCard({
   const timeOptions = selectedDate ? (timesByDate[selectedDate] ?? selectedDateOption?.times ?? []) : [];
   const canSubmit = Boolean(policy.canReschedule && selectedDate && selectedTime && hasAcceptedPolicy);
   const canCancel = Boolean(policy.canCancel && hasAcceptedPolicy);
+  const checkoutNotCompleted = paymentStatus === "cancelled";
 
   const policyText = useMemo(
     () => {
@@ -303,6 +314,15 @@ export function RescheduleAppointmentCard({
   return (
     <section id="remarcacao-consulta" className={rootClassName}>
       <h3 className="font-medium">Remarcação facilitada</h3>
+      {checkoutNotCompleted ? (
+        <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100">
+          <AlertTitle>Pagamento não concluído</AlertTitle>
+          <AlertDescription className="text-amber-900/90 dark:text-amber-100/90">
+            Você saiu do checkout antes de finalizar a taxa de remarcação. Se o horário ainda estiver
+            disponível, confirme novamente abaixo.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <p className="text-sm text-muted-foreground">{policyText}</p>
       <p className="text-sm text-muted-foreground">
         Atendimento: <span className="font-medium text-foreground">{fixedEventType.label}</span>
@@ -387,7 +407,7 @@ export function RescheduleAppointmentCard({
               onClick={() => handleDateChange(item.isoDate)}
               disabled={!policy.canReschedule || isPending}
             >
-              {item.weekdayLabel}, {item.label}
+              {item.weekdayLabel}, {formatIsoDateToPtBr(item.isoDate)}
             </Button>
           ))}
         </div>
@@ -461,7 +481,7 @@ export function RescheduleAppointmentCard({
                   <>
                     Sua consulta atual será substituída por{" "}
                     <span className="font-medium text-foreground">
-                      {selectedDate || "data não selecionada"} às{" "}
+                      {selectedDate ? formatIsoDateToPtBr(selectedDate) : "data não selecionada"} às{" "}
                       {selectedTime || "horário não selecionado"}
                     </span>
                     .
@@ -529,4 +549,14 @@ function formatMoney(valueInCents: number) {
     style: "currency",
     currency: "BRL",
   }).format(valueInCents / 100);
+}
+
+function formatIsoDateToPtBr(isoDate: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!match) {
+    return isoDate;
+  }
+
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
 }

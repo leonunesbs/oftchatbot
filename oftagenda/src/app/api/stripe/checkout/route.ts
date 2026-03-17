@@ -14,6 +14,8 @@ const ACTIVE_APPOINTMENT_ERROR =
   'Você já possui um agendamento ativo. Para remarcar ou gerenciar sua consulta, acesse seu painel.';
 const PENDING_RESERVATION_ERROR =
   'Você já possui um agendamento aguardando remarcação. Finalize ou cancele o pendente atual.';
+const INTERNAL_CHECKOUT_ERROR =
+  'Não foi possível iniciar o pagamento agora. Tente novamente em instantes.';
 const checkoutPayloadSchema = bookingCheckoutSchema;
 
 export async function POST(request: Request) {
@@ -143,7 +145,8 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Falha ao iniciar checkout Stripe.';
-    if (message === ACTIVE_APPOINTMENT_ERROR) {
+    const normalizedMessage = toHumanReadableError(message);
+    if (matchesKnownError(normalizedMessage, ACTIVE_APPOINTMENT_ERROR)) {
       return NextResponse.json(
         {
           ok: false,
@@ -155,12 +158,12 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-    if (message === PENDING_RESERVATION_ERROR) {
+    if (matchesKnownError(normalizedMessage, PENDING_RESERVATION_ERROR)) {
       return NextResponse.json(
         {
           ok: false,
           errorCode: 'PENDING_RESERVATION_EXISTS',
-          error: 'Voce ja possui um agendamento pendente.',
+          error: 'Você já possui um agendamento pendente.',
           errorDetails: 'Finalize ou cancele o agendamento pendente antes de criar outro.',
           redirectTo: '/dashboard#agendamentos-pendentes',
         },
@@ -168,7 +171,8 @@ export async function POST(request: Request) {
       );
     }
     const status = message.toLowerCase().includes('not authenticated') ? 401 : 500;
-    return NextResponse.json({ ok: false, error: message }, { status });
+    const publicError = status === 500 ? INTERNAL_CHECKOUT_ERROR : normalizedMessage;
+    return NextResponse.json({ ok: false, error: publicError }, { status });
   }
 }
 
@@ -187,4 +191,27 @@ async function getCustomerEmailByUserId(userId: string) {
   } catch {
     return null;
   }
+}
+
+function toHumanReadableError(rawMessage: string) {
+  const cleaned = rawMessage
+    .replace(/\[Request ID:[^\]]+\]\s*/gi, '')
+    .replace(/Server Error\s*/gi, '')
+    .replace(/Uncaught Error:\s*/gi, '')
+    .replace(/\s+at\s+[^\n]+/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (cleaned.length === 0) {
+    return INTERNAL_CHECKOUT_ERROR;
+  }
+  return cleaned;
+}
+
+function matchesKnownError(rawMessage: string, knownError: string) {
+  const normalize = (value: string) =>
+    value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase();
+  return normalize(rawMessage).includes(normalize(knownError));
 }

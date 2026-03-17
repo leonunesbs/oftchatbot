@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
@@ -13,6 +14,7 @@ type StartCheckoutButtonProps = {
   date: string;
   time: string;
   label?: string;
+  secondaryAction?: ReactNode;
   isAuthenticated?: boolean;
   paymentMode?: PaymentMode;
   reservationAmountCents?: number;
@@ -40,7 +42,7 @@ export function StartCheckoutButton({
   date,
   time,
   label = "Ir para pagamento",
-  isAuthenticated,
+  secondaryAction,
   paymentMode = "booking_fee",
   reservationAmountCents,
   consultationAmountCents,
@@ -60,11 +62,6 @@ export function StartCheckoutButton({
 
   async function handleStartCheckout() {
     if (isLoading) {
-      return;
-    }
-
-    if (isAuthenticated === false) {
-      redirectToSignIn();
       return;
     }
 
@@ -155,43 +152,52 @@ export function StartCheckoutButton({
     : "Redirecionando...";
 
   return (
-    <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-      <Button
-        type="button"
-        onClick={handleStartCheckout}
-        disabled={isLoading}
-        className="w-full sm:w-auto"
-      >
-        {isLoading ? loadingLabel : label}
-      </Button>
-      <p className="w-full rounded-md border border-border/60 bg-muted/30 px-3 py-1.5 text-center text-xs text-muted-foreground sm:w-auto sm:text-left">
-        {buildPaymentDisclaimer({
-          paymentMode,
-          reservationAmountCents,
-          consultationAmountCents,
-          reservationFeePercent,
-        })}
-      </p>
-      {error ? (
-        <div className="w-full rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive sm:max-w-[24rem]">
-          <p className="font-medium">{error.title}</p>
-          {error.description ? (
-            <p className="mt-1 text-xs text-destructive/90">
-              {error.description}
-            </p>
-          ) : null}
-          {error.redirectTo ? (
-            <div className="mt-2 flex items-center gap-2">
-              <Button asChild size="sm" variant="outline">
-                <Link href={error.redirectTo}>Ir para meu agendamento</Link>
-              </Button>
-              <span className="text-xs text-destructive/80">
-                Redirecionando automaticamente...
-              </span>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+    <div className="w-full space-y-2">
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+        {secondaryAction ? (
+          <div className="w-full sm:w-auto">{secondaryAction}</div>
+        ) : null}
+        <Button
+          type="button"
+          onClick={handleStartCheckout}
+          disabled={isLoading}
+          className="w-full sm:w-auto"
+        >
+          {isLoading ? loadingLabel : label}
+        </Button>
+      </div>
+
+      <div className="w-full space-y-2">
+        <p className="w-full rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-left text-xs text-muted-foreground">
+          {buildPaymentDisclaimer({
+            paymentMode,
+            reservationAmountCents,
+            consultationAmountCents,
+            reservationFeePercent,
+          })}
+        </p>
+
+        {error ? (
+          <div className="w-full rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+            <p className="font-semibold">{error.title}</p>
+            {error.description ? (
+              <p className="mt-1 text-xs leading-relaxed text-destructive/90">
+                {error.description}
+              </p>
+            ) : null}
+            {error.redirectTo ? (
+              <div className="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={error.redirectTo}>Ir para meu agendamento</Link>
+                </Button>
+                <span className="text-xs text-destructive/80">
+                  Redirecionando automaticamente...
+                </span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 
@@ -218,7 +224,7 @@ function buildPaymentDisclaimer(input: {
   reservationFeePercent: number;
 }) {
   if (input.paymentMode === "in_person") {
-    return "Ao confirmar, seu horário será reservado. O pagamento será realizado presencialmente no dia da consulta.";
+    return "Ao confirmar, seu horário fica garantido. O pagamento será realizado presencialmente no dia da consulta.";
   }
 
   if (input.paymentMode === "full_payment") {
@@ -228,16 +234,16 @@ function buildPaymentDisclaimer(input: {
     ) {
       return `Pagamento online integral (cartão e Pix): ${formatMoney(input.consultationAmountCents)}.`;
     }
-    return "Pagamento online integral (cartão e Pix) para confirmar a reserva.";
+    return "Pagamento online integral (cartão e Pix) para confirmar o horário.";
   }
 
   const baseText =
-    "Pagamento para reserva de horário (cartão e Pix), com bloqueio por 30 minutos.";
+    "Para confirmar o horário, você realiza agora um pagamento online (cartão ou Pix).";
   if (
     typeof input.reservationAmountCents !== "number" ||
     input.reservationAmountCents <= 0
   ) {
-    return `${baseText} Não corresponde ao valor total da consulta.`;
+    return `${baseText} Composição da consulta: confirmação online + saldo presencial.`;
   }
 
   const reservationValue = formatMoney(input.reservationAmountCents);
@@ -245,9 +251,9 @@ function buildPaymentDisclaimer(input: {
     typeof input.consultationAmountCents === "number" &&
     input.consultationAmountCents > 0
   ) {
-    return `${baseText} Taxa de reserva: ${reservationValue} (${input.reservationFeePercent}% de ${formatMoney(input.consultationAmountCents)}).`;
+    return `${baseText} Composição da consulta: ${reservationValue} agora + saldo no dia. Esse valor representa ${input.reservationFeePercent}% de ${formatMoney(input.consultationAmountCents)}.`;
   }
-  return `${baseText} Taxa de reserva: ${reservationValue}.`;
+  return `${baseText} Composição da consulta: ${reservationValue} agora + saldo presencial no dia da consulta.`;
 }
 
 function formatMoney(cents: number) {
@@ -261,7 +267,7 @@ function requiresAuthentication(
   response: Response,
   data: CheckoutApiResponse | null,
 ): boolean {
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401) {
     return true;
   }
 
@@ -273,9 +279,7 @@ function requiresAuthentication(
   const normalizedError = rawError.trim().toLowerCase();
   return (
     normalizedError === "not authenticated" ||
-    normalizedError === "not authorized" ||
     normalizedError.includes("not authenticated") ||
-    normalizedError.includes("not authorized") ||
     normalizedError.includes("não autenticado") ||
     normalizedError.includes("nao autenticado")
   );
@@ -316,9 +320,15 @@ function normalizeCheckoutError(
     };
   }
   if (typeof data?.error === "string" && data.error.trim().length > 0) {
+    const sanitizedTitle = sanitizeBackendErrorMessage(data.error);
+    const sanitizedDetails =
+      typeof data.errorDetails === "string" && data.errorDetails.trim().length > 0
+        ? sanitizeBackendErrorMessage(data.errorDetails)
+        : undefined;
+
     return {
-      title: data.error,
-      description: data.errorDetails,
+      title: "Não foi possível concluir essa etapa.",
+      description: sanitizedDetails ?? sanitizedTitle,
       redirectTo:
         typeof data.redirectTo === "string" ? data.redirectTo : undefined,
     };
@@ -326,4 +336,25 @@ function normalizeCheckoutError(
   return {
     title: "Não foi possível processar o agendamento.",
   };
+}
+
+function sanitizeBackendErrorMessage(rawMessage: string): string {
+  if (rawMessage.trim().length === 0) {
+    return "Tente novamente em instantes.";
+  }
+
+  const cleanedMessage = rawMessage
+    .replace(/\[Request ID:[^\]]+\]\s*/gi, "")
+    .replace(/Server Error\s*/gi, "")
+    .replace(/Uncaught Error:\s*/gi, "")
+    .replace(/\s+at\s+[^\n]+/gi, "")
+    .replace(/^\(.+\)$/gim, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (cleanedMessage.length === 0) {
+    return "Tente novamente em instantes.";
+  }
+
+  return cleanedMessage;
 }

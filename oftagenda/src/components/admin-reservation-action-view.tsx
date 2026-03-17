@@ -440,6 +440,8 @@ Equipe de atendimento`;
           <input type="hidden" name="clerkUserId" value={reservation.clerkUserId} />
           <input type="hidden" name="eventTypeId" value={reservation.eventTypeId} />
           <input type="hidden" name="availabilityId" value={reservation.availabilityId} />
+          <input type="hidden" name="notificationType" value="reschedule" />
+          <input type="hidden" name="previousScheduledAt" value={String(reservation.startsAt)} />
           <input type="hidden" name="notifyEmail" value={reservation.patientEmail ?? ""} />
           <input type="hidden" name="notifyName" value={reservation.patientName ?? ""} />
           <input type="hidden" name="eventTypeTitle" value={reservation.eventTypeTitle} />

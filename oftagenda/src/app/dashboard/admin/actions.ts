@@ -348,6 +348,9 @@ export async function updateReservationAction(formData: FormData) {
   const time = toStringValue(formData.get("time"));
   const status = parseReservationStatus(formData.get("status"));
   const notes = toStringValue(formData.get("notes")) || undefined;
+  const notificationType = toStringValue(formData.get("notificationType"));
+  const previousScheduledAtRaw = toStringValue(formData.get("previousScheduledAt"));
+  const previousScheduledAt = previousScheduledAtRaw ? Number(previousScheduledAtRaw) : undefined;
 
   const result = await client.mutation(api.admin.updateReservation, {
     reservationId,
@@ -365,18 +368,29 @@ export async function updateReservationAction(formData: FormData) {
   const notifyName = toStringValue(formData.get("notifyName"));
   const eventTypeTitle = toStringValue(formData.get("eventTypeTitle")) || "Consulta oftalmológica";
   if (notifyEmail) {
+    const isRescheduleNotification = notificationType === "reschedule";
     await notifyReservationUpdateEmail({
       to: notifyEmail,
       patientName: notifyName,
-      subject: "Seu agendamento foi atualizado",
-      title: "Atualização do seu agendamento",
-      summary: "Houve uma atualização no seu atendimento pela equipe administrativa.",
-      details: [
-        `Atendimento: ${eventTypeTitle}`,
-        `Novo horário: ${formatDateTimeForEmail({ date, time })}`,
-        `Status atual: ${effectiveStatus}`,
-        notes ? `Observações: ${notes}` : "Observações: sem observações adicionais",
-      ],
+      subject: isRescheduleNotification ? "Sua consulta foi reagendada" : "Seu agendamento foi atualizado",
+      title: isRescheduleNotification ? "Reagendamento confirmado" : "Atualização do seu agendamento",
+      summary: isRescheduleNotification
+        ? "A equipe administrativa reagendou sua consulta. Confira os dados atualizados abaixo."
+        : "Houve uma atualização no seu atendimento pela equipe administrativa.",
+      details: isRescheduleNotification
+        ? [
+            `Atendimento: ${eventTypeTitle}`,
+            `Horário anterior: ${formatDateTimeForEmail({ timestamp: previousScheduledAt })}`,
+            `Novo horário: ${formatDateTimeForEmail({ date, time })}`,
+            `Status atual: ${effectiveStatus}`,
+            notes ? `Observações: ${notes}` : "Observações: sem observações adicionais",
+          ]
+        : [
+            `Atendimento: ${eventTypeTitle}`,
+            `Novo horário: ${formatDateTimeForEmail({ date, time })}`,
+            `Status atual: ${effectiveStatus}`,
+            notes ? `Observações: ${notes}` : "Observações: sem observações adicionais",
+          ],
     });
   }
   revalidatePath(ADMIN_PATH);

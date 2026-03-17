@@ -75,15 +75,17 @@ export default async function ResumoPreAgendamentoPage({
 
   return (
     <section className="mx-auto flex min-h-[55vh] w-full max-w-4xl items-center">
-      <Card className="w-full border-border/70 bg-card/95 shadow-sm">
-        <CardHeader className="space-y-2">
-          <CardTitle>Resumo do pré-agendamento</CardTitle>
-          <CardDescription>
+      <Card className="w-full border-border/60 bg-card/90 shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-lg font-semibold tracking-tight">
+            Resumo do pré-agendamento
+          </CardTitle>
+          <CardDescription className="text-sm text-muted-foreground/90">
             {summary.paymentMode === "in_person"
               ? "Confira os dados antes de confirmar o agendamento."
               : summary.paymentMode === "full_payment"
-                ? "Confira os dados antes de seguir para o pagamento da consulta."
-                : "Confira os dados antes de seguir para a taxa de reserva do horário."}
+                ? "Confira os dados antes de confirmar seu horário com pagamento online."
+                : "Confira os dados antes de seguir para a confirmação online do horário."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -92,20 +94,20 @@ export default async function ResumoPreAgendamentoPage({
               <AlertTitle>Pagamento não concluído</AlertTitle>
               <AlertDescription>
                 Seu pagamento não foi concluído. Se desejar
-                confirmar a intenção de reservar este horário, você pode tentar
+                confirmar este horário, você pode tentar
                 novamente abaixo.
               </AlertDescription>
             </Alert>
           ) : null}
-          <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm">
+          <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-xs text-muted-foreground sm:text-sm">
             <div className="grid gap-3 md:grid-cols-2">
               <p>
-                <span className="font-medium text-foreground">Local:</span>{" "}
+                <span className="font-semibold text-foreground/90">Local:</span>{" "}
                 {summary.locationLabel}
               </p>
               {summary.locationAddress ? (
                 <p>
-                  <span className="font-medium text-foreground">Endereço:</span>{" "}
+                  <span className="font-semibold text-foreground/90">Endereço:</span>{" "}
                   <a
                     href={addressHref}
                     className="underline underline-offset-4 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -116,27 +118,31 @@ export default async function ResumoPreAgendamentoPage({
                 </p>
               ) : null}
               <p>
-                <span className="font-medium text-foreground">Data:</span>{" "}
+                <span className="font-semibold text-foreground/90">Data:</span>{" "}
                 {summary.dateLabel}
               </p>
               <p>
-                <span className="font-medium text-foreground">Horário:</span>{" "}
+                <span className="font-semibold text-foreground/90">Horário:</span>{" "}
                 {summary.timeLabel}
               </p>
             </div>
           </div>
 
           {summary.paymentMode === "in_person" ? (
-            <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm">
-              <p className="font-medium text-foreground">Pagamento presencial</p>
-              <p className="mt-1 text-muted-foreground">
+            <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-sm">
+              <p className="text-sm font-semibold text-foreground/90">
+                Pagamento presencial
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 O pagamento será realizado presencialmente no dia da consulta.
               </p>
               {summary.consultationPriceCents > 0 ? (
-                <div className="mt-3 rounded-lg border border-border/60 bg-background/70 p-3">
+                <div className="mt-3 rounded-lg border border-border/60 bg-background/60 p-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-foreground">Consulta oftalmológica</p>
-                    <p className="font-medium text-foreground">
+                    <p className="text-sm font-semibold text-foreground/90">
+                      Consulta oftalmológica
+                    </p>
+                    <p className="text-sm font-semibold text-foreground/90">
                       {formatConsultationPrice(summary.consultationPriceCents)}
                     </p>
                   </div>
@@ -147,63 +153,56 @@ export default async function ResumoPreAgendamentoPage({
               ) : null}
             </div>
           ) : summary.paymentMode === "full_payment" ? (
-            <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm">
-              <p className="font-medium text-foreground">Resumo financeiro</p>
-              <p className="mt-1 text-muted-foreground">
-                O valor integral da consulta será cobrado online para confirmar a reserva.
+            <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-sm">
+              <p className="text-sm font-semibold text-foreground/90">
+                Resumo financeiro
               </p>
-              <div className="mt-3 rounded-lg border border-border/60 bg-background/70 p-3">
+              <p className="mt-1 text-xs text-muted-foreground">
+                Para confirmar este horário, o investimento da consulta é feito online neste momento.
+              </p>
+              <div className="mt-3 rounded-lg border border-border/60 bg-background/60 p-2.5">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium text-foreground">Consulta oftalmológica (pago agora)</p>
-                  <p className="font-medium text-foreground">
+                  <p className="text-sm text-foreground/90">
+                    Investimento da consulta
+                  </p>
+                  <p className="text-sm font-medium text-foreground/90">
                     {formatConsultationPrice(summary.consultationPriceCents)}
                   </p>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Pagamento online integral para confirmar a reserva.
+                  Valor pago online para finalizar a confirmação.
                 </p>
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm">
-              <p className="font-medium text-foreground">Resumo financeiro</p>
-              <p className="mt-1 text-muted-foreground">
-                Confira os valores como em um checkout antes de seguir para o
-                pagamento.
+            <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-sm">
+              <p className="text-sm font-semibold text-foreground/90">
+                Resumo financeiro
               </p>
-              <div className="mt-3 space-y-3 rounded-lg border border-border/60 bg-background/70 p-3">
+              <p className="mt-1 text-xs text-muted-foreground">
+                Você confirma o horário com uma entrada online e acerta o restante no dia da consulta.
+              </p>
+              <div className="mt-3 space-y-3 rounded-lg border border-border/60 bg-background/60 p-2.5">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-foreground">Consulta oftalmológica</p>
-                    <p className="font-medium text-foreground">
-                      {formatConsultationPrice(summary.consultationPriceCents)}
+                    <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                      Entrada para confirmação
                     </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Valor total da consulta.
-                  </p>
-                </div>
-                <div className="h-px w-full bg-border/70" />
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-foreground">
-                      Taxa de reserva (pago agora)
-                    </p>
-                    <p className="font-medium text-foreground">
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
                       {formatReservationFee(summary.reservationFeeCents)}
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Pagamento online para confirmar a reserva.
+                    Valor online para garantir este horário.
                   </p>
                 </div>
                 <div className="h-px w-full bg-border/70" />
                 <div className="space-y-1">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-foreground">
-                      Pagamento na consulta (presencial)
+                    <p className="text-sm text-red-700 dark:text-red-400">
+                      Restante no dia da consulta
                     </p>
-                    <p className="font-medium text-foreground">
+                    <p className="text-sm font-medium text-red-700 dark:text-red-400">
                       {formatRemainingAtConsultation(
                         summary.consultationPriceCents,
                         remainingAtConsultationCents,
@@ -211,27 +210,43 @@ export default async function ResumoPreAgendamentoPage({
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Valor restante para pagamento presencial no dia da consulta.
+                    Ajuste presencial no atendimento.
+                  </p>
+                </div>
+                <div className="h-px w-full bg-border/70" />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-foreground/90">
+                      Investimento total
+                    </p>
+                    <p className="text-sm font-medium text-foreground/90">
+                      {formatConsultationPrice(summary.consultationPriceCents)}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Valor completo da consulta.
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="flex w-full flex-col gap-2 border-t border-border/70 pt-4 sm:flex-row sm:items-start sm:justify-between">
-            <Button asChild variant="outline" className="w-full sm:w-auto">
-              <Link href="/agendar">Editar agendamento</Link>
-            </Button>
+          <div className="flex w-full flex-col gap-2 border-t border-border/70 pt-3">
             <StartCheckoutButton
               location={summary.locationId}
               date={summary.date}
               time={summary.time}
+              secondaryAction={
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link href="/agendar">Editar agendamento</Link>
+                </Button>
+              }
               label={
                 summary.paymentMode === "in_person"
                   ? "Confirmar agendamento"
                   : summary.paymentMode === "full_payment"
-                    ? "Pagar consulta"
-                    : "Pagar taxa de reserva"
+                    ? "Confirmar com pagamento online"
+                    : "Confirmar horário"
               }
               isAuthenticated={Boolean(userId)}
               paymentMode={summary.paymentMode}

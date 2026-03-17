@@ -12,6 +12,8 @@ import { getStripeClient } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 const CHECKOUT_SESSION_DURATION_SECONDS = 30 * 60;
+const INTERNAL_RESCHEDULE_ERROR =
+  "Não foi possível concluir a remarcação agora. Tente novamente em instantes.";
 
 const reschedulePayloadSchema = bookingCheckoutSchema.extend({
   eventTypeId: z.string().trim().min(1),
@@ -69,6 +71,12 @@ export async function POST(request: Request) {
         },
       ];
       try {
+        const cancelParams = new URLSearchParams({
+          payment: "cancelled",
+          location: parsed.data.location,
+          date: parsed.data.date,
+          time: parsed.data.time,
+        });
         const checkoutSessionParams: StripeSdk.Checkout.SessionCreateParams = {
           expires_at: Math.floor(desiredHoldExpiresAt / 1000),
           mode: "payment",
@@ -88,7 +96,7 @@ export async function POST(request: Request) {
           },
           customer_email: customerEmail ?? undefined,
           success_url: `${origin}/dashboard?payment=success`,
-          cancel_url: `${origin}/dashboard/reagendar?payment=cancelled`,
+          cancel_url: `${origin}/dashboard/reagendar?${cancelParams.toString()}`,
           metadata: {
             reservationId: String(result.reservationId),
             paymentId: String(result.paymentId),
@@ -150,7 +158,8 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao remarcar consulta.";
     const status = message.toLowerCase().includes("not authenticated") ? 401 : 500;
-    return NextResponse.json({ ok: false, error: message }, { status });
+    const publicMessage = status === 500 ? INTERNAL_RESCHEDULE_ERROR : toHumanReadableError(message);
+    return NextResponse.json({ ok: false, error: publicMessage }, { status });
   }
 }
 
@@ -169,4 +178,18 @@ async function getCustomerEmailByUserId(userId: string) {
   } catch {
     return null;
   }
+}
+
+function toHumanReadableError(rawMessage: string) {
+  const cleaned = rawMessage
+    .replace(/\[Request ID:[^\]]+\]\s*/gi, "")
+    .replace(/Server Error\s*/gi, "")
+    .replace(/Uncaught Error:\s*/gi, "")
+    .replace(/\s+at\s+[^\n]+/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (cleaned.length === 0) {
+    return INTERNAL_RESCHEDULE_ERROR;
+  }
+  return cleaned;
 }
