@@ -18,32 +18,24 @@ function normalizeIssuerUrl(rawValue: string) {
   }
 }
 
-function resolveClerkIssuerDomain() {
-  const candidates = [
-    process.env.CLERK_FRONTEND_API_URL,
-    process.env.CLERK_ISSUER_URL,
-    process.env.NEXT_PUBLIC_CLERK_FRONTEND_API_URL,
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) {
-      continue;
-    }
-    const normalized = normalizeIssuerUrl(candidate);
+function resolveClerkDomain() {
+  const configuredDomain = process.env.CLERK_FRONTEND_API_URL;
+  if (configuredDomain) {
+    const normalized = normalizeIssuerUrl(configuredDomain);
     if (normalized) {
       return normalized;
     }
   }
 
   throw new Error(
-    "Clerk issuer domain não configurado. Defina CLERK_FRONTEND_API_URL (ex.: https://clerk.seudominio.com).",
+    "Dominio do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
   );
 }
 
 export default {
   providers: [
     {
-      domain: resolveClerkIssuerDomain(),
+      domain: resolveClerkDomain(),
       applicationID: "convex",
     },
   ],
