@@ -6,6 +6,7 @@ import StripeSdk from 'stripe';
 import { bookingCheckoutSchema } from '@/domain/booking/schema';
 import { requireMemberApiAccess } from '@/lib/access';
 import { getAuthenticatedConvexHttpClient } from '@/lib/convex-server';
+import { resolvePublicOrigin } from '@/lib/request-origin';
 import { getStripeClient } from '@/lib/stripe';
 
 export const runtime = 'nodejs';
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     const customerEmail = await getCustomerEmailByUserId(userId);
 
     const stripe = getStripeClient();
-    const origin = new URL(request.url).origin;
+    const origin = resolvePublicOrigin(request);
     const cancelParams = new URLSearchParams({
       location: parsed.data.location,
       date: parsed.data.date,
@@ -149,6 +150,9 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Falha ao iniciar checkout Stripe.';
+    console.error('[api/stripe/checkout] Falha ao iniciar checkout.', {
+      message,
+    });
     const normalizedMessage = toHumanReadableError(message);
     if (matchesKnownError(normalizedMessage, ACTIVE_APPOINTMENT_ERROR)) {
       return NextResponse.json(

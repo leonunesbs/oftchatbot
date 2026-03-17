@@ -8,6 +8,7 @@ import { api } from "@convex/_generated/api";
 import { bookingCheckoutSchema } from "@/domain/booking/schema";
 import { requireMemberApiAccess } from "@/lib/access";
 import { getAuthenticatedConvexHttpClient } from "@/lib/convex-server";
+import { resolvePublicOrigin } from "@/lib/request-origin";
 import { getStripeClient } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     if (result.kind === "payment_required") {
       const customerEmail = await getCustomerEmailByUserId(userId);
       const stripe = getStripeClient();
-      const origin = new URL(request.url).origin;
+      const origin = resolvePublicOrigin(request);
       const desiredHoldExpiresAt =
         result.holdExpiresAt ?? Date.now() + CHECKOUT_SESSION_DURATION_SECONDS * 1000;
       const lineItems: StripeSdk.Checkout.SessionCreateParams.LineItem[] = [
@@ -157,6 +158,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao remarcar consulta.";
+    console.error("[api/appointments/reschedule] Falha ao remarcar consulta.", {
+      message,
+    });
     const status = message.toLowerCase().includes("not authenticated") ? 401 : 500;
     const publicMessage = status === 500 ? INTERNAL_RESCHEDULE_ERROR : toHumanReadableError(message);
     return NextResponse.json({ ok: false, error: publicMessage }, { status });
