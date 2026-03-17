@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 
 import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 
 type PatientRescheduleDialogProps = {
   policy: {
@@ -25,7 +28,7 @@ type PatientRescheduleDialogProps = {
     id: string;
     label: string;
   };
-  fixedLocation: {
+  fixedEventTypeOption: {
     value: string;
     label: string;
   };
@@ -42,19 +45,20 @@ type PatientRescheduleDialogProps = {
 export function PatientRescheduleDialog({
   policy,
   fixedEventType,
-  fixedLocation,
+  fixedEventTypeOption,
   dateOptions,
   availabilityError,
   backHref,
 }: PatientRescheduleDialogProps) {
   const router = useRouter();
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
 
   return (
     <Dialog
       open
       onOpenChange={(open) => {
         if (!open) {
-          closeParallelRoute(router, backHref);
+          closeParallelRoute(router, backHref, resolvedBackHref);
         }
       }}
     >
@@ -62,17 +66,17 @@ export function PatientRescheduleDialog({
         <DialogHeader>
           <DialogTitle>Reagendar consulta</DialogTitle>
           <DialogDescription>
-            Escolha uma nova data e horário para a mesma unidade do atendimento atual.
+            Escolha uma nova data e horário para o mesmo evento do atendimento atual.
           </DialogDescription>
         </DialogHeader>
         <RescheduleAppointmentCard
           policy={policy}
           fixedEventType={fixedEventType}
-          fixedLocation={fixedLocation}
+          fixedEventTypeOption={fixedEventTypeOption}
           dateOptions={dateOptions}
           availabilityError={availabilityError}
           displayMode="embedded"
-          onCompleted={() => closeParallelRoute(router, backHref)}
+          onCompleted={() => closeParallelRoute(router, backHref, resolvedBackHref)}
         />
       </DialogContent>
     </Dialog>

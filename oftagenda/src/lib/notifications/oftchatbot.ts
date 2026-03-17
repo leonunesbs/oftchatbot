@@ -69,7 +69,7 @@ function buildAppointmentConfirmationMessage(input: AppointmentConfirmedNotifica
     "",
     "Seu agendamento foi confirmado com sucesso.",
     `Consulta: ${input.consultationType}`,
-    `Local: ${input.location}`,
+    `Evento: ${input.eventType}`,
     `Data e horario: ${when}`,
     "",
     "Se precisar, responda esta mensagem para falar com nossa equipe.",

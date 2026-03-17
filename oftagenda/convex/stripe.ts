@@ -9,7 +9,7 @@ const BOOKING_MIN_NOTICE_MS = 48 * 60 * 60_000;
 const RESERVATION_FEE_PERCENT = 20;
 
 const checkoutDraftSchema = {
-  location: v.string(),
+  eventType: v.string(),
   date: v.string(),
   time: v.string(),
 };
@@ -31,7 +31,7 @@ export const createCheckoutDraft = mutation({
 
     const now = Date.now();
 
-    const eventType = await resolveActiveEventType(ctx, args.location);
+    const eventType = await resolveActiveEventType(ctx, args.eventType);
     const paymentMode = eventType.paymentMode ?? "booking_fee";
 
     if (paymentMode === "in_person") {
@@ -309,7 +309,7 @@ export const confirmInPersonBooking = mutation({
     }
 
     const now = Date.now();
-    const eventType = await resolveActiveEventType(ctx, args.location);
+    const eventType = await resolveActiveEventType(ctx, args.eventType);
     const paymentMode = eventType.paymentMode ?? "booking_fee";
 
     if (paymentMode !== "in_person") {
@@ -368,7 +368,6 @@ export const confirmInPersonBooking = mutation({
       name: patient.name,
       phone: patient.phone,
       email: patient.email,
-      location: eventType.location,
       eventTypeId: eventType._id,
       reservationId,
       preferredPeriod: inferPreferredPeriod(slotTimestamp),
@@ -400,7 +399,7 @@ export const confirmInPersonBooking = mutation({
         appointmentId: String(appointmentId),
         patientName: patient.name,
         patientPhone: patient.phone,
-        location: eventType.location,
+        eventType: eventType.name ?? eventType.title,
         scheduledFor: slotTimestamp,
         timezone: referenceAvailability.timezone,
         consultationType: eventType.name ?? eventType.title ?? "Consulta oftalmologica",
@@ -423,7 +422,7 @@ export const reconcileStripeEvent = mutation({
       reservationId: v.optional(v.string()),
       paymentId: v.optional(v.string()),
       clerkUserId: v.optional(v.string()),
-      location: v.optional(v.string()),
+      eventType: v.optional(v.string()),
       date: v.optional(v.string()),
       time: v.optional(v.string()),
     }),
@@ -469,7 +468,7 @@ export const reconcileStripeEvent = mutation({
           appointmentId: string;
           patientName: string;
           patientPhone: string;
-          location: string;
+          eventType: string;
           scheduledFor: number;
           timezone: string;
           consultationType: string;
@@ -584,7 +583,6 @@ async function markAsPaid(
       name: patient.name,
       phone: patient.phone,
       email: patient.email,
-      location: eventType.location,
       eventTypeId: eventType._id,
       reservationId: reservation._id,
       preferredPeriod: inferPreferredPeriod(reservation.startsAt),
@@ -613,7 +611,6 @@ async function markAsPaid(
       name: patient.name,
       phone: patient.phone,
       email: patient.email,
-      location: eventType.location,
       eventTypeId: eventType._id,
       reservationId: reservation._id,
       preferredPeriod: inferPreferredPeriod(reservation.startsAt),
@@ -657,7 +654,7 @@ async function markAsPaid(
     appointmentId: String(appointmentId),
     patientName: patient.name,
     patientPhone: patient.phone,
-    location: eventType.location,
+    eventType: eventType.name ?? eventType.title,
     scheduledFor: reservation.startsAt,
     timezone: availability?.timezone ?? "America/Fortaleza",
     consultationType: eventType.name ?? eventType.title ?? "Consulta oftalmologica",
@@ -747,8 +744,8 @@ async function findPaymentByWebhook(
   return null;
 }
 
-async function resolveActiveEventType(ctx: MutationCtx, location: string) {
-  const normalizedInput = location.trim().toLowerCase();
+async function resolveActiveEventType(ctx: MutationCtx, eventType: string) {
+  const normalizedInput = eventType.trim().toLowerCase();
   const activeEventTypes = await ctx.db
     .query("event_types")
     .withIndex("by_active", (q) => q.eq("active", true))
@@ -759,11 +756,11 @@ async function resolveActiveEventType(ctx: MutationCtx, location: string) {
   );
 
   if (candidates.length === 0) {
-    throw new Error(`Evento selecionado não encontrado para slug "${location.trim()}".`);
+    throw new Error(`Evento selecionado não encontrado para slug "${eventType.trim()}".`);
   }
   if (candidates.length > 1) {
     throw new Error(
-      `Mais de um evento ativo encontrado para slug "${location.trim()}". Mantenha apenas um evento ativo por slug.`,
+      `Mais de um evento ativo encontrado para slug "${eventType.trim()}". Mantenha apenas um evento ativo por slug.`,
     );
   }
 

@@ -19,9 +19,8 @@ type PendingReservation = {
   _id: string;
   startsAt: number;
   holdExpiresAt: number;
-  location: string;
   consultationType: string;
-  checkoutLocation: string;
+  checkoutEventType: string;
   checkoutDate: string;
   checkoutTime: string;
 };
@@ -48,7 +47,7 @@ export function PendingReservationsList({
       return;
     }
     if (
-      !reservation.checkoutLocation ||
+      !reservation.checkoutEventType ||
       !reservation.checkoutDate ||
       !reservation.checkoutTime
     ) {
@@ -64,7 +63,7 @@ export function PendingReservationsList({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            location: reservation.checkoutLocation,
+            eventType: reservation.checkoutEventType,
             date: reservation.checkoutDate,
             time: reservation.checkoutTime,
           }),
@@ -140,7 +139,7 @@ export function PendingReservationsList({
         {reservations.map((item) => {
           const isCurrentAction = isPending && currentReservationId === item._id;
           const canRetryPayment = Boolean(
-            item.checkoutLocation && item.checkoutDate && item.checkoutTime,
+            item.checkoutEventType && item.checkoutDate && item.checkoutTime,
           );
           return (
             <li
@@ -148,7 +147,7 @@ export function PendingReservationsList({
               className="space-y-2 rounded-lg border border-border/70 p-3"
             >
               <p className="text-sm text-muted-foreground">
-                {item.consultationType} - {item.location} -{" "}
+                {item.consultationType} -{" "}
                 {new Date(item.startsAt).toLocaleString("pt-BR")} (reservado até{" "}
                 {new Date(item.holdExpiresAt).toLocaleTimeString("pt-BR", {
                   hour: "2-digit",

@@ -27,7 +27,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 import {
   reservationStatusBadgeVariant,
   reservationStatusLabel,
@@ -48,7 +51,7 @@ type ReservationActionData = {
   availabilityId: string;
   eventTypeTitle: string;
   eventKind: "consulta" | "procedimento" | "exame";
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
+  eventTypeSlug: string;
   availabilityLabel: string;
   status: ReservationStatus;
   startsAt: number;
@@ -184,14 +187,8 @@ function buildMailtoHref({ to, subject, body }: { to: string; subject: string; b
   return `mailto:${to}?${params.toString()}`;
 }
 
-function formatLocationLabel(location: ReservationActionData["location"]) {
-  if (location === "fortaleza") {
-    return "Fortaleza";
-  }
-  if (location === "sao_domingos_do_maranhao") {
-    return "São Domingos do Maranhão";
-  }
-  return "Fortuna";
+function formatEventTypeSlug(eventTypeSlug: string) {
+  return eventTypeSlug || "sem-slug";
 }
 
 function parseDateInput(value?: string) {
@@ -284,7 +281,7 @@ function ReservationActionContent({
 
 Este é um lembrete da sua consulta de ${reservation.eventTypeTitle}.
 Data e horário: ${formatDateTime(reservation.startsAt)}.
-Unidade: ${formatLocationLabel(reservation.location)}.
+Slug do evento: ${formatEventTypeSlug(reservation.eventTypeSlug)}.
 
 Se precisar reagendar, responda este e-mail com antecedência.
 
@@ -295,7 +292,7 @@ Equipe de atendimento`;
 Seu agendamento está confirmado:
 - Atendimento: ${reservation.eventTypeTitle}
 - Data e horário: ${formatDateTime(reservation.startsAt)}
-- Unidade: ${formatLocationLabel(reservation.location)}
+- Slug do evento: ${formatEventTypeSlug(reservation.eventTypeSlug)}
 
 Qualquer dúvida, estamos à disposição.
 
@@ -662,7 +659,8 @@ export function AdminReservationActionView({
   fromDragDrop,
 }: AdminReservationActionViewProps) {
   const router = useRouter();
-  const handleBack = () => closeParallelRoute(router, backHref);
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
+  const handleBack = () => closeParallelRoute(router, backHref, resolvedBackHref);
 
   if (asDrawer) {
     return (
@@ -670,7 +668,7 @@ export function AdminReservationActionView({
         open
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref);
+            closeParallelRoute(router, backHref, resolvedBackHref);
           }
         }}
       >

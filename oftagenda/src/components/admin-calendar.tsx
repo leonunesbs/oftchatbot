@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
 import type { ReservationStatus } from "@/lib/reservation-status";
 import { reservationStatusLabel } from "@/lib/reservation-status";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type CalendarItem = {
   _id: string;
@@ -203,10 +204,12 @@ function parseReagendarReservationId(pathname: string) {
 function DraggableReservationCard({
   item,
   agendaPath,
+  originHref,
   dragEnabled,
 }: {
   item: CalendarItem;
   agendaPath: string;
+  originHref: string;
   dragEnabled: boolean;
 }) {
   const router = useRouter();
@@ -229,11 +232,22 @@ function DraggableReservationCard({
       } ${
         STATUS_CARD_CLASS[item.status]
       } ${isDragging ? "cursor-grabbing opacity-70" : ""}`}
-      onClick={() => router.push(`${agendaPath}/status/${item.reservationId}`)}
+      onClick={() =>
+        router.push(
+          appendParallelRouteOrigin(
+            `${agendaPath}/status/${item.reservationId}`,
+            originHref,
+          ),
+        )}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          router.push(`${agendaPath}/status/${item.reservationId}`);
+          router.push(
+            appendParallelRouteOrigin(
+              `${agendaPath}/status/${item.reservationId}`,
+              originHref,
+            ),
+          );
         }
       }}
       {...listeners}
@@ -258,6 +272,7 @@ function AgendaSlotCell({
   day,
   openEmptySlotRoute,
   agendaPath,
+  originHref,
   liveMarkerOffsetPercent,
   isDraggingReservation,
   dragEnabled,
@@ -268,6 +283,7 @@ function AgendaSlotCell({
   day: Date;
   openEmptySlotRoute: (day: Date, slot: string) => void;
   agendaPath: string;
+  originHref: string;
   liveMarkerOffsetPercent: number | null;
   isDraggingReservation: boolean;
   dragEnabled: boolean;
@@ -310,7 +326,13 @@ function AgendaSlotCell({
       ) : null}
       <div className="space-y-1">
         {slotItems.map((item) => (
-          <DraggableReservationCard key={item._id} item={item} agendaPath={agendaPath} dragEnabled={dragEnabled} />
+          <DraggableReservationCard
+            key={item._id}
+            item={item}
+            agendaPath={agendaPath}
+            originHref={originHref}
+            dragEnabled={dragEnabled}
+          />
         ))}
       </div>
     </div>
@@ -320,6 +342,7 @@ function AgendaSlotCell({
 export function AdminCalendar({ items }: AdminCalendarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [anchorDate, setAnchorDate] = useState(() => new Date());
   const [now, setNow] = useState(() => new Date());
@@ -329,6 +352,10 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
   const bodyCursorBeforeDragRef = useRef<string>("");
   const previousPathnameRef = useRef(pathname);
   const agendaPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const originHref = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     const updateNow = () => setNow(new Date());
@@ -543,7 +570,9 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
 
   function openEmptySlotRoute(day: Date, slot: string) {
     const date = toDateInput(day);
-    router.push(`${agendaPath}/celula-vazia?date=${date}&time=${slot}`);
+    router.push(
+      appendParallelRouteOrigin(`${agendaPath}/celula-vazia?date=${date}&time=${slot}`, originHref),
+    );
   }
 
   const nextOperations = useMemo(
@@ -587,7 +616,10 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       },
     }));
     router.push(
-      `${agendaPath}/reagendar/${source.reservationId}?date=${target.date}&time=${target.time}&fromDragDrop=true`,
+      appendParallelRouteOrigin(
+        `${agendaPath}/reagendar/${source.reservationId}?date=${target.date}&time=${target.time}&fromDragDrop=true`,
+        originHref,
+      ),
     );
   }
 
@@ -674,6 +706,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                       day={day}
                       openEmptySlotRoute={openEmptySlotRoute}
                       agendaPath={agendaPath}
+                      originHref={originHref}
                       liveMarkerOffsetPercent={
                         liveMarker && liveMarker.dayKey === dayKey && liveMarker.slot === slot ? liveMarker.offsetPercent : null
                       }
@@ -718,22 +751,46 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1">
                     <Button asChild variant="outline" size="sm">
-                      <Link href={`${agendaPath}/reagendar/${item.reservationId}`} prefetch={false}>
+                      <Link
+                        href={appendParallelRouteOrigin(
+                          `${agendaPath}/reagendar/${item.reservationId}`,
+                          originHref,
+                        )}
+                        prefetch={false}
+                      >
                         Reagendar
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm">
-                      <Link href={`${agendaPath}/status/${item.reservationId}`} prefetch={false}>
+                      <Link
+                        href={appendParallelRouteOrigin(
+                          `${agendaPath}/status/${item.reservationId}`,
+                          originHref,
+                        )}
+                        prefetch={false}
+                      >
                         Status
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm">
-                      <Link href={`${agendaPath}/contato/${item.reservationId}`} prefetch={false}>
+                      <Link
+                        href={appendParallelRouteOrigin(
+                          `${agendaPath}/contato/${item.reservationId}`,
+                          originHref,
+                        )}
+                        prefetch={false}
+                      >
                         Contato
                       </Link>
                     </Button>
                     <Button asChild variant="destructive" size="sm">
-                      <Link href={`${agendaPath}/cancelar/${item.reservationId}`} prefetch={false}>
+                      <Link
+                        href={appendParallelRouteOrigin(
+                          `${agendaPath}/cancelar/${item.reservationId}`,
+                          originHref,
+                        )}
+                        prefetch={false}
+                      >
                         Cancelar
                       </Link>
                     </Button>

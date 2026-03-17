@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const params = new URLSearchParams({
-    location: parsed.data.location,
+    eventType: parsed.data.eventType,
     date: parsed.data.date,
     time: parsed.data.time,
   });

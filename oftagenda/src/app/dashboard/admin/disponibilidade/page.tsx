@@ -3,6 +3,7 @@ import { buildAvailabilityGroups, getAdminSnapshot } from "@/app/dashboard/admin
 import { AdminAvailabilityDataTable } from "@/components/admin-availability-data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
 
 export default async function AdminAvailabilityPage() {
   const data = await getAdminSnapshot();
@@ -17,7 +18,13 @@ export default async function AdminAvailabilityPage() {
       <CardContent className="space-y-4">
         <div className="flex justify-end">
           <Button size="sm" asChild>
-            <Link href="/dashboard/admin/nova-disponibilidade" scroll={false}>
+            <Link
+              href={appendParallelRouteOrigin(
+                "/dashboard/admin/nova-disponibilidade",
+                "/dashboard/admin/disponibilidade",
+              )}
+              scroll={false}
+            >
               Nova disponibilidade
             </Link>
           </Button>

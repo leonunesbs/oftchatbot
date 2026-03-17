@@ -5,17 +5,16 @@ import { getBookingBootstrapData } from "@/lib/booking-bootstrap";
 import { getConvexHttpClient } from "@/lib/convex-server";
 
 type PreBookingSummaryQueryParams = {
-  locationId?: string;
-  location?: string;
+  eventType?: string;
   date?: string;
   time?: string;
   payment?: string;
 };
 
 export type PreBookingSummaryData = {
-  locationId: string;
-  locationLabel: string;
-  locationAddress: string;
+  eventType: string;
+  eventTypeLabel: string;
+  eventTypeAddress: string;
   consultationPriceCents: number;
   reservationFeeCents: number;
   reservationFeePercent: number;
@@ -33,20 +32,20 @@ export type PreBookingSummaryData = {
 export async function resolvePreBookingSummary(
   params: PreBookingSummaryQueryParams,
 ): Promise<PreBookingSummaryData> {
-  const rawLocationId = normalizeLocationInput(params.locationId ?? params.location ?? "");
+  const rawEventType = normalizeLocationInput(params.eventType ?? "");
   const date = normalizeDateInput(params.date ?? "");
   const time = normalizeTimeInput(params.time ?? "");
   const payment = (params.payment ?? "").trim();
-  const hasRedactedParams = [rawLocationId, date, time, payment].some(
+  const hasRedactedParams = [rawEventType, date, time, payment].some(
     isRedactedValue,
   );
-  const hasMissingParams = !rawLocationId || !date || !time;
+  const hasMissingParams = !rawEventType || !date || !time;
 
   if (hasRedactedParams || hasMissingParams) {
     return {
-      locationId: rawLocationId,
-      locationLabel: rawLocationId || "Local não informado",
-      locationAddress: "",
+      eventType: rawEventType,
+      eventTypeLabel: rawEventType || "Evento não informado",
+      eventTypeAddress: "",
       consultationPriceCents: 0,
       reservationFeeCents: 0,
       reservationFeePercent: 20,
@@ -62,41 +61,41 @@ export async function resolvePreBookingSummary(
     };
   }
 
-  const { locations } = await getBookingBootstrapData();
-  const normalizedLocationId = normalizeLocationInput(rawLocationId);
-  const selectedLocation =
-    locations.find(
+  const { eventTypes } = await getBookingBootstrapData();
+  const normalizedEventType = normalizeLocationInput(rawEventType);
+  const selectedEventType =
+    eventTypes.find(
       (locationOption) =>
-        normalizeLocationInput(locationOption.value) === normalizedLocationId ||
-        normalizeLocationInput(locationOption.label) === normalizedLocationId,
+        normalizeLocationInput(locationOption.value) === normalizedEventType ||
+        normalizeLocationInput(locationOption.label) === normalizedEventType,
     ) ??
     null;
   const validation =
-    selectedLocation
-      ? await validateSelectionForLocation({
-          locationId: selectedLocation.value,
+    selectedEventType
+      ? await validateSelectionForEventType({
+          eventType: selectedEventType.value,
           date,
           time,
         })
       : { hasDateOption: false, hasValidTime: false };
-  const paymentMode: PaymentMode = selectedLocation?.paymentMode ?? "booking_fee";
+  const paymentMode: PaymentMode = selectedEventType?.paymentMode ?? "booking_fee";
   const consultationPriceCents =
-    typeof selectedLocation?.consultationPriceCents === "number"
-      ? selectedLocation.consultationPriceCents
+    typeof selectedEventType?.consultationPriceCents === "number"
+      ? selectedEventType.consultationPriceCents
       : 0;
   const reservationFeePercent =
-    typeof selectedLocation?.reservationFeePercent === "number"
-      ? selectedLocation.reservationFeePercent
+    typeof selectedEventType?.reservationFeePercent === "number"
+      ? selectedEventType.reservationFeePercent
       : 20;
   const reservationFeeCents =
-    typeof selectedLocation?.reservationFeeCents === "number"
-      ? selectedLocation.reservationFeeCents
+    typeof selectedEventType?.reservationFeeCents === "number"
+      ? selectedEventType.reservationFeeCents
       : calculatePercentageCents(consultationPriceCents, reservationFeePercent);
 
   return {
-    locationId: selectedLocation?.value ?? rawLocationId,
-    locationLabel: selectedLocation?.label ?? rawLocationId,
-    locationAddress: selectedLocation?.address ?? "",
+    eventType: selectedEventType?.value ?? rawEventType,
+    eventTypeLabel: selectedEventType?.label ?? rawEventType,
+    eventTypeAddress: selectedEventType?.address ?? "",
     consultationPriceCents,
     reservationFeeCents,
     reservationFeePercent,
@@ -109,7 +108,7 @@ export async function resolvePreBookingSummary(
     hasRedactedParams: false,
     hasMissingParams: false,
     hasInvalidSelection:
-      !selectedLocation || !validation.hasDateOption || !validation.hasValidTime,
+      !selectedEventType || !validation.hasDateOption || !validation.hasValidTime,
   };
 }
 
@@ -123,15 +122,15 @@ function calculatePercentageCents(amountCents: number, percent: number) {
   return Math.round((amountCents * percent) / 100);
 }
 
-async function validateSelectionForLocation(input: {
-  locationId: string;
+async function validateSelectionForEventType(input: {
+  eventType: string;
   date: string;
   time: string;
 }) {
   try {
     const client = getConvexHttpClient();
-    const options = await client.query(api.appointments.getBookingOptionsByLocation, {
-      location: input.locationId,
+    const options = await client.query(api.appointments.getBookingOptionsByEventType, {
+      eventType: input.eventType,
       daysAhead: 3650,
       targetDate: input.date,
     });

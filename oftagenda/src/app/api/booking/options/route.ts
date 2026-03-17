@@ -1,30 +1,30 @@
 import { NextResponse } from "next/server";
 
 import { api } from "@convex/_generated/api";
-import { bookingLocationSchema } from "@/domain/booking/schema";
+import { bookingEventTypeSchema } from "@/domain/booking/schema";
 import { getConvexHttpClient } from "@/lib/convex-server";
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const locationParam = url.searchParams.get("location");
+    const eventTypeParam = url.searchParams.get("eventType");
     const daysAheadParam = Number(url.searchParams.get("daysAhead") ?? "3650");
     const targetDateParam = url.searchParams.get("targetDate") ?? undefined;
-    const parsedLocation = bookingLocationSchema.safeParse(locationParam);
+    const parsedEventType = bookingEventTypeSchema.safeParse(eventTypeParam);
 
-    if (!parsedLocation.success) {
+    if (!parsedEventType.success) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Local inválido.",
+          error: "Tipo de atendimento inválido.",
         },
         { status: 400 },
       );
     }
 
     const client = getConvexHttpClient();
-    const options = await client.query(api.appointments.getBookingOptionsByLocation, {
-      location: parsedLocation.data,
+    const options = await client.query(api.appointments.getBookingOptionsByEventType, {
+      eventType: parsedEventType.data,
       daysAhead: Number.isNaN(daysAheadParam) ? 3650 : daysAheadParam,
       targetDate: targetDateParam,
     });

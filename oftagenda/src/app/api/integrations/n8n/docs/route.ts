@@ -26,12 +26,12 @@ export async function GET(request: Request) {
         method: "GET",
         path: "/api/integrations/n8n/locations",
         description:
-          "Lista locais ativos de atendimento para agendamento, incluindo preço da consulta e taxa de reserva.",
+          "Lista eventos ativos de atendimento para agendamento, incluindo preço da consulta e taxa de reserva.",
       },
       {
         method: "GET",
-        path: "/api/integrations/n8n/availability?location=<slug>&daysAhead=14",
-        description: "Lista datas e horários disponíveis para o local.",
+        path: "/api/integrations/n8n/availability?eventType=<slug>&daysAhead=14",
+        description: "Lista datas e horários disponíveis para o evento informado.",
       },
       {
         method: "GET",
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
         description:
           "Gera link para encaminhar paciente à página /agendar/resumo.",
         body: {
-          location: "fortaleza",
+          eventType: "consulta-oftalmologica",
           date: "2026-03-20",
           time: "14:00",
           phone: "5585999999999 (opcional)",
@@ -79,8 +79,8 @@ export async function GET(request: Request) {
         responseExample: {
           ok: true,
           summaryPath:
-            "agendar/resumo?location=fortaleza&date=2026-03-20&time=14%3A00&phone=5585999999999&source=n8n",
-          summaryUrl: `${forwardOrigin}/agendar/resumo?location=fortaleza&date=2026-03-20&time=14%3A00&phone=5585999999999&source=n8n`,
+            "agendar/resumo?eventType=consulta-oftalmologica&date=2026-03-20&time=14%3A00&phone=5585999999999&source=n8n",
+          summaryUrl: `${forwardOrigin}/agendar/resumo?eventType=consulta-oftalmologica&date=2026-03-20&time=14%3A00&phone=5585999999999&source=n8n`,
         },
       },
       {

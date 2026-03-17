@@ -7,7 +7,7 @@ const payloadSchema = z.object({
   appointmentId: z.string().min(1),
   patientName: z.string().min(1),
   patientPhone: z.string().min(8),
-  location: z.string().min(1),
+  eventType: z.string().min(1),
   scheduledFor: z.number().int().positive(),
   timezone: z.string().min(3),
   consultationType: z.string().min(1),

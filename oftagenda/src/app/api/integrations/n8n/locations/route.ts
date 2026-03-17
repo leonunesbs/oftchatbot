@@ -18,27 +18,27 @@ function formatCurrency(cents?: number) {
 export async function GET() {
   try {
     const client = getConvexHttpClient();
-    const rawLocations = await client.query(
-      api.appointments.getActiveBookingLocations,
+    const rawEventTypes = await client.query(
+      api.appointments.getActiveBookingEventTypes,
       {},
     );
-    const locations = rawLocations.map((location) => ({
-      ...location,
-      consultationPriceFormatted: formatCurrency(location.consultationPriceCents),
-      reservationFeeFormatted: formatCurrency(location.reservationFeeCents),
+    const eventTypes = rawEventTypes.map((eventType) => ({
+      ...eventType,
+      consultationPriceFormatted: formatCurrency(eventType.consultationPriceCents),
+      reservationFeeFormatted: formatCurrency(eventType.reservationFeeCents),
       paymentGuidance:
-        location.paymentMode === "full_payment"
+        eventType.paymentMode === "full_payment"
           ? "Valor referente ao pagamento integral da consulta."
-          : location.paymentMode === "in_person"
+          : eventType.paymentMode === "in_person"
             ? "Pagamento realizado presencialmente no dia da consulta."
-            : `Taxa de reserva de ${location.reservationFeePercent}% para garantir o horário.`,
+            : `Taxa de reserva de ${eventType.reservationFeePercent}% para garantir o horário.`,
     }));
-    return NextResponse.json({ ok: true, locations });
+    return NextResponse.json({ ok: true, eventTypes });
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
-        : "Falha ao listar locais para integração n8n.";
+        : "Falha ao listar eventos para integração n8n.";
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }

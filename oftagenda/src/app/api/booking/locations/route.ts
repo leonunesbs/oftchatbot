@@ -8,10 +8,10 @@ export async function GET() {
   try {
     await requireMemberApiAccess();
     const client = getConvexHttpClient();
-    const locations = await client.query(api.appointments.getActiveBookingLocations, {});
-    return NextResponse.json({ ok: true, locations });
+    const eventTypes = await client.query(api.appointments.getActiveBookingEventTypes, {});
+    return NextResponse.json({ ok: true, eventTypes });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Falha ao buscar locais de atendimento.";
+    const message = error instanceof Error ? error.message : "Falha ao buscar eventos de atendimento.";
     const status = message === "Not authenticated" ? 401 : message === "Not authorized" ? 403 : 500;
     return NextResponse.json({ ok: false, error: message }, { status });
   }

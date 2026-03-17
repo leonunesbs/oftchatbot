@@ -19,7 +19,6 @@ type EventTypeOption = {
   title: string;
   kind?: "consulta" | "procedimento" | "exame";
   availabilityId?: string;
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
   active: boolean;
 };
 

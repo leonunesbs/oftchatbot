@@ -5,19 +5,12 @@ import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-c
 import { Button } from "@/components/ui/button";
 
 type DashboardReschedulePageProps = {
-  searchParams?:
-    | Promise<{
-        payment?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-      }>
-    | {
-        payment?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-      };
+  searchParams?: Promise<{
+    payment?: string;
+    eventType?: string;
+    date?: string;
+    time?: string;
+  }>;
 };
 
 export default async function DashboardReschedulePage({
@@ -27,7 +20,7 @@ export default async function DashboardReschedulePage({
   const payment = params.payment ?? "";
   const initialDate = params.date ?? "";
   const initialTime = params.time ?? "";
-  const initialLocation = params.location ?? "";
+  const initialEventType = params.eventType ?? "";
   const checkoutNotCompleted = payment === "cancelled";
   const rescheduleData = await getPatientRescheduleData();
   if (!rescheduleData) {
@@ -62,12 +55,12 @@ export default async function DashboardReschedulePage({
       <RescheduleAppointmentCard
         policy={rescheduleData.policy}
         fixedEventType={rescheduleData.fixedEventType}
-        fixedLocation={rescheduleData.fixedLocation}
+        fixedEventTypeOption={rescheduleData.fixedEventTypeOption}
         dateOptions={rescheduleData.dateOptions}
         availabilityError={rescheduleData.availabilityError}
         paymentStatus={payment}
-        initialDate={initialLocation === rescheduleData.fixedLocation.value ? initialDate : ""}
-        initialTime={initialLocation === rescheduleData.fixedLocation.value ? initialTime : ""}
+        initialDate={initialEventType === rescheduleData.fixedEventTypeOption.value ? initialDate : ""}
+        initialTime={initialEventType === rescheduleData.fixedEventTypeOption.value ? initialTime : ""}
       />
     </section>
   );

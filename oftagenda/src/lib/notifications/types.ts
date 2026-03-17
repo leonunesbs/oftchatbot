@@ -2,7 +2,7 @@ export type AppointmentConfirmedNotificationInput = {
   appointmentId: string;
   patientName: string;
   patientPhone: string;
-  location: string;
+  eventType: string;
   scheduledFor: number;
   timezone: string;
   consultationType: string;

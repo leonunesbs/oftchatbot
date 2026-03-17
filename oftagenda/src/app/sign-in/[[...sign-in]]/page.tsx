@@ -18,13 +18,9 @@ export const metadata: Metadata = {
 };
 
 type SignInPageProps = {
-  searchParams?:
-    | Promise<{
-        redirect_url?: string;
-      }>
-    | {
-        redirect_url?: string;
-      };
+  searchParams?: Promise<{
+    redirect_url?: string;
+  }>;
 };
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {

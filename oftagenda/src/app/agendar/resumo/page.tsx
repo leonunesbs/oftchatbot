@@ -14,21 +14,12 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 type ResumoPageProps = {
-  searchParams?:
-    | Promise<{
-        locationId?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-        payment?: string;
-      }>
-    | {
-        locationId?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-        payment?: string;
-      };
+  searchParams?: Promise<{
+    eventType?: string;
+    date?: string;
+    time?: string;
+    payment?: string;
+  }>;
 };
 
 export default async function ResumoPreAgendamentoPage({
@@ -53,7 +44,7 @@ export default async function ResumoPreAgendamentoPage({
             <CardDescription>
               {summary.hasRedactedParams
                 ? "Detectamos dados inválidos na URL deste pré-agendamento. Por segurança, inicie um novo agendamento."
-                : "Esse horário não está mais disponível para o local selecionado. Escolha um novo horário para continuar."}
+                : "Esse horário não está mais disponível para o evento selecionado. Escolha um novo horário para continuar."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -65,8 +56,8 @@ export default async function ResumoPreAgendamentoPage({
       </section>
     );
   }
-  const addressHref = summary.locationAddress
-    ? buildAddressHref(summary.locationAddress)
+  const addressHref = summary.eventTypeAddress
+    ? buildAddressHref(summary.eventTypeAddress)
     : "";
   const remainingAtConsultationCents = Math.max(
     summary.consultationPriceCents - summary.reservationFeeCents,
@@ -102,18 +93,18 @@ export default async function ResumoPreAgendamentoPage({
           <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-xs text-muted-foreground sm:text-sm">
             <div className="grid gap-3 md:grid-cols-2">
               <p>
-                <span className="font-semibold text-foreground/90">Local:</span>{" "}
-                {summary.locationLabel}
+                <span className="font-semibold text-foreground/90">Evento:</span>{" "}
+                {summary.eventTypeLabel}
               </p>
-              {summary.locationAddress ? (
+              {summary.eventTypeAddress ? (
                 <p>
                   <span className="font-semibold text-foreground/90">Endereço:</span>{" "}
                   <a
                     href={addressHref}
                     className="underline underline-offset-4 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    aria-label={`Abrir o endereço em um aplicativo de mapas: ${summary.locationAddress}`}
+                    aria-label={`Abrir o endereço em um aplicativo de mapas: ${summary.eventTypeAddress}`}
                   >
-                    {summary.locationAddress}
+                    {summary.eventTypeAddress}
                   </a>
                 </p>
               ) : null}
@@ -224,27 +215,13 @@ export default async function ResumoPreAgendamentoPage({
                     </div>
                   </div>
                 </div>
-                <div className="h-px w-full bg-border/70" />
-                <div className="space-y-1">
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <p className="text-sm text-foreground/90">
-                      Investimento total
-                    </p>
-                    <p className="text-sm font-medium text-foreground/90 sm:text-right">
-                      {formatConsultationPrice(summary.consultationPriceCents)}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Valor completo da consulta.
-                  </p>
-                </div>
               </div>
             </div>
           )}
 
           <div className="flex w-full flex-col gap-2 border-t border-border/70 pt-3">
             <StartCheckoutButton
-              location={summary.locationId}
+              eventType={summary.eventType}
               date={summary.date}
               time={summary.time}
               secondaryAction={

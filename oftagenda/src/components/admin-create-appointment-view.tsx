@@ -9,7 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 import { useRouter } from "next/navigation";
 
 type EventTypeOption = {
@@ -19,7 +22,6 @@ type EventTypeOption = {
   title: string;
   kind?: "consulta" | "procedimento" | "exame";
   availabilityId?: string;
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
   active: boolean;
 };
 
@@ -46,13 +48,14 @@ export function AdminCreateAppointmentView({
   backHref,
 }: AdminCreateAppointmentViewProps) {
   const router = useRouter();
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
   if (asDrawer) {
     return (
       <Dialog
         open
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref);
+            closeParallelRoute(router, backHref, resolvedBackHref);
           }
         }}
       >

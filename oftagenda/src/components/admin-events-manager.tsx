@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   createReservationAction,
   deleteEventTypeAction,
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
 
 const selectClassName = "h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs";
 
@@ -242,6 +244,13 @@ function EventReservationsDataTable({
 }
 
 export function AdminEventsManager({ eventTypes, reservations, availabilityGroups, selectedKind }: AdminEventsManagerProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const originHref = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
+
   const reservationsByEventId = useMemo(() => {
     const map = new Map<string, ReservationRow[]>();
     for (const reservation of reservations) {
@@ -337,11 +346,12 @@ export function AdminEventsManager({ eventTypes, reservations, availabilityGroup
             <div className="flex min-w-72 flex-wrap gap-2">
               <Button size="sm" variant="outline" asChild>
                 <Link
-                  href={
+                  href={appendParallelRouteOrigin(
                     selectedKind === "all"
                       ? `/dashboard/admin/eventos/editar/${eventType._id}`
-                      : `/dashboard/admin/eventos/editar/${eventType._id}?kind=${selectedKind}`
-                  }
+                      : `/dashboard/admin/eventos/editar/${eventType._id}?kind=${selectedKind}`,
+                    originHref,
+                  )}
                 >
                   Editar
                 </Link>
@@ -446,7 +456,7 @@ export function AdminEventsManager({ eventTypes, reservations, availabilityGroup
         },
       },
     ],
-    [availabilityGroupBySlotId, reservationsByEventId, selectedKind],
+    [availabilityGroupBySlotId, originHref, reservationsByEventId, selectedKind],
   );
 
   return (

@@ -19,10 +19,10 @@ export async function BookingFormContainer({
       isAuthenticated={isAuthenticated}
       clerkEnabled={clerkEnabled}
       embedMode={embedMode}
-      initialLocations={bootstrapData.locations}
-      initialLocationsError={bootstrapData.locationsError}
-      initialAvailabilityByLocation={bootstrapData.availabilityByLocation}
-      initialAvailabilityErrorsByLocation={bootstrapData.availabilityErrorsByLocation}
+      initialEventTypes={bootstrapData.eventTypes}
+      initialEventTypesError={bootstrapData.eventTypesError}
+      initialAvailabilityByEventType={bootstrapData.availabilityByEventType}
+      initialAvailabilityErrorsByEventType={bootstrapData.availabilityErrorsByEventType}
     />
   );
 }

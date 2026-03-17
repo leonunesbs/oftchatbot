@@ -296,17 +296,18 @@ export const getPatientContextByPhone = query({
 
     const recentHistory = userAppointments.slice(0, 5).map((a) => ({
       appointmentId: String(a._id),
-      location: a.location,
+      eventType: a.consultationType ?? "Consulta oftalmológica",
       status: a.status,
       scheduledFor: a.scheduledFor ?? null,
       consultationType: a.consultationType ?? null,
       requestedAt: a.requestedAt,
     }));
 
-    const locationCounts = new Map<string, number>();
+    const eventTypeCounts = new Map<string, number>();
     const consultationCounts = new Map<string, number>();
     for (const a of userAppointments) {
-      locationCounts.set(a.location, (locationCounts.get(a.location) ?? 0) + 1);
+      const eventTypeKey = a.consultationType ?? "Consulta oftalmológica";
+      eventTypeCounts.set(eventTypeKey, (eventTypeCounts.get(eventTypeKey) ?? 0) + 1);
       if (a.consultationType) {
         consultationCounts.set(
           a.consultationType,
@@ -315,8 +316,8 @@ export const getPatientContextByPhone = query({
       }
     }
 
-    const frequentLocation =
-      [...locationCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ??
+    const frequentEventType =
+      [...eventTypeCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ??
       null;
     const frequentConsultationType =
       [...consultationCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ??
@@ -338,15 +339,15 @@ export const getPatientContextByPhone = query({
       summary: {
         totalAppointments: userAppointments.length,
         hasActiveAppointment: activeAppointment !== null,
-        lastVisitLocation: lastCompleted?.location ?? null,
+        lastVisitEventType: lastCompleted?.consultationType ?? null,
         lastVisitDate: lastCompleted?.scheduledFor ?? null,
-        frequentLocation,
+        frequentEventType,
         frequentConsultationType,
       },
       activeAppointment: activeAppointment
         ? {
             appointmentId: String(activeAppointment._id),
-            location: activeAppointment.location,
+            eventType: activeAppointment.consultationType ?? "Consulta oftalmológica",
             status: activeAppointment.status,
             scheduledFor: activeAppointment.scheduledFor ?? null,
             consultationType: activeAppointment.consultationType ?? null,
@@ -453,7 +454,7 @@ function mapAppointmentForResponse(
     name: appointment.name,
     phone: appointment.phone,
     email: appointment.email,
-    location: appointment.location,
+    eventType: appointment.consultationType ?? "Consulta oftalmológica",
     status: appointment.status,
     requestedAt: appointment.requestedAt,
     scheduledFor: appointment.scheduledFor ?? null,
@@ -478,7 +479,7 @@ function mapReservationForResponse(
     appointmentId: reservation.appointmentId ? String(reservation.appointmentId) : null,
     eventTypeId: String(reservation.eventTypeId),
     eventTypeTitle: eventType?.name ?? eventType?.title ?? "Consulta oftalmológica",
-    location: eventType?.location ?? "fortaleza",
+    eventTypeSlug: eventType?.slug ?? "",
     startsAt: reservation.startsAt,
     startsAtDateBr: startsAtDisplay.dateBr,
     startsAtTime: startsAtDisplay.time,

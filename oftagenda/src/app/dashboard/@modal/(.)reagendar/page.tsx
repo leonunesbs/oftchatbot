@@ -11,7 +11,7 @@ export default async function DashboardRescheduleModalPage() {
     <PatientRescheduleDialog
       policy={rescheduleData.policy}
       fixedEventType={rescheduleData.fixedEventType}
-      fixedLocation={rescheduleData.fixedLocation}
+      fixedEventTypeOption={rescheduleData.fixedEventTypeOption}
       dateOptions={rescheduleData.dateOptions}
       availabilityError={rescheduleData.availabilityError}
       backHref="/dashboard"

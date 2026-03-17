@@ -12,30 +12,7 @@ const RESCHEDULE_MAX_DAYS_AHEAD = 30;
 const RESCHEDULE_MAX_PER_APPOINTMENT = 1;
 const RESERVATION_FEE_PERCENT = 20;
 
-const bookingLocationValidator = v.string();
-const DEFAULT_LOCATION_CONFIGS = [
-  {
-    slug: "fortaleza",
-    label: "Fortaleza",
-    active: true,
-    isDefault: true,
-    sortOrder: 10,
-  },
-  {
-    slug: "sao_domingos_do_maranhao",
-    label: "São Domingos do Maranhão",
-    active: true,
-    isDefault: true,
-    sortOrder: 20,
-  },
-  {
-    slug: "fortuna",
-    label: "Fortuna",
-    active: true,
-    isDefault: true,
-    sortOrder: 30,
-  },
-] as const;
+const bookingEventTypeValidator = v.string();
 
 const periodValidator = v.union(
   v.literal("manha"),
@@ -49,7 +26,7 @@ export const confirmBooking = mutation({
     name: v.string(),
     phone: v.string(),
     email: v.string(),
-    location: bookingLocationValidator,
+    eventType: bookingEventTypeValidator,
     preferredPeriod: periodValidator,
     reason: v.optional(v.string()),
   },
@@ -68,7 +45,7 @@ export const confirmBooking = mutation({
       .query("event_types")
       .withIndex("by_active", (q) => q.eq("active", true))
       .collect();
-    const selectedEventType = activeEventTypes.find((item) => item.slug === args.location);
+    const selectedEventType = activeEventTypes.find((item) => item.slug === args.eventType);
     if (!selectedEventType) {
       throw new Error("Local selecionado nao encontrado");
     }
@@ -79,7 +56,7 @@ export const confirmBooking = mutation({
       name: args.name,
       phone: args.phone,
       email: args.email,
-      location: selectedEventType.location,
+      eventTypeId: selectedEventType._id,
       preferredPeriod: args.preferredPeriod,
       reason: args.reason,
       status: "confirmed",
@@ -121,9 +98,9 @@ export const hasConfirmedBooking = query({
   },
 });
 
-export const getBookingOptionsByLocation = query({
+export const getBookingOptionsByEventType = query({
   args: {
-    location: bookingLocationValidator,
+    eventType: bookingEventTypeValidator,
     daysAhead: v.optional(v.number()),
     targetDate: v.optional(v.string()),
   },
@@ -136,11 +113,11 @@ export const getBookingOptionsByLocation = query({
 
     const eventTypes = activeEventTypes.filter(
       (item) =>
-        item.slug === args.location &&
+        item.slug === args.eventType &&
         Boolean(item.availabilityId),
     );
     if (eventTypes.length === 0) {
-      return { location: args.location, dates: [] };
+      return { eventType: args.eventType, dates: [] };
     }
 
     const [allAvailabilities, allOverrides] = await Promise.all([
@@ -163,7 +140,7 @@ export const getBookingOptionsByLocation = query({
       ),
     );
     if (activeGroupNames.size === 0) {
-      return { location: args.location, dates: [] };
+      return { eventType: args.eventType, dates: [] };
     }
 
     const eventTypeByGroupName = new Map<string, (typeof eventTypes)[number]>();
@@ -190,7 +167,7 @@ export const getBookingOptionsByLocation = query({
       activeGroupNames.has(override.groupName.trim()),
     );
     if (availabilities.length === 0 && relevantOverrides.length === 0) {
-      return { location: args.location, dates: [] };
+      return { eventType: args.eventType, dates: [] };
     }
     const overrideByGroupDate = new Map(
       relevantOverrides.map((override) => [buildOverrideKey(override.groupName.trim(), override.date), override]),
@@ -330,54 +307,35 @@ export const getBookingOptionsByLocation = query({
       });
     }
 
-    return { location: args.location, dates };
+    return { eventType: args.eventType, dates };
   },
 });
 
-export const getActiveBookingLocations = query({
+export const getActiveBookingEventTypes = query({
   args: {},
   handler: async (ctx) => {
-    const [eventTypes, configuredLocations, allAvailabilities, allOverrides] = await Promise.all([
+    const [eventTypes, allAvailabilities, allOverrides] = await Promise.all([
       ctx.db
         .query("event_types")
-        .withIndex("by_active", (q) => q.eq("active", true))
-        .collect(),
-      ctx.db
-        .query("location_configs")
         .withIndex("by_active", (q) => q.eq("active", true))
         .collect(),
       ctx.db.query("availabilities").collect(),
       ctx.db.query("availability_overrides").collect(),
     ]);
     const availabilityById = new Map(allAvailabilities.map((item) => [String(item._id), item]));
-    const activeConfigList = configuredLocations.length > 0
-      ? configuredLocations
-      : DEFAULT_LOCATION_CONFIGS;
-    const locationConfigBySlug = new Map<string, { label: string; sortOrder: number }>(
-      activeConfigList.map((config) => [config.slug, { label: config.label, sortOrder: config.sortOrder }]),
-    );
     return [...eventTypes]
       .filter(
         (eventType) =>
-          hasBookableAvailabilityForEventType(eventType, availabilityById, allAvailabilities, allOverrides) &&
-          (locationConfigBySlug.size === 0 || locationConfigBySlug.has(eventType.slug)),
+          hasBookableAvailabilityForEventType(eventType, availabilityById, allAvailabilities, allOverrides),
       )
       .sort((a, b) => {
-        const configA = locationConfigBySlug.get(a.slug);
-        const configB = locationConfigBySlug.get(b.slug);
-        const orderA = configA?.sortOrder ?? Number.MAX_SAFE_INTEGER;
-        const orderB = configB?.sortOrder ?? Number.MAX_SAFE_INTEGER;
-        if (orderA !== orderB) {
-          return orderA - orderB;
-        }
-        const labelA = configA?.label ?? a.name ?? a.title;
-        const labelB = configB?.label ?? b.name ?? b.title;
+        const labelA = a.name ?? a.title;
+        const labelB = b.name ?? b.title;
         return labelA.localeCompare(labelB, "pt-BR");
       })
       .map((eventType) => {
         const paymentMode = eventType.paymentMode ?? "booking_fee";
         const priceCents = normalizeAmountCents(eventType.priceCents) ?? 0;
-        const locationConfig = locationConfigBySlug.get(eventType.slug);
         const feePercent = paymentMode === "full_payment" ? 100
           : paymentMode === "in_person" ? 0
           : RESERVATION_FEE_PERCENT;
@@ -391,7 +349,7 @@ export const getActiveBookingLocations = query({
           reservationFeePercent: feePercent,
           paymentMode,
           value: eventType.slug,
-          label: locationConfig?.label ?? eventType.name ?? eventType.title,
+          label: eventType.name ?? eventType.title,
           address: eventType.address ?? "",
         };
       });
@@ -469,9 +427,8 @@ export const getDashboardState = query({
           _id: item._id,
           startsAt: item.startsAt,
           holdExpiresAt: getReservationHoldExpiresAt(item),
-          location: eventType?.location ?? "",
           consultationType: eventType?.name ?? eventType?.title ?? "",
-          checkoutLocation: eventType?.slug ?? "",
+          checkoutEventType: eventType?.slug ?? "",
           checkoutDate: formatDateInTimezone(item.startsAt, timezone),
           checkoutTime: formatTimeInTimezone(item.startsAt, timezone),
         };
@@ -530,7 +487,7 @@ export const getDashboardState = query({
 export const rescheduleOwnAppointment = mutation({
   args: {
     eventTypeId: v.id("event_types"),
-    location: bookingLocationValidator,
+    eventType: bookingEventTypeValidator,
     date: v.string(),
     time: v.string(),
   },
@@ -570,8 +527,8 @@ export const rescheduleOwnAppointment = mutation({
     if (!eventType || !eventType.active) {
       throw new Error("Este atendimento não está disponível para remarcação.");
     }
-    if (eventType.slug !== args.location) {
-      throw new Error("O local informado não corresponde ao atendimento da consulta.");
+    if (eventType.slug !== args.eventType) {
+      throw new Error("O tipo de atendimento informado não corresponde ao evento da consulta.");
     }
     const availability = eventType.availabilityId ? await ctx.db.get(eventType.availabilityId) : null;
     if (!availability) {
@@ -674,7 +631,6 @@ export const rescheduleOwnAppointment = mutation({
         eventTypeSlug: eventType.slug,
         holdExpiresAt,
         scheduledFor: slotTimestamp,
-        location: eventType.location,
       };
     }
 
@@ -708,7 +664,6 @@ export const rescheduleOwnAppointment = mutation({
     }
 
     await ctx.db.patch(appointment._id, {
-      location: eventType.location,
       eventTypeId: eventType._id,
       reservationId: newReservationId,
       preferredPeriod: inferPreferredPeriod(slotTimestamp),
@@ -737,7 +692,6 @@ export const rescheduleOwnAppointment = mutation({
       kind: "rescheduled" as const,
       appointmentId: appointment._id,
       scheduledFor: slotTimestamp,
-      location: eventType.location,
       consultationType: eventType.name ?? eventType.title ?? eventType.slug,
     };
   },

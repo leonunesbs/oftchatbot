@@ -34,6 +34,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type ReservationRow = {
   _id: string;
@@ -58,7 +60,6 @@ type EventTypeOption = {
   title: string;
   kind?: "consulta" | "procedimento" | "exame";
   availabilityId?: string;
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
   active: boolean;
 };
 
@@ -112,6 +113,13 @@ export function AdminReservationsManager({
   searchQuery,
   stats,
 }: AdminReservationsManagerProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const originHref = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
+
   const buildFilterHref = (status: "all" | ReservationStatus) => {
     const params = new URLSearchParams();
     if (status !== "all") {
@@ -201,25 +209,45 @@ export function AdminReservationsManager({
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/admin/reservas/reagendar/${reservation._id}`}>
+                    <Link
+                      href={appendParallelRouteOrigin(
+                        `/dashboard/admin/reservas/reagendar/${reservation._id}`,
+                        originHref,
+                      )}
+                    >
                       <CalendarSync className="size-4" />
                       Reagendar e atualizar
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/admin/reservas/status/${reservation._id}`}>
+                    <Link
+                      href={appendParallelRouteOrigin(
+                        `/dashboard/admin/reservas/status/${reservation._id}`,
+                        originHref,
+                      )}
+                    >
                       <CheckCircle2 className="size-4" />
                       Atualizar status
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem variant="destructive" asChild>
-                    <Link href={`/dashboard/admin/reservas/cancelar/${reservation._id}`}>
+                    <Link
+                      href={appendParallelRouteOrigin(
+                        `/dashboard/admin/reservas/cancelar/${reservation._id}`,
+                        originHref,
+                      )}
+                    >
                       <XCircle className="size-4" />
                       Cancelar
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/admin/reservas/contato/${reservation._id}`}>
+                    <Link
+                      href={appendParallelRouteOrigin(
+                        `/dashboard/admin/reservas/contato/${reservation._id}`,
+                        originHref,
+                      )}
+                    >
                       <UserRound className="size-4" />
                       Contato do paciente
                     </Link>
@@ -231,7 +259,7 @@ export function AdminReservationsManager({
         },
       },
     ],
-    [],
+    [originHref],
   );
 
   const safeTotal = stats.total > 0 ? stats.total : 1;

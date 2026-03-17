@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import type { LocationAvailabilityResponse } from "@/lib/booking-bootstrap";
+import type { EventTypeAvailabilityResponse } from "@/lib/booking-bootstrap";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -21,7 +21,6 @@ type EventTypeOption = {
   title: string;
   kind?: "consulta" | "procedimento" | "exame";
   availabilityId?: string;
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
   active: boolean;
 };
 
@@ -39,7 +38,7 @@ type AdminCreateAppointmentFormProps = {
 
 type BookingOptionsApiResponse = {
   ok: boolean;
-  options?: LocationAvailabilityResponse;
+  options?: EventTypeAvailabilityResponse;
   error?: string;
 };
 
@@ -111,7 +110,7 @@ export function AdminCreateAppointmentForm({
   );
   const [selectedDdi, setSelectedDdi] = useState("+55");
   const [phoneWithMask, setPhoneWithMask] = useState("");
-  const [availableDates, setAvailableDates] = useState<LocationAvailabilityResponse["dates"]>([]);
+  const [availableDates, setAvailableDates] = useState<EventTypeAvailabilityResponse["dates"]>([]);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
@@ -165,7 +164,7 @@ export function AdminCreateAppointmentForm({
 
     const abortController = new AbortController();
     const params = new URLSearchParams({
-      location: selectedEventType.slug,
+      eventType: selectedEventType.slug,
       daysAhead: "365",
     });
     setIsLoadingAvailability(true);

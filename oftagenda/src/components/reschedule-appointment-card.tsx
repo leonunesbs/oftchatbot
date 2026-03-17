@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import type { LocationAvailabilityDate } from "@/lib/booking-bootstrap";
+import type { EventTypeAvailabilityDate } from "@/lib/booking-bootstrap";
 
 type ReschedulePolicy = {
   canReschedule: boolean;
@@ -41,11 +41,11 @@ type RescheduleAppointmentCardProps = {
     id: string;
     label: string;
   };
-  fixedLocation: {
+  fixedEventTypeOption: {
     value: string;
     label: string;
   };
-  dateOptions: LocationAvailabilityDate[];
+  dateOptions: EventTypeAvailabilityDate[];
   availabilityError?: string;
   displayMode?: "card" | "embedded";
   paymentStatus?: string;
@@ -57,7 +57,7 @@ type RescheduleAppointmentCardProps = {
 export function RescheduleAppointmentCard({
   policy,
   fixedEventType,
-  fixedLocation,
+  fixedEventTypeOption,
   dateOptions,
   availabilityError,
   displayMode = "card",
@@ -160,7 +160,7 @@ export function RescheduleAppointmentCard({
 
     const abortController = new AbortController();
     const params = new URLSearchParams({
-      location: fixedLocation.value,
+      eventType: fixedEventTypeOption.value,
       targetDate: selectedDate,
     });
 
@@ -214,7 +214,7 @@ export function RescheduleAppointmentCard({
     return () => {
       abortController.abort();
     };
-  }, [fixedLocation.value, selectedDate, timesByDate]);
+  }, [fixedEventTypeOption.value, selectedDate, timesByDate]);
 
   useEffect(() => {
     if (!selectedDate) {
@@ -246,7 +246,7 @@ export function RescheduleAppointmentCard({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             eventTypeId: fixedEventType.id,
-            location: fixedLocation.value,
+            eventType: fixedEventTypeOption.value,
             date: selectedDate,
             time: selectedTime,
           }),

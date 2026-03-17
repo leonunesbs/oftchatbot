@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
 
 const weekdayLongLabels = [
   "Domingo",
@@ -147,6 +148,8 @@ export function AdminAvailabilityEditor({
   showCreateButton?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [isOverridePending, startOverrideTransition] = useTransition();
   const [groupStates, setGroupStates] = useState<GroupState[]>(() => buildInitialGroups(groups));
@@ -160,6 +163,10 @@ export function AdminAvailabilityEditor({
 
   const hasGroups = groupStates.length > 0;
   const selectClassName = "h-9 rounded-md border border-input bg-input/20 px-2 text-xs";
+  const originHref = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
 
   const flattenedDayCount = useMemo(
     () => groupStates.reduce((total, group) => total + group.days.filter((day) => day.enabled).length, 0),
@@ -437,7 +444,13 @@ export function AdminAvailabilityEditor({
         <div className="flex items-center gap-2">
           {showCreateButton ? (
             <Button size="sm" asChild>
-              <Link href="/dashboard/admin/nova-disponibilidade" scroll={false}>
+              <Link
+                href={appendParallelRouteOrigin(
+                  "/dashboard/admin/nova-disponibilidade",
+                  originHref,
+                )}
+                scroll={false}
+              >
                 Nova disponibilidade
               </Link>
             </Button>

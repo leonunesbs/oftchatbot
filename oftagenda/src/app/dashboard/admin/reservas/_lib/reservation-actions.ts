@@ -363,7 +363,7 @@ export async function getReservationActionData(reservationId: string) {
     availabilityId: String(reservation.availabilityId),
     eventTypeTitle: reservation.eventTypeTitle,
     eventKind: eventType?.kind ?? "consulta",
-    location: eventType?.location ?? "fortaleza",
+    eventTypeSlug: eventType?.slug ?? "",
     availabilityLabel: reservation.availabilityLabel,
     status: reservation.status,
     startsAt: reservation.startsAt,

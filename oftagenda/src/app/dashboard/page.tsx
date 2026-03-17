@@ -20,6 +20,7 @@ import { PhoneLinkCard } from "@/components/phone-link-card";
 import { upsertPatientBirthDateAction } from "@/app/dashboard/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
 import {
   Card,
   CardContent,
@@ -33,15 +34,10 @@ import { getAuthenticatedConvexHttpClient } from "@/lib/convex-server";
 import { api } from "@convex/_generated/api";
 
 type DashboardPageProps = {
-  searchParams?:
-    | Promise<{
-        booking?: string;
-        payment?: string;
-      }>
-    | {
-        booking?: string;
-        payment?: string;
-      };
+  searchParams?: Promise<{
+    booking?: string;
+    payment?: string;
+  }>;
 };
 
 export default async function DashboardPage({
@@ -63,7 +59,6 @@ export default async function DashboardPage({
     nextAppointment: {
       _id: string;
       scheduledFor?: number;
-      location: string;
       eventSlug?: string | null;
       eventName?: string | null;
       eventAddress?: string | null;
@@ -74,9 +69,8 @@ export default async function DashboardPage({
       _id: string;
       startsAt: number;
       holdExpiresAt: number;
-      location: string;
       consultationType: string;
-      checkoutLocation: string;
+      checkoutEventType: string;
       checkoutDate: string;
       checkoutTime: string;
     }>;
@@ -96,7 +90,6 @@ export default async function DashboardPage({
       _id: string;
       status: string;
       requestedAt: number;
-      location: string;
     }>;
   } = {
     hasConfirmedBooking: false,
@@ -138,7 +131,6 @@ export default async function DashboardPage({
         ? {
             _id: data.nextAppointment._id,
             scheduledFor: data.nextAppointment.scheduledFor,
-            location: data.nextAppointment.location,
             eventSlug: data.nextAppointment.eventSlug ?? null,
             eventName: data.nextAppointment.eventName ?? null,
             eventAddress: data.nextAppointment.eventAddress ?? null,
@@ -150,9 +142,8 @@ export default async function DashboardPage({
         _id: item._id,
         startsAt: item.startsAt,
         holdExpiresAt: item.holdExpiresAt,
-        location: item.location,
         consultationType: item.consultationType,
-        checkoutLocation: item.checkoutLocation,
+        checkoutEventType: item.checkoutEventType,
         checkoutDate: item.checkoutDate,
         checkoutTime: item.checkoutTime,
       })),
@@ -172,7 +163,6 @@ export default async function DashboardPage({
         _id: item._id,
         status: item.status,
         requestedAt: item.requestedAt,
-        location: item.location,
       })),
     };
   } catch {
@@ -189,7 +179,7 @@ export default async function DashboardPage({
   const hasPriorityByAge = typeof patientAge === "number" && patientAge >= 65;
   const appointmentStart = resolveAppointmentStart(nextAppointment?.scheduledFor);
   const appointmentLocation =
-    nextAppointment?.eventAddress || nextAppointment?.location || "Local a confirmar";
+    nextAppointment?.eventAddress || "Local a confirmar";
   const appointmentDateLabel = formatDisplayDate(nextAppointment?.scheduledFor);
   const appointmentTimeLabel = formatDisplayTime(nextAppointment?.scheduledFor);
   const appointmentCountdownLabel = formatAppointmentCountdown(nextAppointment?.scheduledFor);
@@ -410,13 +400,17 @@ export default async function DashboardPage({
 
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Button variant="outline" asChild>
-                        <Link href="/dashboard/reagendar">
+                        <Link
+                          href={appendParallelRouteOrigin("/dashboard/reagendar", "/dashboard")}
+                        >
                           <CalendarClockIcon className="size-4" />
                           Reagendar
                         </Link>
                       </Button>
                       <Button variant="outline" asChild>
-                        <Link href="/dashboard/reagendar">
+                        <Link
+                          href={appendParallelRouteOrigin("/dashboard/reagendar", "/dashboard")}
+                        >
                           <CalendarCheck2Icon className="size-4" />
                           Cancelar
                         </Link>
@@ -564,7 +558,9 @@ export default async function DashboardPage({
                 Abra o assistente interativo para remarcar ou cancelar sua consulta sem sair do painel.
               </p>
               <Button asChild>
-                <Link href="/dashboard/reagendar">
+                <Link
+                  href={appendParallelRouteOrigin("/dashboard/reagendar", "/dashboard")}
+                >
                   <CalendarClockIcon className="size-4" />
                   Abrir assistente de remarcação
                 </Link>

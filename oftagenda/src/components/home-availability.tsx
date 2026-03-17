@@ -4,7 +4,6 @@ import * as React from "react";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
 
-import type { BookingPayload } from "@/domain/booking/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type BookingLocationOption = {
-  value: BookingPayload["location"];
+  value: string;
   label: string;
   eventTypesCount?: number;
 };
@@ -42,7 +41,7 @@ type LocationAvailabilityDate = {
 };
 
 type LocationAvailabilityResponse = {
-  location: BookingPayload["location"];
+  eventType: string;
   dates: LocationAvailabilityDate[];
 };
 
@@ -59,7 +58,7 @@ function parseIsoDate(isoDate: string) {
 }
 
 export function HomeAvailability() {
-  const [location, setLocation] = React.useState<BookingPayload["location"] | "">("");
+  const [location, setLocation] = React.useState<string>("");
   const [locations, setLocations] = React.useState<BookingLocationOption[]>(fallbackLocations);
   const [availability, setAvailability] = React.useState<LocationAvailabilityResponse | null>(null);
   const [selectedDate, setSelectedDate] = React.useState("");
@@ -109,7 +108,7 @@ export function HomeAvailability() {
           throw new Error(data?.error ?? "Não foi possível carregar os locais.");
         }
 
-        const locationsResponse = Array.isArray(data.locations) ? data.locations : [];
+        const locationsResponse = Array.isArray(data.eventTypes) ? data.eventTypes : [];
         if (!cancelled && locationsResponse.length > 0) {
           setLocations(locationsResponse as BookingLocationOption[]);
         }
@@ -140,7 +139,7 @@ export function HomeAvailability() {
     }
   }, [location, locations]);
 
-  function handleLocationChange(nextLocation: BookingPayload["location"]) {
+  function handleLocationChange(nextLocation: string) {
     setLocation(nextLocation);
     setAvailability(null);
     setSelectedDate("");
@@ -161,7 +160,7 @@ export function HomeAvailability() {
       setAvailabilityError(null);
 
       try {
-        const response = await fetch(`/api/booking/options?location=${location}`);
+        const response = await fetch(`/api/booking/options?eventType=${location}`);
         const data = await response.json();
 
         if (!response.ok || !data?.ok) {

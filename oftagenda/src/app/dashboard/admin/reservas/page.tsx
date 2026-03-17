@@ -96,7 +96,6 @@ export default async function AdminReservationsPage({
             title: eventType.title,
             kind: eventType.kind,
             availabilityId: eventType.availabilityId ? String(eventType.availabilityId) : undefined,
-            location: eventType.location,
             active: eventType.active,
           }))}
           availabilityGroups={availabilityGroups}

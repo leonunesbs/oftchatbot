@@ -87,7 +87,6 @@ export async function renderEventTypeEditPage({
         kind: eventType.kind ?? "consulta",
         paymentMode: eventType.paymentMode ?? "booking_fee",
         availabilityId: defaultAvailabilityId,
-        location: eventType.location,
         active: eventType.active,
       }}
     />

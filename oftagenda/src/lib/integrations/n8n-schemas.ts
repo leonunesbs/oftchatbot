@@ -1,9 +1,9 @@
 import { z } from "zod/v4";
 
-import { bookingCheckoutSchema, bookingLocationSchema } from "@/domain/booking/schema";
+import { bookingCheckoutSchema, bookingEventTypeSchema } from "@/domain/booking/schema";
 
 export const n8nAvailabilitySearchSchema = z.object({
-  location: bookingLocationSchema,
+  eventType: bookingEventTypeSchema,
   daysAhead: z.coerce.number().int().min(1).max(30).default(14),
 });
 
@@ -44,15 +44,15 @@ const n8nResumoTimeSchema = z.preprocess(
   z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
 );
 
-const n8nResumoLocationSchema = z.preprocess(
+const n8nResumoEventTypeSchema = z.preprocess(
   (value) => normalizeLocationInput(value),
-  bookingLocationSchema,
+  bookingEventTypeSchema,
 );
 
 export const n8nResumoLinkSchema = bookingCheckoutSchema
-  .omit({ location: true, date: true, time: true })
+  .omit({ eventType: true, date: true, time: true })
   .extend({
-    location: n8nResumoLocationSchema,
+    eventType: n8nResumoEventTypeSchema,
     date: n8nResumoDateSchema,
     time: n8nResumoTimeSchema,
     phone: z.preprocess(

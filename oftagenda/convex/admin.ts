@@ -4,12 +4,6 @@ import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
-const locationValidator = v.union(
-  v.literal("fortaleza"),
-  v.literal("sao_domingos_do_maranhao"),
-  v.literal("fortuna"),
-);
-
 const availabilityStatusValidator = v.union(
   v.literal("active"),
   v.literal("inactive"),
@@ -48,29 +42,6 @@ const paymentModeValidator = v.union(
   v.literal("full_payment"),
   v.literal("in_person"),
 );
-const defaultLocationConfigs = [
-  {
-    slug: "fortaleza" as const,
-    label: "Fortaleza",
-    active: true,
-    isDefault: true,
-    sortOrder: 10,
-  },
-  {
-    slug: "sao_domingos_do_maranhao" as const,
-    label: "São Domingos do Maranhão",
-    active: true,
-    isDefault: true,
-    sortOrder: 20,
-  },
-  {
-    slug: "fortuna" as const,
-    label: "Fortuna",
-    active: true,
-    isDefault: true,
-    sortOrder: 30,
-  },
-];
 
 async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
@@ -296,116 +267,11 @@ export const getCalendarData = query({
           eventTypeId: reservation.eventTypeId,
           eventTypeTitle: eventType?.name ?? eventType?.title ?? "Evento removido",
           kind: eventType?.kind ?? "consulta",
-          location: eventType?.location ?? "fortaleza",
+          eventTypeSlug: eventType?.slug ?? "",
         };
       });
 
     return { items };
-  },
-});
-
-export const listLocationConfigs = query({
-  args: {},
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
-    const existingConfigs = await ctx.db.query("location_configs").collect();
-    if (existingConfigs.length > 0) {
-      return [...existingConfigs].sort((a, b) => a.sortOrder - b.sortOrder);
-    }
-
-    return defaultLocationConfigs.map((config) => ({
-      _id: null,
-      _creationTime: 0,
-      slug: config.slug,
-      label: config.label,
-      active: config.active,
-      isDefault: config.isDefault,
-      sortOrder: config.sortOrder,
-      createdAt: 0,
-      updatedAt: 0,
-    }));
-  },
-});
-
-export const upsertLocationConfig = mutation({
-  args: {
-    slug: locationValidator,
-    label: v.string(),
-    active: v.boolean(),
-    isDefault: v.boolean(),
-    sortOrder: v.number(),
-  },
-  handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-
-    const now = Date.now();
-    const existing = await ctx.db
-      .query("location_configs")
-      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .first();
-
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        label: args.label.trim(),
-        active: args.active,
-        isDefault: args.isDefault,
-        sortOrder: args.sortOrder,
-        updatedAt: now,
-      });
-      return { ok: true, configId: existing._id, created: false };
-    }
-
-    const configId = await ctx.db.insert("location_configs", {
-      slug: args.slug,
-      label: args.label.trim(),
-      active: args.active,
-      isDefault: args.isDefault,
-      sortOrder: args.sortOrder,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    return { ok: true, configId, created: true };
-  },
-});
-
-export const seedDefaultLocationConfigs = mutation({
-  args: {},
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
-    const now = Date.now();
-    const results: Array<{ slug: string; created: boolean }> = [];
-
-    for (const item of defaultLocationConfigs) {
-      const existing = await ctx.db
-        .query("location_configs")
-        .withIndex("by_slug", (q) => q.eq("slug", item.slug))
-        .first();
-      if (existing) {
-        await ctx.db.patch(existing._id, {
-          label: item.label,
-          active: item.active,
-          isDefault: item.isDefault,
-          sortOrder: item.sortOrder,
-          updatedAt: now,
-        });
-        results.push({ slug: item.slug, created: false });
-        continue;
-      }
-
-      await ctx.db.insert("location_configs", {
-        slug: item.slug,
-        label: item.label,
-        active: item.active,
-        isDefault: item.isDefault,
-        sortOrder: item.sortOrder,
-        createdAt: now,
-        updatedAt: now,
-      });
-      results.push({ slug: item.slug, created: true });
-    }
-
-    return { ok: true, total: results.length, results };
   },
 });
 
@@ -419,7 +285,6 @@ export const createEventType = mutation({
     durationMinutes: v.number(),
     priceCents: v.number(),
     paymentMode: v.optional(paymentModeValidator),
-    location: locationValidator,
     availabilityId: v.id("availabilities"),
   },
   handler: async (ctx, args) => {
@@ -467,7 +332,6 @@ export const createEventType = mutation({
       durationMinutes: args.durationMinutes,
       priceCents: normalizedPriceCents,
       paymentMode: args.paymentMode ?? "booking_fee",
-      location: args.location,
       availabilityId: args.availabilityId,
       active: true,
       createdAt: now,
@@ -489,7 +353,6 @@ export const updateEventType = mutation({
     durationMinutes: v.number(),
     priceCents: v.number(),
     paymentMode: v.optional(paymentModeValidator),
-    location: locationValidator,
     availabilityId: v.id("availabilities"),
     active: v.boolean(),
   },
@@ -538,7 +401,6 @@ export const updateEventType = mutation({
       durationMinutes: args.durationMinutes,
       priceCents: normalizedPriceCents,
       paymentMode: args.paymentMode ?? "booking_fee",
-      location: args.location,
       availabilityId: args.availabilityId,
       active: args.active,
       updatedAt: Date.now(),
@@ -1319,7 +1181,6 @@ export const adminCreateAppointment = mutation({
       name: args.name.trim(),
       phone: args.phone.trim(),
       email: args.email.trim(),
-      location: eventType.location,
       eventTypeId: args.eventTypeId,
       reservationId,
       preferredPeriod: args.preferredPeriod,

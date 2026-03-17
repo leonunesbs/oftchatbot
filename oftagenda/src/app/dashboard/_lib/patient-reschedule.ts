@@ -1,6 +1,6 @@
 import { api } from "@convex/_generated/api";
 
-import { getBookingBootstrapData, type BookingLocationOption } from "@/lib/booking-bootstrap";
+import { getBookingBootstrapData, type BookingEventTypeOption } from "@/lib/booking-bootstrap";
 import { getAuthenticatedConvexHttpClient } from "@/lib/convex-server";
 
 type ReschedulePolicy = {
@@ -24,7 +24,7 @@ export type PatientRescheduleData = {
     id: string;
     label: string;
   };
-  fixedLocation: BookingLocationOption;
+  fixedEventTypeOption: BookingEventTypeOption;
   availabilityError?: string;
   dateOptions: Array<{
     isoDate: string;
@@ -66,8 +66,8 @@ export async function getPatientRescheduleData(): Promise<PatientRescheduleData 
     if (!fixedEventTypeId) {
       return null;
     }
-    const fixedLocation = bootstrap.locations.find((item) => item.value === bookingSlug);
-    if (!fixedLocation) {
+    const fixedEventTypeOption = bootstrap.eventTypes.find((item) => item.value === bookingSlug);
+    if (!fixedEventTypeOption) {
       return null;
     }
     const fixedEventTypeLabel =
@@ -75,15 +75,15 @@ export async function getPatientRescheduleData(): Promise<PatientRescheduleData 
       dashboardData.nextAppointment.consultationType ??
       "Atendimento";
 
-    const availability = bootstrap.availabilityByLocation[fixedLocation.value];
+    const availability = bootstrap.availabilityByEventType[fixedEventTypeOption.value];
     return {
       policy: dashboardData.reschedulePolicy ?? DEFAULT_POLICY,
       fixedEventType: {
         id: String(fixedEventTypeId),
         label: fixedEventTypeLabel,
       },
-      fixedLocation,
-      availabilityError: bootstrap.availabilityErrorsByLocation[fixedLocation.value],
+      fixedEventTypeOption,
+      availabilityError: bootstrap.availabilityErrorsByEventType[fixedEventTypeOption.value],
       dateOptions: availability?.dates ?? [],
     };
   } catch {

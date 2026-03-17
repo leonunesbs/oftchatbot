@@ -13,15 +13,10 @@ export const metadata: Metadata = {
 };
 
 type UnauthorizedPageProps = {
-  searchParams?:
-    | Promise<{
-        from?: string;
-        requiredRole?: string;
-      }>
-    | {
-        from?: string;
-        requiredRole?: string;
-      };
+  searchParams?: Promise<{
+    from?: string;
+    requiredRole?: string;
+  }>;
 };
 
 export default async function UnauthorizedPage({ searchParams }: UnauthorizedPageProps) {

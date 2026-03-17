@@ -12,14 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { XIcon } from "lucide-react";
 
 import type { PaymentMode } from "@/lib/booking-bootstrap";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 
 type ResumoDialogProps = {
-  locationId: string;
-  locationLabel: string;
-  locationAddress: string;
+  eventType: string;
+  eventTypeLabel: string;
+  eventTypeAddress: string;
   consultationPriceCents: number;
   reservationFeeCents: number;
   reservationFeePercent: number;
@@ -35,9 +39,9 @@ type ResumoDialogProps = {
 };
 
 export function ResumoDialog({
-  locationId,
-  locationLabel,
-  locationAddress,
+  eventType,
+  eventTypeLabel,
+  eventTypeAddress,
   consultationPriceCents,
   reservationFeeCents,
   reservationFeePercent,
@@ -52,9 +56,10 @@ export function ResumoDialog({
   isAuthenticated,
 }: ResumoDialogProps) {
   const router = useRouter();
+  const backHref = useParallelRouteBackHref("/agendar");
   const checkoutNotCompleted = payment === "cancelled";
   const hasError = hasRedactedParams || hasInvalidSelection;
-  const addressHref = locationAddress ? buildAddressHref(locationAddress) : "";
+  const addressHref = eventTypeAddress ? buildAddressHref(eventTypeAddress) : "";
   const remainingAtConsultationCents = Math.max(
     consultationPriceCents - reservationFeeCents,
     0,
@@ -65,11 +70,21 @@ export function ResumoDialog({
       open
       onOpenChange={(open) => {
         if (!open) {
-          closeParallelRoute(router, "/agendar");
+          closeParallelRoute(router, "/agendar", backHref);
         }
       }}
     >
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute top-4 right-4"
+          onClick={() => closeParallelRoute(router, "/agendar", backHref)}
+          aria-label="Fechar resumo"
+        >
+          <XIcon />
+        </Button>
         <DialogHeader>
           <DialogTitle>
             {hasError
@@ -82,7 +97,7 @@ export function ResumoDialog({
               : checkoutNotCompleted
                 ? "Você não concluiu o checkout. Esse horário foi liberado e pode já ter sido ocupado. Escolha um novo horário."
                 : hasInvalidSelection
-                  ? "Esse horário não está mais disponível para o local selecionado. Escolha um novo horário."
+                  ? "Esse horário não está mais disponível para o evento selecionado. Escolha um novo horário."
                   : paymentMode === "in_person"
                     ? "Confira os dados antes de confirmar o agendamento."
                     : paymentMode === "full_payment"
@@ -102,18 +117,18 @@ export function ResumoDialog({
         ) : (
           <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-xs text-muted-foreground sm:text-sm">
             <p>
-              <span className="font-semibold text-foreground/90">Local:</span>{" "}
-              {locationLabel}
+              <span className="font-semibold text-foreground/90">Evento:</span>{" "}
+              {eventTypeLabel}
             </p>
-            {locationAddress ? (
+            {eventTypeAddress ? (
               <p>
                 <span className="font-semibold text-foreground/90">Endereço:</span>{" "}
                 <a
                   href={addressHref}
                   className="underline underline-offset-4 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  aria-label={`Abrir o endereço em um aplicativo de mapas: ${locationAddress}`}
+                  aria-label={`Abrir o endereço em um aplicativo de mapas: ${eventTypeAddress}`}
                 >
-                  {locationAddress}
+                  {eventTypeAddress}
                 </a>
               </p>
             ) : null}
@@ -221,20 +236,6 @@ export function ResumoDialog({
                       </div>
                     </div>
                   </div>
-                  <div className="h-px w-full bg-border/70" />
-                  <div className="space-y-1">
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                      <p className="text-sm text-foreground/90">
-                        Investimento total
-                      </p>
-                      <p className="text-sm font-medium text-foreground/90 sm:text-right">
-                        {formatConsultationPrice(consultationPriceCents)}
-                      </p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Valor completo da consulta.
-                    </p>
-                  </div>
                 </div>
               </>
             )}
@@ -255,14 +256,14 @@ export function ResumoDialog({
             </Button>
           ) : (
             <StartCheckoutButton
-              location={locationId}
+              eventType={eventType}
               date={date}
               time={time}
               secondaryAction={
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => closeParallelRoute(router, "/agendar")}
+                  onClick={() => closeParallelRoute(router, "/agendar", backHref)}
                   className="w-full sm:w-auto"
                 >
                   Editar agendamento

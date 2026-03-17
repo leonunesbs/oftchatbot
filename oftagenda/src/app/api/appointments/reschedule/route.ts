@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const { client, userId } = await getAuthenticatedConvexHttpClient();
     const result = await client.mutation(api.appointments.rescheduleOwnAppointment, {
       eventTypeId: parsed.data.eventTypeId as Id<"event_types">,
-      location: parsed.data.location,
+      eventType: parsed.data.eventType,
       date: parsed.data.date,
       time: parsed.data.time,
     });
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       try {
         const cancelParams = new URLSearchParams({
           payment: "cancelled",
-          location: parsed.data.location,
+          eventType: parsed.data.eventType,
           date: parsed.data.date,
           time: parsed.data.time,
         });
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
               appointmentId: String(result.appointmentId),
               clerkUserId: String(userId),
               eventTypeSlug: result.eventTypeSlug,
-              location: parsed.data.location,
+              eventType: parsed.data.eventType,
               date: parsed.data.date,
               time: parsed.data.time,
               flow: "paid_reschedule",
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
             appointmentId: String(result.appointmentId),
             clerkUserId: String(userId),
             eventTypeSlug: result.eventTypeSlug,
-            location: parsed.data.location,
+            eventType: parsed.data.eventType,
             date: parsed.data.date,
             time: parsed.data.time,
             flow: "paid_reschedule",
@@ -153,7 +153,7 @@ export async function POST(request: Request) {
       ok: true,
       appointmentId: result.appointmentId as Id<"appointments">,
       scheduledFor: result.scheduledFor,
-      location: result.location,
+      eventType: result.eventTypeSlug,
       consultationType: result.consultationType,
     });
   } catch (error) {

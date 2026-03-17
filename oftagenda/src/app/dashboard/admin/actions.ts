@@ -111,10 +111,6 @@ export async function createEventTypeAction(formData: FormData) {
       | "full_payment"
       | "in_person",
     availabilityId: toStringValue(formData.get("availabilityId")) as Id<"availabilities">,
-    location: (toStringValue(formData.get("location")) || "fortaleza") as
-      | "fortaleza"
-      | "sao_domingos_do_maranhao"
-      | "fortuna",
   });
   revalidatePath(ADMIN_PATH);
 }
@@ -146,10 +142,6 @@ export async function updateEventTypeAction(formData: FormData) {
       | "full_payment"
       | "in_person",
     availabilityId: toStringValue(formData.get("availabilityId")) as Id<"availabilities">,
-    location: (toStringValue(formData.get("location")) || "fortaleza") as
-      | "fortaleza"
-      | "sao_domingos_do_maranhao"
-      | "fortuna",
     active: toStringValue(formData.get("active")) === "true",
   });
   revalidatePath(ADMIN_PATH);

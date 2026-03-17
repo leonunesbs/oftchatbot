@@ -10,7 +10,7 @@ import Link from "next/link";
 import type { PaymentMode } from "@/lib/booking-bootstrap";
 
 type StartCheckoutButtonProps = {
-  location: string;
+  eventType: string;
   date: string;
   time: string;
   label?: string;
@@ -38,7 +38,7 @@ type CheckoutApiResponse = {
 };
 
 export function StartCheckoutButton({
-  location,
+  eventType,
   date,
   time,
   label = "Ir para pagamento",
@@ -69,7 +69,7 @@ export function StartCheckoutButton({
     startCheckoutTransition(async () => {
       try {
         trackEvent("submit_booking", {
-          location,
+          eventType,
           date,
           time,
           step: paymentMode === "in_person" ? "confirm_in_person" : "checkout",
@@ -94,7 +94,7 @@ export function StartCheckoutButton({
     const response = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ location, date, time }),
+      body: JSON.stringify({ eventType, date, time }),
     });
     const data = (await response
       .json()
@@ -115,7 +115,7 @@ export function StartCheckoutButton({
     const response = await fetch("/api/booking/confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ location, date, time }),
+      body: JSON.stringify({ eventType, date, time }),
     });
     const data = (await response
       .json()

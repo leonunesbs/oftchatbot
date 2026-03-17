@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   try {
     const { client, userId } = await getAuthenticatedConvexHttpClient();
     const draft = await client.mutation(api.stripe.createCheckoutDraft, {
-      location: parsed.data.location,
+      eventType: parsed.data.eventType,
       date: parsed.data.date,
       time: parsed.data.time,
     });
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     const stripe = getStripeClient();
     const origin = resolvePublicOrigin(request);
     const cancelParams = new URLSearchParams({
-      location: parsed.data.location,
+      eventType: parsed.data.eventType,
       date: parsed.data.date,
       time: parsed.data.time,
       payment: 'cancelled',
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
             paymentId: String(draft.paymentId),
             clerkUserId: String(userId),
             eventTypeSlug: draft.eventTypeSlug,
-            location: parsed.data.location,
+            eventType: parsed.data.eventType,
             date: parsed.data.date,
             time: parsed.data.time,
           },
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
           paymentId: String(draft.paymentId),
           clerkUserId: String(userId),
           eventTypeSlug: draft.eventTypeSlug,
-          location: parsed.data.location,
+          eventType: parsed.data.eventType,
           date: parsed.data.date,
           time: parsed.data.time,
         },

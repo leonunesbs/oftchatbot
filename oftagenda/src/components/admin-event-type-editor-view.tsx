@@ -14,7 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 import { useRouter } from "next/navigation";
 
 const selectClassName = "h-9 rounded-md border border-input bg-input/20 px-2 text-sm";
@@ -54,7 +57,6 @@ type EventTypeData = {
   kind: "consulta" | "procedimento" | "exame";
   paymentMode: "booking_fee" | "full_payment" | "in_person";
   availabilityId: string;
-  location: "fortaleza" | "sao_domingos_do_maranhao" | "fortuna";
   active: boolean;
 };
 
@@ -84,7 +86,6 @@ function EventTypeEditorContent({
         errorMessage="Não foi possível atualizar o evento."
       >
         <input type="hidden" name="eventTypeId" value={eventType._id} />
-        <input type="hidden" name="location" value={eventType.location} />
 
         <p className="text-xs text-muted-foreground">
           Revise os dados com atenção. Campos com impacto na agenda e no pagamento possuem instruções logo abaixo.
@@ -284,7 +285,8 @@ export function AdminEventTypeEditorView({
   backHref,
 }: AdminEventTypeEditorViewProps) {
   const router = useRouter();
-  const handleBack = () => closeParallelRoute(router, backHref);
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
+  const handleBack = () => closeParallelRoute(router, backHref, resolvedBackHref);
 
   if (asDrawer) {
     return (
@@ -292,7 +294,7 @@ export function AdminEventTypeEditorView({
         open
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref);
+            closeParallelRoute(router, backHref, resolvedBackHref);
           }
         }}
       >

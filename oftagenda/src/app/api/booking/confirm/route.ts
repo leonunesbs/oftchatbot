@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const { client } = await getAuthenticatedConvexHttpClient();
     const result = await client.mutation(api.stripe.confirmInPersonBooking, {
-      location: parsed.data.location,
+      eventType: parsed.data.eventType,
       date: parsed.data.date,
       time: parsed.data.time,
     });

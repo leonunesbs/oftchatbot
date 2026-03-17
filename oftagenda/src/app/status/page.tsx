@@ -137,7 +137,7 @@ export default async function StatusPage() {
   if (convexUrl) {
     try {
       const client = getConvexHttpClient();
-      await client.query(api.appointments.getActiveBookingLocations, {});
+      await client.query(api.appointments.getActiveBookingEventTypes, {});
       checks.push({
         name: "Convex query pública",
         status: "ok",
@@ -306,7 +306,7 @@ export default async function StatusPage() {
     }
 
     try {
-      const response = await fetch(`${origin}/api/booking/options?location=fortaleza&daysAhead=7`, {
+      const response = await fetch(`${origin}/api/booking/options?eventType=consulta-oftalmologica&daysAhead=7`, {
         method: "GET",
         headers: cookieHeader ? { cookie: cookieHeader } : undefined,
         cache: "no-store",

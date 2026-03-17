@@ -3,21 +3,12 @@ import { auth } from "@clerk/nextjs/server";
 import { ResumoDialog } from "./resumo-dialog";
 
 type ResumoInterceptPageProps = {
-  searchParams?:
-    | Promise<{
-        locationId?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-        payment?: string;
-      }>
-    | {
-        locationId?: string;
-        location?: string;
-        date?: string;
-        time?: string;
-        payment?: string;
-      };
+  searchParams?: Promise<{
+    eventType?: string;
+    date?: string;
+    time?: string;
+    payment?: string;
+  }>;
 };
 
 export default async function ResumoInterceptPage({
@@ -31,9 +22,9 @@ export default async function ResumoInterceptPage({
 
   return (
     <ResumoDialog
-      locationId={summary.locationId}
-      locationLabel={summary.locationLabel}
-      locationAddress={summary.locationAddress}
+      eventType={summary.eventType}
+      eventTypeLabel={summary.eventTypeLabel}
+      eventTypeAddress={summary.eventTypeAddress}
       consultationPriceCents={summary.consultationPriceCents}
       reservationFeeCents={summary.reservationFeeCents}
       reservationFeePercent={summary.reservationFeePercent}

@@ -23,7 +23,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { closeParallelRoute } from "@/lib/parallel-route-navigation";
+import {
+  closeParallelRoute,
+  useParallelRouteBackHref,
+} from "@/lib/parallel-route-navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 
@@ -76,6 +79,7 @@ export function TimeBlockForm({
   backHref: string;
 }) {
   const router = useRouter();
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
   const formId = useId();
   const [groupName, setGroupName] = useState(availabilityGroups[0]?.name ?? "");
   const [date, setDate] = useState(() => (initialDate && isIsoDate(initialDate) ? initialDate : ""));
@@ -102,7 +106,11 @@ export function TimeBlockForm({
           Nenhuma disponibilidade encontrada. Cadastre uma disponibilidade antes de bloquear horários.
         </p>
         <div className="flex justify-end">
-          <Button type="button" variant="outline" onClick={() => closeParallelRoute(router, backHref)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => closeParallelRoute(router, backHref, resolvedBackHref)}
+          >
             Voltar
           </Button>
         </div>
@@ -117,7 +125,7 @@ export function TimeBlockForm({
       className="grid gap-3"
       successMessage="Bloqueio de horário salvo com sucesso."
       errorMessage="Não foi possível salvar o bloqueio de horário."
-      onSuccess={() => closeParallelRoute(router, backHref)}
+      onSuccess={() => closeParallelRoute(router, backHref, resolvedBackHref)}
     >
       <input type="hidden" name="groupName" value={groupName} />
       <input type="hidden" name="timezone" value={timezone} />
@@ -237,6 +245,7 @@ export function AdminCreateTimeBlockView({
   backHref,
 }: AdminCreateTimeBlockViewProps) {
   const router = useRouter();
+  const resolvedBackHref = useParallelRouteBackHref(backHref);
 
   if (asDrawer) {
     return (
@@ -244,7 +253,7 @@ export function AdminCreateTimeBlockView({
         open
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref);
+            closeParallelRoute(router, backHref, resolvedBackHref);
           }
         }}
       >

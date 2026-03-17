@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const parsed = n8nAvailabilitySearchSchema.safeParse({
-    location: url.searchParams.get("location"),
+    eventType: url.searchParams.get("eventType"),
     daysAhead: url.searchParams.get("daysAhead") ?? "14",
   });
   if (!parsed.success) {
@@ -25,8 +25,8 @@ export async function GET(request: Request) {
 
   try {
     const client = getConvexHttpClient();
-    const options = await client.query(api.appointments.getBookingOptionsByLocation, {
-      location: parsed.data.location,
+    const options = await client.query(api.appointments.getBookingOptionsByEventType, {
+      eventType: parsed.data.eventType,
       daysAhead: parsed.data.daysAhead,
     });
     return NextResponse.json({ ok: true, options });

@@ -1,12 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const locationValidator = v.union(
-  v.literal("fortaleza"),
-  v.literal("sao_domingos_do_maranhao"),
-  v.literal("fortuna"),
-);
-
 const periodValidator = v.union(
   v.literal("manha"),
   v.literal("tarde"),
@@ -126,7 +120,6 @@ export default defineSchema({
     durationMinutes: v.number(),
     priceCents: v.optional(v.number()),
     paymentMode: v.optional(paymentModeValidator),
-    location: locationValidator,
     availabilityId: v.optional(v.id("availabilities")),
     active: v.boolean(),
     createdAt: v.number(),
@@ -148,19 +141,6 @@ export default defineSchema({
   })
     .index("by_weekday", ["weekday"])
     .index("by_status", ["status"]),
-
-  location_configs: defineTable({
-    slug: locationValidator,
-    label: v.string(),
-    active: v.boolean(),
-    isDefault: v.boolean(),
-    sortOrder: v.number(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
-    .index("by_slug", ["slug"])
-    .index("by_active", ["active"])
-    .index("by_sort_order", ["sortOrder"]),
 
   availability_overrides: defineTable({
     groupName: v.string(),
@@ -274,7 +254,6 @@ export default defineSchema({
     name: v.string(),
     phone: v.string(),
     email: v.string(),
-    location: locationValidator,
     eventTypeId: v.optional(v.id("event_types")),
     reservationId: v.optional(v.id("reservations")),
     preferredPeriod: periodValidator,

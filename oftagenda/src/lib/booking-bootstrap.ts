@@ -4,7 +4,7 @@ import { getConvexHttpClient } from "@/lib/convex-server";
 
 export type PaymentMode = "booking_fee" | "full_payment" | "in_person";
 
-export type BookingLocationOption = {
+export type BookingEventTypeOption = {
   value: string;
   label: string;
   address?: string;
@@ -15,23 +15,23 @@ export type BookingLocationOption = {
   paymentMode?: PaymentMode;
 };
 
-export type LocationAvailabilityDate = {
+export type EventTypeAvailabilityDate = {
   isoDate: string;
   label: string;
   weekdayLabel: string;
   times: string[];
 };
 
-export type LocationAvailabilityResponse = {
-  location: string;
-  dates: LocationAvailabilityDate[];
+export type EventTypeAvailabilityResponse = {
+  eventType: string;
+  dates: EventTypeAvailabilityDate[];
 };
 
 export type BookingBootstrapData = {
-  locations: BookingLocationOption[];
-  locationsError: string | null;
-  availabilityByLocation: Record<string, LocationAvailabilityResponse>;
-  availabilityErrorsByLocation: Record<string, string>;
+  eventTypes: BookingEventTypeOption[];
+  eventTypesError: string | null;
+  availabilityByEventType: Record<string, EventTypeAvailabilityResponse>;
+  availabilityErrorsByEventType: Record<string, string>;
 };
 
 export async function getBookingBootstrapData(options?: {
@@ -42,34 +42,34 @@ export async function getBookingBootstrapData(options?: {
     typeof options?.daysAhead === "number" && Number.isFinite(options.daysAhead)
       ? Math.max(1, Math.floor(options.daysAhead))
       : 3650;
-  let locations: BookingLocationOption[] = [];
-  let locationsError: string | null = null;
+  let eventTypes: BookingEventTypeOption[] = [];
+  let eventTypesError: string | null = null;
 
   try {
-    const response = await client.query(api.appointments.getActiveBookingLocations, {});
-    locations = Array.isArray(response) ? (response as BookingLocationOption[]) : [];
+    const response = await client.query(api.appointments.getActiveBookingEventTypes, {});
+    eventTypes = Array.isArray(response) ? (response as BookingEventTypeOption[]) : [];
   } catch (error) {
-    locationsError =
+    eventTypesError =
       error instanceof Error ? error.message : "Falha ao carregar eventos disponíveis.";
   }
 
-  const availabilityByLocation: Record<string, LocationAvailabilityResponse> = {};
-  const availabilityErrorsByLocation: Record<string, string> = {};
+  const availabilityByEventType: Record<string, EventTypeAvailabilityResponse> = {};
+  const availabilityErrorsByEventType: Record<string, string> = {};
 
   await Promise.all(
-    locations.map(async (locationOption) => {
+    eventTypes.map(async (eventTypeOption) => {
       try {
-        const options = await client.query(api.appointments.getBookingOptionsByLocation, {
-          location: locationOption.value,
+        const options = await client.query(api.appointments.getBookingOptionsByEventType, {
+          eventType: eventTypeOption.value,
           daysAhead,
         });
         const resolvedOptions =
-          (options as LocationAvailabilityResponse) ?? {
-            location: locationOption.value,
+          (options as EventTypeAvailabilityResponse) ?? {
+            eventType: eventTypeOption.value,
             dates: [],
           };
-        availabilityByLocation[locationOption.value] = {
-          location: resolvedOptions.location,
+        availabilityByEventType[eventTypeOption.value] = {
+          eventType: resolvedOptions.eventType,
           dates: resolvedOptions.dates.map((dateOption) => ({
             ...dateOption,
             // Times are fetched client-side after the user picks a date.
@@ -77,16 +77,16 @@ export async function getBookingBootstrapData(options?: {
           })),
         };
       } catch (error) {
-        availabilityErrorsByLocation[locationOption.value] =
+        availabilityErrorsByEventType[eventTypeOption.value] =
           error instanceof Error ? error.message : "Falha ao carregar disponibilidade.";
       }
     }),
   );
 
   return {
-    locations,
-    locationsError,
-    availabilityByLocation,
-    availabilityErrorsByLocation,
+    eventTypes,
+    eventTypesError,
+    availabilityByEventType,
+    availabilityErrorsByEventType,
   };
 }

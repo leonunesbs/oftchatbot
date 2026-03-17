@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type {
-  BookingLocationOption,
-  LocationAvailabilityResponse,
+  BookingEventTypeOption,
+  EventTypeAvailabilityResponse,
 } from "@/lib/booking-bootstrap";
-import { useRouter, useSearchParams } from "next/navigation";
+import { appendParallelRouteOrigin } from "@/lib/parallel-route-origin";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -27,14 +28,14 @@ import { parseAsString, useQueryStates } from "nuqs";
 const DRAFT_STORAGE_KEY = "oftagenda:booking-draft:v1";
 
 type BookingDraft = {
-  location: BookingPayload["location"];
+  eventType: BookingPayload["eventType"];
   selectedDate: string;
   selectedTime: string;
 };
 
 type BookingOptionsApiResponse = {
   ok: boolean;
-  options?: LocationAvailabilityResponse;
+  options?: EventTypeAvailabilityResponse;
   error?: string;
 };
 
@@ -42,22 +43,23 @@ type BookingFormProps = {
   isAuthenticated: boolean;
   clerkEnabled: boolean;
   embedMode?: boolean;
-  initialLocations: BookingLocationOption[];
-  initialLocationsError?: string | null;
-  initialAvailabilityByLocation: Record<string, LocationAvailabilityResponse>;
-  initialAvailabilityErrorsByLocation: Record<string, string>;
+  initialEventTypes: BookingEventTypeOption[];
+  initialEventTypesError?: string | null;
+  initialAvailabilityByEventType: Record<string, EventTypeAvailabilityResponse>;
+  initialAvailabilityErrorsByEventType: Record<string, string>;
 };
 
 export function BookingForm({
   isAuthenticated,
   clerkEnabled,
   embedMode = false,
-  initialLocations,
-  initialLocationsError = null,
-  initialAvailabilityByLocation,
-  initialAvailabilityErrorsByLocation,
+  initialEventTypes,
+  initialEventTypesError = null,
+  initialAvailabilityByEventType,
+  initialAvailabilityErrorsByEventType,
 }: BookingFormProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dateSectionRef = useRef<HTMLElement | null>(null);
@@ -66,7 +68,7 @@ export function BookingForm({
 
   const [bookingParams, setBookingParams] = useQueryStates(
     {
-      locationId: parseAsString,
+      eventType: parseAsString,
       date: parseAsString,
       time: parseAsString,
     },
@@ -76,7 +78,7 @@ export function BookingForm({
     },
   );
   const [error, setError] = useState<string | null>(null);
-  const [locations] = useState<BookingLocationOption[]>(initialLocations);
+  const [eventTypes] = useState<BookingEventTypeOption[]>(initialEventTypes);
   const [isEmbedded, setIsEmbedded] = useState(embedMode);
   const [isLocationOverflowing, setIsLocationOverflowing] = useState(false);
   const [isStartingBooking, startStartingBookingTransition] = useTransition();
@@ -87,27 +89,27 @@ export function BookingForm({
   );
   const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [timeLoadError, setTimeLoadError] = useState<string | null>(null);
-  const locationId = bookingParams.locationId ?? "";
+  const eventType = bookingParams.eventType ?? "";
   const selectedDate = bookingParams.date ?? "";
   const selectedTime = bookingParams.time ?? "";
 
-  const selectedLocation = locations.find((item) => item.value === locationId);
-  const hasLocation = Boolean(selectedLocation);
-  const availability = selectedLocation
-    ? (initialAvailabilityByLocation[selectedLocation.value] ?? null)
+  const selectedEventType = eventTypes.find((item) => item.value === eventType);
+  const hasEventType = Boolean(selectedEventType);
+  const availability = selectedEventType
+    ? (initialAvailabilityByEventType[selectedEventType.value] ?? null)
     : null;
-  const availabilityError = selectedLocation
-    ? (initialAvailabilityErrorsByLocation[selectedLocation.value] ?? null)
+  const availabilityError = selectedEventType
+    ? (initialAvailabilityErrorsByEventType[selectedEventType.value] ?? null)
     : null;
-  const locationsError = initialLocationsError;
+  const eventTypesError = initialEventTypesError;
   const availableDates = availability?.dates ?? [];
   const selectedDateOption = useMemo(
     () => availableDates.find((item) => item.isoDate === selectedDate) ?? null,
     [availableDates, selectedDate],
   );
   const selectedDateCacheKey =
-    selectedLocation && selectedDate
-      ? `${selectedLocation.value}|${selectedDate}`
+    selectedEventType && selectedDate
+      ? `${selectedEventType.value}|${selectedDate}`
       : "";
   const currentTimeSlots = selectedDateCacheKey
     ? (timesByDateKey[selectedDateCacheKey] ?? null)
@@ -127,9 +129,9 @@ export function BookingForm({
     const currentTime = formatCurrentTime(now);
     return currentTimeSlots.filter((slot) => slot > currentTime);
   }, [currentTimestamp, currentTimeSlots, selectedDate]);
-  const canPickTime = Boolean(hasLocation && selectedDate);
+  const canPickTime = Boolean(hasEventType && selectedDate);
   const hasSelection = Boolean(
-    selectedLocation && selectedDate && selectedTime,
+    selectedEventType && selectedDate && selectedTime,
   );
   const shouldShowTimeCard = Boolean(selectedDate);
   const availableDateSet = useMemo(
@@ -140,22 +142,10 @@ export function BookingForm({
   const lastAvailableDate =
     availableDates[availableDates.length - 1]?.isoDate ?? "";
 
-  useEffect(() => {
-    const legacyLocationId = searchParams.get("location");
-    if (locationId || !legacyLocationId) {
-      return;
-    }
-    const resolvedLocationId = resolveLegacyLocationId(legacyLocationId, locations);
-    if (!resolvedLocationId) {
-      return;
-    }
-    void setBookingParams({ locationId: resolvedLocationId });
-  }, [locationId, locations, searchParams, setBookingParams]);
-
-  function handleLocationChange(nextLocationId: BookingPayload["location"]) {
-    trackEvent("select_city", { location: nextLocationId });
+  function handleEventTypeChange(nextEventType: BookingPayload["eventType"]) {
+    trackEvent("select_city", { eventType: nextEventType });
     void setBookingParams({
-      locationId: nextLocationId,
+      eventType: nextEventType,
       date: null,
       time: null,
     });
@@ -178,28 +168,28 @@ export function BookingForm({
   }
 
   useEffect(() => {
-    if (!locationId) {
+    if (!eventType) {
       return;
     }
 
-    const exists = locations.some((item) => item.value === locationId);
+    const exists = eventTypes.some((item) => item.value === eventType);
     if (!exists) {
       void setBookingParams({
-        locationId: null,
+        eventType: null,
         date: null,
         time: null,
       });
     }
-  }, [locationId, locations, setBookingParams]);
+  }, [eventType, eventTypes, setBookingParams]);
 
   useEffect(() => {
-    if (!selectedLocation || !selectedDate) {
+    if (!selectedEventType || !selectedDate) {
       setIsLoadingTimes(false);
       setTimeLoadError(null);
       return;
     }
 
-    const cacheKey = `${selectedLocation.value}|${selectedDate}`;
+    const cacheKey = `${selectedEventType.value}|${selectedDate}`;
     if (Object.prototype.hasOwnProperty.call(timesByDateKey, cacheKey)) {
       setIsLoadingTimes(false);
       setTimeLoadError(null);
@@ -208,7 +198,7 @@ export function BookingForm({
 
     const abortController = new AbortController();
     const params = new URLSearchParams({
-      location: selectedLocation.value,
+      eventType: selectedEventType.value,
       targetDate: selectedDate,
     });
 
@@ -258,7 +248,7 @@ export function BookingForm({
     return () => {
       abortController.abort();
     };
-  }, [selectedDate, selectedLocation, timesByDateKey]);
+  }, [selectedDate, selectedEventType, timesByDateKey]);
 
   useEffect(() => {
     if (!selectedDate) {
@@ -302,7 +292,7 @@ export function BookingForm({
     if (isDraftHydrated) {
       return;
     }
-    if (locationId || selectedDate || selectedTime) {
+    if (eventType || selectedDate || selectedTime) {
       setIsDraftHydrated(true);
       return;
     }
@@ -315,26 +305,26 @@ export function BookingForm({
 
     try {
       const draft = JSON.parse(draftRaw) as Partial<BookingDraft>;
-      if (typeof draft.location !== "string" || !draft.location) {
+      if (typeof draft.eventType !== "string" || !draft.eventType) {
         window.localStorage.removeItem(DRAFT_STORAGE_KEY);
         setIsDraftHydrated(true);
         return;
       }
 
-      const locationExists = locations.some(
-        (item) => item.value === draft.location,
+      const eventTypeExists = eventTypes.some(
+        (item) => item.value === draft.eventType,
       );
-      if (!locationExists) {
+      if (!eventTypeExists) {
         window.localStorage.removeItem(DRAFT_STORAGE_KEY);
         setIsDraftHydrated(true);
         return;
       }
 
-      const availabilityForLocation =
-        initialAvailabilityByLocation[draft.location];
+      const availabilityForEventType =
+        initialAvailabilityByEventType[draft.eventType];
       const draftDate =
         typeof draft.selectedDate === "string" ? draft.selectedDate : "";
-      const dateOption = availabilityForLocation?.dates.find(
+      const dateOption = availabilityForEventType?.dates.find(
         (item) => item.isoDate === draftDate,
       );
       const restoredDate = dateOption ? draftDate : "";
@@ -346,7 +336,7 @@ export function BookingForm({
           : "";
 
       void setBookingParams({
-        locationId: draft.location,
+        eventType: draft.eventType,
         date: restoredDate || null,
         time: restoredTime || null,
       });
@@ -356,10 +346,10 @@ export function BookingForm({
       setIsDraftHydrated(true);
     }
   }, [
-    initialAvailabilityByLocation,
+    initialAvailabilityByEventType,
     isDraftHydrated,
-    locationId,
-    locations,
+    eventType,
+    eventTypes,
     selectedDate,
     selectedTime,
     setBookingParams,
@@ -370,19 +360,19 @@ export function BookingForm({
       return;
     }
 
-    if (!locationId) {
+    if (!eventType) {
       window.localStorage.removeItem(DRAFT_STORAGE_KEY);
       return;
     }
     window.localStorage.setItem(
       DRAFT_STORAGE_KEY,
       JSON.stringify({
-        location: locationId,
+        eventType,
         selectedDate,
         selectedTime,
       }),
     );
-  }, [isDraftHydrated, locationId, selectedDate, selectedTime]);
+  }, [isDraftHydrated, eventType, selectedDate, selectedTime]);
 
   useEffect(() => {
     if (!isEmbedded) {
@@ -451,7 +441,7 @@ export function BookingForm({
       observer.disconnect();
       window.removeEventListener("resize", updateOverflowState);
     };
-  }, [locations]);
+  }, [eventTypes]);
 
   function handleStartBooking() {
     if (isStartingBooking) {
@@ -459,26 +449,29 @@ export function BookingForm({
     }
     setError(null);
 
-    if (!selectedLocation || !selectedDate || !selectedTime) {
-      setError("Selecione local, data e horário para continuar.");
+    if (!selectedEventType || !selectedDate || !selectedTime) {
+      setError("Selecione evento, data e horário para continuar.");
       return;
     }
 
     const summaryUrl = buildPreBookingSummaryUrl({
-      locationId: selectedLocation.value,
+      eventType: selectedEventType.value,
       selectedDate,
       selectedTime,
     });
+    const currentSearch = searchParams.toString();
+    const originHref = currentSearch ? `${pathname}?${currentSearch}` : pathname;
+    const summaryUrlWithOrigin = appendParallelRouteOrigin(summaryUrl, originHref);
     window.localStorage.removeItem(DRAFT_STORAGE_KEY);
     startStartingBookingTransition(() => {
       trackEvent("start_booking", {
-        location: selectedLocation.value,
+        eventType: selectedEventType.value,
         date: selectedDate,
         time: selectedTime,
         authenticated: isAuthenticated,
         clerkEnabled,
       });
-      router.push(summaryUrl);
+      router.push(summaryUrlWithOrigin);
     });
   }
 
@@ -493,7 +486,7 @@ export function BookingForm({
       <CardHeader className="space-y-3">
         <CardTitle>Agendar consulta</CardTitle>
         <CardDescription>
-          Selecione local, data e horário. Em seguida, revise no resumo antes de
+          Selecione evento, data e horário. Em seguida, revise no resumo antes de
           concluir.
         </CardDescription>
       </CardHeader>
@@ -501,30 +494,30 @@ export function BookingForm({
         <div className="grid min-w-0 gap-4 sm:grid-cols-5 sm:auto-rows-auto md:gap-5">
           <section className="min-w-0 h-fit self-start space-y-4 rounded-xl border border-border/70 p-4 sm:col-span-3">
             <div className="space-y-1">
-              <Label>1. Escolha o local de atendimento</Label>
+              <Label>1. Escolha o evento</Label>
               <p className="text-xs text-muted-foreground">
-                Escolha o local onde você deseja ser atendido para visualizar as
-                datas e horários disponíveis. Estamos aqui para tornar seu
-                agendamento simples, rápido e tranquilo.
+                Escolha o tipo de atendimento para visualizar as datas e horários
+                disponíveis. Estamos aqui para tornar seu agendamento simples,
+                rápido e tranquilo.
               </p>
             </div>
-            {locations.length > 0 ? (
+            {eventTypes.length > 0 ? (
               <div
                 ref={locationListRef}
                 className="max-h-88 overflow-y-auto pr-1 md:max-h-96"
               >
                 <RadioGroup
-                  name="location"
-                  value={locationId ?? undefined}
-                  onValueChange={(value) => handleLocationChange(value)}
+                  name="eventType"
+                  value={eventType ?? undefined}
+                  onValueChange={(value) => handleEventTypeChange(value)}
                   className="space-y-2"
                 >
-                  {locations.map((item) => (
+                  {eventTypes.map((item) => (
                     <label
                       key={item.value}
                       className={cn(
                         "flex flex-wrap cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors sm:flex-nowrap",
-                        locationId === item.value
+                        eventType === item.value
                           ? "border-primary bg-primary/5"
                           : "border-border hover:bg-muted/30",
                       )}
@@ -560,8 +553,8 @@ export function BookingForm({
                 Nenhum evento ativo disponível para agendamento.
               </p>
             )}
-            {locationsError ? (
-              <p className="text-xs text-muted-foreground">{locationsError}</p>
+            {eventTypesError ? (
+              <p className="text-xs text-muted-foreground">{eventTypesError}</p>
             ) : null}
           </section>
 
@@ -569,19 +562,19 @@ export function BookingForm({
             ref={dateSectionRef}
             className={cn(
               "min-w-0 h-fit self-start scroll-mt-24 space-y-4 rounded-xl border border-border/70 p-4 sm:col-span-2 sm:row-span-2",
-              !hasLocation && "opacity-60",
+              !hasEventType && "opacity-60",
             )}
           >
             <div className="space-y-1">
               <Label>2. Escolha a data</Label>
               <p className="text-xs text-muted-foreground">
-                {hasLocation
-                  ? "Selecione no calendário um dia disponível para este local."
+                {hasEventType
+                  ? "Selecione no calendário um dia disponível para este evento."
                   : "Primeiro selecione o evento."}
               </p>
             </div>
 
-            {!hasLocation ? null : (
+            {!hasEventType ? null : (
               <div className="space-y-3">
                 <div className="rounded-xl border border-border/70 bg-muted/10 p-2">
                   <Calendar
@@ -648,11 +641,11 @@ export function BookingForm({
             {availabilityError ? (
               <p className="text-xs text-destructive">{availabilityError}</p>
             ) : null}
-            {hasLocation &&
+            {hasEventType &&
             !availabilityError &&
             availableDates.length === 0 ? (
               <p className="text-xs text-muted-foreground">
-                Não há datas disponíveis para este local.
+                Não há datas disponíveis para este evento.
               </p>
             ) : null}
           </section>
@@ -682,7 +675,7 @@ export function BookingForm({
                   {canPickTime
                     ? isLoadingTimes
                       ? "Carregando horários..."
-                      : `Horários disponíveis para ${selectedLocation?.label}.`
+                      : `Horários disponíveis para ${selectedEventType?.label}.`
                     : "Selecione evento e data para carregar os horários abaixo."}
                 </p>
               </div>
@@ -716,7 +709,7 @@ export function BookingForm({
               <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
                 <p className="font-medium">Resumo rápido</p>
                 <p className="text-muted-foreground">
-                  {selectedLocation?.label ?? "Selecione um evento"}
+                  {selectedEventType?.label ?? "Selecione um evento"}
                   {selectedDateOption
                     ? ` - ${selectedDateOption.weekdayLabel}, ${selectedDateOption.label}`
                     : selectedDate
@@ -748,16 +741,16 @@ export function BookingForm({
 }
 
 function buildPreBookingSummaryUrl({
-  locationId,
+  eventType,
   selectedDate,
   selectedTime,
 }: {
-  locationId: BookingPayload["location"];
+  eventType: BookingPayload["eventType"];
   selectedDate: string;
   selectedTime: string;
 }) {
   const params = new URLSearchParams({
-    locationId,
+    eventType,
     date: selectedDate,
     time: selectedTime,
   });
@@ -796,50 +789,6 @@ function parseIsoDate(isoDate: string) {
     typeof month === "number" && Number.isFinite(month) ? month : 1;
   const safeDay = typeof day === "number" && Number.isFinite(day) ? day : 1;
   return new Date(safeYear, safeMonth - 1, safeDay, 12, 0, 0);
-}
-
-function resolveLegacyLocationId(
-  legacyLocationId: string,
-  locations: BookingLocationOption[],
-) {
-  const raw = legacyLocationId.trim();
-  if (!raw) {
-    return undefined;
-  }
-  const directMatch = locations.find((item) => item.value === raw);
-  if (directMatch) {
-    return directMatch.value;
-  }
-
-  const normalizedRaw = normalizeLocationToken(raw);
-  if (!normalizedRaw) {
-    return undefined;
-  }
-
-  for (const item of locations) {
-    const normalizedValue = normalizeLocationToken(item.value);
-    const normalizedLabel = normalizeLocationToken(item.label);
-    if (
-      normalizedRaw === normalizedValue ||
-      normalizedRaw === normalizedLabel ||
-      normalizedLabel.includes(normalizedRaw) ||
-      normalizedRaw.includes(normalizedValue)
-    ) {
-      return item.value;
-    }
-  }
-
-  return undefined;
-}
-
-function normalizeLocationToken(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, " ");
 }
 
 function scrollToSection(sectionRef: { current: HTMLElement | null }) {
