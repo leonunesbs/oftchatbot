@@ -54,6 +54,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   "nova-disponibilidade": "Nova disponibilidade",
   "sign-in": "Entrar",
   "sign-up": "Criar conta",
+  waitlist: "Lista de espera",
   "termos-de-uso": "Termos de Uso",
   "politica-de-privacidade": "Política de Privacidade",
   embed: "Embed",

@@ -571,7 +571,14 @@ async function markAsPaid(
   );
 
   let appointmentId = reservation.appointmentId;
+  let isPaidReschedule = false;
+  let previousReservationId: Id<"reservations"> | null = null;
   if (appointmentId) {
+    const currentAppointment = await ctx.db.get(appointmentId);
+    previousReservationId = currentAppointment?.reservationId ?? null;
+    isPaidReschedule = Boolean(
+      previousReservationId && String(previousReservationId) !== String(reservation._id),
+    );
     await ctx.db.patch(appointmentId, {
       patientId: patient._id,
       name: patient.name,
@@ -581,11 +588,24 @@ async function markAsPaid(
       eventTypeId: eventType._id,
       reservationId: reservation._id,
       preferredPeriod: inferPreferredPeriod(reservation.startsAt),
-      status: "confirmed",
+      status: isPaidReschedule ? "rescheduled" : "confirmed",
       scheduledFor: reservation.startsAt,
       consultationType: eventType.name ?? eventType.title ?? "Consulta oftalmologica",
       updatedAt: now,
     });
+    if (isPaidReschedule && previousReservationId) {
+      const previousReservation = await ctx.db.get(previousReservationId);
+      if (
+        previousReservation &&
+        (previousReservation.status === "confirmed" || previousReservation.status === "awaiting_reschedule")
+      ) {
+        await ctx.db.patch(previousReservation._id, {
+          status: "cancelled",
+          notes: "Reserva substituída após confirmação de pagamento de remarcação adicional.",
+          updatedAt: now,
+        });
+      }
+    }
   } else {
     appointmentId = await ctx.db.insert("appointments", {
       clerkUserId: reservation.clerkUserId,
@@ -613,8 +633,17 @@ async function markAsPaid(
     await ctx.db.insert("appointment_events", {
       appointmentId,
       clerkUserId: reservation.clerkUserId,
-      eventType: "confirmed",
-      notes: "Agendamento confirmado automaticamente após pagamento Stripe.",
+      eventType: isPaidReschedule ? "rescheduled" : "confirmed",
+      notes: isPaidReschedule
+        ? "Remarcação confirmada automaticamente após pagamento de nova taxa no Stripe."
+        : "Agendamento confirmado automaticamente após pagamento Stripe.",
+      payload: isPaidReschedule
+        ? JSON.stringify({
+            previousReservationId,
+            newReservationId: reservation._id,
+            newScheduledFor: reservation.startsAt,
+          })
+        : undefined,
       createdAt: now,
     });
   }
@@ -787,14 +816,13 @@ async function assertSlotIsAvailable(
     ctx.db.query("reservations").collect(),
   ]);
 
+  const override = allOverrides.find((item) => item.groupName === groupName && item.date === isoDate);
   const groupAvailabilities = allAvailabilities.filter(
     (item) => item.status === "active" && resolveAvailabilityGroupName(item) === groupName,
   );
-  if (groupAvailabilities.length === 0) {
+  if (!override && groupAvailabilities.length === 0) {
     throw new Error("Sem disponibilidade ativa para o evento.");
   }
-
-  const override = allOverrides.find((item) => item.groupName === groupName && item.date === isoDate);
   const availableSlots = new Set<string>();
   if (override) {
     if (!override.allDayUnavailable) {
@@ -898,8 +926,10 @@ async function assertCanCreateNewBookingDraft(
     .query("appointments")
     .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", clerkUserId))
     .collect();
+  await markOverdueAppointmentsAsNoShow(ctx, appointments, now);
+
   const hasActiveAppointment = appointments.some(
-    (item) => item.status === "confirmed" || item.status === "rescheduled",
+    (item) => isAppointmentCurrentlyActive(item, now),
   );
   if (hasActiveAppointment) {
     throw new Error(
@@ -920,6 +950,67 @@ async function assertCanCreateNewBookingDraft(
     throw new Error(
       "Você já possui um agendamento aguardando remarcação. Finalize ou cancele o pendente atual.",
     );
+  }
+}
+
+function isAppointmentInActiveWindow(appointment: Doc<"appointments">) {
+  return appointment.status === "confirmed" || appointment.status === "rescheduled";
+}
+
+function hasAppointmentStarted(appointment: Doc<"appointments">, now: number) {
+  return typeof appointment.scheduledFor === "number" && appointment.scheduledFor <= now;
+}
+
+function isAppointmentCurrentlyActive(appointment: Doc<"appointments">, now: number) {
+  return isAppointmentInActiveWindow(appointment) && !hasAppointmentStarted(appointment, now);
+}
+
+async function markOverdueAppointmentsAsNoShow(
+  ctx: MutationCtx,
+  appointments: Doc<"appointments">[],
+  now: number,
+) {
+  const overdueAppointments = appointments.filter(
+    (item) => isAppointmentInActiveWindow(item) && hasAppointmentStarted(item, now),
+  );
+  if (overdueAppointments.length === 0) {
+    return;
+  }
+
+  for (const appointment of overdueAppointments) {
+    await ctx.db.patch(appointment._id, {
+      status: "no_show",
+      updatedAt: now,
+    });
+
+    if (appointment.reservationId) {
+      const reservation = await ctx.db.get(appointment.reservationId);
+      if (
+        reservation &&
+        (reservation.status === "confirmed" ||
+          reservation.status === "pending" ||
+          reservation.status === "awaiting_patient" ||
+          reservation.status === "in_care" ||
+          reservation.status === "surgery_planned" ||
+          reservation.status === "postop_followup")
+      ) {
+        await ctx.db.patch(reservation._id, {
+          status: "cancelled",
+          notes:
+            "Reserva encerrada automaticamente por no-show após ultrapassar o horário de início.",
+          updatedAt: now,
+        });
+      }
+    }
+
+    await ctx.db.insert("appointment_events", {
+      appointmentId: appointment._id,
+      clerkUserId: appointment.clerkUserId,
+      eventType: "no_show",
+      notes:
+        "Consulta marcada como no_show automaticamente após ultrapassar o horário de início.",
+      createdAt: now,
+    });
   }
 }
 

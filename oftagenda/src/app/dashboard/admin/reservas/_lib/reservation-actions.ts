@@ -8,6 +8,15 @@ type PatientProfileValues = {
   birthDate?: string;
 };
 
+type RescheduleDateOption = {
+  isoDate: string;
+  label: string;
+  weekdayLabel: string;
+  times: string[];
+};
+
+const RESCHEDULE_DATE_LOOKAHEAD_DAYS = 180;
+
 function getEventTypeLabel(
   eventType: "created" | "confirmed" | "rescheduled" | "no_show" | "cancelled" | "completed" | "details_submitted",
 ) {
@@ -42,6 +51,161 @@ function normalizeBirthDate(value: string | undefined) {
     return undefined;
   }
   return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : undefined;
+}
+
+function parseTimeToMinutes(time: string) {
+  const [hoursRaw, minutesRaw] = time.split(":");
+  const hours = Number(hoursRaw ?? "0");
+  const minutes = Number(minutesRaw ?? "0");
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    return 0;
+  }
+  return hours * 60 + minutes;
+}
+
+function formatMinutesToTime(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function buildSlotsWithinRange(startTime: string, endTime: string, durationMinutes: number) {
+  const safeDuration = durationMinutes > 0 ? durationMinutes : 30;
+  const start = parseTimeToMinutes(startTime);
+  const end = parseTimeToMinutes(endTime);
+  const slots: string[] = [];
+
+  for (let cursor = start; cursor + safeDuration <= end; cursor += safeDuration) {
+    slots.push(formatMinutesToTime(cursor));
+  }
+
+  return slots;
+}
+
+function toIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseIsoDateToLocalDate(isoDate: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+    return null;
+  }
+  const [yearRaw, monthRaw, dayRaw] = isoDate.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return null;
+  }
+  return new Date(year, month - 1, day, 12, 0, 0);
+}
+
+function resolveAvailabilityGroupName(availability: { _id: string; name?: string } | undefined) {
+  if (!availability) {
+    return "Disponibilidade";
+  }
+  const normalized = availability.name?.trim();
+  if (normalized && normalized.length > 0) {
+    return normalized;
+  }
+  return `Disponibilidade-${availability._id}`;
+}
+
+function buildRescheduleDateOptions(args: {
+  eventTypeId: string;
+  snapshot: Awaited<ReturnType<typeof getAdminSnapshot>>;
+  now?: number;
+  daysAhead?: number;
+}): RescheduleDateOption[] {
+  const { eventTypeId, snapshot } = args;
+  const now = args.now ?? Date.now();
+  const daysAhead = args.daysAhead ?? RESCHEDULE_DATE_LOOKAHEAD_DAYS;
+
+  const eventType = snapshot.eventTypes.find((item) => String(item._id) === eventTypeId);
+  if (!eventType?.availabilityId) {
+    return [];
+  }
+
+  const baseAvailability = snapshot.availabilities.find(
+    (item) => String(item._id) === String(eventType.availabilityId),
+  );
+  const groupName = resolveAvailabilityGroupName(
+    baseAvailability
+      ? {
+          _id: String(baseAvailability._id),
+          name: baseAvailability.name,
+        }
+      : undefined,
+  );
+
+  const activeGroupSlots = snapshot.availabilities.filter(
+    (item) => item.status === "active" && resolveAvailabilityGroupName({ _id: String(item._id), name: item.name }) === groupName,
+  );
+  if (activeGroupSlots.length === 0) {
+    return [];
+  }
+
+  const overrideByDate = new Map(
+    snapshot.availabilityOverrides
+      .filter((override) => override.groupName === groupName)
+      .map((override) => [override.date, override]),
+  );
+
+  const duration = eventType.durationMinutes > 0 ? eventType.durationMinutes : 30;
+  const options: RescheduleDateOption[] = [];
+
+  for (let offset = 0; offset < daysAhead; offset += 1) {
+    const date = new Date(now);
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() + offset);
+    const isoDate = toIsoDate(date);
+    const parsedDate = parseIsoDateToLocalDate(isoDate);
+    if (!parsedDate) {
+      continue;
+    }
+
+    const override = overrideByDate.get(isoDate);
+    const daySlots = new Set<string>();
+    if (override) {
+      if (override.allDayUnavailable) {
+        continue;
+      }
+      const activeOverrideSlots = override.slots.filter((slot) => slot.status === "active");
+      for (const slot of activeOverrideSlots) {
+        for (const generatedSlot of buildSlotsWithinRange(slot.startTime, slot.endTime, duration)) {
+          daySlots.add(generatedSlot);
+        }
+      }
+    } else {
+      const weekday = parsedDate.getDay();
+      const weeklySlots = activeGroupSlots.filter((availability) => availability.weekday === weekday);
+      for (const weeklySlot of weeklySlots) {
+        for (const generatedSlot of buildSlotsWithinRange(weeklySlot.startTime, weeklySlot.endTime, duration)) {
+          daySlots.add(generatedSlot);
+        }
+      }
+    }
+
+    const times = [...daySlots].sort((a, b) => parseTimeToMinutes(a) - parseTimeToMinutes(b));
+    if (times.length === 0) {
+      continue;
+    }
+
+    options.push({
+      isoDate,
+      label: parsedDate.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      weekdayLabel: parsedDate.toLocaleDateString("pt-BR", { weekday: "short" }),
+      times,
+    });
+  }
+
+  return options;
 }
 
 function resolveMergedPatientField({
@@ -173,6 +337,10 @@ export async function getReservationActionData(reservationId: string) {
   });
 
   const eventType = eventTypeById.get(String(reservation.eventTypeId));
+  const rescheduleDateOptions = buildRescheduleDateOptions({
+    eventTypeId: String(reservation.eventTypeId),
+    snapshot: data,
+  });
   const recentTimeline =
     typeof reservation.appointmentId === "string"
       ? data.appointmentEvents
@@ -205,6 +373,7 @@ export async function getReservationActionData(reservationId: string) {
     patientEmail: mergedEmail.value,
     patientPhone: mergedPhone.value,
     patientBirthDate: mergedBirthDate.value,
+    rescheduleDateOptions,
     recentTimeline,
   };
 }

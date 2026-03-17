@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 
 type EventTypeOption = {
   _id: string;
+  slug: string;
   name?: string;
   title: string;
   kind?: "consulta" | "procedimento" | "exame";

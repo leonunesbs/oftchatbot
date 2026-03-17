@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ReservationStatus } from "@/lib/reservation-status";
 import { reservationStatusLabel } from "@/lib/reservation-status";
 import { usePathname, useRouter } from "next/navigation";
@@ -67,6 +66,7 @@ const SLOT_DURATION_MINUTES = 30;
 const CALENDAR_START_HOUR = 7;
 const CALENDAR_END_HOUR = 20;
 const DRAG_DROP_RESCHEDULE_CONFIRMED_EVENT = "agenda-drag-drop-reschedule-confirmed";
+const ADMIN_CALENDAR_DND_CONTEXT_ID = "admin-calendar-dnd-context";
 
 function startOfWeek(date: Date) {
   const next = new Date(date);
@@ -200,10 +200,19 @@ function parseReagendarReservationId(pathname: string) {
   return match?.[1] ?? null;
 }
 
-function DraggableReservationCard({ item, agendaPath }: { item: CalendarItem; agendaPath: string }) {
+function DraggableReservationCard({
+  item,
+  agendaPath,
+  dragEnabled,
+}: {
+  item: CalendarItem;
+  agendaPath: string;
+  dragEnabled: boolean;
+}) {
   const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: buildReservationDragId(item.reservationId),
+    disabled: !dragEnabled,
   });
   const style = transform
     ? {
@@ -215,7 +224,9 @@ function DraggableReservationCard({ item, agendaPath }: { item: CalendarItem; ag
     <div
       ref={setNodeRef}
       style={style}
-      className={`block w-full cursor-grab select-none rounded-md px-2 py-1 text-left text-[11px] active:cursor-grabbing ${
+      className={`block w-full select-none rounded-md px-2 py-1 text-left text-[11px] ${
+        dragEnabled ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+      } ${
         STATUS_CARD_CLASS[item.status]
       } ${isDragging ? "cursor-grabbing opacity-70" : ""}`}
       onClick={() => router.push(`${agendaPath}/status/${item.reservationId}`)}
@@ -249,6 +260,7 @@ function AgendaSlotCell({
   agendaPath,
   liveMarkerOffsetPercent,
   isDraggingReservation,
+  dragEnabled,
 }: {
   dayKey: string;
   slot: string;
@@ -258,10 +270,12 @@ function AgendaSlotCell({
   agendaPath: string;
   liveMarkerOffsetPercent: number | null;
   isDraggingReservation: boolean;
+  dragEnabled: boolean;
 }) {
   const isEmptySlot = slotItems.length === 0;
   const { isOver, setNodeRef } = useDroppable({
     id: buildSlotDropId(dayKey, slot),
+    disabled: !dragEnabled,
   });
 
   return (
@@ -296,7 +310,7 @@ function AgendaSlotCell({
       ) : null}
       <div className="space-y-1">
         {slotItems.map((item) => (
-          <DraggableReservationCard key={item._id} item={item} agendaPath={agendaPath} />
+          <DraggableReservationCard key={item._id} item={item} agendaPath={agendaPath} dragEnabled={dragEnabled} />
         ))}
       </div>
     </div>
@@ -309,6 +323,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [anchorDate, setAnchorDate] = useState(() => new Date());
   const [now, setNow] = useState(() => new Date());
+  const [dragEnabled, setDragEnabled] = useState(false);
   const [isDraggingReservation, setIsDraggingReservation] = useState(false);
   const [optimisticMoves, setOptimisticMoves] = useState<Record<string, OptimisticMove>>({});
   const bodyCursorBeforeDragRef = useRef<string>("");
@@ -329,6 +344,16 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       if (intervalId !== undefined) {
         window.clearInterval(intervalId);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 640px)");
+    const syncDragEnabled = () => setDragEnabled(mediaQuery.matches);
+    syncDragEnabled();
+    mediaQuery.addEventListener("change", syncDragEnabled);
+    return () => {
+      mediaQuery.removeEventListener("change", syncDragEnabled);
     };
   }, []);
 
@@ -532,6 +557,9 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
   const reservationById = useMemo(() => new Map(displayItems.map((item) => [item.reservationId, item])), [displayItems]);
 
   function handleDragEnd(event: DragEndEvent) {
+    if (!dragEnabled) {
+      return;
+    }
     if (!event.over) {
       return;
     }
@@ -565,26 +593,38 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
 
   return (
     <div className="min-w-0 space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Button variant={viewMode === "week" ? "default" : "outline"} size="sm" onClick={() => setViewMode("week")}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+          <Button
+            variant={viewMode === "week" ? "default" : "outline"}
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => setViewMode("week")}
+          >
             Semana
           </Button>
-          <Button variant={viewMode === "day" ? "default" : "outline"} size="sm" onClick={() => setViewMode("day")}>
+          <Button
+            variant={viewMode === "day" ? "default" : "outline"}
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => setViewMode("day")}
+          >
             Dia
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => shiftPeriod("prev")}>
-            Anterior
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchorDate(new Date())}>
-            Hoje
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => shiftPeriod("next")}>
-            Próxima
-          </Button>
-          <Button asChild>
+        <div className="space-y-2 sm:flex sm:items-center sm:gap-2 sm:space-y-0">
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => shiftPeriod("prev")}>
+              Anterior
+            </Button>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setAnchorDate(new Date())}>
+              Hoje
+            </Button>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => shiftPeriod("next")}>
+              Próxima
+            </Button>
+          </div>
+          <Button asChild className="w-full sm:w-auto">
             <Link href={`${agendaPath}/novo-agendamento`} prefetch={false}>
               Novo agendamento
             </Link>
@@ -593,6 +633,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
       </div>
 
       <DndContext
+        id={ADMIN_CALENDAR_DND_CONTEXT_ID}
         onDragStart={() => setIsDraggingReservation(true)}
         onDragCancel={() => setIsDraggingReservation(false)}
         onDragEnd={(event) => {
@@ -636,6 +677,7 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
                         liveMarker && liveMarker.dayKey === dayKey && liveMarker.slot === slot ? liveMarker.offsetPercent : null
                       }
                       isDraggingReservation={isDraggingReservation}
+                      dragEnabled={dragEnabled}
                     />
                   );
                 })}
@@ -645,12 +687,10 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
         </div>
       </DndContext>
 
-      <div className="grid gap-3 lg:grid-cols-[1fr_360px]">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Legenda de leitura rápida</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2">
+      <div className="grid gap-3 px-1 sm:px-0 lg:grid-cols-[1fr_360px]">
+        <section className="rounded-xl border border-border/70 bg-card p-4 shadow-sm md:p-5">
+          <h2 className="text-base font-semibold tracking-tight">Legenda de leitura rápida</h2>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge className={STATUS_CARD_CLASS.pending}>Pendente / aguardando paciente</Badge>
             <Badge className={STATUS_CARD_CLASS.confirmed}>Confirmado / em atendimento</Badge>
             <Badge className={STATUS_CARD_CLASS.surgery_planned}>Planejado / pós-operatório / concluído</Badge>
@@ -658,17 +698,15 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
             <Badge className={KIND_CLASS.consulta}>Tipo: consulta</Badge>
             <Badge className={KIND_CLASS.exame}>Tipo: exame</Badge>
             <Badge className={KIND_CLASS.procedimento}>Tipo: procedimento</Badge>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Operação rápida da secretária</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <section className="rounded-xl border border-border/70 bg-card p-4 shadow-sm md:p-5">
+          <h2 className="text-base font-semibold tracking-tight">Operação rápida da secretária</h2>
+          <div className="mt-3 space-y-2.5">
             {nextOperations.length > 0 ? (
               nextOperations.map((item) => (
-                <div key={item._id} className="rounded-md border p-2">
+                <div key={item._id} className="rounded-lg border border-border/60 bg-background/80 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                   <p className="truncate text-sm font-medium">{item.patientName}</p>
                   <p className="text-xs text-muted-foreground">
                     {new Intl.DateTimeFormat("pt-BR", {
@@ -704,20 +742,18 @@ export function AdminCalendar({ items }: AdminCalendarProps) {
             ) : (
               <p className="text-sm text-muted-foreground">Não há reservas ativas para operação rápida.</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Painel de lembretes por e-mail</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+      <section className="mx-1 rounded-xl border border-border/70 bg-card p-4 shadow-sm sm:mx-0 md:p-5">
+        <h2 className="text-base font-semibold tracking-tight">Painel de lembretes por e-mail</h2>
+        <div className="mt-3 grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
           <p>Abra a ação de contato para disparar lembrete 24h com modelo pronto de e-mail.</p>
           <p>Use a ação de reagendamento para atualizar data e horário sem sair da agenda.</p>
           <p>Os registros recentes ficam disponíveis no drawer da reserva selecionada.</p>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

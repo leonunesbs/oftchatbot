@@ -5,6 +5,7 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 
 const RESERVATION_HOLD_DURATION_MS = 15 * 60_000;
+const RESCHEDULE_CHECKOUT_HOLD_DURATION_MS = 30 * 60_000;
 const RESCHEDULE_MIN_NOTICE_MS = 24 * 60 * 60_000;
 const BOOKING_MIN_NOTICE_MS = 48 * 60 * 60_000;
 const RESCHEDULE_MAX_DAYS_AHEAD = 30;
@@ -154,10 +155,6 @@ export const getBookingOptionsByLocation = query({
       (item) => item.status === "active" && activeGroupNames.has(resolveAvailabilityGroupName(item)),
     );
 
-    if (availabilities.length === 0) {
-      return { location: args.location, dates: [] };
-    }
-
     const availabilityByGroup = new Map<string, typeof availabilities>();
     for (const availability of availabilities) {
       const groupName = resolveAvailabilityGroupName(availability);
@@ -167,6 +164,9 @@ export const getBookingOptionsByLocation = query({
     }
 
     const relevantOverrides = allOverrides.filter((override) => activeGroupNames.has(override.groupName));
+    if (availabilities.length === 0 && relevantOverrides.length === 0) {
+      return { location: args.location, dates: [] };
+    }
     const overrideByGroupDate = new Map(
       relevantOverrides.map((override) => [buildOverrideKey(override.groupName, override.date), override]),
     );
@@ -398,6 +398,9 @@ export const getDashboardState = query({
     const resolvedNextAppointment = nextAppointment
       ? {
           ...nextAppointment,
+          eventSlug: nextAppointment.eventTypeId
+            ? (eventTypeById.get(String(nextAppointment.eventTypeId))?.slug ?? null)
+            : null,
           eventName: nextAppointment.eventTypeId
             ? (eventTypeById.get(String(nextAppointment.eventTypeId))?.name ??
               eventTypeById.get(String(nextAppointment.eventTypeId))?.title ??
@@ -425,6 +428,8 @@ export const getDashboardState = query({
           reschedulesUsed: 0,
           minNoticeHours: 24,
           maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+          requiresPaidReschedule: false,
+          paidRescheduleAmountCents: null,
         };
 
     return {
@@ -442,6 +447,7 @@ export const getDashboardState = query({
 
 export const rescheduleOwnAppointment = mutation({
   args: {
+    eventTypeId: v.id("event_types"),
     location: bookingLocationValidator,
     date: v.string(),
     time: v.string(),
@@ -474,7 +480,17 @@ export const rescheduleOwnAppointment = mutation({
       throw new Error("Consulta ainda sem horário definido.");
     }
 
-    const eventType = await resolveSingleActiveEventType(ctx, args.location);
+    if (String(appointment.eventTypeId) !== String(args.eventTypeId)) {
+      throw new Error("A remarcação deve manter o mesmo tipo de atendimento.");
+    }
+
+    const eventType = await ctx.db.get(args.eventTypeId);
+    if (!eventType || !eventType.active) {
+      throw new Error("Este atendimento não está disponível para remarcação.");
+    }
+    if (eventType.slug !== args.location) {
+      throw new Error("O local informado não corresponde ao atendimento da consulta.");
+    }
     const availability = eventType.availabilityId ? await ctx.db.get(eventType.availabilityId) : null;
     if (!availability) {
       throw new Error("Evento sem disponibilidade configurada.");
@@ -492,6 +508,93 @@ export const rescheduleOwnAppointment = mutation({
     const previousScheduledFor = appointment.scheduledFor ?? null;
     const previousReservationId = appointment.reservationId ?? null;
     const endsAt = slotTimestamp + eventType.durationMinutes * 60_000;
+    if (policy.requiresPaidReschedule) {
+      const allReservations = await ctx.db
+        .query("reservations")
+        .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+        .collect();
+      const pendingDrafts = allReservations.filter(
+        (item) =>
+          item.appointmentId === appointment._id &&
+          item.status === "pending" &&
+          getReservationHoldExpiresAt(item) > now,
+      );
+      for (const pendingDraft of pendingDrafts) {
+        await ctx.db.patch(pendingDraft._id, {
+          status: "cancelled",
+          notes: "Rascunho de pagamento substituído por nova tentativa de remarcação.",
+          updatedAt: now,
+        });
+        const pendingPayment = await ctx.db
+          .query("payments")
+          .withIndex("by_reservation_id", (q) => q.eq("reservationId", pendingDraft._id))
+          .filter((q) => q.eq(q.field("status"), "pending"))
+          .first();
+        if (pendingPayment) {
+          await ctx.db.patch(pendingPayment._id, {
+            status: "failed",
+            notes: "Pagamento pendente substituído por nova tentativa de remarcação.",
+            updatedAt: now,
+          });
+        }
+      }
+
+      const paymentMode = eventType.paymentMode ?? "booking_fee";
+      const consultationAmountCents = normalizeAmountCents(eventType.priceCents);
+      if (!consultationAmountCents || consultationAmountCents <= 0) {
+        throw new Error("Não foi possível calcular a taxa para novo reagendamento.");
+      }
+      const amountCents = paymentMode === "full_payment"
+        ? consultationAmountCents
+        : paymentMode === "in_person"
+          ? 0
+          : calculateReservationFeeCents(consultationAmountCents, RESERVATION_FEE_PERCENT);
+      if (!amountCents || amountCents <= 0) {
+        throw new Error("Não foi possível calcular a nova taxa de reserva para remarcação.");
+      }
+
+      const holdExpiresAt = now + RESCHEDULE_CHECKOUT_HOLD_DURATION_MS;
+      const newReservationId = await ctx.db.insert("reservations", {
+        clerkUserId: identity.subject,
+        eventTypeId: eventType._id,
+        availabilityId: availability._id,
+        appointmentId: appointment._id,
+        startsAt: slotTimestamp,
+        endsAt,
+        holdExpiresAt,
+        status: "pending",
+        notes:
+          "Reagendamento adicional solicitado. Aguardando pagamento de nova taxa de reserva.",
+        createdAt: now,
+        updatedAt: now,
+      });
+      const paymentId = await ctx.db.insert("payments", {
+        clerkUserId: identity.subject,
+        reservationId: newReservationId,
+        amountCents,
+        currency: "BRL",
+        method: "card",
+        status: "pending",
+        notes: "Checkout Stripe iniciado para remarcação adicional.",
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      return {
+        ok: true,
+        kind: "payment_required" as const,
+        appointmentId: appointment._id,
+        reservationId: newReservationId,
+        paymentId,
+        amountCents,
+        currency: "BRL" as const,
+        consultationType: eventType.name ?? eventType.title ?? eventType.slug,
+        eventTypeSlug: eventType.slug,
+        holdExpiresAt,
+        scheduledFor: slotTimestamp,
+        location: eventType.location,
+      };
+    }
 
     const newReservationId = await ctx.db.insert("reservations", {
       clerkUserId: identity.subject,
@@ -549,6 +652,7 @@ export const rescheduleOwnAppointment = mutation({
 
     return {
       ok: true,
+      kind: "rescheduled" as const,
       appointmentId: appointment._id,
       scheduledFor: slotTimestamp,
       location: eventType.location,
@@ -756,12 +860,36 @@ async function buildReschedulePolicy(
   appointment: Doc<"appointments">,
   now: number,
 ) {
+  const eventType = appointment.eventTypeId ? await ctx.db.get(appointment.eventTypeId) : null;
+  const paymentMode = eventType?.paymentMode ?? "booking_fee";
   const linkedReservation = appointment.reservationId
     ? await ctx.db.get(appointment.reservationId)
     : null;
   const isClinicInitiatedReschedule = linkedReservation?.status === "awaiting_reschedule";
+  const history = await ctx.db
+    .query("appointment_events")
+    .withIndex("by_appointment_id", (q) => q.eq("appointmentId", appointment._id))
+    .collect();
+  const reschedulesUsed = history.filter((item) => item.eventType === "rescheduled").length;
+  const reachedRescheduleLimit = reschedulesUsed >= RESCHEDULE_MAX_PER_APPOINTMENT;
 
   if (isClinicInitiatedReschedule) {
+    if (paymentMode === "in_person" && reachedRescheduleLimit) {
+      return {
+        canReschedule: false,
+        canCancel: true,
+        isClinicInitiatedReschedule: true,
+        cancelReason: null,
+        requiresHumanSupport: false,
+        reason: "Para consultas com pagamento presencial, apenas 1 remarcação é permitida.",
+        maxReschedules: RESCHEDULE_MAX_PER_APPOINTMENT,
+        reschedulesUsed,
+        minNoticeHours: 24,
+        maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+        requiresPaidReschedule: false,
+        paidRescheduleAmountCents: null,
+      };
+    }
     return {
       canReschedule: true,
       canCancel: true,
@@ -773,6 +901,8 @@ async function buildReschedulePolicy(
       reschedulesUsed: 0,
       minNoticeHours: 24,
       maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+      requiresPaidReschedule: false,
+      paidRescheduleAmountCents: null,
     };
   }
 
@@ -789,27 +919,42 @@ async function buildReschedulePolicy(
       reschedulesUsed: 0,
       minNoticeHours: 24,
       maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+      requiresPaidReschedule: false,
+      paidRescheduleAmountCents: null,
     };
   }
 
-  const history = await ctx.db
-    .query("appointment_events")
-    .withIndex("by_appointment_id", (q) => q.eq("appointmentId", appointment._id))
-    .collect();
-  const reschedulesUsed = history.filter((item) => item.eventType === "rescheduled").length;
+  const consultationAmountCents = normalizeAmountCents(eventType?.priceCents);
+  const paidRescheduleAmountCents =
+    paymentMode === "full_payment"
+      ? consultationAmountCents ?? null
+      : paymentMode === "in_person"
+        ? null
+        : consultationAmountCents
+          ? calculateReservationFeeCents(consultationAmountCents, RESERVATION_FEE_PERCENT)
+          : null;
 
   if (reschedulesUsed >= RESCHEDULE_MAX_PER_APPOINTMENT) {
+    const requiresPaidReschedule = Boolean(
+      typeof paidRescheduleAmountCents === "number" && paidRescheduleAmountCents > 0,
+    );
     return {
-      canReschedule: false,
+      canReschedule: requiresPaidReschedule,
       canCancel: true,
       isClinicInitiatedReschedule: false,
       cancelReason: null,
       requiresHumanSupport: false,
-      reason: "Você já utilizou o limite de 1 remarcação sem custo.",
+      reason: paymentMode === "in_person"
+        ? "Para consultas com pagamento presencial, apenas 1 remarcação é permitida."
+        : requiresPaidReschedule
+          ? "Você já utilizou a remarcação sem custo. A próxima remarcação exige nova taxa de reserva."
+          : "Você já utilizou o limite de 1 remarcação sem custo.",
       maxReschedules: RESCHEDULE_MAX_PER_APPOINTMENT,
       reschedulesUsed,
       minNoticeHours: 24,
       maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+      requiresPaidReschedule,
+      paidRescheduleAmountCents: requiresPaidReschedule ? paidRescheduleAmountCents : null,
     };
   }
 
@@ -825,6 +970,8 @@ async function buildReschedulePolicy(
       reschedulesUsed,
       minNoticeHours: 24,
       maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+      requiresPaidReschedule: false,
+      paidRescheduleAmountCents: null,
     };
   }
 
@@ -839,6 +986,8 @@ async function buildReschedulePolicy(
     reschedulesUsed,
     minNoticeHours: 24,
     maxDaysAhead: RESCHEDULE_MAX_DAYS_AHEAD,
+    requiresPaidReschedule: false,
+    paidRescheduleAmountCents: null,
   };
 }
 
@@ -1081,32 +1230,6 @@ function resolveAvailabilityGroupName(availability: { name?: string; _id?: unkno
   return `Disponibilidade-${String(availability._id ?? "sem-id")}`;
 }
 
-async function resolveSingleActiveEventType(ctx: MutationCtx, location: string) {
-  const normalizedInput = location.trim().toLowerCase();
-  const activeEventTypes = await ctx.db
-    .query("event_types")
-    .withIndex("by_active", (q) => q.eq("active", true))
-    .collect();
-  const candidates = activeEventTypes.filter(
-    (item) => item.slug.trim().toLowerCase() === normalizedInput,
-  );
-
-  if (candidates.length === 0) {
-    throw new Error(`Evento selecionado não encontrado para slug "${location.trim()}".`);
-  }
-  if (candidates.length > 1) {
-    throw new Error(
-      `Mais de um evento ativo encontrado para slug "${location.trim()}". Mantenha apenas um evento ativo por slug.`,
-    );
-  }
-
-  const eventType = candidates[0]!;
-  if (!eventType.availabilityId) {
-    throw new Error("Evento selecionado não está pronto para novos agendamentos.");
-  }
-  return eventType;
-}
-
 function assertRescheduleWindow(
   slotTimestamp: number,
   now: number,
@@ -1170,14 +1293,13 @@ async function assertSlotIsAvailable(
     ctx.db.query("availability_overrides").collect(),
     ctx.db.query("reservations").collect(),
   ]);
+  const override = allOverrides.find((item) => item.groupName === groupName && item.date === isoDate);
   const groupAvailabilities = allAvailabilities.filter(
     (item) => item.status === "active" && resolveAvailabilityGroupName(item) === groupName,
   );
-  if (groupAvailabilities.length === 0) {
+  if (!override && groupAvailabilities.length === 0) {
     throw new Error("Sem disponibilidade ativa para o evento.");
   }
-
-  const override = allOverrides.find((item) => item.groupName === groupName && item.date === isoDate);
   const availableSlots = new Set<string>();
   if (override) {
     if (!override.allDayUnavailable) {

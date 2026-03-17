@@ -17,8 +17,6 @@ function getUnderConstructionRedirect(req: Request) {
   return NextResponse.redirect(redirectUrl);
 }
 
-const signInUrl = process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL?.trim() || "/sign-in";
-
 function isPublicApiBypass(pathname: string) {
   return (
     pathname === "/api/stripe/webhook" ||
@@ -26,14 +24,6 @@ function isPublicApiBypass(pathname: string) {
     pathname === "/api/booking/options" ||
     pathname === "/api/booking/options/" ||
     pathname.startsWith("/api/integrations/n8n/")
-  );
-}
-
-function isRoutePrefetch(req: NextRequest) {
-  return (
-    req.headers.has("next-router-prefetch") ||
-    req.headers.get("purpose") === "prefetch" ||
-    req.headers.get("sec-purpose") === "prefetch"
   );
 }
 
@@ -46,28 +36,15 @@ function shouldRunClerk(_pathname: string) {
 const clerkProxy = clerkMiddleware(
   async (auth, req: NextRequest) => {
     const pathname = req.nextUrl.pathname;
-    const requiresAuth =
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/verificar-whatsapp") ||
-      (pathname.startsWith("/api/") && !isPublicApiBypass(pathname));
+    const requiresAuthApi = pathname.startsWith("/api/") && !isPublicApiBypass(pathname);
 
-    if (requiresAuth) {
+    if (requiresAuthApi) {
       const authData = await auth();
       if (authData.userId) {
         return NextResponse.next();
       }
 
-      if (req.nextUrl.pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-      }
-
-      if (isRoutePrefetch(req)) {
-        return NextResponse.next();
-      }
-
-      const redirectUrl = new URL(signInUrl, req.url);
-      redirectUrl.searchParams.set("redirect_url", req.url);
-      return NextResponse.redirect(redirectUrl);
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
   },
 );

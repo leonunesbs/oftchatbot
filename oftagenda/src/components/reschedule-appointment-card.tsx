@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,12 +15,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type {
-  BookingLocationOption,
-  LocationAvailabilityResponse,
-} from "@/lib/booking-bootstrap";
+import { cn } from "@/lib/utils";
+import type { LocationAvailabilityDate } from "@/lib/booking-bootstrap";
 
 type ReschedulePolicy = {
   canReschedule: boolean;
@@ -32,42 +30,53 @@ type ReschedulePolicy = {
   reschedulesUsed: number;
   minNoticeHours: number;
   maxDaysAhead: number;
+  requiresPaidReschedule?: boolean;
+  paidRescheduleAmountCents?: number | null;
 };
 
 type RescheduleAppointmentCardProps = {
   policy: ReschedulePolicy;
-  locations: BookingLocationOption[];
-  availabilityByLocation: Record<string, LocationAvailabilityResponse>;
-  availabilityErrorsByLocation: Record<string, string>;
-  initialLocation?: string;
+  fixedEventType: {
+    id: string;
+    label: string;
+  };
+  fixedLocation: {
+    value: string;
+    label: string;
+  };
+  dateOptions: LocationAvailabilityDate[];
+  availabilityError?: string;
+  displayMode?: "card" | "embedded";
+  onCompleted?: () => void;
 };
 
 export function RescheduleAppointmentCard({
   policy,
-  locations,
-  availabilityByLocation,
-  availabilityErrorsByLocation,
-  initialLocation = "",
+  fixedEventType,
+  fixedLocation,
+  dateOptions,
+  availabilityError,
+  displayMode = "card",
+  onCompleted,
 }: RescheduleAppointmentCardProps) {
   const router = useRouter();
-  const defaultLocation =
-    locations.find((item) => item.value === initialLocation)?.value ?? locations[0]?.value ?? "";
-  const [location, setLocation] = useState(defaultLocation);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [timesByDate, setTimesByDate] = useState<Record<string, string[]>>({});
+  const [isLoadingTimes, setIsLoadingTimes] = useState(false);
+  const [timeLoadError, setTimeLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
 
-  const availability = location ? availabilityByLocation[location] : undefined;
-  const availabilityError = location ? availabilityErrorsByLocation[location] : undefined;
-  const dateOptions = availability?.dates ?? [];
   const selectedDateOption =
     dateOptions.find((item) => item.isoDate === selectedDate) ?? null;
-  const timeOptions = selectedDateOption?.times ?? [];
-  const canSubmit = Boolean(policy.canReschedule && location && selectedDate && selectedTime);
+  const timeOptions = selectedDate ? (timesByDate[selectedDate] ?? selectedDateOption?.times ?? []) : [];
+  const canSubmit = Boolean(policy.canReschedule && selectedDate && selectedTime && hasAcceptedPolicy);
+  const canCancel = Boolean(policy.canCancel && hasAcceptedPolicy);
 
   const policyText = useMemo(
     () => {
@@ -78,28 +87,142 @@ export function RescheduleAppointmentCard({
     },
     [policy.isClinicInitiatedReschedule, policy.maxDaysAhead, policy.minNoticeHours],
   );
-
-  function handleLocationChange(nextLocation: string) {
-    setLocation(nextLocation);
-    setSelectedDate("");
-    setSelectedTime("");
-    setError(null);
-    setSuccess(null);
-  }
+  const instructionItems = useMemo(
+    () => [
+      {
+        title: "Limite de remarcações",
+        description: `Você já utilizou ${policy.reschedulesUsed} de ${policy.maxReschedules} remarcações disponíveis nesta reserva.`,
+      },
+      {
+        title: "Como funciona a taxa de reserva",
+        description:
+          "A taxa funciona como sinal e é abatida no valor final da consulta quando o atendimento acontece normalmente.",
+      },
+      {
+        title: "Nova taxa após remarcação gratuita",
+        description:
+          policy.requiresPaidReschedule && typeof policy.paidRescheduleAmountCents === "number"
+            ? `Neste momento, a nova remarcação exige taxa de reserva de ${formatMoney(policy.paidRescheduleAmountCents)} para confirmar o novo horário.`
+            : "Depois da remarcação gratuita prevista na política, novas alterações podem exigir nova taxa, sem abatimento.",
+      },
+      {
+        title: "Regras de cancelamento e reembolso",
+        description: policy.isClinicInitiatedReschedule
+          ? "Como a indisponibilidade foi da clínica, o cancelamento é sem custo e com reembolso integral da taxa de reserva."
+          : "Cancelamentos com mais de 24h de antecedência têm reembolso integral da taxa de reserva.",
+      },
+      {
+        title: "Não comparecimento (no-show)",
+        description:
+          "Em caso de ausência, a taxa de reserva é retida e será necessário iniciar uma nova reserva.",
+      },
+    ],
+    [
+      policy.isClinicInitiatedReschedule,
+      policy.maxReschedules,
+      policy.paidRescheduleAmountCents,
+      policy.requiresPaidReschedule,
+      policy.reschedulesUsed,
+    ],
+  );
 
   function handleDateChange(nextDate: string) {
     setSelectedDate(nextDate);
     setSelectedTime("");
+    setTimeLoadError(null);
     setError(null);
     setSuccess(null);
   }
+
+  useEffect(() => {
+    if (!selectedDate) {
+      setIsLoadingTimes(false);
+      setTimeLoadError(null);
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(timesByDate, selectedDate)) {
+      setIsLoadingTimes(false);
+      setTimeLoadError(null);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const params = new URLSearchParams({
+      location: fixedLocation.value,
+      targetDate: selectedDate,
+    });
+
+    setIsLoadingTimes(true);
+    setTimeLoadError(null);
+
+    void fetch(`/api/booking/options?${params.toString()}`, {
+      method: "GET",
+      cache: "no-store",
+      signal: abortController.signal,
+    })
+      .then(async (response) => {
+        const data = (await response.json()) as {
+          ok?: boolean;
+          error?: string;
+          options?: {
+            dates?: Array<{ isoDate: string; times: string[] }>;
+          };
+        };
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error ?? "Falha ao carregar horários.");
+        }
+
+        const dateOption = data.options?.dates?.find(
+          (item) => item.isoDate === selectedDate,
+        );
+        setTimesByDate((previous) => ({
+          ...previous,
+          [selectedDate]: dateOption?.times ?? [],
+        }));
+      })
+      .catch((fetchError: unknown) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        const message =
+          fetchError instanceof Error ? fetchError.message : "Falha ao carregar horários.";
+        setTimeLoadError(message);
+        setTimesByDate((previous) => ({
+          ...previous,
+          [selectedDate]: [],
+        }));
+      })
+      .finally(() => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        setIsLoadingTimes(false);
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [fixedLocation.value, selectedDate, timesByDate]);
+
+  useEffect(() => {
+    if (!selectedDate) {
+      if (selectedTime) {
+        setSelectedTime("");
+      }
+      return;
+    }
+    if (selectedTime && !timeOptions.includes(selectedTime)) {
+      setSelectedTime("");
+    }
+  }, [selectedDate, selectedTime, timeOptions]);
 
   function handleSubmit() {
     if (isPending) {
       return;
     }
     if (!canSubmit) {
-      setError("Selecione local, data e horário para continuar.");
+      setError("Selecione data e horário para continuar.");
       return;
     }
 
@@ -111,7 +234,8 @@ export function RescheduleAppointmentCard({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            location,
+            eventTypeId: fixedEventType.id,
+            location: fixedLocation.value,
             date: selectedDate,
             time: selectedTime,
           }),
@@ -120,9 +244,15 @@ export function RescheduleAppointmentCard({
         if (!response.ok || !data?.ok) {
           throw new Error(data?.error ?? "Não foi possível remarcar a consulta.");
         }
+        if (data?.paymentRequired && typeof data?.url === "string" && data.url.length > 0) {
+          toast.success("Redirecionando para o pagamento da nova taxa de remarcação.");
+          window.location.assign(data.url);
+          return;
+        }
         setSuccess("Consulta remarcada com sucesso.");
         toast.success("Consulta remarcada com sucesso.");
         router.refresh();
+        onCompleted?.();
       } catch (submitError) {
         const message = submitError instanceof Error ? submitError.message : "Falha ao remarcar consulta.";
         setError(message);
@@ -154,6 +284,7 @@ export function RescheduleAppointmentCard({
         );
         toast.success("Consulta cancelada com sucesso.");
         router.refresh();
+        onCompleted?.();
       } catch (submitError) {
         const message = submitError instanceof Error ? submitError.message : "Falha ao cancelar consulta.";
         setError(message);
@@ -164,27 +295,52 @@ export function RescheduleAppointmentCard({
     });
   }
 
+  const rootClassName =
+    displayMode === "embedded"
+      ? "space-y-3"
+      : "space-y-3 rounded-xl border border-border p-4";
+
   return (
-    <section id="remarcacao-consulta" className="space-y-3 rounded-xl border border-border p-4">
+    <section id="remarcacao-consulta" className={rootClassName}>
       <h3 className="font-medium">Remarcação facilitada</h3>
       <p className="text-sm text-muted-foreground">{policyText}</p>
-      <p className="text-xs text-muted-foreground">
-        Remarcações utilizadas: {policy.reschedulesUsed}/{policy.maxReschedules}
+      <p className="text-sm text-muted-foreground">
+        Atendimento: <span className="font-medium text-foreground">{fixedEventType.label}</span>
       </p>
-      <p className="text-xs text-muted-foreground">
-        A taxa de reserva entra como sinal e é abatida no valor da consulta. Após
-        a remarcação gratuita, novas remarcações exigem nova taxa de reserva, sem
-        abatimento.
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {policy.isClinicInitiatedReschedule
-          ? "Neste cenário, o cancelamento é sem custo e com reembolso integral da taxa de reserva."
-          : "Cancelamentos com mais de 24h de antecedência têm reembolso integral da taxa de reserva."}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Em caso de não comparecimento, a taxa de reserva é retida, o agendamento
-        é cancelado como no-show e uma nova reserva deverá ser iniciada.
-      </p>
+      <div className="space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3">
+        <details className="group rounded-md border border-border/60 bg-background px-3 py-2">
+          <summary className="cursor-pointer list-none text-sm font-medium">
+            <span className="inline-block group-open:hidden">Ver instruções da política de remarcação</span>
+            <span className="hidden group-open:inline">Ocultar instruções da política de remarcação</span>
+          </summary>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Leia com atenção antes de confirmar. Estas regras definem como funcionam
+            remarcação, cancelamento e reembolso da sua reserva.
+          </p>
+          <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+            {instructionItems.map((item) => (
+              <li key={item.title} className="space-y-1 rounded-md border border-border/50 bg-muted/30 px-2 py-1.5">
+                <p className="font-medium text-foreground">{item.title}</p>
+                <p>{item.description}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+        <label
+          className={cn(
+            "flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+            hasAcceptedPolicy
+              ? "border-primary bg-primary/5"
+              : "border-border hover:bg-muted/40",
+          )}
+        >
+          <Checkbox
+            checked={hasAcceptedPolicy}
+            onCheckedChange={(checked) => setHasAcceptedPolicy(checked === true)}
+          />
+          <span>Li e concordo com as condições acima.</span>
+        </label>
+      </div>
 
       {!policy.canReschedule ? (
         <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
@@ -218,24 +374,7 @@ export function RescheduleAppointmentCard({
       {!policy.requiresHumanSupport ? (
         <>
       <div className="space-y-2">
-        <p className="text-sm font-medium">1. Local</p>
-        <div className="flex flex-wrap gap-2">
-          {locations.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              variant={location === item.value ? "default" : "outline"}
-              onClick={() => handleLocationChange(item.value)}
-              disabled={!policy.canReschedule || isPending}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium">2. Data</p>
+        <p className="text-sm font-medium">1. Data</p>
         {availabilityError ? (
           <p className="text-sm text-destructive">{availabilityError}</p>
         ) : null}
@@ -253,12 +392,22 @@ export function RescheduleAppointmentCard({
           ))}
         </div>
         {dateOptions.length === 0 && !availabilityError ? (
-          <p className="text-sm text-muted-foreground">Sem datas disponíveis para este local.</p>
+          <p className="text-sm text-muted-foreground">Sem datas disponíveis para o local da sua consulta.</p>
         ) : null}
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium">3. Horário</p>
+        <p className="text-sm font-medium">2. Horário</p>
+        {selectedDate ? (
+          <p className="text-xs text-muted-foreground">
+            {isLoadingTimes
+              ? "Carregando horários disponíveis..."
+              : "Horários disponíveis para a data selecionada."}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">Escolha uma data para ver os horários.</p>
+        )}
+        {timeLoadError ? <p className="text-sm text-destructive">{timeLoadError}</p> : null}
         <div className="flex flex-wrap gap-2">
           {timeOptions.map((slot) => (
             <Button
@@ -266,29 +415,58 @@ export function RescheduleAppointmentCard({
               type="button"
               variant={selectedTime === slot ? "default" : "outline"}
               onClick={() => setSelectedTime(slot)}
-              disabled={!policy.canReschedule || isPending}
+              disabled={!policy.canReschedule || isPending || isLoadingTimes}
             >
               {slot}
             </Button>
           ))}
         </div>
-        {selectedDate && timeOptions.length === 0 ? (
+        {selectedDate && !isLoadingTimes && timeOptions.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sem horários para a data selecionada.</p>
         ) : null}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {!hasAcceptedPolicy ? (
+        <p className="text-xs text-muted-foreground">
+          Marque "Li e concordo com as condições acima" para liberar as ações.
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2 pt-1">
         <AlertDialog open={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <Button type="button" disabled={!canSubmit || isPending}>
-              {isPending ? "Remarcando..." : "Remarcar consulta"}
-            </Button>
-          </AlertDialogTrigger>
+          <Button
+            type="button"
+            disabled={!canSubmit || isPending}
+            onClick={() => setIsRescheduleDialogOpen(true)}
+          >
+            {isPending
+              ? "Processando..."
+              : policy.requiresPaidReschedule
+                ? "Prosseguir para pagamento"
+                : "Remarcar consulta"}
+          </Button>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar remarcação?</AlertDialogTitle>
               <AlertDialogDescription>
-                Sua consulta atual será substituída por este novo horário.
+                {policy.requiresPaidReschedule ? (
+                  <>
+                    O novo horário só será confirmado após pagamento de{" "}
+                    <span className="font-medium text-foreground">
+                      {formatMoney(policy.paidRescheduleAmountCents ?? 0)}
+                    </span>
+                    . Você será redirecionado para o checkout seguro.
+                  </>
+                ) : (
+                  <>
+                    Sua consulta atual será substituída por{" "}
+                    <span className="font-medium text-foreground">
+                      {selectedDate || "data não selecionada"} às{" "}
+                      {selectedTime || "horário não selecionado"}
+                    </span>
+                    .
+                  </>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -306,18 +484,21 @@ export function RescheduleAppointmentCard({
         </AlertDialog>
 
         <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <Button type="button" variant="outline" disabled={isPending || !policy.canCancel}>
-              Cancelar consulta
-            </Button>
-          </AlertDialogTrigger>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending || !canCancel}
+            onClick={() => setIsCancelDialogOpen(true)}
+          >
+            Cancelar consulta
+          </Button>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar cancelamento?</AlertDialogTitle>
               <AlertDialogDescription>
                 {policy.isClinicInitiatedReschedule
-                  ? "Seu horário original ficou indisponível. Este cancelamento será realizado sem custo."
-                  : "Você poderá cancelar somente com antecedência mínima de 24h. Após o cancelamento, será necessário iniciar uma nova reserva."}
+                  ? "Seu horário original ficou indisponível. Este cancelamento será realizado sem custo, com reembolso integral da taxa de reserva."
+                  : "Após o cancelamento, será necessário iniciar uma nova reserva. Reembolsos seguem as regras descritas nas instruções acima."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -341,4 +522,11 @@ export function RescheduleAppointmentCard({
       {success ? <p className="text-sm text-emerald-700 dark:text-emerald-300">{success}</p> : null}
     </section>
   );
+}
+
+function formatMoney(valueInCents: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(valueInCents / 100);
 }

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import {
+  ArrowRightIcon,
   CalendarCheck2Icon,
   CalendarClockIcon,
   Clock3Icon,
@@ -16,7 +17,6 @@ import { BirthDatePickerField } from "@/components/birth-date-picker-field";
 import { CheckoutReturnUrlCleaner } from "@/components/checkout-return-url-cleaner";
 import { PendingReservationsList } from "@/components/pending-reservations-list";
 import { PhoneLinkCard } from "@/components/phone-link-card";
-import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-card";
 import { upsertPatientBirthDateAction } from "@/app/dashboard/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { getBookingBootstrapData } from "@/lib/booking-bootstrap";
 import { getUserRoleFromClerkAuth, hasConfirmedBooking } from "@/lib/access";
 import { getAuthenticatedConvexHttpClient } from "@/lib/convex-server";
 import { api } from "@convex/_generated/api";
@@ -36,9 +35,11 @@ import { api } from "@convex/_generated/api";
 type DashboardPageProps = {
   searchParams?:
     | Promise<{
+        booking?: string;
         payment?: string;
       }>
     | {
+        booking?: string;
         payment?: string;
       };
 };
@@ -47,8 +48,11 @@ export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
   const params = (await searchParams) ?? {};
+  const booking = params.booking ?? "";
   const payment = params.payment ?? "";
+  const bookingJustConfirmed = booking === "confirmed";
   const paymentJustSucceeded = payment === "success";
+  const shouldShowCelebration = bookingJustConfirmed || paymentJustSucceeded;
   const authData = await auth();
   const role = await getUserRoleFromClerkAuth(authData);
   const isAdmin = role === "admin";
@@ -60,6 +64,7 @@ export default async function DashboardPage({
       _id: string;
       scheduledFor?: number;
       location: string;
+      eventSlug?: string | null;
       eventName?: string | null;
       eventAddress?: string | null;
       paymentMode?: "booking_fee" | "full_payment" | "in_person" | null;
@@ -113,13 +118,6 @@ export default async function DashboardPage({
   };
   let phoneLinkStatus: { linked: boolean; phone?: string } = { linked: false };
   let patientBirthDate = "";
-  let rematchBootstrap: Awaited<ReturnType<typeof getBookingBootstrapData>> = {
-    locations: [],
-    locationsError: null,
-    availabilityByLocation: {},
-    availabilityErrorsByLocation: {},
-  };
-
   try {
     const { client } = await getAuthenticatedConvexHttpClient();
     const phoneLinkResult = await client.query(api.phoneLinks.getPhoneLinkByClerkUser, {
@@ -141,6 +139,7 @@ export default async function DashboardPage({
             _id: data.nextAppointment._id,
             scheduledFor: data.nextAppointment.scheduledFor,
             location: data.nextAppointment.location,
+            eventSlug: data.nextAppointment.eventSlug ?? null,
             eventName: data.nextAppointment.eventName ?? null,
             eventAddress: data.nextAppointment.eventAddress ?? null,
             paymentMode: data.nextAppointment.paymentMode ?? null,
@@ -180,8 +179,6 @@ export default async function DashboardPage({
     dashboardState.hasConfirmedBooking = await hasConfirmedBooking();
   }
 
-  rematchBootstrap = await getBookingBootstrapData({ daysAhead: 30 });
-
   const bookingConfirmed = dashboardState.hasConfirmedBooking;
   const hasPendingReschedule = dashboardState.pendingReservations.length > 0;
   const nextAppointment = dashboardState.nextAppointment;
@@ -195,6 +192,7 @@ export default async function DashboardPage({
     nextAppointment?.eventAddress || nextAppointment?.location || "Local a confirmar";
   const appointmentDateLabel = formatDisplayDate(nextAppointment?.scheduledFor);
   const appointmentTimeLabel = formatDisplayTime(nextAppointment?.scheduledFor);
+  const appointmentCountdownLabel = formatAppointmentCountdown(nextAppointment?.scheduledFor);
   const calendarLinks = appointmentStart
     ? buildCalendarLinks({
         title: "Consulta com Dr Leonardo",
@@ -233,17 +231,58 @@ export default async function DashboardPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {paymentJustSucceeded ? (
-            <div className="space-y-3 rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4">
-              <h3 className="font-medium text-emerald-900 dark:text-emerald-200">
-                Pagamento confirmado! Seja muito bem-vindo(a).
-              </h3>
-              <p className="text-sm text-emerald-800/90 dark:text-emerald-200/90">
-                Sua consulta foi reservada com sucesso.
-              </p>
+          {shouldShowCelebration ? (
+            <div className="space-y-4 rounded-xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background p-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-emerald-900 dark:text-emerald-200">
+                  Consulta confirmada com sucesso.
+                </h3>
+                <p className="text-sm text-emerald-900/90 dark:text-emerald-200/90">
+                  Seu horário já está reservado. Agora é só se preparar para chegar com tranquilidade.
+                </p>
+              </div>
+
+              {bookingConfirmed && nextAppointment ? (
+                <div className="rounded-lg border border-emerald-500/30 bg-background/70 p-3">
+                  <p className="text-sm font-medium text-foreground">
+                    Próxima consulta: {appointmentDateLabel} às {appointmentTimeLabel}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {appointmentCountdownLabel}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-900/80 dark:text-emerald-200/80">
+                  Estamos finalizando os detalhes da sua consulta. Atualize em instantes para ver data e horário.
+                </p>
+              )}
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button asChild size="sm">
+                  <Link href="#proximo-agendamento">
+                    Ver detalhes da consulta
+                    <ArrowRightIcon className="size-4" />
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard/detalhes">Fazer triagem agora</Link>
+                </Button>
+              </div>
+
+              <div className="space-y-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-emerald-900/80 dark:text-emerald-200/80">
+                  Próximos passos rápidos
+                </p>
+                <ul className="space-y-1 text-sm text-emerald-900/90 dark:text-emerald-200/90">
+                  <li>1. Salve o horário no calendário para não esquecer.</li>
+                  <li>2. Revise sua triagem para agilizar o atendimento.</li>
+                  <li>3. Se precisar, fale com a clínica pelo WhatsApp.</li>
+                </ul>
+              </div>
+
               {calendarLinks ? (
                 <div className="flex flex-wrap gap-2">
-                  <Button asChild size="sm">
+                  <Button asChild size="sm" variant="outline">
                     <Link
                       href={calendarLinks.googleCalendarHref}
                       target="_blank"
@@ -261,12 +300,7 @@ export default async function DashboardPage({
                     </a>
                   </Button>
                 </div>
-              ) : (
-                <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">
-                  Assim que os dados da consulta estiverem disponíveis, você
-                  poderá salvar no calendário.
-                </p>
-              )}
+              ) : null}
             </div>
           ) : null}
 
@@ -292,7 +326,10 @@ export default async function DashboardPage({
           ) : null}
 
           <div className="grid gap-4 max-md:gap-0 max-md:divide-y max-md:divide-border/60 lg:grid-cols-2">
-            <Card className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0">
+            <Card
+              id="proximo-agendamento"
+              className="border-border/80 max-md:rounded-none max-md:bg-transparent max-md:py-5 max-md:shadow-none max-md:ring-0"
+            >
               <CardHeader className="space-y-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <ShieldCheckIcon className="size-4 text-emerald-600" />
@@ -373,13 +410,13 @@ export default async function DashboardPage({
 
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Button variant="outline" asChild>
-                        <Link href="#remarcacao-consulta">
+                        <Link href="/dashboard/reagendar">
                           <CalendarClockIcon className="size-4" />
                           Reagendar
                         </Link>
                       </Button>
                       <Button variant="outline" asChild>
-                        <Link href="#remarcacao-consulta">
+                        <Link href="/dashboard/reagendar">
                           <CalendarCheck2Icon className="size-4" />
                           Cancelar
                         </Link>
@@ -521,13 +558,18 @@ export default async function DashboardPage({
           ) : null}
 
           {bookingConfirmed ? (
-            <RescheduleAppointmentCard
-              policy={dashboardState.reschedulePolicy}
-              locations={rematchBootstrap.locations}
-              availabilityByLocation={rematchBootstrap.availabilityByLocation}
-              availabilityErrorsByLocation={rematchBootstrap.availabilityErrorsByLocation}
-              initialLocation={nextAppointment?.location}
-            />
+            <div id="remarcacao-consulta" className="space-y-3 rounded-xl border border-border p-4">
+              <h3 className="font-medium">Remarcação e cancelamento</h3>
+              <p className="text-sm text-muted-foreground">
+                Abra o assistente interativo para remarcar ou cancelar sua consulta sem sair do painel.
+              </p>
+              <Button asChild>
+                <Link href="/dashboard/reagendar">
+                  <CalendarClockIcon className="size-4" />
+                  Abrir assistente de remarcação
+                </Link>
+              </Button>
+            </div>
           ) : null}
 
           <div id="agendamentos-pendentes" className="space-y-2">
@@ -565,6 +607,28 @@ function formatDisplayTime(timestamp?: number) {
   return new Intl.DateTimeFormat("pt-BR", {
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+function formatAppointmentCountdown(timestamp?: number) {
+  if (typeof timestamp !== "number") {
+    return "Os detalhes da consulta serão exibidos em breve.";
+  }
+
+  const now = Date.now();
+  const diffMs = timestamp - now;
+  if (diffMs <= 0) {
+    return "Sua consulta está próxima. Em caso de necessidade, fale com a clínica.";
+  }
+
+  const dayMs = 24 * 60 * 60 * 1000;
+  const days = Math.floor(diffMs / dayMs);
+  if (days === 0) {
+    return "Falta menos de 1 dia para sua consulta.";
+  }
+  if (days === 1) {
+    return "Falta 1 dia para sua consulta.";
+  }
+  return `Faltam ${days} dias para sua consulta.`;
 }
 
 function formatPaymentModeLabel(

@@ -1,6 +1,6 @@
-import { createPaymentAction, setPaymentStatusAction } from "@/app/dashboard/admin/actions";
+import { createPaymentAction } from "@/app/dashboard/admin/actions";
 import { formatMoney, getAdminSnapshot, selectClassName } from "@/app/dashboard/admin/_lib/admin-dashboard";
-import { Badge } from "@/components/ui/badge";
+import { AdminPaymentsDataTable } from "@/components/admin-payments-data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ActionToastForm } from "@/components/action-toast-form";
 
 export default async function AdminPaymentsPage() {
@@ -76,53 +75,7 @@ export default async function AdminPaymentsPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Valor</TableHead>
-                <TableHead>Método</TableHead>
-                <TableHead>Usuário</TableHead>
-                <TableHead>Status atual</TableHead>
-                <TableHead className="w-[280px]">Atualizar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.payments.map((payment) => (
-                <TableRow key={payment._id}>
-                  <TableCell className="font-medium">{formatMoney(payment.amountCents, payment.currency)}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {payment.method} / {payment.currency}
-                  </TableCell>
-                  <TableCell className="text-xs">{payment.clerkUserId}</TableCell>
-                  <TableCell>
-                    <Badge variant={payment.status === "paid" ? "default" : "outline"}>{payment.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <ActionToastForm
-                      action={setPaymentStatusAction}
-                      className="grid gap-2"
-                      successMessage="Status do pagamento atualizado com sucesso."
-                      errorMessage="Não foi possível atualizar o pagamento."
-                    >
-                      <input type="hidden" name="paymentId" value={payment._id} />
-                      <select name="status" className={selectClassName} defaultValue={payment.status}>
-                        <option value="pending">pending</option>
-                        <option value="paid">paid</option>
-                        <option value="refunded">refunded</option>
-                        <option value="failed">failed</option>
-                      </select>
-                      <Input name="notes" defaultValue={payment.notes ?? ""} placeholder="Observação" />
-                      <Button size="sm" type="submit">
-                        Atualizar
-                      </Button>
-                    </ActionToastForm>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <AdminPaymentsDataTable payments={data.payments} formatMoney={formatMoney} />
       </CardContent>
     </Card>
   );

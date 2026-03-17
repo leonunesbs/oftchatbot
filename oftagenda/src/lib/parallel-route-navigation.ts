@@ -22,6 +22,13 @@ function canNavigateBack() {
     return false;
   }
 
+  const state = window.history.state as { idx?: unknown } | null;
+  const hasNextAppHistory = typeof state?.idx === "number" && state.idx > 0;
+
+  if (hasNextAppHistory) {
+    return true;
+  }
+
   return window.history.length > 1 && hasSameOriginReferrer();
 }
 

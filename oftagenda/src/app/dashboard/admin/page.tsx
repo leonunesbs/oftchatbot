@@ -1,12 +1,9 @@
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { AdminDashboardDataTables, AdminQuickSectionsDataTable } from "@/components/admin-dashboard-data-tables";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime24h, formatMoney, getAdminSnapshot } from "@/app/dashboard/admin/_lib/admin-dashboard";
 
 const quickSections = [
-  { href: "/dashboard/admin/agenda", title: "Agenda", description: "Calendario semanal/diario para operacao assistida." },
+  { href: "/dashboard/admin/agenda", title: "Agenda", description: "Calendário semanal/diário para operação assistida." },
   { href: "/dashboard/admin/eventos", title: "Eventos", description: "CRUD de eventos e reservas por evento." },
   {
     href: "/dashboard/admin/disponibilidade",
@@ -30,7 +27,11 @@ export default async function AdminDashboardPage() {
     const upcomingReservations = data.reservations
       .filter((reservation) => reservation.startsAt >= now && reservation.status !== "cancelled")
       .sort((a, b) => a.startsAt - b.startsAt)
-      .slice(0, 5);
+      .slice(0, 5)
+      .map((reservation) => ({
+        ...reservation,
+        startsAtFormatted: formatDateTime24h(reservation.startsAt),
+      }));
 
     const weekFromNow = now + 7 * 24 * 60 * 60_000;
     const confirmedWeek = data.reservations.filter(
@@ -51,10 +52,10 @@ export default async function AdminDashboardPage() {
     }).length;
 
     const kpis = [
-      { label: "Confirmados hoje", value: String(confirmedToday), helper: "operacao diaria" },
+      { label: "Confirmados hoje", value: String(confirmedToday), helper: "operação diária" },
       { label: "Confirmados 7 dias", value: String(confirmedWeek), helper: "janela semanal" },
-      { label: "Reservas pendentes", value: String(data.metrics.pendingReservations), helper: "acao recomendada" },
-      { label: "Pacientes ativos", value: String(data.metrics.patients), helper: "cadastros unicos" },
+      { label: "Reservas pendentes", value: String(data.metrics.pendingReservations), helper: "ação recomendada" },
+      { label: "Pacientes ativos", value: String(data.metrics.patients), helper: "cadastros únicos" },
       { label: "Receita paga", value: formatMoney(data.metrics.paidRevenueCents), helper: "pagamentos liquidados" },
       { label: "Eventos ativos", value: String(data.metrics.activeEvents), helper: "consulta, exame e procedimento" },
     ];
@@ -65,7 +66,7 @@ export default async function AdminDashboardPage() {
           <CardHeader>
             <CardTitle>Radar operacional</CardTitle>
             <CardDescription>
-              Indicadores de agendamento, atendimento e financeiro em um unico painel.
+              Indicadores de agendamento, atendimento e financeiro em um único painel.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -83,44 +84,11 @@ export default async function AdminDashboardPage() {
 
         <Card variant="flat-mobile" className="border-border/70">
           <CardHeader>
-            <CardTitle>Proximos atendimentos</CardTitle>
-            <CardDescription>Reservas futuras para acompanhamento rapido da agenda.</CardDescription>
+            <CardTitle>Próximos atendimentos</CardTitle>
+            <CardDescription>Reservas futuras para acompanhamento rápido da agenda.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Horario</TableHead>
-                    <TableHead>Evento</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Usuario</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {upcomingReservations.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
-                        Nenhuma reserva futura encontrada.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    upcomingReservations.map((reservation) => (
-                      <TableRow key={reservation._id}>
-                        <TableCell>{formatDateTime24h(reservation.startsAt)}</TableCell>
-                        <TableCell>{reservation.eventTypeTitle}</TableCell>
-                        <TableCell>
-                          <Badge variant={reservation.status === "confirmed" ? "default" : "outline"}>
-                            {reservation.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{reservation.clerkUserId}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <AdminDashboardDataTables upcomingReservations={upcomingReservations} />
           </CardContent>
         </Card>
 
@@ -130,30 +98,7 @@ export default async function AdminDashboardPage() {
             <CardDescription>Navegação para os módulos administrativos.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Seção</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="w-[150px]">Ação</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {quickSections.map((section) => (
-                    <TableRow key={section.href}>
-                      <TableCell className="font-medium">{section.title}</TableCell>
-                      <TableCell className="text-muted-foreground">{section.description}</TableCell>
-                      <TableCell>
-                        <Button asChild size="sm">
-                          <Link href={section.href}>Abrir</Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <AdminQuickSectionsDataTable quickSections={quickSections} />
           </CardContent>
         </Card>
       </div>

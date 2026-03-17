@@ -23,8 +23,10 @@ export function OverlayLoadingDialog({
           <DialogTitle>
             <Skeleton className={`h-6 ${titleWidthClassName}`} />
           </DialogTitle>
-          <DialogDescription>
-            <Skeleton className={`h-4 ${descriptionWidthClassName}`} />
+          <DialogDescription asChild>
+            <div>
+              <Skeleton className={`h-4 ${descriptionWidthClassName}`} />
+            </div>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

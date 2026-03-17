@@ -7,5 +7,9 @@ type SignUpLayoutProps = {
 };
 
 export default function SignUpLayout({ children }: SignUpLayoutProps) {
-  return <ClerkProvider localization={ptBR}>{children}</ClerkProvider>;
+  return (
+    <ClerkProvider localization={ptBR} waitlistUrl="/waitlist">
+      {children}
+    </ClerkProvider>
+  );
 }

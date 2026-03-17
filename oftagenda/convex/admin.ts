@@ -1881,14 +1881,24 @@ async function resolveAvailabilityForReservation(
   date: string,
   time: string,
 ) {
+  const normalizedDate = date.trim();
+  const normalizedTime = time.trim();
+  if (!isValidIsoDate(normalizedDate)) {
+    throw new Error("Data invalida");
+  }
+  if (!isValidTimeValue(normalizedTime)) {
+    throw new Error("Horário invalido");
+  }
+
   if (!eventType.availabilityId) {
     throw new Error("Evento informado nao possui disponibilidade vinculada");
   }
 
-  const [eventAvailability, requestedAvailability, allAvailabilities] = await Promise.all([
+  const [eventAvailability, requestedAvailability, allAvailabilities, allOverrides] = await Promise.all([
     ctx.db.get(eventType.availabilityId),
     ctx.db.get(requestedAvailabilityId),
     ctx.db.query("availabilities").collect(),
+    ctx.db.query("availability_overrides").collect(),
   ]);
 
   if (!eventAvailability || !requestedAvailability) {
@@ -1902,15 +1912,43 @@ async function resolveAvailabilityForReservation(
   }
 
   const groupSlots = allAvailabilities.filter(
-    (availability) =>
-      resolveAvailabilityGroupName(availability) === eventGroupName && availability.status === "active",
+    (availability) => resolveAvailabilityGroupName(availability) === eventGroupName,
   );
-  if (groupSlots.length === 0) {
+  const activeGroupSlots = groupSlots.filter((availability) => availability.status === "active");
+
+  const overrideForDate = allOverrides.find(
+    (override) => override.groupName === eventGroupName && override.date === normalizedDate,
+  );
+  if (overrideForDate) {
+    if (overrideForDate.allDayUnavailable) {
+      throw new Error("A data selecionada está indisponível para este evento.");
+    }
+
+    const isWithinActiveOverrideSlot = overrideForDate.slots.some(
+      (slot) =>
+        slot.status === "active" &&
+        normalizedTime >= slot.startTime &&
+        normalizedTime < slot.endTime,
+    );
+    if (!isWithinActiveOverrideSlot) {
+      throw new Error("Horário fora das faixas de substituição configuradas para esta data.");
+    }
+
+    const availabilityWithMatchingTimezone = groupSlots.find(
+      (slotAvailability) => slotAvailability.timezone === overrideForDate.timezone,
+    );
+    if (availabilityWithMatchingTimezone) {
+      return availabilityWithMatchingTimezone;
+    }
+    return requestedAvailability;
+  }
+
+  if (activeGroupSlots.length === 0) {
     throw new Error("Grupo de disponibilidade sem faixas ativas");
   }
 
-  const matched = groupSlots.find((slotAvailability) =>
-    slotMatchesAvailability(date, time, {
+  const matched = activeGroupSlots.find((slotAvailability) =>
+    slotMatchesAvailability(normalizedDate, normalizedTime, {
       weekday: slotAvailability.weekday,
       startTime: slotAvailability.startTime,
       endTime: slotAvailability.endTime,

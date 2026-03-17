@@ -28,6 +28,7 @@ export async function renderCreateAppointmentPage({
   }));
   const eventTypes = data.eventTypes.map((eventType) => ({
     _id: String(eventType._id),
+    slug: eventType.slug,
     name: eventType.name,
     title: eventType.title,
     kind: eventType.kind,

@@ -218,10 +218,10 @@ function TimeBlockForm({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction form={formId} type="submit">
               Confirmar bloqueio
             </AlertDialogAction>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

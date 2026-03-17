@@ -68,6 +68,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             path="/sign-in"
             routing="path"
             signUpUrl="/sign-up"
+            waitlistUrl="/waitlist"
             fallbackRedirectUrl={redirectUrl}
             forceRedirectUrl={redirectUrl}
             appearance={{

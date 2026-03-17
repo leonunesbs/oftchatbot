@@ -121,7 +121,7 @@ async function getHeaderSessionState(clerkEnabled: boolean): Promise<SessionStat
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "Minha Agenda | Agendamento Oftalmologico Premium",
+    default: "Minha Agenda | Agendamento Oftalmologico",
     template: "%s | Minha Agenda",
   },
   description: siteConfig.description,

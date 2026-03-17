@@ -10,9 +10,16 @@ export const metadata: Metadata = {
 
 export default async function DashboardLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   await requireMember("/dashboard");
-  return children;
+  return (
+    <>
+      {children}
+      {modal}
+    </>
+  );
 }

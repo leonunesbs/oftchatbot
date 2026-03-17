@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { adminCreateAppointmentAction } from "@/app/dashboard/admin/actions";
 import { ActionToastForm } from "@/components/action-toast-form";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import type { LocationAvailabilityResponse } from "@/lib/booking-bootstrap";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 type EventTypeOption = {
   _id: string;
+  slug: string;
   name?: string;
   title: string;
   kind?: "consulta" | "procedimento" | "exame";
@@ -33,6 +35,12 @@ type AdminCreateAppointmentFormProps = {
   availabilityGroups: AvailabilityGroupOption[];
   initialDate?: string;
   initialTime?: string;
+};
+
+type BookingOptionsApiResponse = {
+  ok: boolean;
+  options?: LocationAvailabilityResponse;
+  error?: string;
 };
 
 const selectClassName = "h-8 w-full rounded-md border border-input bg-input/20 px-2 text-xs";
@@ -69,17 +77,6 @@ function formatDateLabel(value: Date) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" }).format(value);
 }
 
-function buildTimeOptions() {
-  const options: string[] = [];
-  for (let hour = 7; hour <= 20; hour += 1) {
-    options.push(`${String(hour).padStart(2, "0")}:00`);
-    if (hour < 20) {
-      options.push(`${String(hour).padStart(2, "0")}:30`);
-    }
-  }
-  return options;
-}
-
 function formatPhoneWithDddMask(digits: string) {
   const normalized = digits.replace(/\D/g, "").slice(0, 11);
   if (normalized.length <= 2) {
@@ -102,25 +99,152 @@ export function AdminCreateAppointmentForm({
 }: AdminCreateAppointmentFormProps) {
   const activeEventTypes = eventTypes.filter((eventType) => eventType.active);
   const defaultEventTypeId = activeEventTypes[0]?._id ?? "";
+  const fallbackAvailabilityId =
+    availabilityGroups[0]?.representativeId ?? "";
   const defaultAvailabilityId =
     activeEventTypes[0]?.availabilityId ?? availabilityGroups[0]?.representativeId ?? "";
+  const [selectedEventTypeId, setSelectedEventTypeId] = useState(defaultEventTypeId);
+  const [selectedAvailabilityId, setSelectedAvailabilityId] = useState(defaultAvailabilityId);
   const [selectedDate, setSelectedDate] = useState<Date>(() => parseIsoDate(initialDate) ?? new Date());
-  const [selectedTime, setSelectedTime] = useState(initialTime && /^\d{2}:\d{2}$/.test(initialTime) ? initialTime : "08:00");
+  const [selectedTime, setSelectedTime] = useState(
+    initialTime && /^\d{2}:\d{2}$/.test(initialTime) ? initialTime : "08:00",
+  );
   const [selectedDdi, setSelectedDdi] = useState("+55");
   const [phoneWithMask, setPhoneWithMask] = useState("");
+  const [availableDates, setAvailableDates] = useState<LocationAvailabilityResponse["dates"]>([]);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
-  const timeOptions = useMemo(() => buildTimeOptions(), []);
   const eventTypeOptions = useMemo(
     () =>
       activeEventTypes.map((eventType) => ({
         value: eventType._id,
+        slug: eventType.slug,
+        availabilityId: eventType.availabilityId,
         label: eventType.name ?? eventType.title,
         kind: eventType.kind ?? "consulta",
       })),
     [activeEventTypes],
   );
+  const selectedEventType = eventTypeOptions.find(
+    (eventType) => eventType.value === selectedEventTypeId,
+  );
+  const availableDateSet = useMemo(
+    () => new Set(availableDates.map((dateOption) => dateOption.isoDate)),
+    [availableDates],
+  );
+  const selectedIsoDate = toIsoDate(selectedDate);
+  const selectedDateOption =
+    availableDates.find((dateOption) => dateOption.isoDate === selectedIsoDate) ?? null;
+  const availableTimeOptions = selectedDateOption?.times ?? [];
+  const firstAvailableDate = availableDates[0]?.isoDate;
+  const lastAvailableDate = availableDates[availableDates.length - 1]?.isoDate;
+  const hasAvailabilityForEvent = availableDates.length > 0;
   const phoneDigits = phoneWithMask.replace(/\D/g, "").slice(0, 11);
   const normalizedPhone = phoneDigits ? `${selectedDdi}${phoneDigits}` : "";
+
+  useEffect(() => {
+    if (!selectedEventType) {
+      setAvailableDates([]);
+      setAvailabilityError(null);
+      setIsLoadingAvailability(false);
+      return;
+    }
+
+    const preferredAvailabilityId = selectedEventType.availabilityId ?? fallbackAvailabilityId;
+    if (preferredAvailabilityId) {
+      setSelectedAvailabilityId(preferredAvailabilityId);
+    }
+
+    if (!selectedEventType.slug) {
+      setAvailableDates([]);
+      setAvailabilityError("Evento sem slug válido para buscar disponibilidade.");
+      setIsLoadingAvailability(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const params = new URLSearchParams({
+      location: selectedEventType.slug,
+      daysAhead: "365",
+    });
+    setIsLoadingAvailability(true);
+    setAvailabilityError(null);
+
+    void fetch(`/api/booking/options?${params.toString()}`, {
+      method: "GET",
+      cache: "no-store",
+      signal: abortController.signal,
+    })
+      .then(async (response) => {
+        const data = (await response.json()) as BookingOptionsApiResponse;
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error ?? "Falha ao carregar datas disponíveis.");
+        }
+        setAvailableDates(data.options?.dates ?? []);
+      })
+      .catch((fetchError: unknown) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        const message =
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Falha ao carregar datas disponíveis.";
+        setAvailabilityError(message);
+        setAvailableDates([]);
+      })
+      .finally(() => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        setIsLoadingAvailability(false);
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [fallbackAvailabilityId, selectedEventType]);
+
+  useEffect(() => {
+    const hasRequestedInitialDate = Boolean(initialDate && /^\d{4}-\d{2}-\d{2}$/.test(initialDate));
+    if (
+      hasRequestedInitialDate &&
+      initialDate &&
+      availableDateSet.has(initialDate)
+    ) {
+      const parsedInitialDate = parseIsoDate(initialDate);
+      if (parsedInitialDate) {
+        setSelectedDate(parsedInitialDate);
+      }
+      return;
+    }
+
+    if (availableDateSet.has(selectedIsoDate)) {
+      return;
+    }
+
+    const firstDate = availableDates[0]?.isoDate;
+    const parsedFirstDate = parseIsoDate(firstDate);
+    if (parsedFirstDate) {
+      setSelectedDate(parsedFirstDate);
+    }
+  }, [availableDateSet, availableDates, initialDate, selectedIsoDate]);
+
+  useEffect(() => {
+    if (availableTimeOptions.length === 0) {
+      setSelectedTime("");
+      return;
+    }
+    if (availableTimeOptions.includes(selectedTime)) {
+      return;
+    }
+    if (initialTime && availableTimeOptions.includes(initialTime)) {
+      setSelectedTime(initialTime);
+      return;
+    }
+    setSelectedTime(availableTimeOptions[0] ?? "");
+  }, [availableTimeOptions, initialTime, selectedTime]);
 
   return (
     <ActionToastForm
@@ -174,7 +298,14 @@ export function AdminCreateAppointmentForm({
       <div className="grid gap-1.5 md:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor="create-eventType">Tipo de atendimento</Label>
-          <select id="create-eventType" name="eventTypeId" className={selectClassName} defaultValue={defaultEventTypeId} required>
+          <select
+            id="create-eventType"
+            name="eventTypeId"
+            className={selectClassName}
+            value={selectedEventTypeId}
+            onChange={(event) => setSelectedEventTypeId(event.target.value)}
+            required
+          >
             {eventTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label} ({option.kind})
@@ -188,7 +319,8 @@ export function AdminCreateAppointmentForm({
             id="create-availability"
             name="availabilityId"
             className={selectClassName}
-            defaultValue={defaultAvailabilityId}
+            value={selectedAvailabilityId}
+            onChange={(event) => setSelectedAvailabilityId(event.target.value)}
             required
           >
             {availabilityGroups.map((group) => (
@@ -217,13 +349,27 @@ export function AdminCreateAppointmentForm({
                 locale={ptBR}
                 selected={selectedDate}
                 onSelect={(value) => {
-                  if (value) {
+                  if (value && availableDateSet.has(toIsoDate(value))) {
                     setSelectedDate(value);
                   }
                 }}
+                disabled={(dateValue) => !availableDateSet.has(toIsoDate(dateValue))}
+                fromDate={firstAvailableDate ? parseIsoDate(firstAvailableDate) : undefined}
+                toDate={lastAvailableDate ? parseIsoDate(lastAvailableDate) : undefined}
               />
             </PopoverContent>
           </Popover>
+          {isLoadingAvailability ? (
+            <p className="text-xs text-muted-foreground">Carregando datas disponíveis...</p>
+          ) : null}
+          {availabilityError ? (
+            <p className="text-xs text-destructive">{availabilityError}</p>
+          ) : null}
+          {!isLoadingAvailability && !availabilityError && !hasAvailabilityForEvent ? (
+            <p className="text-xs text-muted-foreground">
+              Não há datas disponíveis para o evento selecionado.
+            </p>
+          ) : null}
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="create-time">Horário</Label>
@@ -233,8 +379,12 @@ export function AdminCreateAppointmentForm({
             className={selectClassName}
             value={selectedTime}
             onChange={(event) => setSelectedTime(event.target.value)}
+            disabled={availableTimeOptions.length === 0}
           >
-            {timeOptions.map((option) => (
+            {availableTimeOptions.length === 0 ? (
+              <option value="">Sem horários disponíveis</option>
+            ) : null}
+            {availableTimeOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
@@ -264,7 +414,17 @@ export function AdminCreateAppointmentForm({
         <Textarea id="create-notes" name="notes" placeholder="Informações adicionais da equipe" />
       </div>
 
-      <Button type="submit">Confirmar agendamento</Button>
+      <Button
+        type="submit"
+        disabled={
+          isLoadingAvailability ||
+          Boolean(availabilityError) ||
+          !hasAvailabilityForEvent ||
+          !selectedTime
+        }
+      >
+        Confirmar agendamento
+      </Button>
     </ActionToastForm>
   );
 }

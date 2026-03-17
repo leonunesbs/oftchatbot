@@ -24,7 +24,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -37,7 +36,7 @@ import type { ReservationStatus } from "@/lib/reservation-status";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 type ReservationActionMode = "reagendar" | "status" | "cancelar" | "contato";
 
@@ -59,6 +58,12 @@ type ReservationActionData = {
   patientEmail?: string;
   patientPhone?: string;
   patientBirthDate?: string;
+  rescheduleDateOptions: Array<{
+    isoDate: string;
+    label: string;
+    weekdayLabel: string;
+    times: string[];
+  }>;
   recentTimeline: Array<{
     id: string;
     eventType: "created" | "confirmed" | "rescheduled" | "no_show" | "cancelled" | "completed" | "details_submitted";
@@ -202,6 +207,10 @@ function parseDateInput(value?: string) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function isValidIsoDateInput(value?: string) {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+}
+
 function isValidTimeInput(value?: string) {
   return Boolean(value && /^\d{2}:\d{2}$/.test(value));
 }
@@ -221,8 +230,40 @@ function ReservationActionContent({
 }) {
   const cancelFormId = useId();
   const rescheduleFormId = useId();
-  const [rescheduleDate, setRescheduleDate] = useState<Date>(() => parseDateInput(initialDate) ?? new Date(reservation.startsAt));
-  const defaultRescheduleTime = isValidTimeInput(initialTime) ? initialTime : toTimeInput(reservation.startsAt);
+  const availableDateOptions = reservation.rescheduleDateOptions;
+  const availableDateByIso = useMemo(
+    () => new Map(availableDateOptions.map((option) => [option.isoDate, option])),
+    [availableDateOptions],
+  );
+  const availableDateSet = useMemo(
+    () => new Set(availableDateOptions.map((option) => option.isoDate)),
+    [availableDateOptions],
+  );
+  const reservationDateIso = toDateInput(reservation.startsAt);
+  const requestedInitialDateIso = isValidIsoDateInput(initialDate) ? initialDate : undefined;
+  const initialRescheduleDateIso =
+    (requestedInitialDateIso && availableDateSet.has(requestedInitialDateIso) && requestedInitialDateIso) ||
+    (availableDateSet.has(reservationDateIso) && reservationDateIso) ||
+    availableDateOptions[0]?.isoDate ||
+    reservationDateIso;
+  const [rescheduleDate, setRescheduleDate] = useState<Date>(
+    () => parseDateInput(initialRescheduleDateIso) ?? new Date(reservation.startsAt),
+  );
+  const selectedDateIso = toDateInput(rescheduleDate.getTime());
+  const selectedDateOption = availableDateByIso.get(selectedDateIso);
+  const timeOptions = selectedDateOption?.times ?? [];
+  const reservationTime = toTimeInput(reservation.startsAt);
+  const requestedInitialTime = isValidTimeInput(initialTime) ? initialTime : undefined;
+  const [rescheduleTime, setRescheduleTime] = useState<string>(() => {
+    if (requestedInitialTime && timeOptions.includes(requestedInitialTime)) {
+      return requestedInitialTime;
+    }
+    if (timeOptions.includes(reservationTime)) {
+      return reservationTime;
+    }
+    return timeOptions[0] ?? requestedInitialTime ?? reservationTime;
+  });
+  const canSubmitReschedule = Boolean(selectedDateOption && timeOptions.includes(rescheduleTime));
   const modeTitle =
     mode === "reagendar"
       ? "Reagendar e atualizar"
@@ -423,14 +464,47 @@ Equipe de atendimento`;
                   selected={rescheduleDate}
                   onSelect={(value) => {
                     if (value) {
+                      const nextIsoDate = toDateInput(value.getTime());
+                      const nextTimeOptions = availableDateByIso.get(nextIsoDate)?.times ?? [];
                       setRescheduleDate(value);
+                      setRescheduleTime((current) => {
+                        if (nextTimeOptions.includes(current)) {
+                          return current;
+                        }
+                        return nextTimeOptions[0] ?? "";
+                      });
                     }
                   }}
+                  disabled={(date) => !availableDateSet.has(toDateInput(date.getTime()))}
                 />
               </PopoverContent>
             </Popover>
           </div>
-          <Input name="time" type="time" defaultValue={defaultRescheduleTime} required />
+          <div className="grid gap-1">
+            <p className="text-xs font-medium text-muted-foreground">Horário</p>
+            <select
+              name="time"
+              className="h-9 rounded-md border border-input bg-input/20 px-2 text-sm"
+              value={rescheduleTime}
+              onChange={(event) => setRescheduleTime(event.target.value)}
+              required
+              disabled={timeOptions.length === 0}
+            >
+              {timeOptions.length === 0 ? (
+                <option value="">Sem horários disponíveis</option>
+              ) : null}
+              {timeOptions.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
+            {availableDateOptions.length === 0 ? (
+              <p className="text-xs text-destructive">
+                Este evento não possui datas/horários ativos para reagendamento no período exibido.
+              </p>
+            ) : null}
+          </div>
           <select
             name="status"
             className="h-9 rounded-md border border-input bg-input/20 px-2 text-sm"
@@ -450,7 +524,9 @@ Equipe de atendimento`;
           <Textarea name="notes" defaultValue={reservation.notes ?? ""} placeholder="Observações administrativas" />
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button type="button">Confirmar reagendamento</Button>
+              <Button type="button" disabled={!canSubmitReschedule}>
+                Confirmar reagendamento
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>

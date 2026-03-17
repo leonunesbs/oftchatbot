@@ -148,7 +148,7 @@ export function HeaderAuthButton({
         <DropdownMenuLabel>{firstName ? `Conta de ${firstName}` : "Minha conta"}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard">Ir para o painel</Link>
+          <Link href="/dashboard" prefetch={false}>Ir para o painel</Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"

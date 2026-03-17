@@ -1,4 +1,4 @@
-import { SignUp } from "@clerk/nextjs";
+import { Waitlist } from "@clerk/nextjs";
 import type { Metadata } from "next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SignUpPage() {
+export default function WaitlistPage() {
   if (!isClerkConfigured()) {
     return (
       <section className="mx-auto w-full max-w-lg">
         <Card>
           <CardHeader>
-            <CardTitle>Cadastro indisponível</CardTitle>
+            <CardTitle>Lista de espera indisponível</CardTitle>
             <CardDescription>
-              Configure as variáveis do Clerk para habilitar o cadastro de pacientes.
+              Configure as variáveis do Clerk para habilitar a lista de espera.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -31,11 +31,13 @@ export default function SignUpPage() {
     <section className="mx-auto flex w-full max-w-lg justify-center">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Criar conta</CardTitle>
-          <CardDescription>Cadastre-se para agendar sua consulta.</CardDescription>
+          <CardTitle>Lista de espera</CardTitle>
+          <CardDescription>
+            Cadastre seu interesse para receber o convite de acesso.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <SignUp path="/sign-up" routing="path" signInUrl="/sign-in" waitlistUrl="/waitlist" />
+          <Waitlist />
         </CardContent>
       </Card>
     </section>
