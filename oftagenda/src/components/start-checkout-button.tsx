@@ -238,7 +238,7 @@ function buildPaymentDisclaimer(input: {
   }
 
   const baseText =
-    "Para confirmar o horário, você realiza agora um pagamento online (cartão ou Pix).";
+    "Para confirmar o horário, realize agora um pagamento online (cartão ou Pix).";
   if (
     typeof input.reservationAmountCents !== "number" ||
     input.reservationAmountCents <= 0
@@ -354,6 +354,27 @@ function sanitizeBackendErrorMessage(rawMessage: string): string {
 
   if (cleanedMessage.length === 0) {
     return "Tente novamente em instantes.";
+  }
+
+  const normalizedMessage = cleanedMessage
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+
+  if (
+    normalizedMessage === "not authenticated" ||
+    normalizedMessage.includes("not authenticated") ||
+    normalizedMessage.includes("nao autenticado")
+  ) {
+    return "Sua sessão expirou. Faça login novamente para continuar.";
+  }
+
+  if (
+    normalizedMessage === "not authorized" ||
+    normalizedMessage.includes("not authorized") ||
+    normalizedMessage.includes("nao autorizado")
+  ) {
+    return "Seu perfil não tem permissão para concluir esta etapa.";
   }
 
   return cleanedMessage;

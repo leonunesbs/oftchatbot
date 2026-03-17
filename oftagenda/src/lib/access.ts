@@ -50,19 +50,49 @@ function normalizeUserRole(value: unknown): UserRole | null {
   return null;
 }
 
+function readClaim(source: unknown, path: string[]) {
+  let current: unknown = source;
+  for (const key of path) {
+    if (!current || typeof current !== "object") {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[key];
+  }
+  return current;
+}
+
+function readRoleFromSessionClaims(sessionClaims: unknown) {
+  const roleCandidates = [
+    readClaim(sessionClaims, ["publicMetadata", "role"]),
+    readClaim(sessionClaims, ["public_metadata", "role"]),
+    readClaim(sessionClaims, ["metadata", "role"]),
+    readClaim(sessionClaims, ["role"]),
+  ];
+  for (const candidate of roleCandidates) {
+    const normalized = normalizeUserRole(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+  return null;
+}
+
 export async function getUserRoleFromClerkAuth(authData: {
   userId: string | null;
+  sessionClaims?: unknown;
 }) {
   if (!authData.userId) {
     return null;
   }
 
+  const roleFromSession = readRoleFromSessionClaims(authData.sessionClaims);
+
   try {
     const { client } = await getAuthenticatedConvexHttpClient();
     const ensured = await client.mutation(api.user_roles.ensureCurrentUserRole, {});
-    return normalizeUserRole(ensured.role);
+    return normalizeUserRole(ensured.role) ?? roleFromSession ?? "member";
   } catch {
-    return null;
+    return roleFromSession ?? "member";
   }
 }
 
@@ -77,6 +107,14 @@ function buildSignInRedirectUrl(returnBackUrl: string) {
   const signInUrl = process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL?.trim() || "/sign-in";
   const separator = signInUrl.includes("?") ? "&" : "?";
   return `${signInUrl}${separator}redirect_url=${encodeURIComponent(returnBackUrl)}`;
+}
+
+function buildUnauthorizedRedirectUrl(returnBackUrl: string, requiredRole: UserRole) {
+  const params = new URLSearchParams({
+    from: returnBackUrl,
+    requiredRole,
+  });
+  return `/401?${params.toString()}`;
 }
 
 export async function isAdminFromClerkAuth(authData: {
@@ -110,7 +148,7 @@ export async function requireAdmin(returnBackUrl: string) {
 
   const role = await getUserRoleFromClerkAuth(authData);
   if (!canAccessRole(role, "admin")) {
-    redirect("/dashboard");
+    redirect(buildUnauthorizedRedirectUrl(returnBackUrl, "admin"));
   }
 
   return userId;
@@ -126,7 +164,7 @@ export async function requireMember(returnBackUrl: string) {
 
   const role = await getUserRoleFromClerkAuth(authData);
   if (!canAccessRole(role, "member")) {
-    redirect("/");
+    redirect(buildUnauthorizedRedirectUrl(returnBackUrl, "member"));
   }
 
   return userId;
