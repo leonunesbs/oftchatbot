@@ -114,6 +114,7 @@ export default defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     name: v.optional(v.string()),
+    location: v.optional(v.string()),
     address: v.optional(v.string()),
     notes: v.optional(v.string()),
     kind: v.optional(adminEventKindValidator),
