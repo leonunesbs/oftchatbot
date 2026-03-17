@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { isClerkConfigured } from "@/lib/access";
+import { getUserRoleFromClerkAuth, isClerkConfigured } from "@/lib/access";
 
 export async function GET() {
   if (!isClerkConfigured()) {
@@ -36,6 +36,7 @@ export async function GET() {
         : typeof claims.first_name === "string"
           ? claims.first_name
           : null;
+    await getUserRoleFromClerkAuth({ userId });
 
     return NextResponse.json({
       clerkEnabled: true,
@@ -46,14 +47,14 @@ export async function GET() {
       firstName,
     });
   } catch {
-    // Keep the session probe resilient. Header UI should degrade gracefully
-    // when Clerk is temporarily unavailable instead of bubbling a 500.
+    // Session revalidation must sync role with Convex; if that fails we surface
+    // an error response instead of downgrading the user to logged out state.
     return NextResponse.json({
       clerkEnabled: true,
       isAuthenticated: false,
       userId: null,
       avatarUrl: null,
       firstName: null,
-    });
+    }, { status: 500 });
   }
 }

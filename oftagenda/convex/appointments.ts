@@ -335,7 +335,7 @@ export const getBookingOptionsByLocation = query({
 export const getActiveBookingLocations = query({
   args: {},
   handler: async (ctx) => {
-    const [eventTypes, configuredLocations] = await Promise.all([
+    const [eventTypes, configuredLocations, allAvailabilities, allOverrides] = await Promise.all([
       ctx.db
         .query("event_types")
         .withIndex("by_active", (q) => q.eq("active", true))
@@ -344,7 +344,10 @@ export const getActiveBookingLocations = query({
         .query("location_configs")
         .withIndex("by_active", (q) => q.eq("active", true))
         .collect(),
+      ctx.db.query("availabilities").collect(),
+      ctx.db.query("availability_overrides").collect(),
     ]);
+    const availabilityById = new Map(allAvailabilities.map((item) => [String(item._id), item]));
     const activeConfigList = configuredLocations.length > 0
       ? configuredLocations
       : DEFAULT_LOCATION_CONFIGS;
@@ -354,7 +357,7 @@ export const getActiveBookingLocations = query({
     return [...eventTypes]
       .filter(
         (eventType) =>
-          Boolean(eventType.availabilityId) &&
+          hasBookableAvailabilityForEventType(eventType, availabilityById, allAvailabilities, allOverrides) &&
           (locationConfigBySlug.size === 0 || locationConfigBySlug.has(eventType.slug)),
       )
       .sort((a, b) => {
@@ -392,6 +395,35 @@ export const getActiveBookingLocations = query({
       });
   },
 });
+
+function hasBookableAvailabilityForEventType(
+  eventType: Pick<Doc<"event_types">, "availabilityId">,
+  availabilityById: Map<string, Doc<"availabilities">>,
+  allAvailabilities: Doc<"availabilities">[],
+  allOverrides: Doc<"availability_overrides">[],
+) {
+  if (!eventType.availabilityId) {
+    return false;
+  }
+  const referenceAvailability = availabilityById.get(String(eventType.availabilityId));
+  if (!referenceAvailability) {
+    return false;
+  }
+  const groupName = resolveAvailabilityGroupName(referenceAvailability);
+  const hasWeeklyAvailability = allAvailabilities.some(
+    (availability) =>
+      availability.status === "active" && resolveAvailabilityGroupName(availability) === groupName,
+  );
+  if (hasWeeklyAvailability) {
+    return true;
+  }
+  return allOverrides.some(
+    (override) =>
+      override.groupName === groupName &&
+      !override.allDayUnavailable &&
+      override.slots.some((slot) => slot.status === "active"),
+  );
+}
 
 export const getDashboardState = query({
   args: {},

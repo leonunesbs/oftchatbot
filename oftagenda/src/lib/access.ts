@@ -3,7 +3,7 @@ import {
   isBookingConfirmedValue,
 } from "@/domain/booking/state";
 import { getAuthenticatedConvexHttpClient } from "@/lib/convex-server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 import { ConvexHttpClient } from "convex/browser";
 import { cookies } from "next/headers";
@@ -50,50 +50,48 @@ function normalizeUserRole(value: unknown): UserRole | null {
   return null;
 }
 
-function readClaim(source: unknown, path: string[]) {
-  let current: unknown = source;
-  for (const key of path) {
-    if (!current || typeof current !== "object") {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[key];
-  }
-  return current;
-}
-
-function readRoleFromSessionClaims(sessionClaims: unknown) {
-  const roleCandidates = [
-    readClaim(sessionClaims, ["publicMetadata", "role"]),
-    readClaim(sessionClaims, ["public_metadata", "role"]),
-    readClaim(sessionClaims, ["metadata", "role"]),
-    readClaim(sessionClaims, ["role"]),
-  ];
-  for (const candidate of roleCandidates) {
-    const normalized = normalizeUserRole(candidate);
-    if (normalized) {
-      return normalized;
-    }
-  }
-  return null;
-}
-
-export async function getUserRoleFromClerkAuth(authData: {
+async function readRoleFromClerkPublicMetadata(authData: {
   userId: string | null;
-  sessionClaims?: unknown;
 }) {
   if (!authData.userId) {
     return null;
   }
 
-  const roleFromSession = readRoleFromSessionClaims(authData.sessionClaims);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(authData.userId);
+  const publicRole = (user.publicMetadata as Record<string, unknown> | null)?.role;
+  return normalizeUserRole(publicRole);
+}
 
-  try {
-    const { client } = await getAuthenticatedConvexHttpClient();
-    const ensured = await client.mutation(api.user_roles.ensureCurrentUserRole, {});
-    return normalizeUserRole(ensured.role) ?? roleFromSession ?? "member";
-  } catch {
-    return roleFromSession ?? "member";
+async function syncCurrentUserRoleInDatabase(authData: {
+  userId: string | null;
+}) {
+  if (!authData.userId) {
+    return null;
   }
+
+  const claimedRole = await readRoleFromClerkPublicMetadata(authData);
+  const { client } = await getAuthenticatedConvexHttpClient();
+  const ensured = await client.mutation(api.user_roles.ensureCurrentUserRole, {
+    claimedRole: claimedRole ?? undefined,
+  });
+  return normalizeUserRole(ensured.role);
+}
+
+async function getCurrentUserRoleFromDatabase() {
+  const { client } = await getAuthenticatedConvexHttpClient();
+  const role = await client.query(api.user_roles.getCurrentUserRole, {});
+  return normalizeUserRole(role);
+}
+
+export async function getUserRoleFromClerkAuth(authData: {
+  userId: string | null;
+}) {
+  if (!authData.userId) {
+    return null;
+  }
+
+  return (await syncCurrentUserRoleInDatabase(authData)) ?? "member";
 }
 
 function canAccessRole(role: UserRole | null, requiredRole: UserRole) {
@@ -120,6 +118,10 @@ function buildUnauthorizedRedirectUrl(returnBackUrl: string, requiredRole: UserR
 export async function isAdminFromClerkAuth(authData: {
   userId: string | null;
 }) {
+  if (!authData.userId) {
+    return false;
+  }
+
   const role = await getUserRoleFromClerkAuth(authData);
   return canAccessRole(role, "admin");
 }

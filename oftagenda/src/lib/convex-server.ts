@@ -37,7 +37,11 @@ export function getConvexHttpClient() {
 
 async function getConvexAuthToken(getToken: Awaited<ReturnType<typeof auth>>["getToken"]) {
   try {
-    return await getToken({ template: "convex" });
+    const tokenFromTemplate = await getToken({ template: "convex" });
+    if (tokenFromTemplate) {
+      return tokenFromTemplate;
+    }
+    return await getToken();
   } catch (error) {
     const status = typeof error === "object" && error !== null ? Reflect.get(error, "status") : null;
     const clerkError =
@@ -45,9 +49,7 @@ async function getConvexAuthToken(getToken: Awaited<ReturnType<typeof auth>>["ge
     const isMissingTemplate = clerkError === true && status === 404;
 
     if (isMissingTemplate) {
-      throw new Error(
-        "Clerk JWT template 'convex' não encontrado. Crie o template no Clerk com o nome 'convex' para autenticar no Convex.",
-      );
+      return await getToken();
     }
     throw error;
   }

@@ -35,6 +35,10 @@ function readRoleFromLegacyClaims(identity: Record<string, unknown>) {
     readClaim(identity, ["publicMetadata", "role"]),
     readClaim(identity, ["public_metadata", "role"]),
     readClaim(identity, ["metadata", "role"]),
+    readClaim(identity, ["claims", "publicMetadata", "role"]),
+    readClaim(identity, ["claims", "public_metadata", "role"]),
+    readClaim(identity, ["claims", "metadata", "role"]),
+    readClaim(identity, ["role"]),
   ];
 
   for (const candidate of roleCandidates) {
@@ -65,23 +69,34 @@ export const getCurrentUserRole = query({
 });
 
 export const ensureCurrentUserRole = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    claimedRole: v.optional(userRoleValidator),
+  },
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
     }
+
+    const roleFromClaims = readRoleFromLegacyClaims(identity as unknown as Record<string, unknown>);
+    const claimedRole = args.claimedRole ?? roleFromClaims;
 
     const existing = await ctx.db
       .query("user_roles")
       .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
       .first();
     if (existing) {
-      return { role: existing.role, migratedFromLegacyClaims: false };
+      if (claimedRole && existing.role !== claimedRole) {
+        await ctx.db.patch(existing._id, {
+          role: claimedRole,
+          updatedAt: Date.now(),
+        });
+        return { role: claimedRole, migratedFromLegacyClaims: false, syncedFromClaims: true };
+      }
+      return { role: existing.role, migratedFromLegacyClaims: false, syncedFromClaims: false };
     }
 
-    const inferredRole =
-      readRoleFromLegacyClaims(identity as unknown as Record<string, unknown>) ?? "member";
+    const inferredRole = claimedRole ?? "member";
     const now = Date.now();
     await ctx.db.insert("user_roles", {
       clerkUserId: identity.subject,
@@ -93,6 +108,7 @@ export const ensureCurrentUserRole = mutation({
     return {
       role: inferredRole,
       migratedFromLegacyClaims: inferredRole !== "member",
+      syncedFromClaims: inferredRole !== "member",
     };
   },
 });

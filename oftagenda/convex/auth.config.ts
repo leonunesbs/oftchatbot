@@ -1,9 +1,9 @@
 import type { AuthConfig } from "convex/server";
 
-function normalizeIssuerUrl(rawValue: string) {
+function normalizeIssuerUrls(rawValue: string) {
   const trimmed = rawValue.trim();
   if (!trimmed) {
-    return null;
+    return [];
   }
 
   // Support accidental values like `https:/domain.com` by normalizing to `https://domain.com`.
@@ -14,36 +14,51 @@ function normalizeIssuerUrl(rawValue: string) {
   try {
     const parsed = new URL(withProtocol);
     if (!parsed.hostname) {
-      return null;
+      return [];
     }
-    return `${parsed.protocol}//${parsed.hostname}`;
+    const host = parsed.port ? `${parsed.hostname}:${parsed.port}` : parsed.hostname;
+    const origin = `${parsed.protocol}//${host}`;
+    const normalizedPath = parsed.pathname.replace(/\/+$/, "");
+    const urls = new Set<string>([origin, `${origin}/`]);
+    if (normalizedPath && normalizedPath !== "/") {
+      const withPath = `${origin}${normalizedPath}`;
+      urls.add(withPath);
+      urls.add(`${withPath}/`);
+    }
+    return [...urls];
   } catch {
-    return null;
+    return [];
   }
 }
 
 function resolveClerkDomain() {
-  const configuredDomain =
-    process.env.CLERK_FRONTEND_API_URL ??
-    process.env.CLERK_JWT_ISSUER_DOMAIN ??
-    process.env.NEXT_PUBLIC_CLERK_FRONTEND_API_URL;
-  if (configuredDomain) {
-    const normalized = normalizeIssuerUrl(configuredDomain);
-    if (normalized) {
-      return normalized;
+  const candidates = [
+    process.env.CLERK_FRONTEND_API_URL,
+    process.env.CLERK_JWT_ISSUER_DOMAIN,
+    process.env.CLERK_ISSUER_URL,
+    process.env.NEXT_PUBLIC_CLERK_FRONTEND_API_URL,
+    process.env.NEXT_PUBLIC_CLERK_ISSUER_URL,
+  ];
+  const uniqueDomains = new Set<string>();
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
+    for (const normalized of normalizeIssuerUrls(candidate)) {
+      uniqueDomains.add(normalized);
     }
   }
-
-  throw new Error(
-    "Dominio emissor do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL, CLERK_JWT_ISSUER_DOMAIN ou NEXT_PUBLIC_CLERK_FRONTEND_API_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
-  );
+  if (uniqueDomains.size === 0) {
+    throw new Error(
+      "Dominio emissor do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL, CLERK_JWT_ISSUER_DOMAIN, CLERK_ISSUER_URL ou NEXT_PUBLIC_CLERK_FRONTEND_API_URL/NEXT_PUBLIC_CLERK_ISSUER_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
+    );
+  }
+  return [...uniqueDomains];
 }
 
 export default {
-  providers: [
-    {
-      domain: resolveClerkDomain(),
-      applicationID: "convex",
-    },
-  ],
+  providers: resolveClerkDomain().map((domain) => ({
+    domain,
+    applicationID: "convex",
+  })),
 } satisfies AuthConfig;
