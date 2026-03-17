@@ -35,6 +35,7 @@ function resolveClerkDomain() {
   const candidates = [
     process.env.CLERK_FRONTEND_API_URL,
     process.env.CLERK_ISSUER_URL,
+    process.env.CLERK_JWT_ISSUER_DOMAIN,
     process.env.NEXT_PUBLIC_CLERK_FRONTEND_API_URL,
     process.env.NEXT_PUBLIC_CLERK_ISSUER_URL,
   ];
@@ -49,7 +50,7 @@ function resolveClerkDomain() {
   }
   if (uniqueDomains.size === 0) {
     throw new Error(
-      "Dominio emissor do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL, CLERK_ISSUER_URL ou NEXT_PUBLIC_CLERK_FRONTEND_API_URL/NEXT_PUBLIC_CLERK_ISSUER_URL com um dominio valido (ex.: https://clerk.seudominio.com).",
+      "Dominio emissor do Clerk nao configurado. Defina CLERK_FRONTEND_API_URL (ou CLERK_ISSUER_URL/CLERK_JWT_ISSUER_DOMAIN/NEXT_PUBLIC_CLERK_FRONTEND_API_URL/NEXT_PUBLIC_CLERK_ISSUER_URL) com um dominio valido (ex.: https://clerk.seudominio.com).",
     );
   }
   return [...uniqueDomains];
