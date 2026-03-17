@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { StartCheckoutButton } from "@/components/start-checkout-button";
@@ -57,6 +58,8 @@ export function ResumoDialog({
 }: ResumoDialogProps) {
   const router = useRouter();
   const backHref = useParallelRouteBackHref("/agendar");
+  const [isOpen, setIsOpen] = useState(true);
+  const closeRequestedRef = useRef(false);
   const checkoutNotCompleted = payment === "cancelled";
   const hasError = hasRedactedParams || hasInvalidSelection;
   const addressHref = eventTypeAddress ? buildAddressHref(eventTypeAddress) : "";
@@ -64,13 +67,24 @@ export function ResumoDialog({
     consultationPriceCents - reservationFeeCents,
     0,
   );
+  const handleCloseDialog = useCallback(() => {
+    if (closeRequestedRef.current) {
+      return;
+    }
+    closeRequestedRef.current = true;
+    setIsOpen(false);
+
+    window.setTimeout(() => {
+      closeParallelRoute(router, "/agendar", backHref);
+    }, 120);
+  }, [backHref, router]);
 
   return (
     <Dialog
-      open
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          closeParallelRoute(router, "/agendar", backHref);
+          handleCloseDialog();
         }
       }}
     >
@@ -80,7 +94,7 @@ export function ResumoDialog({
           variant="ghost"
           size="icon-sm"
           className="absolute top-4 right-4"
-          onClick={() => closeParallelRoute(router, "/agendar", backHref)}
+          onClick={handleCloseDialog}
           aria-label="Fechar resumo"
         >
           <XIcon />
@@ -263,7 +277,7 @@ export function ResumoDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => closeParallelRoute(router, "/agendar", backHref)}
+                  onClick={handleCloseDialog}
                   className="w-full sm:w-auto"
                 >
                   Editar agendamento

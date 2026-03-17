@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-card";
@@ -52,13 +53,26 @@ export function PatientRescheduleDialog({
 }: PatientRescheduleDialogProps) {
   const router = useRouter();
   const resolvedBackHref = useParallelRouteBackHref(backHref);
+  const [isOpen, setIsOpen] = useState(true);
+  const closeRequestedRef = useRef(false);
+  const handleCloseDialog = useCallback(() => {
+    if (closeRequestedRef.current) {
+      return;
+    }
+    closeRequestedRef.current = true;
+    setIsOpen(false);
+
+    window.setTimeout(() => {
+      closeParallelRoute(router, backHref, resolvedBackHref);
+    }, 120);
+  }, [backHref, resolvedBackHref, router]);
 
   return (
     <Dialog
-      open
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          closeParallelRoute(router, backHref, resolvedBackHref);
+          handleCloseDialog();
         }
       }}
     >
@@ -76,7 +90,7 @@ export function PatientRescheduleDialog({
           dateOptions={dateOptions}
           availabilityError={availabilityError}
           displayMode="embedded"
-          onCompleted={() => closeParallelRoute(router, backHref, resolvedBackHref)}
+          onCompleted={handleCloseDialog}
         />
       </DialogContent>
     </Dialog>
