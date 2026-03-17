@@ -10,6 +10,9 @@ import { getStripeClient } from '@/lib/stripe';
 
 export const runtime = 'nodejs';
 const CHECKOUT_SESSION_DURATION_SECONDS = 30 * 60;
+const STRIPE_MIN_CHECKOUT_TTL_SECONDS = 30 * 60;
+const STRIPE_MAX_CHECKOUT_TTL_SECONDS = 24 * 60 * 60;
+const STRIPE_CHECKOUT_EXPIRY_BUFFER_SECONDS = 60;
 const ACTIVE_APPOINTMENT_ERROR =
   'Você já possui um agendamento ativo. Para remarcar ou gerenciar sua consulta, acesse seu painel.';
 const PENDING_RESERVATION_ERROR =
@@ -77,10 +80,11 @@ export async function POST(request: Request) {
       ];
 
       const desiredHoldExpiresAt = draft.holdExpiresAt ?? Date.now() + CHECKOUT_SESSION_DURATION_SECONDS * 1000;
+      const stripeCheckoutExpiresAt = resolveStripeCheckoutExpiry(desiredHoldExpiresAt);
       const successUrl = `${origin}/dashboard?payment=success`;
 
       const checkoutSessionParams: StripeSdk.Checkout.SessionCreateParams = {
-        expires_at: Math.floor(desiredHoldExpiresAt / 1000),
+        expires_at: stripeCheckoutExpiresAt,
         mode: 'payment',
         line_items: lineItems,
         payment_intent_data: {
@@ -214,4 +218,19 @@ function matchesKnownError(rawMessage: string, knownError: string) {
       .replace(/\p{Diacritic}/gu, '')
       .toLowerCase();
   return normalize(rawMessage).includes(normalize(knownError));
+}
+
+function resolveStripeCheckoutExpiry(desiredHoldExpiresAt: number) {
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const desiredInSeconds = Math.floor(desiredHoldExpiresAt / 1000);
+  const minAllowed = nowInSeconds + STRIPE_MIN_CHECKOUT_TTL_SECONDS + STRIPE_CHECKOUT_EXPIRY_BUFFER_SECONDS;
+  const maxAllowed = nowInSeconds + STRIPE_MAX_CHECKOUT_TTL_SECONDS;
+
+  if (desiredInSeconds < minAllowed) {
+    return minAllowed;
+  }
+  if (desiredInSeconds > maxAllowed) {
+    return maxAllowed;
+  }
+  return desiredInSeconds;
 }
