@@ -1,4 +1,4 @@
-import { formatDateTime24h, getAdminSnapshot } from "@/app/dashboard/admin/_lib/admin-dashboard";
+import { getAdminSnapshot } from "@/app/dashboard/admin/_lib/admin-dashboard";
 import { AdminScheduleEventsDataTable } from "@/components/admin-schedule-events-data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,14 +9,20 @@ const periodFilters = ["7d", "30d", "all"] as const;
 export default async function AdminScheduleEventsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ period?: string; type?: string }>;
+  searchParams?: Promise<{ period?: string | string[]; type?: string | string[] }>;
 }) {
   const data = await getAdminSnapshot();
   const resolvedSearchParams = (await searchParams) ?? {};
-  const selectedPeriod = periodFilters.includes((resolvedSearchParams.period as (typeof periodFilters)[number]) ?? "7d")
-    ? ((resolvedSearchParams.period as (typeof periodFilters)[number]) ?? "7d")
+  const rawPeriod = Array.isArray(resolvedSearchParams.period)
+    ? resolvedSearchParams.period[0]
+    : resolvedSearchParams.period;
+  const rawType = Array.isArray(resolvedSearchParams.type)
+    ? resolvedSearchParams.type[0]
+    : resolvedSearchParams.type;
+  const selectedPeriod = periodFilters.includes((rawPeriod as (typeof periodFilters)[number]) ?? "7d")
+    ? ((rawPeriod as (typeof periodFilters)[number]) ?? "7d")
     : "7d";
-  const selectedType = resolvedSearchParams.type?.trim() || "all";
+  const selectedType = rawType?.trim() || "all";
 
   const now = Date.now();
   const periodStart =
@@ -61,7 +67,7 @@ export default async function AdminScheduleEventsPage({
             </Button>
           ))}
         </div>
-        <AdminScheduleEventsDataTable events={filteredEvents} formatDateTime24h={formatDateTime24h} />
+        <AdminScheduleEventsDataTable events={filteredEvents} />
       </CardContent>
     </Card>
   );

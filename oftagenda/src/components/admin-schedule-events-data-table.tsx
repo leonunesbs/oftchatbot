@@ -16,10 +16,20 @@ type AppointmentEventRow = {
 
 type AdminScheduleEventsDataTableProps = {
   events: AppointmentEventRow[];
-  formatDateTime24h: (value: number) => string;
 };
 
-export function AdminScheduleEventsDataTable({ events, formatDateTime24h }: AdminScheduleEventsDataTableProps) {
+function formatDateTime24h(value: number) {
+  if (!Number.isFinite(value)) {
+    return "-";
+  }
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: false,
+  }).format(new Date(value));
+}
+
+export function AdminScheduleEventsDataTable({ events }: AdminScheduleEventsDataTableProps) {
   const columns = useMemo<Array<ColumnDef<AppointmentEventRow>>>(
     () => [
       {
@@ -48,7 +58,7 @@ export function AdminScheduleEventsDataTable({ events, formatDateTime24h }: Admi
         cell: ({ row }) => <span className="text-xs text-muted-foreground">{row.original.notes ?? "-"}</span>,
       },
     ],
-    [formatDateTime24h],
+    [],
   );
 
   return (

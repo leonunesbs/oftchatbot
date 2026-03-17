@@ -186,12 +186,14 @@ export const getBookingOptionsByLocation = query({
       availabilityByGroup.set(groupName, current);
     }
 
-    const relevantOverrides = allOverrides.filter((override) => activeGroupNames.has(override.groupName));
+    const relevantOverrides = allOverrides.filter((override) =>
+      activeGroupNames.has(override.groupName.trim()),
+    );
     if (availabilities.length === 0 && relevantOverrides.length === 0) {
       return { location: args.location, dates: [] };
     }
     const overrideByGroupDate = new Map(
-      relevantOverrides.map((override) => [buildOverrideKey(override.groupName, override.date), override]),
+      relevantOverrides.map((override) => [buildOverrideKey(override.groupName.trim(), override.date), override]),
     );
 
     const allReservations = await ctx.db.query("reservations").collect();

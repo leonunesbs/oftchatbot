@@ -310,7 +310,7 @@ export function AdminAvailabilityEditor({
     startOverrideTransition(async () => {
       try {
         const formData = new FormData();
-        formData.set("groupName", group.originalName);
+        formData.set("groupName", group.name.trim() || group.originalName);
         formData.set("timezone", group.timezone || "America/Fortaleza");
         formData.set("allDayUnavailable", String(overrideAllDayUnavailable));
         formData.set("dates", JSON.stringify(overrideDates.map((date) => toIsoDate(date))));
