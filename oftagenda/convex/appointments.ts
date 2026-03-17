@@ -13,6 +13,29 @@ const RESCHEDULE_MAX_PER_APPOINTMENT = 1;
 const RESERVATION_FEE_PERCENT = 20;
 
 const bookingLocationValidator = v.string();
+const DEFAULT_LOCATION_CONFIGS = [
+  {
+    slug: "fortaleza",
+    label: "Fortaleza",
+    active: true,
+    isDefault: true,
+    sortOrder: 10,
+  },
+  {
+    slug: "sao_domingos_do_maranhao",
+    label: "São Domingos do Maranhão",
+    active: true,
+    isDefault: true,
+    sortOrder: 20,
+  },
+  {
+    slug: "fortuna",
+    label: "Fortuna",
+    active: true,
+    isDefault: true,
+    sortOrder: 30,
+  },
+] as const;
 
 const periodValidator = v.union(
   v.literal("manha"),
@@ -312,19 +335,44 @@ export const getBookingOptionsByLocation = query({
 export const getActiveBookingLocations = query({
   args: {},
   handler: async (ctx) => {
-    const eventTypes = await ctx.db
-      .query("event_types")
-      .withIndex("by_active", (q) => q.eq("active", true))
-      .collect();
+    const [eventTypes, configuredLocations] = await Promise.all([
+      ctx.db
+        .query("event_types")
+        .withIndex("by_active", (q) => q.eq("active", true))
+        .collect(),
+      ctx.db
+        .query("location_configs")
+        .withIndex("by_active", (q) => q.eq("active", true))
+        .collect(),
+    ]);
+    const activeConfigList = configuredLocations.length > 0
+      ? configuredLocations
+      : DEFAULT_LOCATION_CONFIGS;
+    const locationConfigBySlug = new Map<string, { label: string; sortOrder: number }>(
+      activeConfigList.map((config) => [config.slug, { label: config.label, sortOrder: config.sortOrder }]),
+    );
     return [...eventTypes]
       .filter(
         (eventType) =>
-          Boolean(eventType.availabilityId),
+          Boolean(eventType.availabilityId) &&
+          (locationConfigBySlug.size === 0 || locationConfigBySlug.has(eventType.slug)),
       )
-      .sort((a, b) => (a.name ?? a.title).localeCompare(b.name ?? b.title, "pt-BR"))
+      .sort((a, b) => {
+        const configA = locationConfigBySlug.get(a.slug);
+        const configB = locationConfigBySlug.get(b.slug);
+        const orderA = configA?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+        const orderB = configB?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        const labelA = configA?.label ?? a.name ?? a.title;
+        const labelB = configB?.label ?? b.name ?? b.title;
+        return labelA.localeCompare(labelB, "pt-BR");
+      })
       .map((eventType) => {
         const paymentMode = eventType.paymentMode ?? "booking_fee";
         const priceCents = normalizeAmountCents(eventType.priceCents) ?? 0;
+        const locationConfig = locationConfigBySlug.get(eventType.slug);
         const feePercent = paymentMode === "full_payment" ? 100
           : paymentMode === "in_person" ? 0
           : RESERVATION_FEE_PERCENT;
@@ -338,7 +386,7 @@ export const getActiveBookingLocations = query({
           reservationFeePercent: feePercent,
           paymentMode,
           value: eventType.slug,
-          label: eventType.name ?? eventType.title,
+          label: locationConfig?.label ?? eventType.name ?? eventType.title,
           address: eventType.address ?? "",
         };
       });

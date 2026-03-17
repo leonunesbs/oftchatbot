@@ -48,6 +48,29 @@ const paymentModeValidator = v.union(
   v.literal("full_payment"),
   v.literal("in_person"),
 );
+const defaultLocationConfigs = [
+  {
+    slug: "fortaleza" as const,
+    label: "Fortaleza",
+    active: true,
+    isDefault: true,
+    sortOrder: 10,
+  },
+  {
+    slug: "sao_domingos_do_maranhao" as const,
+    label: "São Domingos do Maranhão",
+    active: true,
+    isDefault: true,
+    sortOrder: 20,
+  },
+  {
+    slug: "fortuna" as const,
+    label: "Fortuna",
+    active: true,
+    isDefault: true,
+    sortOrder: 30,
+  },
+];
 
 async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
@@ -278,6 +301,111 @@ export const getCalendarData = query({
       });
 
     return { items };
+  },
+});
+
+export const listLocationConfigs = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const existingConfigs = await ctx.db.query("location_configs").collect();
+    if (existingConfigs.length > 0) {
+      return [...existingConfigs].sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+
+    return defaultLocationConfigs.map((config) => ({
+      _id: null,
+      _creationTime: 0,
+      slug: config.slug,
+      label: config.label,
+      active: config.active,
+      isDefault: config.isDefault,
+      sortOrder: config.sortOrder,
+      createdAt: 0,
+      updatedAt: 0,
+    }));
+  },
+});
+
+export const upsertLocationConfig = mutation({
+  args: {
+    slug: locationValidator,
+    label: v.string(),
+    active: v.boolean(),
+    isDefault: v.boolean(),
+    sortOrder: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const now = Date.now();
+    const existing = await ctx.db
+      .query("location_configs")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        label: args.label.trim(),
+        active: args.active,
+        isDefault: args.isDefault,
+        sortOrder: args.sortOrder,
+        updatedAt: now,
+      });
+      return { ok: true, configId: existing._id, created: false };
+    }
+
+    const configId = await ctx.db.insert("location_configs", {
+      slug: args.slug,
+      label: args.label.trim(),
+      active: args.active,
+      isDefault: args.isDefault,
+      sortOrder: args.sortOrder,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return { ok: true, configId, created: true };
+  },
+});
+
+export const seedDefaultLocationConfigs = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const now = Date.now();
+    const results: Array<{ slug: string; created: boolean }> = [];
+
+    for (const item of defaultLocationConfigs) {
+      const existing = await ctx.db
+        .query("location_configs")
+        .withIndex("by_slug", (q) => q.eq("slug", item.slug))
+        .first();
+      if (existing) {
+        await ctx.db.patch(existing._id, {
+          label: item.label,
+          active: item.active,
+          isDefault: item.isDefault,
+          sortOrder: item.sortOrder,
+          updatedAt: now,
+        });
+        results.push({ slug: item.slug, created: false });
+        continue;
+      }
+
+      await ctx.db.insert("location_configs", {
+        slug: item.slug,
+        label: item.label,
+        active: item.active,
+        isDefault: item.isDefault,
+        sortOrder: item.sortOrder,
+        createdAt: now,
+        updatedAt: now,
+      });
+      results.push({ slug: item.slug, created: true });
+    }
+
+    return { ok: true, total: results.length, results };
   },
 });
 

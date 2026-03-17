@@ -149,6 +149,19 @@ export default defineSchema({
     .index("by_weekday", ["weekday"])
     .index("by_status", ["status"]),
 
+  location_configs: defineTable({
+    slug: locationValidator,
+    label: v.string(),
+    active: v.boolean(),
+    isDefault: v.boolean(),
+    sortOrder: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_active", ["active"])
+    .index("by_sort_order", ["sortOrder"]),
+
   availability_overrides: defineTable({
     groupName: v.string(),
     date: v.string(),

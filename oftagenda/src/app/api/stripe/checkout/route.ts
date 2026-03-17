@@ -18,6 +18,19 @@ const ACTIVE_APPOINTMENT_ERROR =
   'Você já possui um agendamento ativo. Para remarcar ou gerenciar sua consulta, acesse seu painel.';
 const PENDING_RESERVATION_ERROR =
   'Você já possui um agendamento aguardando remarcação. Finalize ou cancele o pendente atual.';
+const ACTIVE_APPOINTMENT_ERROR_ALIASES = [
+  ACTIVE_APPOINTMENT_ERROR,
+  'Você já possui um agendamento ativo.',
+  'agendamento ativo',
+  'active appointment',
+];
+const PENDING_RESERVATION_ERROR_ALIASES = [
+  PENDING_RESERVATION_ERROR,
+  'Você já possui um agendamento pendente.',
+  'agendamento pendente',
+  'agendamento aguardando remarcação',
+  'pending reservation',
+];
 const INTERNAL_CHECKOUT_ERROR =
   'Não foi possível iniciar o pagamento agora. Tente novamente em instantes.';
 const checkoutPayloadSchema = bookingCheckoutSchema;
@@ -154,7 +167,7 @@ export async function POST(request: Request) {
       message,
     });
     const normalizedMessage = toHumanReadableError(message);
-    if (matchesKnownError(normalizedMessage, ACTIVE_APPOINTMENT_ERROR)) {
+    if (matchesKnownErrorAlias(normalizedMessage, ACTIVE_APPOINTMENT_ERROR_ALIASES)) {
       return NextResponse.json(
         {
           ok: false,
@@ -166,7 +179,7 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-    if (matchesKnownError(normalizedMessage, PENDING_RESERVATION_ERROR)) {
+    if (matchesKnownErrorAlias(normalizedMessage, PENDING_RESERVATION_ERROR_ALIASES)) {
       return NextResponse.json(
         {
           ok: false,
@@ -215,13 +228,16 @@ function toHumanReadableError(rawMessage: string) {
   return cleaned;
 }
 
-function matchesKnownError(rawMessage: string, knownError: string) {
-  const normalize = (value: string) =>
-    value
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .toLowerCase();
-  return normalize(rawMessage).includes(normalize(knownError));
+function matchesKnownErrorAlias(rawMessage: string, knownErrors: readonly string[]) {
+  const normalizedMessage = normalizeErrorText(rawMessage);
+  return knownErrors.some((knownError) => normalizedMessage.includes(normalizeErrorText(knownError)));
+}
+
+function normalizeErrorText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 }
 
 function resolveStripeCheckoutExpiry(desiredHoldExpiresAt: number) {
