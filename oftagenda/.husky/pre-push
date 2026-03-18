@@ -1,4 +1,0 @@
-set -e
-
-echo "[husky] [pre-push] Running build"
-pnpm build

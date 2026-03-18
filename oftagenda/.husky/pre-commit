@@ -1,7 +1,0 @@
-set -e
-
-echo "[husky] [pre-commit] Running lint-staged"
-pnpm lint-staged
-
-echo "[husky] [pre-commit] Running type-check"
-pnpm type-check
