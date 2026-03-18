@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const token = crypto.randomBytes(32).toString("hex");
     const client = getConvexHttpClient();
     const clerkUserId = await findClerkUserIdByEmail(parsed.data.email);
-    const result = await client.mutation(api.phoneLinks.createPhoneLinkToken, {
+    const result = await client.mutation(api.phonelinks.createPhoneLinkToken, {
       phone: parsed.data.phone,
       email: parsed.data.email,
       token,

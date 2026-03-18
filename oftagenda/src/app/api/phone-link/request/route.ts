@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
     const token = crypto.randomBytes(32).toString("hex");
     const convex = getConvexHttpClient();
-    const result = await convex.mutation(api.phoneLinks.createPhoneLinkToken, {
+    const result = await convex.mutation(api.phonelinks.createPhoneLinkToken, {
       phone: parsed.data.phone,
       email: patient.email,
       token,

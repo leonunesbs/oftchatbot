@@ -11,7 +11,7 @@ export async function DELETE() {
     const userId = await requireMemberApiAccess();
 
     const client = getConvexHttpClient();
-    const linkedPhone = await client.query(api.phoneLinks.getPhoneLinkByClerkUser, {
+    const linkedPhone = await client.query(api.phonelinks.getPhoneLinkByClerkUser, {
       clerkUserId: userId,
     });
     if (!linkedPhone?.phone) {
@@ -21,7 +21,7 @@ export async function DELETE() {
       );
     }
 
-    await client.mutation(api.phoneLinks.revokePhoneLink, {
+    await client.mutation(api.phonelinks.revokePhoneLink, {
       phone: linkedPhone.phone,
       clerkUserId: userId,
     });

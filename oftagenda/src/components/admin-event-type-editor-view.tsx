@@ -18,7 +18,8 @@ import {
   closeParallelRoute,
   useParallelRouteBackHref,
 } from "@/lib/parallel-route-navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const selectClassName = "h-9 rounded-md border border-input bg-input/20 px-2 text-sm";
 
@@ -285,16 +286,40 @@ export function AdminEventTypeEditorView({
   backHref,
 }: AdminEventTypeEditorViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const resolvedBackHref = useParallelRouteBackHref(backHref);
-  const handleBack = () => closeParallelRoute(router, backHref, resolvedBackHref);
+  const [isOpen, setIsOpen] = useState(true);
+  const closeRequestedRef = useRef(false);
+  const handleCloseDialog = useCallback(() => {
+    if (closeRequestedRef.current) {
+      return;
+    }
+    closeRequestedRef.current = true;
+    setIsOpen(false);
+
+    window.setTimeout(() => {
+      closeParallelRoute(router, backHref, resolvedBackHref);
+    }, 120);
+  }, [backHref, resolvedBackHref, router]);
+
+  useEffect(() => {
+    if (!asDrawer) {
+      return;
+    }
+    const backPath = resolvedBackHref.split("?")[0]?.split("#")[0] ?? resolvedBackHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [asDrawer, pathname, resolvedBackHref]);
 
   if (asDrawer) {
     return (
       <Dialog
-        open
+        open={isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref, resolvedBackHref);
+            handleCloseDialog();
           }
         }}
       >
@@ -309,7 +334,7 @@ export function AdminEventTypeEditorView({
             linkedAvailabilityGroup={linkedAvailabilityGroup}
           />
           <div className="flex justify-end">
-            <Button type="button" variant="outline" size="sm" onClick={handleBack}>
+            <Button type="button" variant="outline" size="sm" onClick={handleCloseDialog}>
               Voltar
             </Button>
           </div>
@@ -332,7 +357,7 @@ export function AdminEventTypeEditorView({
             linkedAvailabilityGroup={linkedAvailabilityGroup}
           />
           <div className="flex justify-end">
-            <Button type="button" variant="outline" size="sm" onClick={handleBack}>
+            <Button type="button" variant="outline" size="sm" onClick={handleCloseDialog}>
               Voltar
             </Button>
           </div>

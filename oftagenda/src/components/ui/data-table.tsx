@@ -41,10 +41,15 @@ export function DataTable<TData, TValue>({
   filterColumnId,
   filterPlaceholder = "Filtrar...",
 }: DataTableProps<TData, TValue>) {
+  const [isMounted, setIsMounted] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const table = useReactTable({
     data,
@@ -65,10 +70,19 @@ export function DataTable<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 12,
+        pageSize: 10,
       },
     },
   });
+
+  if (!isMounted) {
+    return (
+      <div className="space-y-3">
+        <div className="h-8" />
+        <div className="h-[320px] rounded-md border bg-muted/10" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

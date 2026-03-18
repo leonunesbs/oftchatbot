@@ -113,7 +113,7 @@ export default async function DashboardPage({
   let patientBirthDate = "";
   try {
     const { client } = await getAuthenticatedConvexHttpClient();
-    const phoneLinkResult = await client.query(api.phoneLinks.getPhoneLinkByClerkUser, {
+    const phoneLinkResult = await client.query(api.phonelinks.getPhoneLinkByClerkUser, {
       clerkUserId: authData.userId!,
     });
     if (phoneLinkResult) {

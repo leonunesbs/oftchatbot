@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { RescheduleAppointmentCard } from "@/components/reschedule-appointment-card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -52,6 +52,7 @@ export function PatientRescheduleDialog({
   backHref,
 }: PatientRescheduleDialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const resolvedBackHref = useParallelRouteBackHref(backHref);
   const [isOpen, setIsOpen] = useState(true);
   const closeRequestedRef = useRef(false);
@@ -66,6 +67,14 @@ export function PatientRescheduleDialog({
       closeParallelRoute(router, backHref, resolvedBackHref);
     }, 120);
   }, [backHref, resolvedBackHref, router]);
+
+  useEffect(() => {
+    const backPath = resolvedBackHref.split("?")[0]?.split("#")[0] ?? resolvedBackHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [pathname, resolvedBackHref]);
 
   return (
     <Dialog

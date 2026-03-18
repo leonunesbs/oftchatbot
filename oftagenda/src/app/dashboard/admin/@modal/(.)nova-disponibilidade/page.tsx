@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { AdminAvailabilityCreateDialog } from "@/components/admin-availability-create-dialog";
 import {
@@ -11,6 +11,7 @@ import {
 
 export default function AdminAvailabilityCreateModalPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const backHref = useParallelRouteBackHref("/dashboard/admin/disponibilidade");
   const [isOpen, setIsOpen] = useState(true);
   const closeRequestedRef = useRef(false);
@@ -25,6 +26,14 @@ export default function AdminAvailabilityCreateModalPage() {
       closeParallelRoute(router, "/dashboard/admin/disponibilidade", backHref);
     }, 120);
   }, [backHref, router]);
+
+  useEffect(() => {
+    const backPath = backHref.split("?")[0]?.split("#")[0] ?? backHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [backHref, pathname]);
 
   return (
     <AdminAvailabilityCreateDialog

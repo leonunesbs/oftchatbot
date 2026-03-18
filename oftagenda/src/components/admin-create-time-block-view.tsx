@@ -27,8 +27,8 @@ import {
   closeParallelRoute,
   useParallelRouteBackHref,
 } from "@/lib/parallel-route-navigation";
-import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 export type TimeBlockAvailabilityGroupOption = {
   name: string;
@@ -245,15 +245,40 @@ export function AdminCreateTimeBlockView({
   backHref,
 }: AdminCreateTimeBlockViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const resolvedBackHref = useParallelRouteBackHref(backHref);
+  const [isOpen, setIsOpen] = useState(true);
+  const closeRequestedRef = useRef(false);
+  const handleCloseDialog = useCallback(() => {
+    if (closeRequestedRef.current) {
+      return;
+    }
+    closeRequestedRef.current = true;
+    setIsOpen(false);
+
+    window.setTimeout(() => {
+      closeParallelRoute(router, backHref, resolvedBackHref);
+    }, 120);
+  }, [backHref, resolvedBackHref, router]);
+
+  useEffect(() => {
+    if (!asDrawer) {
+      return;
+    }
+    const backPath = resolvedBackHref.split("?")[0]?.split("#")[0] ?? resolvedBackHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [asDrawer, pathname, resolvedBackHref]);
 
   if (asDrawer) {
     return (
       <Dialog
-        open
+        open={isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref, resolvedBackHref);
+            handleCloseDialog();
           }
         }}
       >

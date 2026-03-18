@@ -11,7 +11,7 @@ export async function GET() {
     const userId = await requireMemberApiAccess();
 
     const client = getConvexHttpClient();
-    const link = await client.query(api.phoneLinks.getPhoneLinkByClerkUser, {
+    const link = await client.query(api.phonelinks.getPhoneLinkByClerkUser, {
       clerkUserId: userId,
     });
 

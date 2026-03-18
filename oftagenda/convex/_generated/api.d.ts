@@ -13,7 +13,7 @@ import type * as appointments from "../appointments.js";
 import type * as history from "../history.js";
 import type * as n8n from "../n8n.js";
 import type * as patients from "../patients.js";
-import type * as phoneLinks from "../phoneLinks.js";
+import type * as phonelinks from "../phonelinks.js";
 import type * as stripe from "../stripe.js";
 import type * as user_roles from "../user_roles.js";
 
@@ -29,7 +29,7 @@ declare const fullApi: ApiFromModules<{
   history: typeof history;
   n8n: typeof n8n;
   patients: typeof patients;
-  phoneLinks: typeof phoneLinks;
+  phonelinks: typeof phonelinks;
   stripe: typeof stripe;
   user_roles: typeof user_roles;
 }>;

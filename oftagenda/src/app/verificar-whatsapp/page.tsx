@@ -26,7 +26,7 @@ export default async function VerificarWhatsAppPage({ searchParams }: Props) {
 
   try {
     const client = getConvexHttpClient();
-    await client.mutation(api.phoneLinks.confirmPhoneLink, { token });
+    await client.mutation(api.phonelinks.confirmPhoneLink, { token });
     return <ResultCard success message="Seu WhatsApp foi vinculado com sucesso!" />;
   } catch (error) {
     const message =

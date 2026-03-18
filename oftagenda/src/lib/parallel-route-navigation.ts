@@ -8,6 +8,7 @@ import {
 
 type RouterLike = {
   replace: (href: string) => void;
+  refresh?: () => void;
 };
 
 export function useParallelRouteBackHref(fallbackHref: string) {
@@ -35,4 +36,10 @@ export function closeParallelRoute(
   // Parallel/intercepted routes can keep stale history entries.
   // Closing via deterministic replace avoids inconsistent dialog behavior.
   router.replace(targetHref);
+
+  // In soft navigation, unmatched parallel slots may stay mounted.
+  // Queue a refresh so the route tree is re-fetched after replace.
+  window.setTimeout(() => {
+    router.refresh?.();
+  }, 0);
 }

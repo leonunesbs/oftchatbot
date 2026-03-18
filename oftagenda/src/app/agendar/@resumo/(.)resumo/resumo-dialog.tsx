@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { StartCheckoutButton } from "@/components/start-checkout-button";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,7 @@ export function ResumoDialog({
   isAuthenticated,
 }: ResumoDialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const backHref = useParallelRouteBackHref("/agendar");
   const [isOpen, setIsOpen] = useState(true);
   const closeRequestedRef = useRef(false);
@@ -78,6 +79,14 @@ export function ResumoDialog({
       closeParallelRoute(router, "/agendar", backHref);
     }, 120);
   }, [backHref, router]);
+
+  useEffect(() => {
+    const backPath = backHref.split("?")[0]?.split("#")[0] ?? backHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [backHref, pathname]);
 
   return (
     <Dialog

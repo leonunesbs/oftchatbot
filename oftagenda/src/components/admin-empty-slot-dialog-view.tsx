@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminCreateAppointmentForm } from "@/components/admin-create-appointment-form";
 import {
   TimeBlockForm,
@@ -18,7 +18,7 @@ import {
   closeParallelRoute,
   useParallelRouteBackHref,
 } from "@/lib/parallel-route-navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type EventTypeOption = {
   _id: string;
@@ -57,8 +57,33 @@ export function AdminEmptySlotDialogView({
   backHref,
 }: AdminEmptySlotDialogViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const resolvedBackHref = useParallelRouteBackHref(backHref);
+  const [isOpen, setIsOpen] = useState(true);
+  const closeRequestedRef = useRef(false);
   const [mode, setMode] = useState<EmptySlotMode>("appointment");
+  const handleCloseDialog = useCallback(() => {
+    if (closeRequestedRef.current) {
+      return;
+    }
+    closeRequestedRef.current = true;
+    setIsOpen(false);
+
+    window.setTimeout(() => {
+      closeParallelRoute(router, backHref, resolvedBackHref);
+    }, 120);
+  }, [backHref, resolvedBackHref, router]);
+
+  useEffect(() => {
+    if (!asDrawer) {
+      return;
+    }
+    const backPath = resolvedBackHref.split("?")[0]?.split("#")[0] ?? resolvedBackHref;
+    if (pathname !== backPath) {
+      closeRequestedRef.current = false;
+      setIsOpen(true);
+    }
+  }, [asDrawer, pathname, resolvedBackHref]);
 
   const content = (
     <div className="space-y-3">
@@ -102,10 +127,10 @@ export function AdminEmptySlotDialogView({
   if (asDrawer) {
     return (
       <Dialog
-        open
+        open={isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            closeParallelRoute(router, backHref, resolvedBackHref);
+            handleCloseDialog();
           }
         }}
       >
