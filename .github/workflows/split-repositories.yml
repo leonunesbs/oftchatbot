@@ -17,6 +17,7 @@ jobs:
       oftagenda: ${{ steps.filter.outputs.oftagenda }}
       oftleonardo: ${{ steps.filter.outputs.oftleonardo }}
       oftchatbot: ${{ steps.filter.outputs.oftchatbot }}
+      psiqdenise: ${{ steps.filter.outputs.psiqdenise }}
     steps:
       - name: Checkout monorepo
         uses: actions/checkout@v4.2.1
@@ -37,6 +38,9 @@ jobs:
             oftchatbot:
               - 'oftchatbot/**'
               - 'pnpm-workspace.yaml'
+            psiqdenise:
+              - 'psiqdenise/**'
+              - 'pnpm-workspace.yaml'
 
   split-oftagenda:
     name: Sync oftagenda repository
@@ -49,6 +53,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          submodules: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -108,6 +113,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          submodules: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -167,6 +173,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          submodules: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -214,3 +221,63 @@ jobs:
 
           git subtree split --prefix=oftchatbot --branch split-oftchatbot
           git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftchatbot.git" split-oftchatbot:main
+
+  split-psiqdenise:
+    name: Sync psiqdenise repository
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.psiqdenise == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4.2.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.2.0
+        with:
+          run_install: false
+
+      - name: Prepare pnpm config for subtree
+        run: |
+          awk '
+            /^onlyBuiltDependencies:/ { print; copy = 1; next }
+            copy == 1 && /^  - / { print; next }
+            copy == 1 { exit }
+          ' pnpm-workspace.yaml > psiqdenise/pnpm-workspace.yaml
+
+          if [ ! -s psiqdenise/pnpm-workspace.yaml ]; then
+            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
+            exit 1
+          fi
+
+          (
+            cd psiqdenise
+            pnpm install --lockfile-only --ignore-scripts
+          )
+
+          if [ ! -s psiqdenise/pnpm-lock.yaml ]; then
+            echo "Failed to generate psiqdenise/pnpm-lock.yaml"
+            exit 1
+          fi
+
+          git add psiqdenise/pnpm-workspace.yaml psiqdenise/pnpm-lock.yaml
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(psiqdenise): sync pnpm config and lockfile"
+          else
+            echo "No changes detected in psiqdenise pnpm files"
+          fi
+
+      - name: Push subtree to leonunesbs/psiqdenise
+        env:
+          TARGET_TOKEN: ${{ secrets.PSIQDENISE_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret PSIQDENISE_REPO_TOKEN"
+            exit 1
+          fi
+
+          git subtree split --prefix=psiqdenise --branch split-psiqdenise
+          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/psiqdenise.git" split-psiqdenise:main

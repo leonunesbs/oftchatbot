@@ -2,6 +2,7 @@ packages:
   - "oftagenda"
   - "oftleonardo"
   - "oftchatbot"
+  - "psiqdenise"
 
 onlyBuiltDependencies:
   - esbuild
