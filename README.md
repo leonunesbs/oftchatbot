@@ -197,3 +197,7 @@ Assim, você mantém isolamento de acesso (cada token só publica em um repo).
 - Evitar query params com PII em URLs públicas.
 - Separar segredos por app e por ambiente (dev/staging/prod).
 - Revisar tags de terceiros periodicamente.
+
+## Nota de manutenção
+
+Este commit pode incluir ajustes pontuais de documentação no monorepo para validar o fluxo de sincronização entre repositórios.
