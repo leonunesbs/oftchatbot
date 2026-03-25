@@ -53,7 +53,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          submodules: true
+
+      - name: Initialize oftagenda submodule
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTAGENDA_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTAGENDA_REPO_TOKEN"
+            exit 1
+          fi
+
+          git config --local url."https://x-access-token:${TARGET_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync -- oftagenda
+          git submodule update --init --depth 1 oftagenda
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -113,7 +125,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          submodules: true
+
+      - name: Initialize oftleonardo submodule
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTLEONARDO_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTLEONARDO_REPO_TOKEN"
+            exit 1
+          fi
+
+          git config --local url."https://x-access-token:${TARGET_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync -- oftleonardo
+          git submodule update --init --depth 1 oftleonardo
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -173,7 +197,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          submodules: true
+
+      - name: Initialize oftchatbot submodule
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTCHATBOT_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTCHATBOT_REPO_TOKEN"
+            exit 1
+          fi
+
+          git config --local url."https://x-access-token:${TARGET_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync -- oftchatbot
+          git submodule update --init --depth 1 oftchatbot
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
@@ -233,7 +269,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          submodules: true
+
+      - name: Initialize psiqdenise submodule
+        env:
+          TARGET_TOKEN: ${{ secrets[format('{0}', 'PSIQDENISE_REPO_TOKEN')] }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret PSIQDENISE_REPO_TOKEN"
+            exit 1
+          fi
+
+          git config --local url."https://x-access-token:${TARGET_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync -- psiqdenise
+          git submodule update --init --depth 1 psiqdenise
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
