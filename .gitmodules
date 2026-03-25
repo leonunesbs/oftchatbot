@@ -7,3 +7,6 @@
 [submodule "oftchatbot"]
 	path = oftchatbot
 	url = https://github.com/leonunesbs/oftchatbot.git
+[submodule "psiqdenise"]
+	path = psiqdenise
+	url = https://github.com/leonunesbs/psiqdenise.git

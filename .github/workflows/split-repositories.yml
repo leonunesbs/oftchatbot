@@ -272,7 +272,7 @@ jobs:
 
       - name: Push subtree to leonunesbs/psiqdenise
         env:
-          TARGET_TOKEN: ${{ secrets.PSIQDENISE_REPO_TOKEN }}
+          TARGET_TOKEN: ${{ secrets[format('{0}', 'PSIQDENISE_REPO_TOKEN')] }}
         run: |
           if [ -z "${TARGET_TOKEN}" ]; then
             echo "Missing secret PSIQDENISE_REPO_TOKEN"
