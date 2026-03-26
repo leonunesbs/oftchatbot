@@ -22,7 +22,7 @@ After completing any task, ask: **"Quer fazer commit e push?"** only when commit
 - **Do not** push commits directly to the standalone GitHub repos (`leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`). Those remotes are updated by CI, not by manual pushes from a separate clone.
 - Always run commit/push from the `oftcore` monorepo root.
 - Do not run commit/push directly inside package directories as if they were separate repositories.
-- Propagate package changes through `.github/workflows/split-repositories.yml`, which splits and pushes each package repo after pushes to `main`.
+- Propagate package changes through `.github/workflows/split-repositories.yml`, which calls `scripts/split-package-push.sh` to run `git subtree split` and push each package repo after pushes to `main`.
 
 ## Design decisions
 
@@ -200,7 +200,7 @@ Optional: `CALCOM_API_BASE_URL`, `CALCOM_API_KEY`, `NEXT_PUBLIC_STRIPE_PUBLIC_KE
 
 ## Commit conventions
 
-Conventional commits enforced via commitlint + husky (`@commitlint/config-conventional`). Pre-commit runs lint-staged (oxlint + oxfmt on JS/TS files).
+Conventional commits are enforced at the **monorepo root** via commitlint + Husky (`@commitlint/config-conventional`). Pre-commit runs lint-staged (oxlint + oxfmt for staged files under `oftagenda/` and `oftchatbot/`), then `pnpm type-check` and `pnpm type-check:chatbot`.
 
 ### Mandatory preflight before commit/push
 
@@ -208,7 +208,7 @@ Conventional commits enforced via commitlint + husky (`@commitlint/config-conven
 - Before any push in `oftagenda`, run `pnpm build` and only push if it succeeds.
 - Never proceed with commit/push when type-check or build fails.
 - If a CI/Vercel failure appears, reproduce locally first (`pnpm type-check` and `pnpm build`) before creating new commits.
-- Keep Husky checks mandatory (non-optional): pre-commit must run `lint-staged` + `pnpm type-check`, and pre-push must run `pnpm build`.
+- Keep Husky checks mandatory (non-optional): pre-commit runs `lint-staged`, then `pnpm type-check` and `pnpm type-check:chatbot`; pre-push runs `pnpm build` and `pnpm build:chatbot`.
 
 ## Linting / formatting
 

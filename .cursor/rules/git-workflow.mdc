@@ -9,8 +9,9 @@ alwaysApply: true
 
 - **Única fonte de verdade no Git:** o repositório **`oftcore`** (commits e pushes a partir da raiz do monorepo).
 - **Não** faça `git commit` nem `git push` dentro de `oftagenda/`, `oftleonardo/`, `oftchatbot/` ou `psiqdenise/` como repositórios separados (incluindo remotes `leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`). Alterações nesses produtos entram como pastas no `oftcore`.
-- **Propagação** para os repositórios standalone é **somente** via `.github/workflows/split-repositories.yml` após push para `main` no `oftcore`. Não conte com push manual aos repos filhos para manter histórico alinhado.
-- Se existirem submódulos ou clones aninhados, **não** use push direto ao remote do pacote para “sincronizar”; o fluxo correto é commit na raiz do `oftcore` e deixar o split atualizar o repo destino.
+- **Propagação** para os repositórios standalone é **somente** via `.github/workflows/split-repositories.yml` (script `scripts/split-package-push.sh`) após push para `main` no `oftcore`. Não conte com push manual aos repos filhos para manter histórico alinhado.
+- **Submódulos:** não misture submódulos Git com o fluxo do monorepo. A fonte de verdade são as pastas versionadas no `oftcore`; o espelho para `leonunesbs/*` é só o subtree split no CI. Para migrar de `.gitmodules` para árvore normal (recomendado), use `bash scripts/submodules-to-plain-tree.sh` uma vez (com submódulos inicializados e fetch possível), depois faça um commit na raiz.
+- Se existirem clones aninhados antigos, **não** use push direto ao remote do pacote para “sincronizar”; o fluxo correto é commit na raiz do `oftcore` e deixar o split atualizar o repo destino.
 
 - Offer **"Quer fazer commit e push?"** only when commit/push has not already been executed for the user's current request.
 - If commit and push were already completed in the same request, confirm the result and do not ask the question again.
@@ -20,4 +21,4 @@ alwaysApply: true
 - Before any push for `oftagenda`, run `pnpm build` and block push if it fails.
 - For changes under `oftchatbot/`, run `pnpm type-check:chatbot` before commit and `pnpm build:chatbot` before push; root `pnpm type-check` and `pnpm build` omit oftchatbot (MVP).
 - Prefer reproducing CI/Vercel failures locally with `pnpm type-check` and `pnpm build` before proposing commit/push.
-- Keep Husky pre-commit and pre-push checks mandatory (without optional enable flags) to enforce local validation.
+- Keep Husky na raiz do `oftcore`: pre-commit (`lint-staged`, `pnpm type-check`, `pnpm type-check:chatbot`) e pre-push (`pnpm build`, `pnpm build:chatbot`), sem flags opcionais que desliguem hooks.

@@ -48,18 +48,14 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftagenda == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+      - uses: pnpm/action-setup@v4.2.0
         with:
           run_install: false
-
-      - name: Build and push oftagenda subtree
+      - name: Split subtree and push
         env:
           TARGET_TOKEN: ${{ secrets.OFTAGENDA_REPO_TOKEN }}
         run: |
@@ -67,36 +63,7 @@ jobs:
             echo "Missing secret OFTAGENDA_REPO_TOKEN"
             exit 1
           fi
-
-          awk '
-            /^onlyBuiltDependencies:/ { print; copy = 1; next }
-            copy == 1 && /^  - / { print; next }
-            copy == 1 { exit }
-          ' pnpm-workspace.yaml > "${RUNNER_TEMP}/pnpm-workspace.yaml"
-
-          if [ ! -s "${RUNNER_TEMP}/pnpm-workspace.yaml" ]; then
-            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
-            exit 1
-          fi
-
-          git subtree split --prefix=oftagenda --branch split-oftagenda
-          git checkout split-oftagenda
-
-          cp "${RUNNER_TEMP}/pnpm-workspace.yaml" pnpm-workspace.yaml
-          pnpm install --lockfile-only --ignore-scripts
-
-          if [ ! -s pnpm-lock.yaml ]; then
-            echo "Failed to generate pnpm-lock.yaml"
-            exit 1
-          fi
-
-          git add pnpm-workspace.yaml pnpm-lock.yaml
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftagenda): sync pnpm config and lockfile"
-          else
-            echo "No changes detected in oftagenda pnpm files"
-          fi
-          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftagenda.git" split-oftagenda:main
+          bash scripts/split-package-push.sh oftagenda leonunesbs/oftagenda
 
   split-oftleonardo:
     name: Sync oftleonardo repository
@@ -104,18 +71,14 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftleonardo == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+      - uses: pnpm/action-setup@v4.2.0
         with:
           run_install: false
-
-      - name: Build and push oftleonardo subtree
+      - name: Split subtree and push
         env:
           TARGET_TOKEN: ${{ secrets.OFTLEONARDO_REPO_TOKEN }}
         run: |
@@ -123,36 +86,7 @@ jobs:
             echo "Missing secret OFTLEONARDO_REPO_TOKEN"
             exit 1
           fi
-
-          awk '
-            /^onlyBuiltDependencies:/ { print; copy = 1; next }
-            copy == 1 && /^  - / { print; next }
-            copy == 1 { exit }
-          ' pnpm-workspace.yaml > "${RUNNER_TEMP}/pnpm-workspace.yaml"
-
-          if [ ! -s "${RUNNER_TEMP}/pnpm-workspace.yaml" ]; then
-            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
-            exit 1
-          fi
-
-          git subtree split --prefix=oftleonardo --branch split-oftleonardo
-          git checkout split-oftleonardo
-
-          cp "${RUNNER_TEMP}/pnpm-workspace.yaml" pnpm-workspace.yaml
-          pnpm install --lockfile-only --ignore-scripts
-
-          if [ ! -s pnpm-lock.yaml ]; then
-            echo "Failed to generate pnpm-lock.yaml"
-            exit 1
-          fi
-
-          git add pnpm-workspace.yaml pnpm-lock.yaml
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftleonardo): sync pnpm config and lockfile"
-          else
-            echo "No changes detected in oftleonardo pnpm files"
-          fi
-          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftleonardo.git" split-oftleonardo:main
+          bash scripts/split-package-push.sh oftleonardo leonunesbs/oftleonardo
 
   split-oftchatbot:
     name: Sync oftchatbot repository
@@ -160,18 +94,14 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftchatbot == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+      - uses: pnpm/action-setup@v4.2.0
         with:
           run_install: false
-
-      - name: Build and push oftchatbot subtree
+      - name: Split subtree and push
         env:
           TARGET_TOKEN: ${{ secrets.OFTCHATBOT_REPO_TOKEN }}
         run: |
@@ -179,36 +109,7 @@ jobs:
             echo "Missing secret OFTCHATBOT_REPO_TOKEN"
             exit 1
           fi
-
-          awk '
-            /^onlyBuiltDependencies:/ { print; copy = 1; next }
-            copy == 1 && /^  - / { print; next }
-            copy == 1 { exit }
-          ' pnpm-workspace.yaml > "${RUNNER_TEMP}/pnpm-workspace.yaml"
-
-          if [ ! -s "${RUNNER_TEMP}/pnpm-workspace.yaml" ]; then
-            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
-            exit 1
-          fi
-
-          git subtree split --prefix=oftchatbot --branch split-oftchatbot
-          git checkout split-oftchatbot
-
-          cp "${RUNNER_TEMP}/pnpm-workspace.yaml" pnpm-workspace.yaml
-          pnpm install --lockfile-only --ignore-scripts
-
-          if [ ! -s pnpm-lock.yaml ]; then
-            echo "Failed to generate pnpm-lock.yaml"
-            exit 1
-          fi
-
-          git add pnpm-workspace.yaml pnpm-lock.yaml
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(oftchatbot): sync pnpm config and lockfile"
-          else
-            echo "No changes detected in oftchatbot pnpm files"
-          fi
-          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/oftchatbot.git" split-oftchatbot:main
+          bash scripts/split-package-push.sh oftchatbot leonunesbs/oftchatbot
 
   split-psiqdenise:
     name: Sync psiqdenise repository
@@ -216,52 +117,19 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.psiqdenise == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+      - uses: pnpm/action-setup@v4.2.0
         with:
           run_install: false
-
-      - name: Build and push psiqdenise subtree
+      - name: Split subtree and push
         env:
-          TARGET_TOKEN: ${{ secrets[format('{0}', 'PSIQDENISE_REPO_TOKEN')] }}
+          TARGET_TOKEN: ${{ secrets.PSIQDENISE_REPO_TOKEN }}
         run: |
           if [ -z "${TARGET_TOKEN}" ]; then
             echo "Missing secret PSIQDENISE_REPO_TOKEN"
             exit 1
           fi
-
-          awk '
-            /^onlyBuiltDependencies:/ { print; copy = 1; next }
-            copy == 1 && /^  - / { print; next }
-            copy == 1 { exit }
-          ' pnpm-workspace.yaml > "${RUNNER_TEMP}/pnpm-workspace.yaml"
-
-          if [ ! -s "${RUNNER_TEMP}/pnpm-workspace.yaml" ]; then
-            echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
-            exit 1
-          fi
-
-          git subtree split --prefix=psiqdenise --branch split-psiqdenise
-          git checkout split-psiqdenise
-
-          cp "${RUNNER_TEMP}/pnpm-workspace.yaml" pnpm-workspace.yaml
-          pnpm install --lockfile-only --ignore-scripts
-
-          if [ ! -s pnpm-lock.yaml ]; then
-            echo "Failed to generate pnpm-lock.yaml"
-            exit 1
-          fi
-
-          git add pnpm-workspace.yaml pnpm-lock.yaml
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(psiqdenise): sync pnpm config and lockfile"
-          else
-            echo "No changes detected in psiqdenise pnpm files"
-          fi
-          git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/leonunesbs/psiqdenise.git" split-psiqdenise:main
+          bash scripts/split-package-push.sh psiqdenise leonunesbs/psiqdenise

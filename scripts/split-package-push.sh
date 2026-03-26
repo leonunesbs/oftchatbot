@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Pushes a monorepo subdirectory to a standalone repo via git subtree split.
+# Used by .github/workflows/split-repositories.yml
+# Requires: TARGET_TOKEN (PAT with repo write), pnpm on PATH, full git history (fetch-depth: 0).
+set -euo pipefail
+
+PREFIX="${1:?first arg: package directory prefix (e.g. oftagenda)}"
+TARGET_REPO="${2:?second arg: target GitHub repo as owner/name (e.g. leonunesbs/oftagenda)}"
+CHORE_MSG="${3:-chore(${PREFIX}): sync pnpm config and lockfile}"
+
+if [[ -z "${TARGET_TOKEN:-}" ]]; then
+  echo "Missing env TARGET_TOKEN (repository PAT with contents: write)"
+  exit 1
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "${REPO_ROOT}"
+
+TMP_WS="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
+
+awk '
+  /^onlyBuiltDependencies:/ { print; copy = 1; next }
+  copy == 1 && /^  - / { print; next }
+  copy == 1 { exit }
+' pnpm-workspace.yaml >"${TMP_WS}/pnpm-workspace.yaml"
+
+if [[ ! -s "${TMP_WS}/pnpm-workspace.yaml" ]]; then
+  echo "Missing onlyBuiltDependencies in root pnpm-workspace.yaml"
+  exit 1
+fi
+
+BRANCH_NAME="split-${PREFIX}"
+git subtree split --prefix="${PREFIX}" --branch "${BRANCH_NAME}"
+git checkout "${BRANCH_NAME}"
+
+cp "${TMP_WS}/pnpm-workspace.yaml" pnpm-workspace.yaml
+pnpm install --lockfile-only --ignore-scripts
+
+if [[ ! -s pnpm-lock.yaml ]]; then
+  echo "Failed to generate pnpm-lock.yaml"
+  exit 1
+fi
+
+git add pnpm-workspace.yaml pnpm-lock.yaml
+if ! git diff --cached --quiet; then
+  git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "${CHORE_MSG}"
+else
+  echo "No changes detected in ${PREFIX} pnpm files"
+fi
+
+git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/${TARGET_REPO}.git" "${BRANCH_NAME}:main"
