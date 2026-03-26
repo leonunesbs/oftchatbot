@@ -93,6 +93,9 @@ importers:
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
+      sitemap:
+        specifier: ^9.0.1
+        version: 9.0.1
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0

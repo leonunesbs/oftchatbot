@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from "astro/config";
+import { EnumChangefreq } from "sitemap";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
@@ -63,7 +64,7 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      changefreq: "monthly",
+      changefreq: EnumChangefreq.MONTHLY,
       priority: 0.7,
       lastmod: new Date(),
       serialize(item) {
@@ -71,20 +72,20 @@ export default defineConfig({
         const lastmod = new Date().toISOString();
 
         const pageRules = {
-          "/": { changefreq: "weekly", priority: 1.0 },
-          "/conteudos": { changefreq: "weekly", priority: 0.8 },
-          "/acuidade-visual": { changefreq: "weekly", priority: 1.0 },
-          "/tela-de-amsler": { changefreq: "weekly", priority: 1.0 },
-          "/agendamento-pendente": { changefreq: "monthly", priority: 0.5 },
-          "/politica-de-privacidade": { changefreq: "yearly", priority: 0.4 },
-          "/termos-de-uso": { changefreq: "yearly", priority: 0.4 },
+          "/": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
+          "/conteudos": { changefreq: EnumChangefreq.WEEKLY, priority: 0.8 },
+          "/acuidade-visual": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
+          "/tela-de-amsler": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
+          "/agendamento-pendente": { changefreq: EnumChangefreq.MONTHLY, priority: 0.5 },
+          "/politica-de-privacidade": { changefreq: EnumChangefreq.YEARLY, priority: 0.4 },
+          "/termos-de-uso": { changefreq: EnumChangefreq.YEARLY, priority: 0.4 },
         };
 
         if (pageRules[path]) {
           item.changefreq = pageRules[path].changefreq;
           item.priority = pageRules[path].priority;
         } else if (path.startsWith("/conteudos/")) {
-          item.changefreq = "monthly";
+          item.changefreq = EnumChangefreq.MONTHLY;
           item.priority = 0.9;
         }
 
