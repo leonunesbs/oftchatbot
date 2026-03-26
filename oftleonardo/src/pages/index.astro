@@ -1,0 +1,71 @@
+---
+export const prerender = false;
+
+import Cities from "@/components/Cities.astro";
+import CTAFinal from "@/components/CTAFinal.astro";
+import Differentials from "@/components/Differentials.astro";
+import ExperienceStats from "@/components/ExperienceStats.astro";
+import FAQ from "@/components/FAQ.astro";
+import Footer from "@/components/Footer.astro";
+import Header from "@/components/Header.astro";
+import Hero from "@/components/Hero.astro";
+import HowItWorks from "@/components/HowItWorks.astro";
+import ParallaxArtifacts from "@/components/ParallaxArtifacts";
+import Services from "@/components/Services.astro";
+import VisualAcuityFloat from "@/components/VisualAcuityFloat";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
+import { buildHomeSeoFromCity, resolveGeoCity } from "@/lib/geo";
+import Layout from "@/layouts/Layout.astro";
+
+const geoCity = await resolveGeoCity({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
+---
+
+<Layout
+  includeFAQSchema={true}
+  title={dynamicSeo.title}
+  description={dynamicSeo.description}
+>
+  <Header />
+  <main
+    id="conteudo-principal"
+    tabindex="-1"
+    class="relative isolate overflow-x-clip"
+  >
+    <ParallaxArtifacts />
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(40%_30%_at_0%_35%,color-mix(in_oklch,var(--color-brand)_6%,transparent),transparent),radial-gradient(35%_25%_at_100%_68%,color-mix(in_oklch,var(--color-brand)_5%,transparent),transparent)]"
+      aria-hidden="true"
+    >
+    </div>
+    <Hero />
+    <div class="defer-render scroll-section">
+      <Services />
+    </div>
+    <div class="defer-render scroll-section">
+      <ExperienceStats />
+    </div>
+    <div class="defer-render scroll-section">
+      <Differentials />
+    </div>
+    <div class="defer-render scroll-section">
+      <Cities />
+    </div>
+    <div class="defer-render scroll-section">
+      <HowItWorks />
+    </div>
+    <div class="defer-render scroll-section">
+      <FAQ />
+    </div>
+    <div class="defer-render scroll-section">
+      <CTAFinal />
+    </div>
+  </main>
+  <Footer />
+  <VisualAcuityFloat client:idle />
+  <WhatsAppFloat client:idle />
+</Layout>

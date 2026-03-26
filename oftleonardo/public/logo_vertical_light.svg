@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <style>
+      @font-face {
+        font-family: "Noto Sans";
+        src: url("/fonts/NotoSans/NotoSans-Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Noto Sans";
+        src: url("/fonts/NotoSans/NotoSans-Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+      }
+      .name { font-family: "Noto Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; letter-spacing: 0.3px; }
+      .sub  { font-family: "Noto Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 300; letter-spacing: 1.2px; }
+    </style>
+
+    <clipPath id="clipCircle">
+      <circle cx="800" cy="320" r="135"/>
+    </clipPath>
+
+    <g id="octMarkLight" clip-path="url(#clipCircle)">
+      <path d="M580 270 C675 244,748 236,792 250 C797 252,803 252,808 250 C852 236,925 244,1020 270 L1020 292 C925 270,852 262,808 274 C803 276,797 276,792 274 C748 262,675 270,580 292 Z" fill="#D6D6D6"/>
+      <path d="M570 300 C670 286,745 284,792 296 C798 298,802 298,808 296 C855 284,930 286,1030 300 L1030 326 C930 312,855 310,808 322 C802 324,798 324,792 322 C745 310,670 312,570 326 Z" fill="#BDBDBD"/>
+      <path d="M560 336 C668 328,742 330,790 346 C798 349,802 349,810 346 C858 330,932 328,1040 336 L1040 366 C932 360,858 362,810 378 C802 381,798 381,790 378 C742 362,668 360,560 366 Z" fill="#A2A2A2"/>
+      <path d="M570 372 C685 366,758 368,795 382 C799 384,801 384,805 382 C842 368,915 366,1030 372 L1030 404 C915 398,842 400,805 414 C801 416,799 416,795 414 C758 400,685 398,570 404 Z" fill="#3F3F3F"/>
+      <path d="M590 414 C705 414,760 424,800 430 C840 424,895 414,1010 414 L1010 460 C895 456,840 454,800 456 C760 454,705 456,590 460 Z" fill="#6F6F6F" opacity="0.55"/>
+    </g>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#FFFFFF"/>
+
+  <use href="#octMarkLight"/>
+
+  <g text-anchor="middle">
+    <text x="800" y="610" class="name" font-size="92" fill="#111111">Leonardo Nunes</text>
+    <text x="800" y="675" class="sub" font-size="30" fill="#444444">Oftalmologista · Clínico e Cirúrgico</text>
+  </g>
+</svg>

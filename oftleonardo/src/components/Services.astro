@@ -1,0 +1,59 @@
+---
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { siteConfig } from "@/config/site";
+import { Eye, ScanEye, Sparkles, CircleGauge, Scan, Baby } from "lucide-react";
+
+const iconMap: Record<string, typeof Eye> = {
+  Eye,
+  ScanEye,
+  Sparkles,
+  CircleGauge,
+  Scan,
+  Baby,
+};
+---
+
+<section id="atuacao" class="py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="scroll-reveal mx-auto max-w-2xl text-center">
+      <h2
+        class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+      >
+        Especialidades
+      </h2>
+      <p class="mt-4 text-muted-foreground">
+        Formação sólida, atualização constante e foco em oferecer o diagnóstico
+        mais preciso e o tratamento mais adequado para cada paciente.
+      </p>
+    </div>
+
+    <div class="scroll-3d-stage mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        siteConfig.services.map((service) => {
+          const Icon = iconMap[service.icon];
+          return (
+            <Card className="surface-lift scroll-card-depth scroll-card-motion group h-full border-border/50 hover:border-border hover:shadow-sm">
+              <CardHeader>
+                <div class="mb-3 flex size-11 items-center justify-center rounded-xl bg-secondary text-foreground transition-transform duration-300 group-hover:-translate-y-0.5">
+                  {Icon && <Icon className="size-5" />}
+                </div>
+                <div class="flex flex-col items-start gap-1.5">
+                  <CardTitle className="text-lg leading-snug">{service.title}</CardTitle>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {service.shortDescription}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p class="text-sm leading-relaxed text-muted-foreground">
+                  {service.description}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

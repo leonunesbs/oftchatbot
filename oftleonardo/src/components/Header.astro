@@ -1,0 +1,386 @@
+---
+import { siteConfig } from "@/config/site";
+import MobileMenu from "./MobileMenu";
+import BookingPopup from "./BookingPopup";
+---
+
+<header
+  id="main-header"
+  class="fixed top-0 z-40 w-full border-b border-border/70 bg-background/92 backdrop-blur-xl backdrop-saturate-150"
+>
+  <div
+    id="header-inner"
+    class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6"
+  >
+    <a href="/" class="logo-link" aria-label="Página inicial">
+      <div class="logo-full">
+        <img
+          src="/logo_horizontal_light.svg"
+          alt={`${siteConfig.name} – ${siteConfig.title}`}
+          class="h-10 w-auto dark:hidden sm:h-12"
+          width="227"
+          height="48"
+        />
+        <img
+          src="/logo_horizontal_dark.svg"
+          alt={`${siteConfig.name} – ${siteConfig.title}`}
+          class="hidden h-10 w-auto dark:block sm:h-12"
+          width="227"
+          height="48"
+        />
+      </div>
+      <div class="logo-mono">
+        <img
+          src="/mono_light.svg"
+          alt={`${siteConfig.name}`}
+          class="h-8 w-auto dark:hidden"
+          width="32"
+          height="32"
+        />
+        <img
+          src="/mono_dark.svg"
+          alt={`${siteConfig.name}`}
+          class="hidden h-8 w-auto dark:block"
+          width="32"
+          height="32"
+        />
+      </div>
+    </a>
+
+    <nav
+      class="hidden items-center gap-1 md:flex"
+      aria-label="Navegação principal"
+    >
+      {
+        siteConfig.navLinks
+          .filter((link) => link.label !== "Consulta")
+          .map((link) => (
+            <a
+              href={link.href}
+              class="rounded-md px-3 py-2 text-sm font-medium text-foreground/85 transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </a>
+          ))
+      }
+      <details id="tools-menu" class="group relative">
+        <summary
+          class="list-none cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:text-foreground"
+        >
+          Ferramentas
+        </summary>
+        <div
+          class="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-border/60 bg-background/95 p-2 opacity-0 shadow-lg backdrop-blur transition duration-150 group-open:visible group-open:opacity-100"
+        >
+          <a
+            href="/acuidade-visual"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Teste Visual
+          </a>
+          <a
+            href="/tela-de-amsler"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Tela de Amsler
+          </a>
+          <a
+            href="/agendamento-online"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Agendamento Online
+          </a>
+          <a
+            href="/conteudos"
+            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Hub de Conteúdos
+          </a>
+        </div>
+      </details>
+      <button
+        type="button"
+        class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
+        aria-label="Alternar tema"
+        data-theme-mode="system"
+      >
+        <span class="theme-icon theme-icon-light absolute flex size-7 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:bg-amber-400/10 dark:text-amber-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </span>
+        <span class="theme-icon theme-icon-dark absolute flex size-7 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </span>
+        <span class="theme-icon theme-icon-system absolute flex size-7 items-center justify-center rounded-full bg-zinc-500/15 text-zinc-600 dark:bg-zinc-400/15 dark:text-zinc-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        </span>
+      </button>
+      <BookingPopup
+        client:visible
+        size="default"
+        className="ml-2 inline-flex h-10 rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        triggerAriaLabel="Agendar consulta"
+      >
+        Agendar Consulta
+      </BookingPopup>
+    </nav>
+
+    <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
+      <BookingPopup
+        client:visible
+        size="sm"
+        className="inline-flex h-8 rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        triggerAriaLabel="Agendar consulta"
+      >
+        Agendar
+      </BookingPopup>
+      <button
+        type="button"
+        class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
+        aria-label="Alternar tema"
+        data-theme-mode="system"
+      >
+        <span class="theme-icon theme-icon-light absolute flex size-7 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:bg-amber-400/10 dark:text-amber-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </span>
+        <span class="theme-icon theme-icon-dark absolute flex size-7 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </span>
+        <span class="theme-icon theme-icon-system absolute flex size-7 items-center justify-center rounded-full bg-zinc-500/15 text-zinc-600 dark:bg-zinc-400/15 dark:text-zinc-300" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        </span>
+      </button>
+      <MobileMenu client:media="(max-width: 767px)" />
+    </div>
+  </div>
+</header>
+<div class="h-18" aria-hidden="true"></div>
+
+<style>
+  #main-header {
+    --p: 0;
+    contain: layout;
+    box-shadow: 0 calc(var(--p) * 14px) calc(var(--p) * 36px)
+      color-mix(in oklch, var(--foreground) 14%, transparent);
+    transition: box-shadow 220ms ease;
+  }
+
+  #header-inner {
+    height: calc(4.75rem - var(--p) * 1.6rem);
+    transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .logo-link {
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .logo-full,
+  .logo-mono {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    will-change: opacity, transform;
+  }
+
+  .logo-full {
+    opacity: calc(1 - var(--p));
+    transform: translateX(calc(var(--p) * -100%));
+  }
+
+  .logo-mono {
+    opacity: min(calc(var(--p) * 1.2), 1);
+    transform: translateX(calc((1 - var(--p)) * -100%));
+  }
+
+  nav[aria-label="Navegação principal"] {
+    transform: translateY(calc(var(--p) * -2px));
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #mobile-controls {
+    transform: translateX(calc(var(--p) * 0.5rem));
+    will-change: transform;
+  }
+
+  .theme-icon {
+    opacity: 0;
+    transform: scale(0.82);
+    transition:
+      opacity 170ms ease-out,
+      transform 170ms ease-out;
+    will-change: opacity, transform;
+  }
+
+  .theme-toggle[data-theme-mode="light"] .theme-icon-light,
+  .theme-toggle[data-theme-mode="dark"] .theme-icon-dark,
+  .theme-toggle[data-theme-mode="system"] .theme-icon-system {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-icon {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const header = document.getElementById("main-header");
+  const toolsMenu = document.getElementById("tools-menu");
+  const SCROLL_RANGE_MOBILE = 80;
+  let ticking = false;
+  let previousProgress = -1;
+
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function getTargetProgress() {
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop) return 0;
+    const scrollRange = SCROLL_RANGE_MOBILE;
+    const scrollY = Math.max(window.scrollY, 0);
+    return clamp(scrollY / scrollRange, 0, 1);
+  }
+
+  function syncHeaderProgress() {
+    if (!header) return;
+    const nextProgress = getTargetProgress();
+    if (Math.abs(nextProgress - previousProgress) < 0.01) {
+      ticking = false;
+      return;
+    }
+
+    previousProgress = nextProgress;
+    header.style.setProperty("--p", `${nextProgress}`);
+    ticking = false;
+  }
+
+  function updateTarget() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(syncHeaderProgress);
+  }
+
+  function setupSectionLinkSmoothScroll() {
+    const sectionLinks = new Set<HTMLAnchorElement>();
+    if (header) {
+      const headerSectionLinks =
+        header.querySelectorAll<HTMLAnchorElement>('a[href^="/#"]');
+      headerSectionLinks.forEach((link) => sectionLinks.add(link));
+    }
+
+    const taggedSectionLinks = document.querySelectorAll<HTMLAnchorElement>(
+      "a[data-section-scroll]",
+    );
+    taggedSectionLinks.forEach((link) => sectionLinks.add(link));
+
+    sectionLinks.forEach((link) => {
+      link.addEventListener("click", (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        const href = link.getAttribute("href");
+        if (!href) return;
+
+        const url = new URL(href, window.location.origin);
+        if (url.pathname !== window.location.pathname || !url.hash) {
+          return;
+        }
+
+        const target = document.querySelector<HTMLElement>(url.hash);
+        if (!target) return;
+
+        event.preventDefault();
+        history.pushState(null, "", url.hash);
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+
+  window.addEventListener("scroll", updateTarget, { passive: true });
+  window.addEventListener("resize", updateTarget, { passive: true });
+
+  // Keep native <details> semantics, but close when user clicks away.
+  document.addEventListener("click", (event) => {
+    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
+    if (!toolsMenu.open) return;
+
+    const target = event.target;
+    if (target instanceof Node && !toolsMenu.contains(target)) {
+      toolsMenu.open = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
+    if (event.key === "Escape" && toolsMenu.open) {
+      toolsMenu.open = false;
+    }
+  });
+
+  updateTarget();
+  setupSectionLinkSmoothScroll();
+
+  type ThemeMode = "light" | "dark" | "system";
+  const THEME_CYCLE: ThemeMode[] = ["light", "dark", "system"];
+
+  function resolveEffectiveTheme(mode: ThemeMode): "light" | "dark" {
+    if (mode === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return mode;
+  }
+
+  function getStoredTheme(): ThemeMode {
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    return "system";
+  }
+
+  function setThemeState(mode: ThemeMode) {
+    document.documentElement.classList.toggle("dark", resolveEffectiveTheme(mode) === "dark");
+
+    const toggles = document.querySelectorAll(".theme-toggle");
+    toggles.forEach((toggle) => {
+      toggle.setAttribute("data-theme-mode", mode);
+    });
+
+    window.dispatchEvent(new CustomEvent("theme-changed", { detail: { mode } }));
+  }
+
+  let currentTheme = getStoredTheme();
+  setThemeState(currentTheme);
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (getStoredTheme() === "system") {
+      setThemeState("system");
+    }
+  });
+
+  const themeToggles = document.querySelectorAll(".theme-toggle");
+  themeToggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const idx = THEME_CYCLE.indexOf(currentTheme);
+      const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+      currentTheme = next;
+      localStorage.setItem("theme", next);
+      setThemeState(next);
+    });
+  });
+</script>

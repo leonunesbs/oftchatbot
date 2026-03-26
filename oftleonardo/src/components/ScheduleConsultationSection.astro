@@ -1,0 +1,57 @@
+---
+import WhatsAppModal from "@/components/WhatsAppModal";
+import { buttonVariants } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
+
+interface Props {
+  id?: string;
+  title: string;
+  description: string;
+  whatsappMessageTemplate: string;
+  triggerLabel?: string;
+  showAgendaCta?: boolean;
+}
+
+const {
+  id = "agendar",
+  title,
+  description,
+  whatsappMessageTemplate,
+  triggerLabel = "Agendar consulta",
+  showAgendaCta = true,
+} = Astro.props as Props;
+
+---
+
+<section id={id} class="space-y-4 text-center">
+  <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
+    {title}
+  </h2>
+  <p class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
+    {description}
+  </p>
+  <div class="flex flex-wrap justify-center gap-3">
+    <WhatsAppModal
+      client:visible
+      size="lg"
+      className="h-12 px-8 text-base"
+      triggerAriaLabel={title}
+      whatsappMessageTemplate={whatsappMessageTemplate}
+      showOnlineBookingCta={true}
+    >
+      {triggerLabel}
+    </WhatsAppModal>
+    {
+      showAgendaCta && (
+        <a
+          href={siteConfig.partnerApps.oftagenda}
+          target="_blank"
+          rel="noopener noreferrer"
+          class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}
+        >
+          Abrir Minha Agenda
+        </a>
+      )
+    }
+  </div>
+</section>

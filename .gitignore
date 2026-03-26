@@ -25,6 +25,8 @@ coverage/
 # local temp artifacts
 tmp/
 temp/
+# submodule→plain-tree migration leftovers (node_modules may block rm -rf)
+oftleonardo._*/
 
 # IDE/editor
 .idea/

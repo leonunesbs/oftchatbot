@@ -1,0 +1,29 @@
+# Leonardo Nunes · Oftalmologista
+
+> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica, além de cirurgia de catarata. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA).
+
+## Páginas principais
+
+- [Início](https://oftleonardo.com.br/): apresentação do médico, especialidades, cidades de atendimento e CTAs para agendamento.
+- [Conteúdos](https://oftleonardo.com.br/conteudos): hub de conteúdos educativos em oftalmologia.
+- [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): triagem visual orientativa (não substitui consulta).
+- [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): triagem orientativa para distorções centrais (não substitui consulta).
+- [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): condições de uso do site e responsabilidades.
+- [Política de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): tratamento de dados e cookies em conformidade com a LGPD.
+
+## Agendamento
+
+- O agendamento principal acontece em [Agendamento Online](https://oftleonardo.com.br/agendamento-online), com formulário incorporado da plataforma oficial.
+- Canais complementares, como WhatsApp, podem aparecer em pontos específicos da experiência.
+
+## Descoberta técnica
+
+- Sitemap: https://oftleonardo.com.br/sitemap.xml
+- Robots: https://oftleonardo.com.br/robots.txt
+- LLM short file: https://oftleonardo.com.br/llm.txt
+
+## Contato
+
+- WhatsApp: https://api.whatsapp.com/send?phone=5585999853811
+- E-mail: contato@oftleonardo.com.br
+- Instagram: https://www.instagram.com/oftleonardo
