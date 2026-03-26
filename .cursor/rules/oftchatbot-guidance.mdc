@@ -6,6 +6,7 @@ alwaysApply: false
 
 # oftchatbot guidance
 
+- **MVP package:** root `pnpm type-check`, `pnpm lint`, and `pnpm build` in `oftcore` do **not** include oftchatbot. After substantive changes, run from the monorepo root: `pnpm type-check:chatbot`, `pnpm lint:chatbot`, and `pnpm build:chatbot`.
 - The primary deterministic assistant is **Lumi**. A secondary persona, **Fox**, may wrap Lumi replies using OpenAI for tone only.
 - Always preserve deterministic business decisions from Lumi (intent, state transitions, guardrails, handoff triggers, booking decisions).
 - Main Lumi logic lives in `src/lib/lumi/`:

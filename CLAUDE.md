@@ -35,11 +35,12 @@ Any destructive user action (delete, clear, reset, irreversible state change) mu
 
 ## Repository structure
 
-This is a pnpm monorepo (`oftcore`) with three packages:
+This is a pnpm monorepo (`oftcore`). **Primary products:** `oftagenda`, `oftleonardo`, and `psiqdenise` (they drive root `pnpm dev`, `pnpm build`, `pnpm lint`, and `pnpm type-check`). **`oftchatbot/`** is kept as an **MVP** (WhatsApp/Lumi); validate it explicitly with `pnpm build:chatbot`, `pnpm lint:chatbot`, and `pnpm type-check:chatbot` from the monorepo root when you change it.
 
 - **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + Stripe. Runs on port 3001 by default.
 - **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Booking via iframe embed of oftagenda (`/agendamento-online` → `/embed/agendar`).
-- **`oftchatbot/`** — Clinic chatbot app (Next.js). Runs on port 3030 by default.
+- **`psiqdenise/`** — Psychologist site (Astro). Same stack family as oftleonardo; uses its own content and port (see `psiqdenise/package.json`).
+- **`oftchatbot/`** — Clinic chatbot app (Next.js). Runs on port 3030 by default. MVP scope; not part of the default monorepo build/lint/type-check pipeline.
 
 ### Monorepo split & deploy strategy
 
@@ -62,15 +63,21 @@ Each job also generates a standalone `pnpm-workspace.yaml` and `pnpm-lock.yaml` 
 Run from the monorepo root (`/Users/leonunesbs/Documents/Github/oftcore.nosync`):
 
 ```bash
-pnpm dev                  # dev all apps (Next.js web + Astro + chatbot)
-pnpm dev:all:full         # dev all apps including Convex backend
+pnpm dev                  # dev oftagenda + oftleonardo + psiqdenise (parallel)
+pnpm dev:all:full         # same three packages (full dev scripts per package)
+pnpm dev:with-chatbot     # dev + oftchatbot (MVP) alongside the three above
+pnpm dev:all:full:with-chatbot   # full dev scripts including oftchatbot
 pnpm dev:agenda           # only oftagenda (Next.js only, no Convex)
 pnpm dev:agenda:full      # only oftagenda + Convex dev
 pnpm dev:leonardo         # only oftleonardo
+pnpm dev:psiqdenise       # only psiqdenise
 pnpm dev:chatbot          # only oftchatbot
-pnpm build                # build all packages
-pnpm lint                 # lint all packages (oxlint)
-pnpm type-check           # type-check all packages
+pnpm build                # build oftagenda + oftleonardo + psiqdenise
+pnpm build:chatbot        # build oftchatbot only (MVP)
+pnpm lint                 # lint oftagenda + oftleonardo + psiqdenise
+pnpm lint:chatbot         # lint oftchatbot only
+pnpm type-check           # type-check oftagenda + oftleonardo + psiqdenise
+pnpm type-check:chatbot   # type-check oftchatbot only
 ```
 
 From `oftagenda/`:
@@ -153,6 +160,8 @@ Build auto-deploys Convex when `CONVEX_DEPLOY_KEY` is set.
 Astro 5 static site (SSR via `@astrojs/vercel` adapter). React islands for interactive components. Booking via iframe embed of oftagenda (`/embed/agendar`). Live session feature in `src/lib/live-session/` and `src/pages/api/live-session/`. Rate limiting in `src/lib/api/rate-limit.ts`.
 
 ## oftchatbot architecture
+
+**MVP:** The monorepo does not run oftchatbot in default `pnpm build` / `pnpm lint` / `pnpm type-check`; use the `:chatbot` scripts from the repo root when working on this package.
 
 ### Core concept
 `oftchatbot` powers the clinic WhatsApp operation and CRM panel. **Lumi** is the deterministic assistant (source of truth for business decisions). **Fox** can optionally wrap Lumi replies via OpenAI for conversational tone while preserving the same deterministic decision.

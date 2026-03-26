@@ -12,5 +12,6 @@ alwaysApply: true
 - Rely on `.github/workflows/split-repositories.yml` to propagate package changes from `oftcore` to standalone repositories after pushes to `main`.
 - Before any commit for `oftagenda`, run `pnpm type-check` and block commit if it fails.
 - Before any push for `oftagenda`, run `pnpm build` and block push if it fails.
+- For changes under `oftchatbot/`, run `pnpm type-check:chatbot` before commit and `pnpm build:chatbot` before push; root `pnpm type-check` and `pnpm build` omit oftchatbot (MVP).
 - Prefer reproducing CI/Vercel failures locally with `pnpm type-check` and `pnpm build` before proposing commit/push.
 - Keep Husky pre-commit and pre-push checks mandatory (without optional enable flags) to enforce local validation.
