@@ -7,8 +7,24 @@ import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 
+/** Origem canônica (usada no sitemap e em customPages para rotas SSR). */
+const siteOrigin = "https://oftleonardo.com.br";
+
+/**
+ * Com output "server", o sitemap só inclui páginas pré-renderizadas por padrão.
+ * Estas URLs são servidas em SSR e precisam constar no sitemap.
+ */
+const sitemapCustomPages = [
+  `${siteOrigin}/`,
+  `${siteOrigin}/acuidade-visual`,
+  `${siteOrigin}/tela-de-amsler`,
+  `${siteOrigin}/politica-de-privacidade`,
+  `${siteOrigin}/termos-de-uso`,
+  `${siteOrigin}/agendamento-pendente`,
+];
+
 export default defineConfig({
-  site: "https://oftleonardo.com.br",
+  site: siteOrigin,
   fonts: [
     {
       provider: fontProviders.google(),
@@ -64,6 +80,22 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
+      customPages: sitemapCustomPages,
+      /**
+       * Rotas SSR geram duplicata com barra final; rotas pré-renderizadas em /conteudos/…
+       * usam barra final no build — mantemos só essas com barra.
+       */
+      filter(page) {
+        try {
+          const pathname = new URL(page).pathname;
+          if (pathname === "/") return true;
+          if (pathname.startsWith("/conteudos")) return true;
+          if (pathname.endsWith("/")) return false;
+          return true;
+        } catch {
+          return true;
+        }
+      },
       changefreq: EnumChangefreq.MONTHLY,
       priority: 0.7,
       lastmod: new Date(),

@@ -10,12 +10,19 @@ import { getCollection } from "astro:content";
 export const prerender = true;
 
 const articles = await getCollection("conteudos");
+const conditionArticles = articles.filter((a) => a.data.hubCategory === "conditions");
+const examArticles = articles.filter((a) => a.data.hubCategory === "exams");
+const examArticlesSorted = [...examArticles].sort((a, b) => {
+  if (a.id === "exames-oftalmologicos") return -1;
+  if (b.id === "exames-oftalmologicos") return 1;
+  return a.data.condition.localeCompare(b.data.condition, "pt-BR");
+});
 const tools = clusterTopics.filter((t) => t.intent === "informational");
 const scheduling = clusterTopics.find((t) => t.intent === "transactional");
 
 const title = "Conteúdos de Oftalmologia | Retina, Catarata e Triagem Visual";
 const description =
-  "Hub de conteúdos de oftalmologia com guias sobre retinopatia diabética, DMRI, glaucoma, catarata, ceratocone, estrabismo, triagem visual e agendamento de consulta.";
+  "Hub de conteúdos de oftalmologia com guias sobre doenças oculares, exames (OCT, campo visual, topografia, angiografia etc.), triagem visual e agendamento de consulta.";
 const canonical = new URL("/conteudos", siteConfig.canonical).href;
 
 const breadcrumbSchema = {
@@ -80,8 +87,9 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
     <section class="rounded-2xl border border-border/60 bg-card p-6 sm:p-8">
       <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Hub de Conteúdos em Oftalmologia</h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-        Explore conteúdos sobre doenças oculares e ferramentas de triagem visual. Informações
-        acessíveis revisadas por Leonardo Nunes, oftalmologista especialista em retina e catarata.
+        Explore guias sobre doenças oculares, referências sobre exames (diagnóstico por imagem e
+        função visual) e ferramentas de triagem. Informações acessíveis revisadas por Leonardo Nunes,
+        oftalmologista especialista em retina e catarata.
       </p>
     </section>
 
@@ -111,11 +119,45 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
     </section>
 
     {
-      articles.length > 0 && (
+      examArticlesSorted.length > 0 && (
+        <section class="mt-8">
+          <h2 class="mb-4 text-lg font-semibold text-foreground">Exames e Diagnóstico</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {examArticlesSorted.map((article) => (
+              <article class="group rounded-xl border border-border/60 bg-card p-5 transition-colors hover:border-brand/30">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium text-violet-600 dark:text-violet-400">
+                    Referência
+                  </span>
+                  <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                    {article.data.readingTime}
+                  </span>
+                </div>
+                <h3 class="mt-2 text-base font-semibold text-foreground">
+                  {article.data.condition}
+                </h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                  {article.data.description}
+                </p>
+                <a
+                  href={`/conteudos/${article.id}`}
+                  class="mt-3 inline-flex text-sm font-medium text-brand hover:underline"
+                >
+                  Ler conteúdo
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      conditionArticles.length > 0 && (
         <section class="mt-8">
           <h2 class="mb-4 text-lg font-semibold text-foreground">Doenças e Condições Oculares</h2>
           <div class="grid gap-4 sm:grid-cols-2">
-            {articles.map((article) => (
+            {conditionArticles.map((article) => (
               <article class="group rounded-xl border border-border/60 bg-card p-5 transition-colors hover:border-brand/30">
                 <div class="flex items-center gap-2">
                   <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">

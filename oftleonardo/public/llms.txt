@@ -10,17 +10,53 @@
 - [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): triagem orientativa para distorções centrais (não substitui consulta).
 - [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): condições de uso do site e responsabilidades.
 - [Política de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): tratamento de dados e cookies em conformidade com a LGPD.
+- [Agendamento pendente de pagamento](https://oftleonardo.com.br/agendamento-pendente): página exibida após fluxo de agendamento com pagamento a concluir (quando aplicável).
 
 ## Agendamento
 
 - O agendamento principal acontece em [Agendamento Online](https://oftleonardo.com.br/agendamento-online), com formulário incorporado da plataforma oficial.
 - Canais complementares, como WhatsApp, podem aparecer em pontos específicos da experiência.
 
+## Artigos — doenças e condições
+
+- [Catarata: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/catarata)
+- [Ceratocone: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/ceratocone)
+- [Coriorretinopatia Serosa Central: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/coriorretinopatia-serosa)
+- [Degeneração Macular (DMRI): o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/degeneracao-macular)
+- [Estrabismo: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/estrabismo)
+- [Glaucoma: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/glaucoma)
+- [Retinopatia Diabética: o que é, sintomas e tratamento](https://oftleonardo.com.br/conteudos/retinopatia-diabetica)
+
+## Artigos — refração e visão
+
+- [Astigmatismo: o que é, visão distorcida, astigmatismo irregular e correção](https://oftleonardo.com.br/conteudos/astigmatismo)
+- [Hipermetropia: o que é, sintomas, cansaço visual e correção](https://oftleonardo.com.br/conteudos/hipermetropia)
+- [Miopia: o que é, sintomas, graus e opções de correção](https://oftleonardo.com.br/conteudos/miopia)
+- [Presbiopia (vista cansada): o que é, sintomas e opções de tratamento](https://oftleonardo.com.br/conteudos/presbiopia)
+
+## Artigos — cirurgia e opções de tratamento
+
+- [Cirurgia refrativa: LASIK, PRK, SMILE e o que avaliar antes de operar](https://oftleonardo.com.br/conteudos/cirurgia-refrativa)
+- [Lentes premium na catarata: multifocais, tóricas e o que considerar na escolha](https://oftleonardo.com.br/conteudos/lentes-premium-catarata)
+
+## Artigos — exames e procedimentos
+
+- [Angiografia fluoresceínica: estudo dos vasos da retina](https://oftleonardo.com.br/conteudos/angiografia-fluoresceinica)
+- [Biomicroscopia (lâmpada de fenda): como é feita e para que serve](https://oftleonardo.com.br/conteudos/biomicroscopia-lampada-de-fenda)
+- [Campo visual (perimetria): o que mede o exame](https://oftleonardo.com.br/conteudos/campo-visual-perimetria)
+- [Exames oftalmológicos: visão geral e guias por exame](https://oftleonardo.com.br/conteudos/exames-oftalmologicos)
+- [Mapeamento de retina: imagem de fundo ampliada (widefield)](https://oftleonardo.com.br/conteudos/mapeamento-de-retina)
+- [Microscopia especular: contagem das células da córnea](https://oftleonardo.com.br/conteudos/microscopia-especular)
+- [OCT: tomografia de coerência óptica na oftalmologia](https://oftleonardo.com.br/conteudos/oct-tomografia-coerencia-optica)
+- [Retinografia: fotografia do fundo do olho](https://oftleonardo.com.br/conteudos/retinografia)
+- [Tomografia de córnea (Scheimpflug e sistemas 3D)](https://oftleonardo.com.br/conteudos/tomografia-de-cornea)
+- [Topografia corneana: mapa da curvatura da córnea](https://oftleonardo.com.br/conteudos/topografia-corneana)
+
 ## Descoberta técnica
 
 - Sitemap: https://oftleonardo.com.br/sitemap.xml
 - Robots: https://oftleonardo.com.br/robots.txt
-- LLM short file: https://oftleonardo.com.br/llm.txt
+- Versão curta para LLMs: https://oftleonardo.com.br/llm.txt
 
 ## Contato
 

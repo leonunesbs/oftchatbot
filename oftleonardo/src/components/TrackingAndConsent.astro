@@ -23,6 +23,10 @@ window.gtag("consent", "default", {
 });`}
       </script>
       {gtmId ? <GoogleTagmanager id={gtmId} /> : null}
+      <script>
+        import { initOftFunnelAnalytics } from "@/lib/analytics-init";
+        window.__oftInitFunnelAnalytics = initOftFunnelAnalytics;
+      </script>
       <script is:inline define:vars={{ ga4Id, gtmId, metaPixelId, googleAdsId }}>
         (function () {
   var resolvedGa4Id = typeof ga4Id === "string" ? ga4Id : "";
@@ -102,36 +106,18 @@ window.gtag("consent", "default", {
       window.gtag("config", resolvedGoogleAdsId);
     }
 
-    bindPrimaryBookingTracking();
-  }
-
-  function bindPrimaryBookingTracking() {
-    document.addEventListener("click", function (event) {
-      var target = event.target;
-      if (!(target instanceof Element)) return;
-
-      var link = target.closest("a");
-      if (!(link instanceof HTMLAnchorElement)) return;
-
-      var href = link.getAttribute("href") || "";
-      var isPartnerBookingLink = href.indexOf("agenda.oftleonardo.com.br") !== -1;
-
-      if (!isPartnerBookingLink) return;
-
-      var ctaText = (link.textContent || "").trim().slice(0, 80);
-      var payload = {
-        channel: "online_booking",
-        cta_text: ctaText,
-        cta_href: href,
-        page_path: window.location.pathname,
-      };
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push(Object.assign({ event: "start_booking" }, payload));
-
-      if (resolvedGa4Id && !resolvedGtmId && window.gtag) {
-        window.gtag("event", "start_booking", payload);
+    setTimeout(function scheduleFunnelInit() {
+      var attempts = 0;
+      function tryInit() {
+        if (typeof window.__oftInitFunnelAnalytics === "function") {
+          window.__oftInitFunnelAnalytics();
+          return;
+        }
+        attempts += 1;
+        if (attempts < 40) setTimeout(tryInit, 50);
       }
-    });
+      tryInit();
+    }, 0);
   }
 
   window.__oftConsentActions = {

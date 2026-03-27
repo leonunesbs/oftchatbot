@@ -41,6 +41,7 @@ export const GET: APIRoute = async ({ request }) => {
       readingTime: article.data.readingTime,
       keywords: article.data.keywords,
       relatedSlugs: article.data.relatedSlugs,
+      hubCategory: article.data.hubCategory,
       faq: includeArticleFaq ? article.data.faq : [],
       bodyMarkdown: includeArticleBody ? article.body : undefined,
     }));

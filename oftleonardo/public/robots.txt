@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 
 User-agent: Googlebot
 Allow: /
@@ -15,4 +16,6 @@ Allow: /
 
 Sitemap: https://oftleonardo.com.br/sitemap.xml
 Host: https://oftleonardo.com.br
-# LLM profile: https://oftleonardo.com.br/llms.txt
+
+# Perfil para modelos e assistentes: https://oftleonardo.com.br/llms.txt
+# Versão resumida: https://oftleonardo.com.br/llm.txt

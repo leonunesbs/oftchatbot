@@ -206,7 +206,7 @@ export const siteConfig = {
     {
       question: "O que é presbiopia (vista cansada) e como é tratada?",
       answer:
-        "A presbiopia é a dificuldade natural para enxergar de perto que surge a partir dos 40 anos, causada pela perda gradual de flexibilidade do cristalino. O tratamento mais comum é o uso de óculos para leitura ou lentes multifocais. Em casos selecionados, pode ser considerado o implante de lente intraocular multifocal durante a cirurgia de catarata. Na consulta, o Dr. Leonardo avalia o grau, a saúde ocular completa e orienta a melhor opção para o seu perfil.",
+        "A presbiopia é a dificuldade natural para enxergar de perto que surge a partir dos 40 anos, causada pela perda gradual de flexibilidade do cristalino. O tratamento mais comum é o uso de óculos para leitura ou lentes multifocais. Em casos selecionados, pode ser considerado o implante de lente intraocular multifocal durante a cirurgia de catarata. Na consulta, o Dr. Leonardo avalia o grau, a saúde ocular completa e orienta a melhor opção para o seu perfil. Há também um guia completo sobre sintomas, diagnóstico e opções de correção na área Conteúdos do site, no artigo dedicado à presbiopia.",
     },
     {
       question: "Tenho diabetes. Com que frequência devo examinar os olhos?",

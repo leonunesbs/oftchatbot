@@ -8,18 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
+import { trackClickWhatsapp } from "@/lib/analytics";
 import {
   GEO_CITY_COOKIE_NAME,
   type SupportedGeoCitySlug,
 } from "@/lib/geo/constants";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: Array<Record<string, unknown>>;
-  }
-}
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -39,25 +34,6 @@ function buildWhatsAppUrl(whatsappNumber: string, messageText: string) {
   return `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`;
 }
 
-const CONSENT_KEY = "oftcore:consent:v1";
-
-function trackClick(cityName: string) {
-  try {
-    if (localStorage.getItem(CONSENT_KEY) !== "granted") return;
-  } catch {
-    return;
-  }
-
-  const payload = {
-    city: cityName,
-    channel: "whatsapp",
-  };
-  window.dataLayer?.push({ event: "start_booking", ...payload });
-  const { ga4Id, gtmId } = siteConfig.analytics;
-  if (ga4Id && !gtmId) {
-    window.gtag?.("event", "start_booking", payload);
-  }
-}
 
 function readCookieValue(cookieName: string) {
   if (typeof document === "undefined") return null;
@@ -156,10 +132,18 @@ export default function WhatsAppModal({
             <a
               key={city.slug}
               id={`gtm-whatsapp-city-${city.slug}`}
+              data-oft-whatsapp-tracked="true"
               href={buildCityWhatsAppUrl(city.name, city.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackClick(city.name)}
+              onClick={() =>
+                trackClickWhatsapp({
+                  city: city.name,
+                  page_path:
+                    typeof window !== "undefined" ? window.location.pathname : undefined,
+                  trigger_id: triggerId,
+                })
+              }
               className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-brand/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-600/10 text-green-600 transition-colors group-hover:bg-green-600/20">
