@@ -47,12 +47,18 @@ export default function ParallaxArtifacts() {
             dot(56, 44, 3, 10),
             dot(90, 50, 4, 9),
             dot(6, 46, 5, 8),
+            dot(32, 8, 4, 10),
+            dot(62, 52, 5, 9),
+            dot(8, 78, 4, 9),
+            dot(94, 36, 3, 10),
             glow(50, 42, 80, 5),
             glow(18, 28, 50, 4),
             glow(80, 70, 60, 4),
+            glow(38, 88, 65, 4),
+            glow(4, 22, 55, 3),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.36,
+          opacity: 0.4,
         }}
       />
 
@@ -66,15 +72,21 @@ export default function ParallaxArtifacts() {
             ring(64, 22, 3, 5, 8),
             ring(80, 60, 5, 7, 8),
             ring(36, 76, 3, 5, 9),
+            ring(8, 52, 3, 5, 8),
+            ring(50, 8, 4, 6, 9),
             sparkle(12, 18, 16),
             sparkle(48, 14, 14),
             sparkle(74, 40, 15),
             sparkle(30, 56, 14),
             sparkle(88, 82, 15),
             sparkle(54, 64, 14),
+            sparkle(22, 8, 15),
+            sparkle(96, 58, 14),
+            sparkle(40, 92, 15),
+            sparkle(66, 30, 14),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.34,
+          opacity: 0.38,
         }}
       />
 
@@ -91,13 +103,19 @@ export default function ParallaxArtifacts() {
             dot(18, 72, 7, 8),
             dot(48, 70, 5, 8),
             dot(84, 78, 7, 8),
+            dot(4, 12, 6, 7),
+            dot(70, 6, 5, 8),
+            dot(94, 44, 6, 7),
             sparkle(22, 48, 13),
             sparkle(66, 16, 12),
             sparkle(40, 84, 13),
             sparkle(92, 56, 12),
+            sparkle(14, 62, 13),
+            sparkle(52, 38, 12),
+            sparkle(76, 90, 13),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.32,
+          opacity: 0.36,
         }}
       />
 
@@ -123,6 +141,14 @@ export default function ParallaxArtifacts() {
             dot(4, 36, 3, 10),
             dot(52, 32, 4, 9),
             dot(96, 40, 3, 10),
+            dot(18, 8, 4, 11),
+            dot(54, 22, 5, 10),
+            dot(78, 8, 3, 10),
+            dot(12, 66, 5, 9),
+            dot(38, 58, 4, 10),
+            dot(82, 46, 5, 9),
+            dot(6, 92, 4, 10),
+            dot(62, 94, 3, 10),
           ].join(", "),
         }}
       />
@@ -140,9 +166,13 @@ export default function ParallaxArtifacts() {
             glow(72, 80, 90, 5),
             glow(8, 60, 70, 3),
             glow(92, 70, 70, 3),
+            glow(38, 12, 75, 4),
+            glow(64, 58, 95, 4),
+            glow(22, 88, 85, 4),
+            glow(96, 24, 65, 3),
           ].join(", "),
           maskImage: MASK_INNER,
-          opacity: 0.22,
+          opacity: 0.28,
         }}
       />
 
@@ -160,6 +190,9 @@ export default function ParallaxArtifacts() {
             ring(56, 72, 5, 7, 8),
             ring(82, 68, 3.5, 5.5, 9),
             ring(44, 52, 3, 5, 7),
+            ring(6, 40, 3, 5, 8),
+            ring(70, 8, 4, 6, 9),
+            ring(92, 46, 3.5, 5.5, 8),
             sparkle(8, 16, 16),
             sparkle(30, 10, 14),
             sparkle(52, 22, 15),
@@ -172,9 +205,14 @@ export default function ParallaxArtifacts() {
             sparkle(14, 78, 14),
             sparkle(48, 86, 15),
             sparkle(74, 90, 14),
+            sparkle(26, 34, 15),
+            sparkle(58, 12, 14),
+            sparkle(84, 34, 15),
+            sparkle(4, 70, 14),
+            sparkle(96, 76, 15),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.3,
+          opacity: 0.36,
         }}
       />
 
@@ -195,9 +233,14 @@ export default function ParallaxArtifacts() {
             dot(42, 56, 5, 7),
             dot(72, 48, 7, 7),
             dot(96, 58, 6, 7),
+            dot(24, 8, 6, 8),
+            dot(70, 18, 7, 7),
+            dot(8, 88, 8, 7),
+            dot(48, 42, 6, 8),
+            dot(90, 92, 7, 7),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.36,
+          opacity: 0.42,
         }}
       />
 
@@ -227,9 +270,17 @@ export default function ParallaxArtifacts() {
             sparkle(24, 92, 12),
             sparkle(64, 88, 14),
             sparkle(84, 94, 12),
+            sparkle(2, 32, 13),
+            sparkle(40, 2, 12),
+            sparkle(98, 38, 14),
+            sparkle(12, 58, 13),
+            sparkle(54, 18, 12),
+            sparkle(82, 62, 14),
+            sparkle(30, 96, 13),
+            sparkle(66, 42, 12),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.28,
+          opacity: 0.34,
         }}
       />
 
@@ -244,9 +295,13 @@ export default function ParallaxArtifacts() {
             glow(44, 64, 55, 5),
             glow(66, 58, 50, 4),
             glow(88, 66, 60, 5),
+            glow(18, 38, 55, 4),
+            glow(52, 78, 58, 5),
+            glow(76, 34, 52, 4),
+            glow(34, 18, 48, 4),
           ].join(", "),
           maskImage: MASK_DEFAULT,
-          opacity: 0.24,
+          opacity: 0.3,
         }}
       />
     </div>

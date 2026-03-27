@@ -187,28 +187,28 @@
 
 @keyframes parallax-shift-slow {
   from {
-    transform: translate3d(0, -7%, 0);
+    transform: translate3d(0, -11%, 0);
   }
   to {
-    transform: translate3d(0, 7%, 0);
+    transform: translate3d(0, 11%, 0);
   }
 }
 
 @keyframes parallax-shift-medium {
   from {
-    transform: translate3d(0, -10%, 0);
+    transform: translate3d(0, -16%, 0);
   }
   to {
-    transform: translate3d(0, 10%, 0);
+    transform: translate3d(0, 16%, 0);
   }
 }
 
 @keyframes parallax-shift-fast {
   from {
-    transform: translate3d(0, -14%, 0);
+    transform: translate3d(0, -22%, 0);
   }
   to {
-    transform: translate3d(0, 14%, 0);
+    transform: translate3d(0, 22%, 0);
   }
 }
 
