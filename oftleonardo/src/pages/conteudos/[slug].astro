@@ -137,6 +137,9 @@ const allSchemas = [breadcrumbSchema, medicalPageSchema, faqSchema];
         description={`Tem dúvidas sobre ${condition.toLowerCase()}? Agende uma consulta com Leonardo Nunes para avaliação completa e orientação personalizada.`}
         whatsappMessageTemplate={`Olá, Dr. Leonardo! Gostaria de agendar uma consulta sobre ${condition.toLowerCase()} em {city}.`}
         triggerLabel="Agendar consulta"
+        triggerGtmId={`gtm-artigo-${article.id}-schedule-whatsapp`}
+        agendaLinkGtmId={`gtm-artigo-${article.id}-schedule-agenda`}
+        onlineBookingLinkId={`gtm-artigo-${article.id}-dialog-agendar-online`}
       />
 
       <footer class="space-y-6 border-t border-border pt-8">

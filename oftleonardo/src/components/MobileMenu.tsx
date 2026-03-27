@@ -70,6 +70,7 @@ export default function MobileMenu() {
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button
+          id="gtm-mobile-menu-open"
           variant="ghost"
           size="icon"
           className="md:hidden"
@@ -87,7 +88,7 @@ export default function MobileMenu() {
             <span className="text-lg font-semibold">Leonardo Nunes</span>
           </DrawerTitle>
           <DrawerClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Fechar menu">
+            <Button id="gtm-mobile-menu-close" variant="ghost" size="icon" aria-label="Fechar menu">
               <X className="size-4" />
             </Button>
           </DrawerClose>
@@ -95,19 +96,35 @@ export default function MobileMenu() {
         <Separator />
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <nav className="flex flex-col gap-1">
-            {siteConfig.navLinks.map((link) => (
+            {siteConfig.navLinks.map((link) => {
+              const navId =
+                link.href === "/#atuacao"
+                  ? "gtm-mobile-nav-especialidades"
+                  : link.href === "/#atendimento"
+                    ? "gtm-mobile-nav-atendimento"
+                    : link.href === "/#diferenciais"
+                      ? "gtm-mobile-nav-diferenciais"
+                      : link.href === "/#consulta"
+                        ? "gtm-mobile-nav-consulta"
+                        : link.href === "/#faq"
+                          ? "gtm-mobile-nav-faq"
+                          : "gtm-mobile-nav-link";
+              return (
               <a
                 key={link.href}
+                id={navId}
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
               >
                 {link.label}
               </a>
-            ))}
+              );
+            })}
           </nav>
           <Separator className="my-4" />
           <a
+            id="gtm-mobile-tools-acuidade-visual"
             href="/acuidade-visual"
             onClick={() => setOpen(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
@@ -116,6 +133,7 @@ export default function MobileMenu() {
             Teste de Acuidade Visual
           </a>
           <a
+            id="gtm-mobile-tools-amsler"
             href="/tela-de-amsler"
             onClick={() => setOpen(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
@@ -127,12 +145,16 @@ export default function MobileMenu() {
             variant="ghost"
             className="h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent"
             triggerAriaLabel="Agendar consulta"
+            triggerId="gtm-mobile-menu-agendamento"
+            onlineBookingLinkId="gtm-mobile-menu-dialog-agendar-online"
           >
             <CalendarCheck2 className="size-4" />
             Agendamento Online
           </WhatsAppModal>
           <Separator className="my-4" />
           <button
+            id="gtm-mobile-menu-theme"
+            type="button"
             onClick={cycleTheme}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >

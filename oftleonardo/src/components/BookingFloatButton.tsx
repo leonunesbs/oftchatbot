@@ -27,6 +27,8 @@ export default function BookingFloatButton() {
         size="lg"
         className="h-14 gap-2 px-5 shadow-lg hover:shadow-xl"
         triggerAriaLabel="Ir para o agendamento online"
+        triggerId="gtm-float-booking-calendar"
+        onlineBookingLinkId="gtm-float-booking-dialog-agendar-online"
       >
         <CalendarIcon className="size-5" />
         <span className="hidden sm:inline">Agendar Online</span>

@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 import BookingPopup from "./BookingPopup";
 ---
 
-<section class="relative">
+<section id="section-hero" class="relative">
   <div
     class="absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_50%_0%,color-mix(in_oklch,var(--color-brand)_12%,transparent),transparent),radial-gradient(50%_50%_at_100%_100%,color-mix(in_oklch,var(--color-brand)_8%,transparent),transparent)]"
     aria-hidden="true"
@@ -39,10 +39,17 @@ import BookingPopup from "./BookingPopup";
       </p>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <BookingPopup client:visible size="lg" className="h-12 px-8 text-base">
+        <BookingPopup
+          client:visible
+          size="lg"
+          className="h-12 px-8 text-base"
+          triggerId="gtm-hero-booking"
+          onlineBookingLinkId="gtm-hero-dialog-agendar-online"
+        >
           Agendar Consulta
         </BookingPopup>
         <a
+          id="gtm-hero-ver-especialidades"
           href="#atuacao"
           data-section-scroll
           class={`${buttonVariants({ variant: "outline", size: "lg" })} h-12 px-8 text-base`}

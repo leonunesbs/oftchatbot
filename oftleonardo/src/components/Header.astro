@@ -12,7 +12,7 @@ import BookingPopup from "./BookingPopup";
     id="header-inner"
     class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6"
   >
-    <a href="/" class="logo-link" aria-label="Página inicial">
+    <a id="gtm-header-logo" href="/" class="logo-link" aria-label="Página inicial">
       <div class="logo-full">
         <img
           src="/logo_horizontal_light.svg"
@@ -54,14 +54,27 @@ import BookingPopup from "./BookingPopup";
       {
         siteConfig.navLinks
           .filter((link) => link.label !== "Consulta")
-          .map((link) => (
+          .map((link) => {
+            const navId =
+              link.href === "/#atuacao"
+                ? "gtm-nav-especialidades"
+                : link.href === "/#atendimento"
+                  ? "gtm-nav-atendimento"
+                  : link.href === "/#diferenciais"
+                    ? "gtm-nav-diferenciais"
+                    : link.href === "/#faq"
+                      ? "gtm-nav-faq"
+                      : "gtm-nav-link";
+            return (
             <a
+              id={navId}
               href={link.href}
               class="rounded-md px-3 py-2 text-sm font-medium text-foreground/85 transition-colors hover:text-foreground"
             >
               {link.label}
             </a>
-          ))
+            );
+          })
       }
       <details id="tools-menu" class="group relative">
         <summary
@@ -73,24 +86,28 @@ import BookingPopup from "./BookingPopup";
           class="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-border/60 bg-background/95 p-2 opacity-0 shadow-lg backdrop-blur transition duration-150 group-open:visible group-open:opacity-100"
         >
           <a
+            id="gtm-nav-tools-acuidade-visual"
             href="/acuidade-visual"
             class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
           >
             Teste Visual
           </a>
           <a
+            id="gtm-nav-tools-amsler"
             href="/tela-de-amsler"
             class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
           >
             Tela de Amsler
           </a>
           <a
+            id="gtm-nav-tools-agendamento-online"
             href="/agendamento-online"
             class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
           >
             Agendamento Online
           </a>
           <a
+            id="gtm-nav-tools-conteudos"
             href="/conteudos"
             class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
           >
@@ -99,6 +116,7 @@ import BookingPopup from "./BookingPopup";
         </div>
       </details>
       <button
+        id="gtm-header-theme-toggle-desktop"
         type="button"
         class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
         aria-label="Alternar tema"
@@ -119,6 +137,8 @@ import BookingPopup from "./BookingPopup";
         size="default"
         className="ml-2 inline-flex h-10 rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
         triggerAriaLabel="Agendar consulta"
+        triggerId="gtm-header-booking-desktop"
+        onlineBookingLinkId="gtm-header-desktop-dialog-agendar-online"
       >
         Agendar Consulta
       </BookingPopup>
@@ -130,10 +150,13 @@ import BookingPopup from "./BookingPopup";
         size="sm"
         className="inline-flex h-8 rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
         triggerAriaLabel="Agendar consulta"
+        triggerId="gtm-header-booking-mobile"
+        onlineBookingLinkId="gtm-header-mobile-dialog-agendar-online"
       >
         Agendar
       </BookingPopup>
       <button
+        id="gtm-header-theme-toggle-mobile"
         type="button"
         class="theme-toggle group relative inline-flex size-9 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-background/85 text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/15"
         aria-label="Alternar tema"

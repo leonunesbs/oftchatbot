@@ -2,7 +2,7 @@
 import WhatsAppModal from "./WhatsAppModal";
 ---
 
-<section class="relative bg-secondary/30 py-20 sm:py-28">
+<section id="section-cta-final" class="relative bg-secondary/30 py-20 sm:py-28">
   <div
     class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_50%,color-mix(in_oklch,var(--color-brand)_10%,transparent),transparent)]"
     aria-hidden="true"
@@ -28,6 +28,8 @@ import WhatsAppModal from "./WhatsAppModal";
           client:visible
           size="lg"
           className="h-12 px-8 text-base"
+          triggerId="gtm-cta-final-booking"
+          onlineBookingLinkId="gtm-cta-final-dialog-agendar-online"
         >
           Agendar Minha Consulta
         </WhatsAppModal>

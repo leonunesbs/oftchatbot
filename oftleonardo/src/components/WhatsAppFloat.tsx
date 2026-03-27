@@ -19,6 +19,8 @@ export default function WhatsAppFloat() {
       <WhatsAppModal
         variant="default"
         size="lg"
+        triggerId="gtm-float-whatsapp"
+        onlineBookingLinkId="gtm-float-whatsapp-dialog-agendar-online"
         triggerAriaLabel="Agendar consulta pelo WhatsApp"
         dialogTitle="Agendar Consulta"
         dialogDescription="Escolha a cidade e inicie o agendamento pelo WhatsApp"

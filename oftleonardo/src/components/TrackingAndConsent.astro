@@ -74,11 +74,13 @@ window.gtag("consent", "default", {
     if (trackingEnabled) return;
     trackingEnabled = true;
 
-    if (resolvedGa4Id) {
+    var loadedGtagJs = false;
+    if (resolvedGa4Id && !resolvedGtmId) {
       loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGa4Id);
       ensureGtagStub();
       window.gtag("js", new Date());
       window.gtag("config", resolvedGa4Id, { anonymize_ip: true });
+      loadedGtagJs = true;
     }
 
     if (resolvedMetaPixelId) {
@@ -91,7 +93,12 @@ window.gtag("consent", "default", {
       window.fbq("track", "PageView");
     }
 
-    if (resolvedGoogleAdsId && window.gtag) {
+    if (resolvedGoogleAdsId) {
+      if (!loadedGtagJs) {
+        loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGoogleAdsId);
+        ensureGtagStub();
+        window.gtag("js", new Date());
+      }
       window.gtag("config", resolvedGoogleAdsId);
     }
 
@@ -112,22 +119,17 @@ window.gtag("consent", "default", {
       if (!isPartnerBookingLink) return;
 
       var ctaText = (link.textContent || "").trim().slice(0, 80);
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "start_booking",
+      var payload = {
         channel: "online_booking",
         cta_text: ctaText,
         cta_href: href,
         page_path: window.location.pathname,
-      });
+      };
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(Object.assign({ event: "start_booking" }, payload));
 
-      if (window.gtag) {
-        window.gtag("event", "start_booking", {
-          channel: "online_booking",
-          cta_text: ctaText,
-          cta_href: href,
-          page_path: window.location.pathname,
-        });
+      if (resolvedGa4Id && !resolvedGtmId && window.gtag) {
+        window.gtag("event", "start_booking", payload);
       }
     });
   }
@@ -135,8 +137,8 @@ window.gtag("consent", "default", {
   window.__oftConsentActions = {
     grant: function () {
       localStorage.setItem(consentKey, "granted");
-      enableTracking();
       setConsent(true);
+      enableTracking();
     },
     deny: function () {
       localStorage.setItem(consentKey, "denied");
@@ -148,8 +150,8 @@ window.gtag("consent", "default", {
   sanitizeUrlParams();
   ensureGtagStub();
   if (savedConsent === "granted") {
-    enableTracking();
     setConsent(true);
+    enableTracking();
   } else if (savedConsent === "denied") {
     setConsent(false);
   }

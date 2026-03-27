@@ -7,6 +7,8 @@ interface Props {
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   triggerAriaLabel?: string;
+  triggerId?: string;
+  onlineBookingLinkId?: string;
 }
 
 export default function BookingPopup({
@@ -15,6 +17,8 @@ export default function BookingPopup({
   size = "default",
   className,
   triggerAriaLabel,
+  triggerId,
+  onlineBookingLinkId,
 }: Props) {
   return (
     <WhatsAppModal
@@ -22,6 +26,8 @@ export default function BookingPopup({
       size={size}
       className={className}
       triggerAriaLabel={triggerAriaLabel}
+      triggerId={triggerId}
+      onlineBookingLinkId={onlineBookingLinkId}
     >
       {children}
     </WhatsAppModal>

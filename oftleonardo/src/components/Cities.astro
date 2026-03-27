@@ -91,7 +91,14 @@ const imageStyles: Record<string, string> = {
                 </p>
 
                 <div class="mt-6">
-                  <WhatsAppModal client:visible variant="outline" size="sm" className="w-full">
+                  <WhatsAppModal
+                    client:visible
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    triggerId={`gtm-cities-${city.slug}-booking`}
+                    onlineBookingLinkId={`gtm-cities-${city.slug}-dialog-agendar-online`}
+                  >
                     Agendar consulta
                   </WhatsAppModal>
                 </div>

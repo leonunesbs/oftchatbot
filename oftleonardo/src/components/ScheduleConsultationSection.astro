@@ -10,6 +10,11 @@ interface Props {
   whatsappMessageTemplate: string;
   triggerLabel?: string;
   showAgendaCta?: boolean;
+  /** `id` no botão que abre o WhatsApp (GTM: ID do clique). */
+  triggerGtmId?: string;
+  /** `id` no link "Abrir Minha Agenda". */
+  agendaLinkGtmId?: string;
+  onlineBookingLinkId?: string;
 }
 
 const {
@@ -19,6 +24,9 @@ const {
   whatsappMessageTemplate,
   triggerLabel = "Agendar consulta",
   showAgendaCta = true,
+  triggerGtmId = "gtm-section-schedule-whatsapp",
+  agendaLinkGtmId = "gtm-section-schedule-agenda",
+  onlineBookingLinkId = "gtm-section-schedule-dialog-agendar-online",
 } = Astro.props as Props;
 
 ---
@@ -38,12 +46,15 @@ const {
       triggerAriaLabel={title}
       whatsappMessageTemplate={whatsappMessageTemplate}
       showOnlineBookingCta={true}
+      triggerId={triggerGtmId}
+      onlineBookingLinkId={onlineBookingLinkId}
     >
       {triggerLabel}
     </WhatsAppModal>
     {
       showAgendaCta && (
         <a
+          id={agendaLinkGtmId}
           href={siteConfig.partnerApps.oftagenda}
           target="_blank"
           rel="noopener noreferrer"

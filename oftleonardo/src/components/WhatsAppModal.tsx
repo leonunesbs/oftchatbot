@@ -53,7 +53,10 @@ function trackClick(cityName: string) {
     channel: "whatsapp",
   };
   window.dataLayer?.push({ event: "start_booking", ...payload });
-  window.gtag?.("event", "start_booking", payload);
+  const { ga4Id, gtmId } = siteConfig.analytics;
+  if (ga4Id && !gtmId) {
+    window.gtag?.("event", "start_booking", payload);
+  }
 }
 
 function readCookieValue(cookieName: string) {
@@ -76,6 +79,10 @@ interface Props {
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
+  /** Stable `id` for GTM/GA4 (variável "ID do clique"). */
+  triggerId?: string;
+  /** `id` no link "Agendar online" dentro do diálogo. */
+  onlineBookingLinkId?: string;
   triggerAriaLabel?: string;
   dialogTitle?: string;
   dialogDescription?: string;
@@ -88,6 +95,8 @@ export default function WhatsAppModal({
   variant = "default",
   size = "default",
   className,
+  triggerId,
+  onlineBookingLinkId = "gtm-dialog-agendar-online",
   triggerAriaLabel,
   dialogTitle = "Agendar Consulta",
   dialogDescription = "Escolha a cidade e inicie o agendamento pelo WhatsApp",
@@ -130,6 +139,7 @@ export default function WhatsAppModal({
           size={size}
           className={className}
           aria-label={triggerAriaLabel}
+          {...(triggerId ? { id: triggerId } : {})}
         >
           {children}
         </Button>
@@ -145,6 +155,7 @@ export default function WhatsAppModal({
           {orderedCities.map((city) => (
             <a
               key={city.slug}
+              id={`gtm-whatsapp-city-${city.slug}`}
               href={buildCityWhatsAppUrl(city.name, city.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
@@ -172,7 +183,9 @@ export default function WhatsAppModal({
               poucos cliques.
             </p>
             <Button asChild className="mt-3 w-full">
-              <a href={siteConfig.partnerApps.oftagenda}>Agendar online</a>
+              <a id={onlineBookingLinkId} href={siteConfig.partnerApps.oftagenda}>
+                Agendar online
+              </a>
             </Button>
           </div>
         )}

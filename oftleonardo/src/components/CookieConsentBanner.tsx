@@ -54,10 +54,10 @@ export default function CookieConsentBanner() {
           .
         </p>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={handleDeny}>
+          <Button id="gtm-consent-essential-only" variant="outline" size="sm" onClick={handleDeny}>
             Apenas essenciais
           </Button>
-          <Button size="sm" onClick={handleGrant}>
+          <Button id="gtm-consent-accept" size="sm" onClick={handleGrant}>
             Aceitar e continuar
           </Button>
         </div>
