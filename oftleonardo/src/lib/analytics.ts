@@ -7,6 +7,8 @@ export const CONSENT_STORAGE_KEY = "oftcore:consent:v1";
 export const GA4_EVENTS = {
   click_whatsapp: "click_whatsapp",
   schedule_appointment: "schedule_appointment",
+  /** Abertura do diálogo de agendamento (CTA que não é link; GTM pode mapear por `dialog_opener_id`). */
+  booking_dialog_open: "booking_dialog_open",
   /** Clique em cidade (WhatsApp) ou em “Agendar online” no diálogo de agendamento. Marque como conversão no GA4. */
   generate_lead: "generate_lead",
   /** Legacy: mantido para compatibilidade com tags existentes. */
@@ -139,6 +141,24 @@ export function trackClickWhatsapp(payload: {
     method: "whatsapp",
     dialog_opener_id: payload.trigger_id,
     city: payload.city,
+  });
+}
+
+/** Diálogo de agendamento aberto (botão CTA, sem mudança de rota). */
+export function trackBookingDialogOpen(payload: {
+  /** `id` do botão que abre o diálogo (GTM). */
+  dialog_opener_id?: string;
+  /** Texto visível do CTA, quando for string simples. */
+  cta_text?: string;
+  page_path?: string;
+}) {
+  const page_path = payload.page_path ?? window.location.pathname;
+  const float_entry = resolveFloatEntry(payload.dialog_opener_id);
+  dispatch(GA4_EVENTS.booking_dialog_open, {
+    ...payload,
+    page_path,
+    booking_conversion_scope: "booking_dialog",
+    ...(float_entry ? { float_entry } : {}),
   });
 }
 

@@ -8,12 +8,22 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import { trackClickWhatsapp, trackScheduleAppointmentClick } from "@/lib/analytics";
+import {
+  trackBookingDialogOpen,
+  trackClickWhatsapp,
+  trackScheduleAppointmentClick,
+} from "@/lib/analytics";
 import {
   GEO_CITY_COOKIE_NAME,
   type SupportedGeoCitySlug,
 } from "@/lib/geo/constants";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+
+function ctaTextFromChildren(children: ReactNode): string | undefined {
+  if (typeof children === "string") return children.trim().slice(0, 120);
+  if (typeof children === "number") return String(children).slice(0, 120);
+  return undefined;
+}
 
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -108,7 +118,17 @@ export default function WhatsAppModal({
     );
 
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) return;
+        trackBookingDialogOpen({
+          dialog_opener_id: triggerId,
+          cta_text: ctaTextFromChildren(children),
+          page_path:
+            typeof window !== "undefined" ? window.location.pathname : undefined,
+        });
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           variant={variant}
