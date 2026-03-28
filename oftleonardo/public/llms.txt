@@ -1,11 +1,11 @@
 # Leonardo Nunes · Oftalmologista
 
-> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica e em cirurgia de catarata. Registro profissional: CRM-CE 27.199 | CRM-PI 10.051. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). O hub **Conteúdos** reúne artigos informativos sobre doenças oculares, refração, cirurgia e exames (OCT, campo visual, topografia, angiografia etc.), além de páginas de triagem visual educativa.
+> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica e em cirurgia de catarata. Registro profissional: CRM-CE 27.199 | CRM-PI 10.051. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). **Conteúdos em oftalmologia** reúnem artigos informativos sobre doenças oculares, refração, cirurgia e exames (OCT, campo visual, topografia, angiografia etc.), além de páginas de triagem visual educativa.
 
 ## Páginas principais
 
 - [Início](https://oftleonardo.com.br/): apresentação do médico, especialidades, cidades de atendimento e CTAs para agendamento.
-- [Conteúdos](https://oftleonardo.com.br/conteudos): hub de conteúdos educativos em oftalmologia.
+- [Conteúdos](https://oftleonardo.com.br/conteudos): conteúdos educativos em oftalmologia.
 - [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): triagem visual orientativa (não substitui consulta).
 - [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): triagem orientativa para distorções centrais (não substitui consulta).
 - [Calculadora de olho seco](https://oftleonardo.com.br/calculadora-olho-seco): teste online de sintomas com questionário clínico OSDI (educativo; não substitui consulta).

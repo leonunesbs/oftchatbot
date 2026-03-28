@@ -5,6 +5,7 @@ import Header from "@/components/Header.astro";
 import { PresbiopiaScrollHero } from "@/components/PresbiopiaScrollHero";
 import ScheduleConsultationSection from "@/components/ScheduleConsultationSection.astro";
 import { siteConfig } from "@/config/site";
+import { formatLastReviewedPtBr } from "@/lib/format-last-reviewed";
 import Layout from "@/layouts/Layout.astro";
 import { getCollection, render } from "astro:content";
 
@@ -20,8 +21,19 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 const { Content } = await render(article);
-const { title, description, keywords, condition, procedure, readingTime, faq, relatedSlugs } =
-  article.data;
+const {
+  title,
+  description,
+  keywords,
+  condition,
+  procedure,
+  readingTime,
+  lastReviewed,
+  faq,
+  relatedSlugs,
+} = article.data;
+
+const lastReviewedFormatted = formatLastReviewedPtBr(lastReviewed);
 
 const canonical = new URL(`/conteudos/${article.id}`, siteConfig.canonical).href;
 
@@ -64,7 +76,7 @@ const medicalPageSchema = {
     "@type": "PeopleAudience",
     healthCondition: { "@type": "MedicalCondition", name: condition },
   },
-  lastReviewed: new Date().toISOString().split("T")[0],
+  lastReviewed,
   reviewedBy: {
     "@type": "Physician",
     name: siteConfig.name,
@@ -120,6 +132,7 @@ const isPresbiopia = article.id === "presbiopia";
       title={title}
       description={description}
       readingTime={readingTime}
+      lastReviewedFormatted={lastReviewedFormatted}
     />
   )}
 
@@ -145,9 +158,12 @@ const isPresbiopia = article.id === "presbiopia";
       {
         !isPresbiopia && (
           <header class="space-y-3">
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
               <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">
                 {readingTime} de leitura
+              </span>
+              <span class="inline-flex items-center rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                Última revisão: {lastReviewedFormatted}
               </span>
             </div>
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
@@ -210,7 +226,7 @@ const isPresbiopia = article.id === "presbiopia";
           class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground"
         >
           <a href="/" class="transition-colors hover:text-foreground">Página Inicial</a>
-          <a href="/conteudos" class="transition-colors hover:text-foreground">Hub de Conteúdos</a>
+          <a href="/conteudos" class="transition-colors hover:text-foreground">Conteúdos</a>
           <a href="/#atuacao" class="transition-colors hover:text-foreground">Especialidades</a>
           <a href="/#atendimento" class="transition-colors hover:text-foreground">Cidades de Atendimento</a>
           <a href="/acuidade-visual" class="transition-colors hover:text-foreground">Teste de Acuidade Visual</a>

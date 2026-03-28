@@ -5,6 +5,7 @@ keywords: "degeneração macular, DMRI, degeneração macular relacionada à ida
 condition: "Degeneração Macular Relacionada à Idade"
 procedure: "Tratamento de Retina"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "A DMRI causa cegueira total?"
     answer: "A DMRI afeta principalmente a visão central, usada para leitura e reconhecimento de rostos. A visão periférica (lateral) geralmente é preservada. Com tratamento adequado, é possível retardar a progressão e manter boa qualidade de vida."

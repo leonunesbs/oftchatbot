@@ -5,6 +5,7 @@ keywords: "microscopia especular, endotélio corneano, contagem células córnea
 condition: "Microscopia especular (endotélio)"
 procedure: "Avaliação da camada endotelial e estimativa de densidade celular"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Microscopia especular dói?"

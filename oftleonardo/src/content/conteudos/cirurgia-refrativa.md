@@ -5,6 +5,7 @@ keywords: "cirurgia refrativa, LASIK, PRK, SMILE, laser na visão, miopia cirurg
 condition: "Erros de refração indicados para correção cirúrgica"
 procedure: "Cirurgia refrativa a laser (LASIK, PRK, SMILE ou técnicas relacionadas)"
 readingTime: "9 min"
+lastReviewed: "2026-03-28"
 hubCategory: refractive
 faq:
   - question: "Cirurgia refrativa 'cura' a vista para sempre?"

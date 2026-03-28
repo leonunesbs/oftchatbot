@@ -10,6 +10,8 @@ const conteudos = defineCollection({
     condition: z.string(),
     procedure: z.string(),
     readingTime: z.string(),
+    /** Data da última revisão do conteúdo (ISO `YYYY-MM-DD`). */
+    lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     faq: z.array(
       z.object({
         question: z.string(),

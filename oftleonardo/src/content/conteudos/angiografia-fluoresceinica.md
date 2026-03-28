@@ -5,6 +5,7 @@ keywords: "angiografia fluoresceínica, fluoresceína retina, exame fundo de olh
 condition: "Angiografia fluoresceínica"
 procedure: "Estudo sequencial da circulação retinocoroidal com contraste venoso"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Angiografia fluoresceínica é a mesma coisa que angiotomografia de retina?"

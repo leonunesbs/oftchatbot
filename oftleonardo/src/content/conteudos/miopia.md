@@ -5,6 +5,7 @@ keywords: "miopia, miopia graus, visão embaçada longe, erro de refração, óc
 condition: "Miopia"
 procedure: "Correção com óculos, lentes de contato ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+lastReviewed: "2026-03-28"
 hubCategory: refractive
 faq:
   - question: "A miopia piora se eu ler muito no escuro ou usar o celular deitado?"

@@ -5,6 +5,7 @@ keywords: "hipermetropia, hipermetropia sintomas, erro de refração, vista cans
 condition: "Hipermetropia"
 procedure: "Correção com óculos, lentes de contato ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+lastReviewed: "2026-03-28"
 hubCategory: refractive
 faq:
   - question: "Hipermetropia é o mesmo que presbiopia?"

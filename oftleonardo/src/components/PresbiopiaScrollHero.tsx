@@ -7,6 +7,8 @@ type PresbiopiaScrollHeroProps = {
   title: string;
   description: string;
   readingTime: string;
+  /** Data da última revisão já formatada em pt-BR (ex.: 28 de março de 2026). */
+  lastReviewedFormatted: string;
   /** Link âncora para a seção de agendamento (ex.: #agendar). */
   scheduleAnchorHref?: string;
   scheduleAnchorId?: string;
@@ -59,6 +61,7 @@ export function PresbiopiaScrollHero({
   title,
   description,
   readingTime,
+  lastReviewedFormatted,
   scheduleAnchorHref = "#agendar",
   scheduleAnchorId = "gtm-artigo-presbiopia-hero-agendar",
 }: PresbiopiaScrollHeroProps) {
@@ -283,6 +286,9 @@ export function PresbiopiaScrollHero({
             <div className="mb-3 flex flex-wrap items-center gap-2 sm:mb-4 sm:gap-3">
               <span className="inline-flex items-center rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand">
                 {readingTime} de leitura
+              </span>
+              <span className="inline-flex items-center rounded-full border border-zinc-600/50 bg-zinc-900/40 px-3 py-1 text-xs font-medium tracking-wide text-zinc-300">
+                Última revisão: {lastReviewedFormatted}
               </span>
             </div>
 

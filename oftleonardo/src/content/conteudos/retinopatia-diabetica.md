@@ -5,6 +5,7 @@ keywords: "retinopatia diabética, diabetes e visão, retinopatia, perda de vis�
 condition: "Retinopatia Diabética"
 procedure: "Tratamento de Retina"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "Quem tem diabetes sempre desenvolve retinopatia diabética?"
     answer: "Não necessariamente, mas o risco aumenta com o tempo de diabetes e com o descontrole da glicemia. Manter os níveis de açúcar, pressão arterial e colesterol controlados reduz significativamente o risco."

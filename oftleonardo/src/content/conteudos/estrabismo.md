@@ -5,6 +5,7 @@ keywords: "estrabismo, olho torto, desvio ocular, estrabismo infantil, cirurgia 
 condition: "Estrabismo"
 procedure: "Tratamento de Estrabismo"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "Estrabismo em criança corrige sozinho?"
     answer: "Alguns tipos de desvio ocular em bebês podem se alinhar nos primeiros meses de vida. Porém, qualquer estrabismo persistente após os 4 a 6 meses de idade deve ser avaliado por um oftalmologista. O tratamento precoce é fundamental para evitar a ambliopia (olho preguiçoso)."

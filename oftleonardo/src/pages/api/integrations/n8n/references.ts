@@ -39,6 +39,7 @@ export const GET: APIRoute = async ({ request }) => {
       condition: article.data.condition,
       procedure: article.data.procedure,
       readingTime: article.data.readingTime,
+      lastReviewed: article.data.lastReviewed,
       keywords: article.data.keywords,
       relatedSlugs: article.data.relatedSlugs,
       hubCategory: article.data.hubCategory,
@@ -101,7 +102,7 @@ export const GET: APIRoute = async ({ request }) => {
     const message =
       error instanceof Error
         ? error.message
-        : "Falha ao gerar referências do FAQ e do Hub de Conteúdos.";
+        : "Falha ao gerar referências do FAQ e dos conteúdos em oftalmologia.";
 
     return new Response(
       JSON.stringify({

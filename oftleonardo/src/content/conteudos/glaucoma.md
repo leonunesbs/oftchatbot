@@ -5,6 +5,7 @@ keywords: "glaucoma, pressão ocular, pressão intraocular, nervo óptico, colí
 condition: "Glaucoma"
 procedure: "Tratamento de Glaucoma"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "Glaucoma tem cura?"
     answer: "O glaucoma não tem cura, mas pode ser controlado. O tratamento reduz a pressão do olho e impede ou retarda a perda de visão. Por isso, o diagnóstico precoce e o uso contínuo da medicação são essenciais."

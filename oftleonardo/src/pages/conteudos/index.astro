@@ -50,9 +50,9 @@ const hubSections = [
   },
 ].filter(Boolean) as { id: string; label: string }[];
 
-const title = "Conteúdos de Oftalmologia | Retina, Catarata e Triagem Visual";
+const title = "Conteúdos em oftalmologia | Retina, Catarata e Triagem Visual";
 const description =
-  "Hub de conteúdos de oftalmologia com guias sobre doenças oculares, erros de refração (miopia, astigmatismo, presbiopia etc.), exames (OCT, campo visual, topografia, angiografia), triagem visual e agendamento.";
+  "Conteúdos em oftalmologia: guias sobre doenças oculares, erros de refração (miopia, astigmatismo, presbiopia etc.), exames (OCT, campo visual, topografia, angiografia), triagem visual e agendamento.";
 const canonical = new URL("/conteudos", siteConfig.canonical).href;
 
 const breadcrumbSchema = {
@@ -77,7 +77,7 @@ const schemaItems = [
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "Conteúdos de Oftalmologia",
+  name: "Conteúdos em oftalmologia",
   itemListElement: schemaItems.map((item, index) => ({
     "@type": "ListItem",
     position: index + 1,
@@ -115,7 +115,7 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
     </nav>
 
     <section class="rounded-2xl border border-border/60 bg-card p-6 sm:p-8">
-      <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Hub de Conteúdos em Oftalmologia</h1>
+      <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Conteúdos em oftalmologia</h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
         Explore guias sobre doenças oculares e erros de refração, referências sobre exames (diagnóstico
         por imagem e função visual) e ferramentas de triagem. Informações acessíveis revisadas por

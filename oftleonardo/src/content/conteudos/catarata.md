@@ -5,6 +5,7 @@ keywords: "catarata, cirurgia de catarata, lente intraocular, visão embaçada, 
 condition: "Catarata"
 procedure: "Cirurgia de Catarata"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "A cirurgia de catarata é segura?"
     answer: "Sim. A cirurgia de catarata é um dos procedimentos mais realizados no mundo, com alta taxa de sucesso. É feita com anestesia local, dura em média 15 a 20 minutos e a recuperação é rápida na maioria dos casos."

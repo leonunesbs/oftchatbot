@@ -5,6 +5,7 @@ keywords: "exames oftalmológicos, guia exames olho, OCT, campo visual, topograf
 condition: "Guia de exames oftalmológicos"
 procedure: "Diagnóstico por imagem e avaliação funcional (informação educacional)"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Preciso fazer todos esses exames em toda consulta?"
@@ -25,7 +26,7 @@ relatedSlugs:
   - glaucoma
 ---
 
-Este hub é **somente educativo**: não define quais exames você precisa — isso só pode ser decidido em **consulta**, com história e exame clínico.
+Este material é **somente educativo**: não define quais exames você precisa — isso só pode ser decidido em **consulta**, com história e exame clínico.
 
 ## Guias por exame
 
@@ -57,4 +58,4 @@ Nem todo sintoma exige todos os exames; o roteiro é **individualizado**.
 
 ## Conteúdos sobre doenças
 
-Para leitura sobre condições específicas, veja também a seção **Doenças e condições oculares** no [hub de conteúdos](/conteudos) — por exemplo glaucoma, catarata e retinopatia diabética.
+Para leitura sobre condições específicas, veja também a seção **Doenças e condições oculares** em [Conteúdos](/conteudos) — por exemplo glaucoma, catarata e retinopatia diabética.

@@ -5,6 +5,7 @@ keywords: "topografia corneana, mapa de córnea, ceratocone, astigmatismo cornea
 condition: "Topografia corneana"
 procedure: "Mapeamento da curvatura e poder refrativo da superfície corneana"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Topografia dói?"

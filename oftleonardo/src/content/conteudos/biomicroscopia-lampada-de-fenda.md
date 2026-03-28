@@ -5,6 +5,7 @@ keywords: "biomicroscopia, lâmpada de fenda, exame de córnea, câmara anterior
 condition: "Biomicroscopia (lâmpada de fenda)"
 procedure: "Exame clínico estruturado da superfície ocular e estruturas adjacentes"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "A biomicroscopia dói?"

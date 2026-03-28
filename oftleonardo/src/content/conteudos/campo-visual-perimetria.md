@@ -5,6 +5,7 @@ keywords: "campo visual, perimetria, exame glaucoma, déficit visual periférico
 condition: "Campo visual (perimetria)"
 procedure: "Avaliação funcional da sensibilidade visual em diferentes regiões"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Campo visual e acuidade visual são a mesma coisa?"

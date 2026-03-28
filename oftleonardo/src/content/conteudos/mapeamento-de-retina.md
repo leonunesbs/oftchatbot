@@ -5,6 +5,7 @@ keywords: "mapeamento de retina, widefield, imagem fundo de olho ampliada, retin
 condition: "Mapeamento de retina (imagem ampliada)"
 procedure: "Registro ampliado do fundo do olho para avaliação de retina central e periférica"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Mapeamento de retina é ultrassom?"

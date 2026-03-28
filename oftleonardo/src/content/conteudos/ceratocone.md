@@ -5,6 +5,7 @@ keywords: "ceratocone, córnea, deformidade da córnea, astigmatismo irregular, 
 condition: "Ceratocone"
 procedure: "Crosslinking de Córnea"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "Ceratocone pode causar cegueira?"
     answer: "Raramente. Com o diagnóstico precoce e o tratamento adequado, a maioria das pessoas com ceratocone mantém boa visão. Em casos muito avançados, o transplante de córnea pode ser necessário, com excelentes resultados."

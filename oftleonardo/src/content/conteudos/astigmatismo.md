@@ -5,6 +5,7 @@ keywords: "astigmatismo, astigmatismo sintomas, visão embaçada, cilindro ócul
 condition: "Astigmatismo"
 procedure: "Correção com óculos, lentes de contato tóricas ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+lastReviewed: "2026-03-28"
 hubCategory: refractive
 faq:
   - question: "Astigmatismo é doença?"

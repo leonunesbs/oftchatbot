@@ -5,6 +5,7 @@ keywords: "coriorretinopatia serosa central, serosa central, CRSC, visão embaç
 condition: "Coriorretinopatia Serosa Central"
 procedure: "Tratamento de Retina"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "A coriorretinopatia serosa central é grave?"
     answer: "Na maioria dos casos, a doença é autolimitada e a visão se recupera espontaneamente em semanas a poucos meses. Em casos crônicos ou recorrentes, pode haver dano permanente à visão central, exigindo tratamento."

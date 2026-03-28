@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import WhatsAppModal from "./WhatsAppModal";
 import {
+  BookOpen,
   CalendarCheck2,
   Droplets,
   Eye,
@@ -124,6 +125,15 @@ export default function MobileMenu() {
             })}
           </nav>
           <Separator className="my-4" />
+          <a
+            id="gtm-mobile-tools-conteudos"
+            href="/conteudos"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            <BookOpen className="size-4" />
+            Conteúdos
+          </a>
           <a
             id="gtm-mobile-tools-acuidade-visual"
             href="/acuidade-visual"

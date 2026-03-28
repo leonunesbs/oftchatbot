@@ -5,6 +5,7 @@ keywords: "lentes premium catarata, lente intraocular multifocal, lente intraocu
 condition: "Catarata — escolha de lente intraocular"
 procedure: "Cirurgia de catarata com implante de lente intraocular (incluindo opções premium quando indicadas)"
 readingTime: "8 min"
+lastReviewed: "2026-03-28"
 faq:
   - question: "Lente premium elimina óculos para sempre?"
     answer: "Não há garantia de zero óculos para todas as situações. Multifocais e outras lentes avançadas podem reduzir a dependência de óculos para longe e perto em muitos pacientes, mas halos, perda de contraste ou necessidade de óculos para leitura fina ou visão noturna ainda podem ocorrer. O planejamento individualizado é fundamental."

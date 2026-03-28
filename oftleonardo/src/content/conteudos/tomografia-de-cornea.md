@@ -5,6 +5,7 @@ keywords: "tomografia de córnea, Pentacam, Scheimpflug, espessura corneana, ect
 condition: "Tomografia de córnea (3D)"
 procedure: "Reconstrução tridimensional da córnea com medidas de espessura e elevação"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Tomografia de córnea é o mesmo que OCT de córnea?"

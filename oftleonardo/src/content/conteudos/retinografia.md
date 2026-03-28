@@ -5,6 +5,7 @@ keywords: "retinografia, fundo de olho, fotografia da retina, exame de retina, d
 condition: "Retinografia (foto do fundo de olho)"
 procedure: "Documentação por imagem da retina e estruturas visíveis no fundo"
 readingTime: "3 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "Retinografia substitui a dilatação para o médico ver o fundo?"

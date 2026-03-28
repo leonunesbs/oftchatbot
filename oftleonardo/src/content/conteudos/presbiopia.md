@@ -5,6 +5,7 @@ keywords: "presbiopia, vista cansada, dificuldade para ler de perto, acomodaçã
 condition: "Presbiopia"
 procedure: "Correção da visão para perto (óculos, lentes ou cirurgia refrativa)"
 readingTime: "8 min"
+lastReviewed: "2026-03-28"
 hubCategory: refractive
 faq:
   - question: "A presbiopia é uma doença?"

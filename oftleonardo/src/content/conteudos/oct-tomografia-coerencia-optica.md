@@ -5,6 +5,7 @@ keywords: "OCT oftalmologia, tomografia coerência óptica, OCT mácula, OCT ner
 condition: "OCT (tomografia de coerência óptica)"
 procedure: "Imagem em seção de alta resolução da retina, disco óptico ou córnea"
 readingTime: "4 min"
+lastReviewed: "2026-03-28"
 hubCategory: exams
 faq:
   - question: "OCT usa radiação como tomografia de corpo?"

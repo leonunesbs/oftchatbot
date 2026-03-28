@@ -33,7 +33,7 @@ const tools = [
   {
     id: "gtm-nav-tools-conteudos",
     href: "/conteudos",
-    label: "Hub de Conteúdos",
+    label: "Conteúdos",
   },
 ] as const
 
