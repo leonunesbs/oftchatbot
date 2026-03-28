@@ -75,7 +75,7 @@ const ARTIFACTS_V1 = [
   shard(122, 3),
   shard(74, 2),
   shard(168, 2),
-  ellipseGlow(50, 55, "42%", "7%", 5, "82%"),
+  ellipseGlow(50, 55, "42%", "7%", 3, "82%"),
   ellipseGlow(16, 40, "32%", "11%", 5, "78%"),
   ellipseGlow(84, 88, "26%", "14%", 4, "80%"),
   ellipseGlow(24, 32, "28%", "9%", 5, "76%"),
@@ -93,9 +93,9 @@ const ARTIFACTS_V1 = [
   arcWedge(84, 16, 15, 3, 36),
   arcWedge(44, 22, 120, 3, 42),
   arcWedge(12, 70, 300, 3, 38),
-  glow(48, 50, 130, 5),
-  glow(50, 42, 100, 6),
-  glow(30, 75, 110, 5),
+  glow(48, 50, 130, 3),
+  glow(50, 42, 100, 4),
+  glow(30, 75, 110, 3),
 ].join(", ");
 
 /** Textura média: traços e faixas; poucos pontos de destaque. */
@@ -254,7 +254,7 @@ const ARTIFACTS_V5 = [
 export default function ParallaxArtifacts() {
   return (
     <div
-      className="pointer-events-none absolute inset-0 -z-1 block overflow-hidden"
+      className="parallax-artifacts pointer-events-none absolute inset-0 -z-1 block overflow-hidden"
       aria-hidden="true"
     >
       <div
@@ -263,7 +263,6 @@ export default function ParallaxArtifacts() {
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V1,
           maskImage: MASK_INNER,
-          opacity: 0.42,
         }}
       />
       <div
@@ -272,7 +271,6 @@ export default function ParallaxArtifacts() {
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V2,
           maskImage: MASK_DEFAULT,
-          opacity: 0.52,
         }}
       />
       <div
@@ -281,7 +279,6 @@ export default function ParallaxArtifacts() {
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V3,
           maskImage: MASK_DEFAULT,
-          opacity: 0.5,
         }}
       />
       <div
@@ -290,7 +287,6 @@ export default function ParallaxArtifacts() {
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V4,
           maskImage: MASK_DEFAULT,
-          opacity: 0.52,
         }}
       />
       <div
@@ -299,7 +295,6 @@ export default function ParallaxArtifacts() {
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V5,
           maskImage: MASK_DEFAULT,
-          opacity: 0.48,
         }}
       />
     </div>

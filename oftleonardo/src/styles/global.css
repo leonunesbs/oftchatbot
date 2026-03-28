@@ -312,6 +312,41 @@
     contain: paint;
   }
 
+  /**
+   * Opacidade do fundo parallax: tema claro precisa de mais contraste no texto;
+   * tema escuro mantém o efeito visível com leve redução.
+   */
+  .parallax-artifacts .parallax-layer--v1 {
+    opacity: 0.24;
+  }
+  .parallax-artifacts .parallax-layer--v2 {
+    opacity: 0.3;
+  }
+  .parallax-artifacts .parallax-layer--v3 {
+    opacity: 0.29;
+  }
+  .parallax-artifacts .parallax-layer--v4 {
+    opacity: 0.3;
+  }
+  .parallax-artifacts .parallax-layer--v5 {
+    opacity: 0.28;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v1 {
+    opacity: 0.33;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v2 {
+    opacity: 0.4;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v3 {
+    opacity: 0.39;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v4 {
+    opacity: 0.4;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v5 {
+    opacity: 0.37;
+  }
+
   .scroll-3d-stage {
     perspective: 1100px;
     transform-style: preserve-3d;
