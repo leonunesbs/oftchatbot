@@ -18,6 +18,11 @@ function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
 }
 
+/** Reduz oscilação por subpixel / jitter de layout sem deixar a animação em “degraus” visíveis. */
+function quantizeProgress(p: number) {
+  return Math.round(p * 1200) / 1200;
+}
+
 function easeOutCubic(t: number) {
   return 1 - (1 - t) ** 3;
 }
@@ -85,53 +90,71 @@ export function PresbiopiaScrollHero({
     }
 
     const el = trackEl;
-    let rafLoop = 0;
+    let rafPending = 0;
+    let lastObservedW = 0;
+    let lastObservedH = 0;
 
     const update = () => {
+      if (document.visibilityState !== "visible") return;
       const rect = el.getBoundingClientRect();
       const trackHeight = Math.max(rect.height, el.offsetHeight, 1);
       const vh = window.visualViewport?.height ?? window.innerHeight;
       const scrollable = Math.max(1, trackHeight - vh);
       let p = clamp01(-rect.top / scrollable);
       if (p >= 0.997) p = 1;
+      p = quantizeProgress(p);
       const prev = lastProgressRef.current;
-      if (Math.abs(p - prev) > 0.0001) {
+      if (Math.abs(p - prev) > 1 / 2400) {
         lastProgressRef.current = p;
         setProgress(p);
       }
     };
 
-    const tick = () => {
-      if (document.visibilityState === "visible") {
+    /** Um RAF por rajada de eventos — evita loop infinito e flicker por setState a 60fps. */
+    const scheduleUpdate = () => {
+      if (rafPending) return;
+      rafPending = requestAnimationFrame(() => {
+        rafPending = 0;
         update();
-      }
-      rafLoop = requestAnimationFrame(tick);
+      });
     };
 
-    const onLayout = () => {
+    const onWindowResize = () => {
       lastProgressRef.current = -1;
-      update();
+      scheduleUpdate();
     };
 
-    rafLoop = requestAnimationFrame(tick);
-
-    window.addEventListener("resize", onLayout, { passive: true });
-    window.visualViewport?.addEventListener("resize", onLayout);
-    window.visualViewport?.addEventListener("scroll", onLayout);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", onWindowResize, { passive: true });
+    window.visualViewport?.addEventListener("resize", onWindowResize);
+    window.visualViewport?.addEventListener("scroll", onWindowResize);
 
     let resizeObserver: ResizeObserver | undefined;
     if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(onLayout);
+      resizeObserver = new ResizeObserver((entries) => {
+        const cr = entries[0]?.contentRect;
+        if (cr) {
+          const dw = Math.abs(cr.width - lastObservedW);
+          const dh = Math.abs(cr.height - lastObservedH);
+          lastObservedW = cr.width;
+          lastObservedH = cr.height;
+          if (dw > 0.5 || dh > 0.5) {
+            lastProgressRef.current = -1;
+          }
+        }
+        scheduleUpdate();
+      });
       resizeObserver.observe(el);
     }
 
-    update();
+    scheduleUpdate();
 
     return () => {
-      cancelAnimationFrame(rafLoop);
-      window.removeEventListener("resize", onLayout);
-      window.visualViewport?.removeEventListener("resize", onLayout);
-      window.visualViewport?.removeEventListener("scroll", onLayout);
+      if (rafPending) cancelAnimationFrame(rafPending);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", onWindowResize);
+      window.visualViewport?.removeEventListener("resize", onWindowResize);
+      window.visualViewport?.removeEventListener("scroll", onWindowResize);
       resizeObserver?.disconnect();
       mq.removeEventListener("change", apply);
     };
