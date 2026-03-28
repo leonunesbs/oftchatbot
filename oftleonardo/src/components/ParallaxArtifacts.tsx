@@ -8,6 +8,37 @@ function glow(x: number, y: number, spread: number, opacity: number) {
   return `radial-gradient(circle at ${x}% ${y}%, color-mix(in oklab, ${brand} ${opacity}%, transparent) 0%, transparent ${spread}px)`;
 }
 
+function ellipseGlow(
+  x: number,
+  y: number,
+  rx: string,
+  ry: string,
+  opacity: number,
+  fadeEnd: string,
+) {
+  return `radial-gradient(ellipse ${rx} ${ry} at ${x}% ${y}%, color-mix(in oklab, ${brand} ${opacity}%, transparent) 0%, transparent ${fadeEnd})`;
+}
+
+function lineBand(angle: number, opacity: number) {
+  return `linear-gradient(${angle}deg, transparent 0%, transparent 43%, color-mix(in oklab, ${brand} ${opacity}%, transparent) 50%, transparent 57%, transparent 100%)`;
+}
+
+/** Traço diagonal fino (evita mais círculos/pontos). */
+function shard(angle: number, opacity: number) {
+  return `linear-gradient(${angle}deg, transparent 0%, transparent 44%, color-mix(in oklab, ${brand} ${opacity}%, transparent) 50%, transparent 56%, transparent 100%)`;
+}
+
+function arcWedge(
+  x: number,
+  y: number,
+  fromDeg: number,
+  opacity: number,
+  spanDeg: number,
+) {
+  const peak = spanDeg * 0.45;
+  return `conic-gradient(from ${fromDeg}deg at ${x}% ${y}%, transparent 0deg, color-mix(in oklab, ${brand} ${opacity}%, transparent) ${peak}deg, transparent ${spanDeg}deg, transparent 360deg)`;
+}
+
 function ring(
   x: number,
   y: number,
@@ -27,281 +58,248 @@ const MASK_DEFAULT =
 const MASK_INNER =
   "linear-gradient(to bottom, transparent 2%, black 18%, black 84%, transparent 98%)";
 
+/** Fundo distante: faixas, cunhas e elipses alongadas (poucos halos circulares). */
+const ARTIFACTS_V1 = [
+  lineBand(8, 4),
+  lineBand(56, 3),
+  lineBand(104, 5),
+  lineBand(176, 3),
+  lineBand(18, 3),
+  lineBand(96, 4),
+  lineBand(142, 3),
+  lineBand(72, 4),
+  lineBand(28, 4),
+  lineBand(112, 3),
+  lineBand(64, 3),
+  shard(38, 3),
+  shard(122, 3),
+  shard(74, 2),
+  shard(168, 2),
+  ellipseGlow(50, 55, "42%", "7%", 5, "82%"),
+  ellipseGlow(16, 40, "32%", "11%", 5, "78%"),
+  ellipseGlow(84, 88, "26%", "14%", 4, "80%"),
+  ellipseGlow(24, 32, "28%", "9%", 5, "76%"),
+  ellipseGlow(68, 48, "20%", "28%", 5, "80%"),
+  ellipseGlow(88, 78, "30%", "12%", 4, "74%"),
+  ellipseGlow(8, 68, "14%", "22%", 4, "78%"),
+  ellipseGlow(52, 18, "24%", "9%", 5, "74%"),
+  ellipseGlow(22, 48, "22%", "9%", 5, "76%"),
+  ellipseGlow(74, 36, "26%", "10%", 5, "72%"),
+  ellipseGlow(48, 78, "16%", "24%", 4, "78%"),
+  arcWedge(72, 44, 250, 3, 48),
+  arcWedge(36, 12, 20, 3, 44),
+  arcWedge(40, 28, 135, 3, 44),
+  arcWedge(18, 82, 285, 3, 40),
+  arcWedge(84, 16, 15, 3, 36),
+  arcWedge(44, 22, 120, 3, 42),
+  arcWedge(12, 70, 300, 3, 38),
+  glow(48, 50, 130, 5),
+  glow(50, 42, 100, 6),
+  glow(30, 75, 110, 5),
+].join(", ");
+
+/** Textura média: traços e faixas; poucos pontos de destaque. */
+const ARTIFACTS_V2 = [
+  lineBand(12, 4),
+  lineBand(88, 3),
+  lineBand(134, 4),
+  lineBand(44, 3),
+  lineBand(162, 4),
+  shard(22, 4),
+  shard(58, 3),
+  shard(96, 3),
+  shard(142, 4),
+  shard(188, 3),
+  shard(6, 3),
+  shard(74, 4),
+  arcWedge(30, 40, 95, 3, 40),
+  arcWedge(70, 62, 200, 3, 36),
+  arcWedge(48, 18, 310, 2, 32),
+  ellipseGlow(20, 55, "18%", "14%", 4, "72%"),
+  ellipseGlow(82, 38, "24%", "10%", 4, "70%"),
+  dot(8, 12, 3, 14),
+  dot(42, 10, 4, 13),
+  dot(65, 18, 6, 12),
+  dot(14, 52, 6, 12),
+  dot(76, 54, 5, 12),
+  dot(34, 68, 4, 11),
+  dot(90, 62, 4, 12),
+  dot(18, 8, 4, 13),
+  dot(54, 22, 5, 12),
+  dot(38, 58, 4, 12),
+  dot(62, 94, 3, 11),
+  dot(44, 96, 4, 12),
+  dot(56, 60, 5, 12),
+  dot(24, 68, 6, 12),
+  dot(56, 44, 3, 12),
+  dot(32, 8, 4, 12),
+  dot(8, 78, 4, 11),
+  dot(36, 38, 5, 12),
+].join(", ");
+
+/** Meio-termo: poucos anéis; traços, cunhas e elipses. */
+const ARTIFACTS_V3 = [
+  ring(50, 8, 4, 6, 11),
+  ring(24, 64, 4, 6, 10),
+  ring(82, 68, 3.5, 5.5, 10),
+  ring(14, 8, 3, 5, 10),
+  lineBand(32, 4),
+  lineBand(118, 4),
+  lineBand(76, 3),
+  lineBand(148, 4),
+  lineBand(8, 3),
+  shard(14, 4),
+  shard(46, 4),
+  shard(102, 3),
+  shard(166, 4),
+  shard(52, 3),
+  shard(128, 4),
+  ellipseGlow(40, 48, "18%", "16%", 5, "70%"),
+  ellipseGlow(72, 22, "22%", "9%", 5, "68%"),
+  ellipseGlow(18, 78, "14%", "20%", 4, "74%"),
+  arcWedge(56, 58, 45, 3, 38),
+  arcWedge(50, 50, 60, 3, 42),
+  arcWedge(28, 92, 200, 3, 38),
+  arcWedge(34, 36, 175, 3, 36),
+  sparkle(12, 18, 17),
+  sparkle(48, 14, 16),
+  sparkle(74, 40, 17),
+  sparkle(30, 56, 16),
+  sparkle(88, 82, 17),
+  sparkle(52, 22, 16),
+  sparkle(18, 48, 16),
+  sparkle(42, 58, 17),
+  sparkle(68, 44, 16),
+  sparkle(26, 34, 17),
+  sparkle(84, 34, 16),
+  shard(26, 3),
+  shard(60, 3),
+  shard(92, 3),
+  shard(8, 3),
+].join(", ");
+
+/** Camada rápida intermediária: traços e elipses; poucos pontos grandes. */
+const ARTIFACTS_V4 = [
+  lineBand(24, 4),
+  lineBand(108, 4),
+  lineBand(156, 3),
+  lineBand(84, 4),
+  shard(18, 4),
+  shard(54, 4),
+  shard(90, 3),
+  shard(132, 4),
+  shard(174, 3),
+  shard(4, 4),
+  ellipseGlow(20, 70, "18%", "24%", 5, "76%"),
+  ellipseGlow(80, 24, "22%", "11%", 5, "70%"),
+  ellipseGlow(48, 44, "24%", "10%", 5, "74%"),
+  ellipseGlow(12, 56, "20%", "10%", 4, "72%"),
+  arcWedge(60, 72, 175, 3, 36),
+  arcWedge(78, 20, 210, 3, 34),
+  arcWedge(44, 52, 125, 3, 32),
+  glow(52, 78, 62, 6),
+  glow(18, 38, 58, 5),
+  glow(88, 66, 64, 5),
+  dot(58, 32, 9, 10),
+  dot(20, 74, 8, 9),
+  dot(86, 78, 8, 9),
+  dot(24, 8, 6, 9),
+  dot(8, 88, 8, 9),
+  dot(48, 42, 6, 9),
+  dot(16, 36, 6, 9),
+  dot(38, 64, 7, 9),
+  dot(18, 72, 7, 9),
+  dot(46, 18, 6, 9),
+  dot(64, 54, 7, 9),
+].join(", ");
+
+/** Primeiro plano: traços cruzados + brilhos pontuais (scroll mais rápido). */
+const ARTIFACTS_V5 = [
+  shard(10, 4),
+  shard(34, 4),
+  shard(58, 3),
+  shard(82, 4),
+  shard(6, 3),
+  shard(118, 4),
+  shard(142, 3),
+  shard(168, 4),
+  shard(194, 3),
+  shard(26, 4),
+  shard(50, 3),
+  shard(96, 4),
+  lineBand(40, 3),
+  lineBand(152, 4),
+  lineBand(88, 3),
+  sparkle(5, 8, 15),
+  sparkle(32, 12, 16),
+  sparkle(60, 6, 15),
+  sparkle(88, 16, 16),
+  sparkle(28, 52, 15),
+  sparkle(56, 66, 16),
+  sparkle(16, 68, 15),
+  sparkle(84, 94, 16),
+  sparkle(2, 32, 15),
+  sparkle(54, 18, 16),
+  sparkle(30, 96, 15),
+  sparkle(72, 34, 16),
+  sparkle(22, 38, 15),
+  sparkle(66, 42, 16),
+  sparkle(14, 62, 15),
+  sparkle(40, 84, 16),
+  sparkle(76, 90, 15),
+  arcWedge(48, 44, 88, 3, 28),
+  arcWedge(22, 78, 220, 3, 26),
+].join(", ");
+
 export default function ParallaxArtifacts() {
   return (
     <div
       className="pointer-events-none absolute inset-0 -z-1 block overflow-hidden"
       aria-hidden="true"
     >
-      {/* ── Mobile: slow layer — dots + soft glows ── */}
       <div
-        className="parallax-layer parallax-layer--slow absolute inset-0 lg:hidden"
+        className="parallax-layer parallax-layer--v1 absolute inset-0"
         style={{
           transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            dot(14, 12, 4, 11),
-            dot(42, 20, 6, 10),
-            dot(78, 16, 5, 10),
-            dot(24, 68, 6, 9),
-            dot(72, 74, 5, 10),
-            dot(56, 44, 3, 10),
-            dot(90, 50, 4, 9),
-            dot(6, 46, 5, 8),
-            dot(32, 8, 4, 10),
-            dot(62, 52, 5, 9),
-            dot(8, 78, 4, 9),
-            dot(94, 36, 3, 10),
-            glow(50, 42, 80, 5),
-            glow(18, 28, 50, 4),
-            glow(80, 70, 60, 4),
-            glow(38, 88, 65, 4),
-            glow(4, 22, 55, 3),
-          ].join(", "),
-          maskImage: MASK_DEFAULT,
-          opacity: 0.4,
-        }}
-      />
-
-      {/* ── Mobile: medium layer — rings + sparkles ── */}
-      <div
-        className="parallax-layer parallax-layer--medium absolute inset-0 lg:hidden"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            ring(20, 30, 4, 6, 9),
-            ring(64, 22, 3, 5, 8),
-            ring(80, 60, 5, 7, 8),
-            ring(36, 76, 3, 5, 9),
-            ring(8, 52, 3, 5, 8),
-            ring(50, 8, 4, 6, 9),
-            sparkle(12, 18, 16),
-            sparkle(48, 14, 14),
-            sparkle(74, 40, 15),
-            sparkle(30, 56, 14),
-            sparkle(88, 82, 15),
-            sparkle(54, 64, 14),
-            sparkle(22, 8, 15),
-            sparkle(96, 58, 14),
-            sparkle(40, 92, 15),
-            sparkle(66, 30, 14),
-          ].join(", "),
-          maskImage: MASK_DEFAULT,
-          opacity: 0.38,
-        }}
-      />
-
-      {/* ── Mobile: fast layer — dots + sparkles ── */}
-      <div
-        className="parallax-layer parallax-layer--fast absolute inset-0 lg:hidden"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            dot(10, 34, 7, 8),
-            dot(30, 22, 5, 8),
-            dot(58, 30, 8, 8),
-            dot(82, 24, 6, 7),
-            dot(18, 72, 7, 8),
-            dot(48, 70, 5, 8),
-            dot(84, 78, 7, 8),
-            dot(4, 12, 6, 7),
-            dot(70, 6, 5, 8),
-            dot(94, 44, 6, 7),
-            sparkle(22, 48, 13),
-            sparkle(66, 16, 12),
-            sparkle(40, 84, 13),
-            sparkle(92, 56, 12),
-            sparkle(14, 62, 13),
-            sparkle(52, 38, 12),
-            sparkle(76, 90, 13),
-          ].join(", "),
-          maskImage: MASK_DEFAULT,
-          opacity: 0.36,
-        }}
-      />
-
-      {/* ── Desktop: slow layer 1 — scattered dots ── */}
-      <div
-        className="parallax-layer parallax-layer--slow absolute inset-0 hidden lg:block"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            dot(8, 12, 3, 12),
-            dot(22, 16, 5, 10),
-            dot(42, 10, 4, 11),
-            dot(65, 18, 6, 9),
-            dot(88, 14, 4, 10),
-            dot(14, 52, 6, 9),
-            dot(46, 46, 4, 10),
-            dot(76, 54, 5, 9),
-            dot(26, 82, 5, 10),
-            dot(70, 84, 4, 11),
-            dot(34, 68, 4, 9),
-            dot(58, 76, 6, 9),
-            dot(90, 62, 4, 10),
-            dot(4, 36, 3, 10),
-            dot(52, 32, 4, 9),
-            dot(96, 40, 3, 10),
-            dot(18, 8, 4, 11),
-            dot(54, 22, 5, 10),
-            dot(78, 8, 3, 10),
-            dot(12, 66, 5, 9),
-            dot(38, 58, 4, 10),
-            dot(82, 46, 5, 9),
-            dot(6, 92, 4, 10),
-            dot(62, 94, 3, 10),
-          ].join(", "),
-        }}
-      />
-
-      {/* ── Desktop: slow layer 2 — soft ambient glows ── */}
-      <div
-        className="parallax-layer parallax-layer--slow absolute inset-0 hidden lg:block"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            glow(15, 20, 90, 5),
-            glow(50, 42, 110, 4),
-            glow(85, 30, 80, 4),
-            glow(30, 75, 100, 4),
-            glow(72, 80, 90, 5),
-            glow(8, 60, 70, 3),
-            glow(92, 70, 70, 3),
-            glow(38, 12, 75, 4),
-            glow(64, 58, 95, 4),
-            glow(22, 88, 85, 4),
-            glow(96, 24, 65, 3),
-          ].join(", "),
+          backgroundImage: ARTIFACTS_V1,
           maskImage: MASK_INNER,
-          opacity: 0.28,
-        }}
-      />
-
-      {/* ── Desktop: medium layer — rings + sparkles ── */}
-      <div
-        className="parallax-layer parallax-layer--medium absolute inset-0 hidden lg:block"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            ring(12, 24, 4, 6.5, 9),
-            ring(38, 18, 3, 5, 8),
-            ring(62, 36, 5, 7.5, 8),
-            ring(86, 22, 3.5, 5.5, 9),
-            ring(24, 64, 4, 6, 8),
-            ring(56, 72, 5, 7, 8),
-            ring(82, 68, 3.5, 5.5, 9),
-            ring(44, 52, 3, 5, 7),
-            ring(6, 40, 3, 5, 8),
-            ring(70, 8, 4, 6, 9),
-            ring(92, 46, 3.5, 5.5, 8),
-            sparkle(8, 16, 16),
-            sparkle(30, 10, 14),
-            sparkle(52, 22, 15),
-            sparkle(76, 14, 14),
-            sparkle(94, 28, 15),
-            sparkle(18, 48, 14),
-            sparkle(42, 58, 15),
-            sparkle(68, 44, 14),
-            sparkle(90, 52, 15),
-            sparkle(14, 78, 14),
-            sparkle(48, 86, 15),
-            sparkle(74, 90, 14),
-            sparkle(26, 34, 15),
-            sparkle(58, 12, 14),
-            sparkle(84, 34, 15),
-            sparkle(4, 70, 14),
-            sparkle(96, 76, 15),
-          ].join(", "),
-          maskImage: MASK_DEFAULT,
-          opacity: 0.36,
-        }}
-      />
-
-      {/* ── Desktop: fast layer 1 — dots ── */}
-      <div
-        className="parallax-layer parallax-layer--fast absolute inset-0 hidden lg:block"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            dot(12, 30, 8, 7),
-            dot(34, 24, 6, 7),
-            dot(58, 32, 9, 8),
-            dot(84, 26, 6, 7),
-            dot(20, 74, 8, 7),
-            dot(52, 70, 6, 8),
-            dot(86, 78, 8, 7),
-            dot(6, 50, 7, 7),
-            dot(42, 56, 5, 7),
-            dot(72, 48, 7, 7),
-            dot(96, 58, 6, 7),
-            dot(24, 8, 6, 8),
-            dot(70, 18, 7, 7),
-            dot(8, 88, 8, 7),
-            dot(48, 42, 6, 8),
-            dot(90, 92, 7, 7),
-          ].join(", "),
-          maskImage: MASK_DEFAULT,
           opacity: 0.42,
         }}
       />
-
-      {/* ── Desktop: fast layer 2 — dense sparkle field ── */}
       <div
-        className="parallax-layer parallax-layer--fast absolute inset-0 hidden lg:block"
+        className="parallax-layer parallax-layer--v2 absolute inset-0"
         style={{
           transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            sparkle(5, 8, 13),
-            sparkle(18, 20, 12),
-            sparkle(32, 12, 14),
-            sparkle(46, 28, 12),
-            sparkle(60, 6, 13),
-            sparkle(74, 22, 12),
-            sparkle(88, 16, 14),
-            sparkle(10, 44, 12),
-            sparkle(28, 52, 13),
-            sparkle(50, 40, 12),
-            sparkle(70, 56, 14),
-            sparkle(92, 48, 12),
-            sparkle(16, 68, 13),
-            sparkle(36, 80, 12),
-            sparkle(56, 66, 14),
-            sparkle(78, 76, 12),
-            sparkle(94, 84, 13),
-            sparkle(24, 92, 12),
-            sparkle(64, 88, 14),
-            sparkle(84, 94, 12),
-            sparkle(2, 32, 13),
-            sparkle(40, 2, 12),
-            sparkle(98, 38, 14),
-            sparkle(12, 58, 13),
-            sparkle(54, 18, 12),
-            sparkle(82, 62, 14),
-            sparkle(30, 96, 13),
-            sparkle(66, 42, 12),
-          ].join(", "),
+          backgroundImage: ARTIFACTS_V2,
           maskImage: MASK_DEFAULT,
-          opacity: 0.34,
+          opacity: 0.52,
         }}
       />
-
-      {/* ── Desktop: fast layer 3 — mid-page glow patches ── */}
       <div
-        className="parallax-layer parallax-layer--fast absolute inset-0 hidden lg:block"
+        className="parallax-layer parallax-layer--v3 absolute inset-0"
         style={{
           transform: "translate3d(0, 0, 0)",
-          backgroundImage: [
-            glow(8, 62, 60, 5),
-            glow(26, 56, 50, 4),
-            glow(44, 64, 55, 5),
-            glow(66, 58, 50, 4),
-            glow(88, 66, 60, 5),
-            glow(18, 38, 55, 4),
-            glow(52, 78, 58, 5),
-            glow(76, 34, 52, 4),
-            glow(34, 18, 48, 4),
-          ].join(", "),
+          backgroundImage: ARTIFACTS_V3,
           maskImage: MASK_DEFAULT,
-          opacity: 0.3,
+          opacity: 0.5,
+        }}
+      />
+      <div
+        className="parallax-layer parallax-layer--v4 absolute inset-0"
+        style={{
+          transform: "translate3d(0, 0, 0)",
+          backgroundImage: ARTIFACTS_V4,
+          maskImage: MASK_DEFAULT,
+          opacity: 0.52,
+        }}
+      />
+      <div
+        className="parallax-layer parallax-layer--v5 absolute inset-0"
+        style={{
+          transform: "translate3d(0, 0, 0)",
+          backgroundImage: ARTIFACTS_V5,
+          maskImage: MASK_DEFAULT,
+          opacity: 0.48,
         }}
       />
     </div>

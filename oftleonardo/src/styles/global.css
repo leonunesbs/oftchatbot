@@ -186,16 +186,34 @@
   }
 }
 
-@keyframes parallax-shift-slow {
+@keyframes parallax-shift-v1 {
   from {
-    transform: translate3d(0, -11%, 0);
+    transform: translate3d(0, -6%, 0);
   }
   to {
-    transform: translate3d(0, 11%, 0);
+    transform: translate3d(0, 6%, 0);
   }
 }
 
-@keyframes parallax-shift-medium {
+@keyframes parallax-shift-v2 {
+  from {
+    transform: translate3d(0, -9%, 0);
+  }
+  to {
+    transform: translate3d(0, 9%, 0);
+  }
+}
+
+@keyframes parallax-shift-v3 {
+  from {
+    transform: translate3d(0, -12%, 0);
+  }
+  to {
+    transform: translate3d(0, 12%, 0);
+  }
+}
+
+@keyframes parallax-shift-v4 {
   from {
     transform: translate3d(0, -16%, 0);
   }
@@ -204,7 +222,7 @@
   }
 }
 
-@keyframes parallax-shift-fast {
+@keyframes parallax-shift-v5 {
   from {
     transform: translate3d(0, -22%, 0);
   }
@@ -347,20 +365,32 @@
 
   @media (min-width: 768px) {
     @supports (animation-timeline: scroll()) {
-      .parallax-layer--slow {
-        animation: parallax-shift-slow linear both;
+      .parallax-layer--v1 {
+        animation: parallax-shift-v1 linear both;
         animation-timeline: scroll(root block);
         animation-range: 0% 100%;
       }
 
-      .parallax-layer--medium {
-        animation: parallax-shift-medium linear both;
+      .parallax-layer--v2 {
+        animation: parallax-shift-v2 linear both;
         animation-timeline: scroll(root block);
         animation-range: 0% 100%;
       }
 
-      .parallax-layer--fast {
-        animation: parallax-shift-fast linear both;
+      .parallax-layer--v3 {
+        animation: parallax-shift-v3 linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0% 100%;
+      }
+
+      .parallax-layer--v4 {
+        animation: parallax-shift-v4 linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0% 100%;
+      }
+
+      .parallax-layer--v5 {
+        animation: parallax-shift-v5 linear both;
         animation-timeline: scroll(root block);
         animation-range: 0% 100%;
       }
@@ -443,10 +473,7 @@
     .scroll-card-motion,
     .scroll-card-diagonal-left,
     .scroll-card-diagonal-right,
-    .parallax-layer,
-    .parallax-layer--slow,
-    .parallax-layer--medium,
-    .parallax-layer--fast {
+    .parallax-layer {
       animation: none !important;
       transform: none !important;
     }
