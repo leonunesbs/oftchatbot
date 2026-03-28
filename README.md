@@ -172,7 +172,6 @@ Assim, você mantém isolamento de acesso (cada token só publica em um repo).
 
 ### Eventos padronizados (GTM/GA4/Meta/Ads)
 
-- `view_content`
 - `select_city`
 - `start_booking`
 - `submit_booking`

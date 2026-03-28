@@ -8,8 +8,6 @@
  * Configure o mesmo ID em `PUBLIC_GTM_ID` (Astro) e `NEXT_PUBLIC_GTM_ID` (Next).
  */
 export const OFT_ANALYTICS_EVENTS = {
-  /** Page / tela (ambos os produtos). */
-  view_content: "view_content",
   /** oftagenda: escolha do tipo de evento / local. */
   select_city: "select_city",
   /** Início do funil de agendamento (site + agenda). */
@@ -34,7 +32,6 @@ export const OFT_ANALYTICS_EVENTS = {
 export type OftAnalyticsEventName = (typeof OFT_ANALYTICS_EVENTS)[keyof typeof OFT_ANALYTICS_EVENTS];
 
 export const OFTAGENDA_ANALYTICS_EVENTS = [
-  OFT_ANALYTICS_EVENTS.view_content,
   OFT_ANALYTICS_EVENTS.select_city,
   OFT_ANALYTICS_EVENTS.start_booking,
   OFT_ANALYTICS_EVENTS.submit_booking,
