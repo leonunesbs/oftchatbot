@@ -11,6 +11,9 @@ interface Props {
   keywords?: string;
   ogType?: string;
   includeFAQSchema?: boolean;
+  /** Metadados extras para og:type=article (conteúdos educativos) */
+  articleAuthor?: string;
+  articleSection?: string;
 }
 
 const {
@@ -19,9 +22,13 @@ const {
   keywords = siteConfig.meta.keywords,
   ogType = "website",
   includeFAQSchema = false,
+  articleAuthor = siteConfig.name,
+  articleSection,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, siteConfig.canonical);
+const ogImageAbsolute = new URL(siteConfig.meta.ogImage, siteConfig.canonical).href;
+const twitterSite = siteConfig.meta.twitterHandle;
 const shouldRenderGtmNoscript = import.meta.env.PROD && Boolean(siteConfig.analytics.gtmId);
 ---
 
@@ -69,10 +76,8 @@ const shouldRenderGtmNoscript = import.meta.env.PROD && Boolean(siteConfig.analy
     <meta property="og:url" content={canonicalURL.href} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta
-      property="og:image"
-      content={new URL(siteConfig.meta.ogImage, siteConfig.canonical).href}
-    />
+    <meta property="og:image" content={ogImageAbsolute} />
+    <meta property="og:image:secure_url" content={ogImageAbsolute} />
     <meta
       property="og:image:width"
       content={String(siteConfig.meta.ogImageWidth)}
@@ -84,25 +89,34 @@ const shouldRenderGtmNoscript = import.meta.env.PROD && Boolean(siteConfig.analy
     <meta property="og:image:type" content="image/png" />
     <meta
       property="og:image:alt"
-      content={`${siteConfig.name} · ${siteConfig.title}`}
+      content={`${siteConfig.name} · ${siteConfig.title} — oftalmologista em Fortaleza e Maranhão`}
     />
     <meta property="og:locale" content="pt_BR" />
     <meta
       property="og:site_name"
       content={`${siteConfig.name} · ${siteConfig.title}`}
     />
+    {
+      ogType === "article" ? (
+        <>
+          <meta property="article:author" content={articleAuthor} />
+          {articleSection ? (
+            <meta property="article:section" content={articleSection} />
+          ) : null}
+        </>
+      ) : null
+    }
 
-    <!-- Twitter -->
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
+    {twitterSite ? <meta name="twitter:site" content={twitterSite} /> : null}
+    {twitterSite ? <meta name="twitter:creator" content={twitterSite} /> : null}
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta
-      name="twitter:image"
-      content={new URL(siteConfig.meta.ogImage, siteConfig.canonical).href}
-    />
+    <meta name="twitter:image" content={ogImageAbsolute} />
     <meta
       name="twitter:image:alt"
-      content={`${siteConfig.name} · ${siteConfig.title}`}
+      content={`${siteConfig.name} · ${siteConfig.title} — oftalmologista em Fortaleza e Maranhão`}
     />
 
     <!-- Geo / Medical -->

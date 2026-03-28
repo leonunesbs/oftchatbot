@@ -7,11 +7,11 @@ import { siteConfig } from "@/config/site";
 import Layout from "@/layouts/Layout.astro";
 
 const title =
-  "Teste de Acuidade Visual Online Grátis | Leonardo Nunes · Oftalmologista";
+  "Leonardo Nunes · Oftalmologista em Fortaleza | Teste de acuidade visual online gratuito";
 const description =
-  "Faça o teste de acuidade visual online e gratuito pelo celular. Tabela de Snellen e Tumbling E com calibração precisa da tela. Resultado imediato com escala logMAR. Avalie sua visão agora.";
+  "Teste sua visão grátis em poucos minutos no celular: calibração rápida e resultado na hora. Triagem orientativa — não substitui consulta. Agende com Leonardo Nunes em Fortaleza.";
 const keywords =
-  "teste de acuidade visual online, teste de visão online, teste visual gratuito, teste de visão pelo celular, acuidade visual, tabela de snellen online, optotipo tumbling e, escala logMAR, teste de visão de perto, triagem visual, oftalmologista fortaleza, teste ocular online, exame de vista online, acuidade visual snellen, teste de olho online";
+  "teste de acuidade visual online, teste de visão online, teste visual gratuito, teste de visão pelo celular, acuidade visual, oftalmologista Fortaleza, triagem visual, teste ocular online, exame de vista online, Snellen, Tumbling E, teste de visão de perto";
 
 const canonical = new URL("/acuidade-visual", siteConfig.canonical).href;
 
@@ -106,7 +106,7 @@ const webAppSchema = {
   "@type": "WebApplication",
   name: "Teste de Acuidade Visual Online",
   description:
-    "Ferramenta gratuita de triagem visual com optotipos Snellen e Tumbling E, calibração de tela e escala logMAR. Teste de visão de perto pelo celular.",
+    "Teste gratuito de acuidade visual pelo celular, com calibração de tela e resultado imediato. Triagem orientativa com Leonardo Nunes, oftalmologista em Fortaleza.",
   url: canonical,
   applicationCategory: "HealthApplication",
   operatingSystem: "All",
@@ -134,7 +134,7 @@ const webAppSchema = {
 const medicalPageSchema = {
   "@context": "https://schema.org",
   "@type": "MedicalWebPage",
-  name: "Teste de Acuidade Visual Online Gratuito",
+  name: "Teste de acuidade visual online gratuito",
   description,
   url: canonical,
   inLanguage: "pt-BR",
@@ -185,7 +185,7 @@ const howToSchema = {
   "@type": "HowTo",
   name: "Como fazer o teste de acuidade visual online pelo celular",
   description:
-    "Passo a passo para realizar o teste de acuidade visual de perto usando o celular, com calibração da tela e optotipos Snellen ou Tumbling E.",
+    "Passo a passo para realizar o teste de acuidade visual de perto no celular: calibração da tela, letras ou letra E e resultado por olho.",
   totalTime: "PT5M",
   tool: [
     { "@type": "HowToTool", name: "Celular ou tablet com tela calibrada" },

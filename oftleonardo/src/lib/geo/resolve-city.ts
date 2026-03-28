@@ -1,4 +1,5 @@
 import type { AstroCookies } from "astro";
+import type { SupportedGeoCitySlug } from "./constants.ts";
 import {
   getDefaultGeoCity,
   getSupportedCityBySlug,
@@ -11,7 +12,20 @@ import {
 } from "./constants.ts";
 import { extractClientIp, isPublicIp } from "./ip.ts";
 
-type ResolutionSource = "cookie" | "ip-api" | "fallback";
+type ResolutionSource = "cookie" | "vercel" | "ip-api" | "fallback";
+
+function tryVercelGeo(request: Request): SupportedGeoCitySlug | null {
+  const city = request.headers.get("x-vercel-ip-city")?.trim();
+  if (!city) return null;
+  const regionCode = request.headers.get("x-vercel-ip-country-region")?.trim();
+  const country = request.headers.get("x-vercel-ip-country")?.trim();
+  return mapIpApiCityToSupportedCity({
+    city,
+    region: regionCode,
+    regionName: regionCode,
+    countryCode: country,
+  });
+}
 
 export interface GeoCityResolution {
   slug: string;
@@ -100,6 +114,13 @@ export async function resolveGeoCity({
   const cachedCity = getSupportedCityBySlug(cachedSlug);
   if (cachedCity) {
     return toResolution("cookie", cachedCity.slug);
+  }
+
+  const vercelSlug = tryVercelGeo(request);
+  if (vercelSlug) {
+    const resolved = toResolution("vercel", vercelSlug);
+    setGeoCookie(cookies, request, resolved.slug);
+    return resolved;
   }
 
   const ip = extractClientIp(request);

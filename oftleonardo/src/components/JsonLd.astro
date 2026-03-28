@@ -10,6 +10,14 @@ const { includeFAQ = false } = Astro.props as Props;
 const ogImageURL = new URL(siteConfig.meta.ogImage, siteConfig.canonical).href;
 const logoURL = new URL("/favicon/favicon.svg", siteConfig.canonical).href;
 
+const sameAsProfiles = [
+  siteConfig.social.instagram,
+  siteConfig.social.linkedin,
+  siteConfig.social.facebook,
+  siteConfig.social.x,
+  siteConfig.social.threads,
+];
+
 const physicianSchema = {
   "@context": "https://schema.org",
   "@type": "Physician",
@@ -19,6 +27,7 @@ const physicianSchema = {
   image: ogImageURL,
   telephone: siteConfig.phone,
   email: siteConfig.email,
+  sameAs: sameAsProfiles,
   medicalSpecialty: ["Ophthalmology"],
   availableService: siteConfig.services.map((s) => ({
     "@type": "MedicalProcedure",

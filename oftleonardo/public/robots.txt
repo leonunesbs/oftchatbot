@@ -14,8 +14,28 @@ Allow: /
 User-agent: Twitterbot
 Allow: /
 
-Sitemap: https://oftleonardo.com.br/sitemap.xml
-Host: https://oftleonardo.com.br
+# Rastreadores de IA (descoberta do site e citação; conteúdo alinhado a llms.txt)
+User-agent: GPTBot
+Allow: /
 
-# Perfil para modelos e assistentes: https://oftleonardo.com.br/llms.txt
-# Versão resumida: https://oftleonardo.com.br/llm.txt
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://oftleonardo.com.br/sitemap.xml
+
+# Documentação para modelos: https://oftleonardo.com.br/llms.txt · resumo: https://oftleonardo.com.br/llm.txt · https://oftleonardo.com.br/ai.txt

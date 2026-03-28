@@ -15,7 +15,7 @@ export const clusterTopics: ClusterTopic[] = [
     slug: "acuidade-visual",
     title: "Teste de acuidade visual online",
     description:
-      "Triagem visual com Snellen e Tumbling E para avaliação inicial da acuidade visual.",
+      "Teste rápido e gratuito no celular, com triagem orientativa da sua visão antes da consulta.",
     href: "/acuidade-visual",
     intent: "informational",
     condition: "Deficiência Visual",

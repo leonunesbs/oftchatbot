@@ -1,5 +1,7 @@
 import { defineMiddleware } from "astro/middleware";
 
+import { resolveGeoCity } from "@/lib/geo";
+
 const cspDirectives = [
   "default-src 'self'",
   "base-uri 'none'",
@@ -128,6 +130,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
       },
     );
   }
+
+  const geoCity = await resolveGeoCity({
+    request: context.request,
+    cookies: context.cookies,
+  });
+  context.locals.geoCity = geoCity;
 
   const response = await next();
   const contentType = response.headers.get("content-type") ?? "";

@@ -16,6 +16,7 @@ const siteOrigin = "https://oftleonardo.com.br";
  */
 const sitemapCustomPages = [
   `${siteOrigin}/`,
+  `${siteOrigin}/conteudos`,
   `${siteOrigin}/acuidade-visual`,
   `${siteOrigin}/tela-de-amsler`,
   `${siteOrigin}/politica-de-privacidade`,

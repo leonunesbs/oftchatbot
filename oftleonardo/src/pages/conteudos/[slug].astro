@@ -83,9 +83,18 @@ const faqSchema = {
 };
 
 const allSchemas = [breadcrumbSchema, medicalPageSchema, faqSchema];
+
+const articleSection =
+  article.data.hubCategory === "exams" ? "Exames e procedimentos" : "Doenças, refração e cirurgia";
 ---
 
-<Layout title={`${title} | ${siteConfig.name}`} description={description} keywords={keywords} ogType="article">
+<Layout
+  title={`${title} | ${siteConfig.name}`}
+  description={description}
+  keywords={keywords}
+  ogType="article"
+  articleSection={articleSection}
+>
   {
     allSchemas.map((schema) => (
       <script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />

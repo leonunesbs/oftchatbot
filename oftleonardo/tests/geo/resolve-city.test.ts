@@ -72,6 +72,36 @@ test("falls back to fortaleza when ip-api is unavailable", async () => {
   }
 });
 
+test("maps Vercel geo headers before calling ip-api", async () => {
+  let fetchCalls = 0;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    fetchCalls += 1;
+    throw new Error("should not be called");
+  }) as typeof fetch;
+
+  try {
+    const cookies = createCookieStore();
+    const city = await resolveGeoCity({
+      request: new Request("https://oftleonardo.com.br", {
+        headers: {
+          "x-vercel-ip-city": "Fortaleza",
+          "x-vercel-ip-country": "BR",
+          "x-vercel-ip-country-region": "CE",
+        },
+      }),
+      cookies: cookies as never,
+    });
+
+    assert.equal(city.slug, "fortaleza");
+    assert.equal(city.source, "vercel");
+    assert.equal(cookies.get(GEO_CITY_COOKIE_NAME)?.value, "fortaleza");
+    assert.equal(fetchCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("maps a valid ip-api city and persists in cookie", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () =>

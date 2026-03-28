@@ -1,6 +1,6 @@
 # Leonardo Nunes · Oftalmologista
 
-> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica, além de cirurgia de catarata. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA).
+> Site institucional do Dr Leonardo, oftalmologista com foco em retina clínica e cirúrgica e em cirurgia de catarata. Registro profissional: CRM-CE 27.199 | CRM-PI 10.051. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). O hub **Conteúdos** reúne artigos informativos sobre doenças oculares, refração, cirurgia e exames (OCT, campo visual, topografia, angiografia etc.), além de páginas de triagem visual educativa.
 
 ## Páginas principais
 
@@ -54,9 +54,10 @@
 
 ## Descoberta técnica
 
-- Sitemap: https://oftleonardo.com.br/sitemap.xml
-- Robots: https://oftleonardo.com.br/robots.txt
-- Versão curta para LLMs: https://oftleonardo.com.br/llm.txt
+- Sitemap (URLs canônicas do site): https://oftleonardo.com.br/sitemap.xml
+- Robots (inclui permissões para rastreadores de busca e de IA): https://oftleonardo.com.br/robots.txt
+- Resumo numa linha para LLMs: https://oftleonardo.com.br/llm.txt
+- Atalho para assistentes (aponta para este documento): https://oftleonardo.com.br/ai.txt
 
 ## Contato
 

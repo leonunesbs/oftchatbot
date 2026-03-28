@@ -36,6 +36,8 @@ export const siteConfig = {
     ogImageWidth: 1200,
     ogImageHeight: 630,
     themeColor: "#3b82f6",
+    /** Conta no X (Twitter Card: site e creator) */
+    twitterHandle: "@oftleonardo",
     keywords:
       "oftalmologista, retina, catarata, cirurgia de catarata, oftalmologia, Fortaleza, Leonardo Nunes, OCT, retinografia, glaucoma",
   },
