@@ -1,4 +1,3 @@
-import { siteConfig } from "@/config/site";
 import { resolveAudiencePageContext } from "@/config/analytics-audiences";
 import {
   GA4_EVENTS,
@@ -23,13 +22,6 @@ function mergePageContext(params: Record<string, unknown>): Record<string, unkno
 function pushLayer(eventName: string, params: Record<string, unknown>) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: eventName, ...mergePageContext(params) });
-}
-
-function sendGtag(eventName: string, params: Record<string, unknown>) {
-  const { ga4Id, gtmId } = siteConfig.analytics;
-  if (ga4Id && !gtmId) {
-    window.gtag?.("event", eventName, mergePageContext(params));
-  }
 }
 
 /**
@@ -68,9 +60,7 @@ function bindOutboundClickTracking() {
           booking_channel: "online_booking" as const,
         };
         pushLayer(GA4_EVENTS.schedule_appointment, payload);
-        sendGtag(GA4_EVENTS.schedule_appointment, payload);
         pushLayer(GA4_EVENTS.start_booking, payload);
-        sendGtag(GA4_EVENTS.start_booking, payload);
         return;
       }
 
@@ -89,9 +79,7 @@ function bindOutboundClickTracking() {
         booking_channel: "whatsapp" as const,
       };
       pushLayer(GA4_EVENTS.click_whatsapp, payload);
-      sendGtag(GA4_EVENTS.click_whatsapp, payload);
       pushLayer(GA4_EVENTS.start_booking, payload);
-      sendGtag(GA4_EVENTS.start_booking, payload);
     },
     true,
   );

@@ -1,4 +1,3 @@
-import { siteConfig } from "@/config/site";
 import { resolveAudiencePageContext, type AudiencePageContext } from "@/config/analytics-audiences";
 
 export const CONSENT_STORAGE_KEY = "oftcore:consent:v1";
@@ -66,18 +65,10 @@ function pushToDataLayer(eventName: string, params: Record<string, unknown>) {
   window.dataLayer.push({ event: eventName, ...params });
 }
 
-function sendGtag(eventName: string, params: Record<string, unknown>) {
-  const { ga4Id, gtmId } = siteConfig.analytics;
-  if (ga4Id && !gtmId) {
-    window.gtag?.("event", eventName, params);
-  }
-}
-
 function dispatch(eventName: string, params: Record<string, unknown>) {
   if (!hasAnalyticsConsent()) return;
   const merged = mergeContext(params);
   pushToDataLayer(eventName, merged);
-  sendGtag(eventName, merged);
 }
 
 function resolveFloatEntry(

@@ -3,8 +3,8 @@ import { siteConfig } from "@/config/site";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { GoogleTagmanager } from "@digi4care/astro-google-tagmanager";
 
-const { ga4Id, gtmId, metaPixelId, googleAdsId } = siteConfig.analytics;
-const hasTracking = import.meta.env.PROD && Boolean(ga4Id || gtmId || metaPixelId || googleAdsId);
+const { gtmId } = siteConfig.analytics;
+const hasTracking = import.meta.env.PROD && Boolean(gtmId);
 ---
 
 {
@@ -22,17 +22,13 @@ window.gtag("consent", "default", {
   wait_for_update: 500,
 });`}
       </script>
-      {gtmId ? <GoogleTagmanager id={gtmId} /> : null}
+      <GoogleTagmanager id={gtmId} />
       <script>
         import { initOftFunnelAnalytics } from "@/lib/analytics-init";
         window.__oftInitFunnelAnalytics = initOftFunnelAnalytics;
       </script>
-      <script is:inline define:vars={{ ga4Id, gtmId, metaPixelId, googleAdsId }}>
+      <script is:inline>
         (function () {
-  var resolvedGa4Id = typeof ga4Id === "string" ? ga4Id : "";
-  var resolvedGtmId = typeof gtmId === "string" ? gtmId : "";
-  var resolvedMetaPixelId = typeof metaPixelId === "string" ? metaPixelId : "";
-  var resolvedGoogleAdsId = typeof googleAdsId === "string" ? googleAdsId : "";
   var trackingEnabled = false;
 
   var consentKey = "oftcore:consent:v1";
@@ -55,12 +51,6 @@ window.gtag("consent", "default", {
       window.history.replaceState({}, "", sanitizedUrl);
     }
   }
-  function loadScript(src) {
-    var script = document.createElement("script");
-    script.async = true;
-    script.src = src;
-    document.head.appendChild(script);
-  }
   function ensureGtagStub() {
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
@@ -77,34 +67,6 @@ window.gtag("consent", "default", {
   function enableTracking() {
     if (trackingEnabled) return;
     trackingEnabled = true;
-
-    var loadedGtagJs = false;
-    if (resolvedGa4Id && !resolvedGtmId) {
-      loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGa4Id);
-      ensureGtagStub();
-      window.gtag("js", new Date());
-      window.gtag("config", resolvedGa4Id, { anonymize_ip: true });
-      loadedGtagJs = true;
-    }
-
-    if (resolvedMetaPixelId) {
-      !(function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);})(window, document,
-      "script","https://connect.facebook.net/en_US/fbevents.js");
-      window.fbq("init", resolvedMetaPixelId);
-      window.fbq("track", "PageView");
-    }
-
-    if (resolvedGoogleAdsId) {
-      if (!loadedGtagJs) {
-        loadScript("https://www.googletagmanager.com/gtag/js?id=" + resolvedGoogleAdsId);
-        ensureGtagStub();
-        window.gtag("js", new Date());
-      }
-      window.gtag("config", resolvedGoogleAdsId);
-    }
 
     setTimeout(function scheduleFunnelInit() {
       var attempts = 0;
@@ -147,4 +109,3 @@ window.gtag("consent", "default", {
     </>
   )
 }
-

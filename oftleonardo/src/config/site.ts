@@ -11,11 +11,9 @@ export const siteConfig = {
     oftagenda:
       "https://agenda.oftleonardo.com.br/?utm_source=oftleonardo&utm_medium=referral&utm_campaign=crossdomain_seo",
   },
+  /** Medição via GTM apenas (GA4, Ads, Meta etc. no container). */
   analytics: {
-    ga4Id: import.meta.env.PUBLIC_GA4_ID ?? "",
     gtmId: import.meta.env.PUBLIC_GTM_ID ?? "",
-    metaPixelId: import.meta.env.PUBLIC_META_PIXEL_ID ?? "",
-    googleAdsId: import.meta.env.PUBLIC_GOOGLE_ADS_ID ?? "",
   },
 
   social: {
