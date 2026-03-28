@@ -187,51 +187,6 @@
   }
 }
 
-@keyframes parallax-shift-v1 {
-  from {
-    transform: translate3d(0, -6%, 0);
-  }
-  to {
-    transform: translate3d(0, 6%, 0);
-  }
-}
-
-@keyframes parallax-shift-v2 {
-  from {
-    transform: translate3d(0, -9%, 0);
-  }
-  to {
-    transform: translate3d(0, 9%, 0);
-  }
-}
-
-@keyframes parallax-shift-v3 {
-  from {
-    transform: translate3d(0, -12%, 0);
-  }
-  to {
-    transform: translate3d(0, 12%, 0);
-  }
-}
-
-@keyframes parallax-shift-v4 {
-  from {
-    transform: translate3d(0, -16%, 0);
-  }
-  to {
-    transform: translate3d(0, 16%, 0);
-  }
-}
-
-@keyframes parallax-shift-v5 {
-  from {
-    transform: translate3d(0, -22%, 0);
-  }
-  to {
-    transform: translate3d(0, 22%, 0);
-  }
-}
-
 @keyframes card-scroll-lift {
   from {
     transform: translate3d(0, 22px, 0) scale(0.985);
@@ -278,14 +233,13 @@
 }
 
 @layer utilities {
-  .defer-render {
-    content-visibility: visible;
-    contain-intrinsic-size: auto;
-  }
-
-  .scroll-section {
-    content-visibility: visible;
-    contain-intrinsic-size: auto;
+  /**
+   * Reduz memória e trabalho de pintura: o navegador pode omitir conteúdo fora da viewport.
+   * Altura estimada evita salto forte de scrollbar ao revelar (ajuste se seções mudarem muito).
+   */
+  .defer-render.scroll-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
   }
 
   .surface-lift {
@@ -318,34 +272,16 @@
    * tema escuro mantém o efeito visível com leve redução.
    */
   .parallax-artifacts .parallax-layer--v1 {
-    opacity: 0.24;
-  }
-  .parallax-artifacts .parallax-layer--v2 {
-    opacity: 0.3;
-  }
-  .parallax-artifacts .parallax-layer--v3 {
-    opacity: 0.29;
-  }
-  .parallax-artifacts .parallax-layer--v4 {
-    opacity: 0.3;
-  }
-  .parallax-artifacts .parallax-layer--v5 {
     opacity: 0.28;
   }
+  .parallax-artifacts .parallax-layer--v2 {
+    opacity: 0.34;
+  }
   html.dark .parallax-artifacts .parallax-layer--v1 {
-    opacity: 0.33;
+    opacity: 0.36;
   }
   html.dark .parallax-artifacts .parallax-layer--v2 {
-    opacity: 0.4;
-  }
-  html.dark .parallax-artifacts .parallax-layer--v3 {
-    opacity: 0.39;
-  }
-  html.dark .parallax-artifacts .parallax-layer--v4 {
-    opacity: 0.4;
-  }
-  html.dark .parallax-artifacts .parallax-layer--v5 {
-    opacity: 0.37;
+    opacity: 0.42;
   }
 
   .scroll-3d-stage {
@@ -399,39 +335,6 @@
     }
   }
 
-  @media (min-width: 768px) {
-    @supports (animation-timeline: scroll()) {
-      .parallax-layer--v1 {
-        animation: parallax-shift-v1 linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0% 100%;
-      }
-
-      .parallax-layer--v2 {
-        animation: parallax-shift-v2 linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0% 100%;
-      }
-
-      .parallax-layer--v3 {
-        animation: parallax-shift-v3 linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0% 100%;
-      }
-
-      .parallax-layer--v4 {
-        animation: parallax-shift-v4 linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0% 100%;
-      }
-
-      .parallax-layer--v5 {
-        animation: parallax-shift-v5 linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0% 100%;
-      }
-    }
-  }
 }
 
 @layer components {
@@ -512,6 +415,9 @@
     .parallax-layer {
       animation: none !important;
       transform: none !important;
+    }
+    .parallax-artifacts {
+      display: none !important;
     }
   }
 }

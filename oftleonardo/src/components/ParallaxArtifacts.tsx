@@ -39,20 +39,6 @@ function arcWedge(
   return `conic-gradient(from ${fromDeg}deg at ${x}% ${y}%, transparent 0deg, color-mix(in oklab, ${brand} ${opacity}%, transparent) ${peak}deg, transparent ${spanDeg}deg, transparent 360deg)`;
 }
 
-function ring(
-  x: number,
-  y: number,
-  innerR: number,
-  outerR: number,
-  opacity: number,
-) {
-  return `radial-gradient(circle at ${x}% ${y}%, transparent 0 ${innerR}px, color-mix(in oklab, ${brand} ${opacity}%, transparent) ${innerR}px ${outerR}px, transparent ${outerR}px)`;
-}
-
-function sparkle(x: number, y: number, opacity: number) {
-  return dot(x, y, 1.5, opacity);
-}
-
 const MASK_DEFAULT =
   "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)";
 const MASK_INNER =
@@ -137,120 +123,6 @@ const ARTIFACTS_V2 = [
   dot(36, 38, 5, 12),
 ].join(", ");
 
-/** Meio-termo: poucos anéis; traços, cunhas e elipses. */
-const ARTIFACTS_V3 = [
-  ring(50, 8, 4, 6, 11),
-  ring(24, 64, 4, 6, 10),
-  ring(82, 68, 3.5, 5.5, 10),
-  ring(14, 8, 3, 5, 10),
-  lineBand(32, 4),
-  lineBand(118, 4),
-  lineBand(76, 3),
-  lineBand(148, 4),
-  lineBand(8, 3),
-  shard(14, 4),
-  shard(46, 4),
-  shard(102, 3),
-  shard(166, 4),
-  shard(52, 3),
-  shard(128, 4),
-  ellipseGlow(40, 48, "18%", "16%", 5, "70%"),
-  ellipseGlow(72, 22, "22%", "9%", 5, "68%"),
-  ellipseGlow(18, 78, "14%", "20%", 4, "74%"),
-  arcWedge(56, 58, 45, 3, 38),
-  arcWedge(50, 50, 60, 3, 42),
-  arcWedge(28, 92, 200, 3, 38),
-  arcWedge(34, 36, 175, 3, 36),
-  sparkle(12, 18, 17),
-  sparkle(48, 14, 16),
-  sparkle(74, 40, 17),
-  sparkle(30, 56, 16),
-  sparkle(88, 82, 17),
-  sparkle(52, 22, 16),
-  sparkle(18, 48, 16),
-  sparkle(42, 58, 17),
-  sparkle(68, 44, 16),
-  sparkle(26, 34, 17),
-  sparkle(84, 34, 16),
-  shard(26, 3),
-  shard(60, 3),
-  shard(92, 3),
-  shard(8, 3),
-].join(", ");
-
-/** Camada rápida intermediária: traços e elipses; poucos pontos grandes. */
-const ARTIFACTS_V4 = [
-  lineBand(24, 4),
-  lineBand(108, 4),
-  lineBand(156, 3),
-  lineBand(84, 4),
-  shard(18, 4),
-  shard(54, 4),
-  shard(90, 3),
-  shard(132, 4),
-  shard(174, 3),
-  shard(4, 4),
-  ellipseGlow(20, 70, "18%", "24%", 5, "76%"),
-  ellipseGlow(80, 24, "22%", "11%", 5, "70%"),
-  ellipseGlow(48, 44, "24%", "10%", 5, "74%"),
-  ellipseGlow(12, 56, "20%", "10%", 4, "72%"),
-  arcWedge(60, 72, 175, 3, 36),
-  arcWedge(78, 20, 210, 3, 34),
-  arcWedge(44, 52, 125, 3, 32),
-  glow(52, 78, 62, 6),
-  glow(18, 38, 58, 5),
-  glow(88, 66, 64, 5),
-  dot(58, 32, 9, 10),
-  dot(20, 74, 8, 9),
-  dot(86, 78, 8, 9),
-  dot(24, 8, 6, 9),
-  dot(8, 88, 8, 9),
-  dot(48, 42, 6, 9),
-  dot(16, 36, 6, 9),
-  dot(38, 64, 7, 9),
-  dot(18, 72, 7, 9),
-  dot(46, 18, 6, 9),
-  dot(64, 54, 7, 9),
-].join(", ");
-
-/** Primeiro plano: traços cruzados + brilhos pontuais (scroll mais rápido). */
-const ARTIFACTS_V5 = [
-  shard(10, 4),
-  shard(34, 4),
-  shard(58, 3),
-  shard(82, 4),
-  shard(6, 3),
-  shard(118, 4),
-  shard(142, 3),
-  shard(168, 4),
-  shard(194, 3),
-  shard(26, 4),
-  shard(50, 3),
-  shard(96, 4),
-  lineBand(40, 3),
-  lineBand(152, 4),
-  lineBand(88, 3),
-  sparkle(5, 8, 15),
-  sparkle(32, 12, 16),
-  sparkle(60, 6, 15),
-  sparkle(88, 16, 16),
-  sparkle(28, 52, 15),
-  sparkle(56, 66, 16),
-  sparkle(16, 68, 15),
-  sparkle(84, 94, 16),
-  sparkle(2, 32, 15),
-  sparkle(54, 18, 16),
-  sparkle(30, 96, 15),
-  sparkle(72, 34, 16),
-  sparkle(22, 38, 15),
-  sparkle(66, 42, 16),
-  sparkle(14, 62, 15),
-  sparkle(40, 84, 16),
-  sparkle(76, 90, 15),
-  arcWedge(48, 44, 88, 3, 28),
-  arcWedge(22, 78, 220, 3, 26),
-].join(", ");
-
 export default function ParallaxArtifacts() {
   return (
     <div
@@ -270,30 +142,6 @@ export default function ParallaxArtifacts() {
         style={{
           transform: "translate3d(0, 0, 0)",
           backgroundImage: ARTIFACTS_V2,
-          maskImage: MASK_DEFAULT,
-        }}
-      />
-      <div
-        className="parallax-layer parallax-layer--v3 absolute inset-0"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: ARTIFACTS_V3,
-          maskImage: MASK_DEFAULT,
-        }}
-      />
-      <div
-        className="parallax-layer parallax-layer--v4 absolute inset-0"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: ARTIFACTS_V4,
-          maskImage: MASK_DEFAULT,
-        }}
-      />
-      <div
-        className="parallax-layer parallax-layer--v5 absolute inset-0"
-        style={{
-          transform: "translate3d(0, 0, 0)",
-          backgroundImage: ARTIFACTS_V5,
           maskImage: MASK_DEFAULT,
         }}
       />
