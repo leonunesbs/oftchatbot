@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import { trackClickWhatsapp } from "@/lib/analytics";
+import { trackClickWhatsapp, trackScheduleAppointmentClick } from "@/lib/analytics";
 import {
   GEO_CITY_COOKIE_NAME,
   type SupportedGeoCitySlug,
@@ -167,7 +167,20 @@ export default function WhatsAppModal({
               poucos cliques.
             </p>
             <Button asChild className="mt-3 w-full">
-              <a id={onlineBookingLinkId} href={siteConfig.partnerApps.oftagenda}>
+              <a
+                id={onlineBookingLinkId}
+                href={siteConfig.partnerApps.oftagenda}
+                data-oft-agenda-dialog-tracked="true"
+                onClick={() =>
+                  trackScheduleAppointmentClick({
+                    cta_text: "Agendar online",
+                    cta_href: siteConfig.partnerApps.oftagenda,
+                    trigger_id: onlineBookingLinkId,
+                    dialog_opener_id: triggerId,
+                    link_context: "booking_dialog",
+                  })
+                }
+              >
                 Agendar online
               </a>
             </Button>

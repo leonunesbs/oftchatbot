@@ -57,6 +57,7 @@ function bindOutboundClickTracking() {
       const href = link.getAttribute("href") || "";
 
       if (href.includes("agenda.oftleonardo.com.br")) {
+        if (link.closest("[data-oft-agenda-dialog-tracked]")) return;
         const ctaText = (link.textContent || "").trim().slice(0, 80);
         const payload = {
           channel: "online_booking" as const,

@@ -7,11 +7,23 @@ export const CONSENT_STORAGE_KEY = "oftcore:consent:v1";
 export const GA4_EVENTS = {
   click_whatsapp: "click_whatsapp",
   schedule_appointment: "schedule_appointment",
+  /** Clique em cidade (WhatsApp) ou em “Agendar online” no diálogo de agendamento. Marque como conversão no GA4. */
+  generate_lead: "generate_lead",
   /** Legacy: mantido para compatibilidade com tags existentes. */
   start_booking: "start_booking",
   audience_page_context: "audience_page_context",
   scroll_depth_milestone: "scroll_depth_milestone",
 } as const;
+
+const FLOAT_ENTRY_BY_TRIGGER: Record<
+  string,
+  "float_whatsapp" | "float_booking"
+> = {
+  "gtm-float-whatsapp": "float_whatsapp",
+  "gtm-float-booking-calendar": "float_booking",
+  "gtm-float-whatsapp-dialog-agendar-online": "float_whatsapp",
+  "gtm-float-booking-dialog-agendar-online": "float_booking",
+};
 
 declare global {
   interface Window {
@@ -61,6 +73,48 @@ function dispatch(eventName: string, params: Record<string, unknown>) {
   sendGtag(eventName, merged);
 }
 
+function resolveFloatEntry(
+  dialog_opener_id?: string,
+  online_link_id?: string,
+): "float_whatsapp" | "float_booking" | undefined {
+  if (dialog_opener_id && FLOAT_ENTRY_BY_TRIGGER[dialog_opener_id]) {
+    return FLOAT_ENTRY_BY_TRIGGER[dialog_opener_id];
+  }
+  if (online_link_id && FLOAT_ENTRY_BY_TRIGGER[online_link_id]) {
+    return FLOAT_ENTRY_BY_TRIGGER[online_link_id];
+  }
+  return undefined;
+}
+
+/**
+ * `generate_lead` ao escolher cidade (WhatsApp) ou “Agendar online” no diálogo (`WhatsAppModal`).
+ * Parâmetro `float_entry` só quando o disparo vem dos flutuantes (ids conhecidos).
+ */
+export function dispatchBookingDialogGenerateLead(payload: {
+  method: "whatsapp" | "online_booking";
+  /** id do botão que abre o diálogo (ex.: gtm-float-whatsapp). */
+  dialog_opener_id?: string;
+  city?: string;
+  cta_href?: string;
+  /** id do link “Agendar online” (ex.: gtm-float-whatsapp-dialog-agendar-online). */
+  online_link_id?: string;
+}) {
+  const float_entry = resolveFloatEntry(
+    payload.dialog_opener_id,
+    payload.online_link_id,
+  );
+  dispatch(GA4_EVENTS.generate_lead, {
+    booking_method: payload.method,
+    booking_conversion_scope: "booking_dialog",
+    ...(payload.dialog_opener_id ? { dialog_opener_id: payload.dialog_opener_id } : {}),
+    ...(payload.online_link_id ? { online_link_id: payload.online_link_id } : {}),
+    ...(payload.city ? { city: payload.city } : {}),
+    ...(payload.cta_href ? { cta_href: payload.cta_href } : {}),
+    ...(float_entry ? { float_entry } : {}),
+    page_path: window.location.pathname,
+  });
+}
+
 /** Clique que abre WhatsApp (api.whatsapp.com / wa.me). */
 export function trackClickWhatsapp(payload: {
   city?: string;
@@ -81,6 +135,11 @@ export function trackClickWhatsapp(payload: {
     page_path,
     trigger_id: payload.trigger_id,
   });
+  dispatchBookingDialogGenerateLead({
+    method: "whatsapp",
+    dialog_opener_id: payload.trigger_id,
+    city: payload.city,
+  });
 }
 
 /** Clique em agendamento online (Minha Agenda / embed). */
@@ -89,7 +148,10 @@ export function trackScheduleAppointmentClick(payload: {
   cta_href: string;
   page_path?: string;
   link_context?: string;
+  /** `id` do link (GTM). */
   trigger_id?: string;
+  /** `id` do botão que abriu o diálogo de agendamento. */
+  dialog_opener_id?: string;
 }) {
   const page_path = payload.page_path ?? window.location.pathname;
   const base = {
@@ -98,6 +160,7 @@ export function trackScheduleAppointmentClick(payload: {
     page_path,
     link_context: payload.link_context,
     trigger_id: payload.trigger_id,
+    dialog_opener_id: payload.dialog_opener_id,
     booking_channel: "online_booking" as const,
   };
   dispatch(GA4_EVENTS.schedule_appointment, base);
@@ -106,6 +169,12 @@ export function trackScheduleAppointmentClick(payload: {
     cta_text: payload.cta_text,
     cta_href: payload.cta_href,
     page_path,
+  });
+  dispatchBookingDialogGenerateLead({
+    method: "online_booking",
+    dialog_opener_id: payload.dialog_opener_id,
+    online_link_id: payload.trigger_id,
+    cta_href: payload.cta_href,
   });
 }
 
