@@ -1,20 +1,10 @@
 import { resolveAudiencePageContext, type AudiencePageContext } from "@/config/analytics-audiences";
+import { ANALYTICS_APP, OFT_ANALYTICS_EVENTS } from "@/lib/oft-analytics-events";
 
 export const CONSENT_STORAGE_KEY = "oftcore:consent:v1";
 
-/** Nomes estáveis para GA4 / GTM (snake_case). */
-export const GA4_EVENTS = {
-  click_whatsapp: "click_whatsapp",
-  schedule_appointment: "schedule_appointment",
-  /** Abertura do diálogo de agendamento (CTA que não é link; GTM pode mapear por `dialog_opener_id`). */
-  booking_dialog_open: "booking_dialog_open",
-  /** Clique em cidade (WhatsApp) ou em “Agendar online” no diálogo de agendamento. Marque como conversão no GA4. */
-  generate_lead: "generate_lead",
-  /** Legacy: mantido para compatibilidade com tags existentes. */
-  start_booking: "start_booking",
-  audience_page_context: "audience_page_context",
-  scroll_depth_milestone: "scroll_depth_milestone",
-} as const;
+/** Nomes estáveis para GA4 / GTM (mesmo conjunto que oftagenda no container unificado). */
+export const GA4_EVENTS = OFT_ANALYTICS_EVENTS;
 
 const FLOAT_ENTRY_BY_TRIGGER: Record<
   string,
@@ -53,6 +43,7 @@ function mergeContext(
       typeof window !== "undefined" ? window.location.search : undefined,
     );
   return {
+    analytics_app: ANALYTICS_APP.oftleonardo,
     funnel_stage: ctx.funnel_stage,
     page_intent: ctx.page_intent,
     ...(ctx.content_theme ? { content_theme: ctx.content_theme } : {}),

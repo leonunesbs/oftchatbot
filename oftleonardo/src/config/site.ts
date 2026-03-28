@@ -11,7 +11,10 @@ export const siteConfig = {
     oftagenda:
       "https://agenda.oftleonardo.com.br/?utm_source=oftleonardo&utm_medium=referral&utm_campaign=crossdomain_seo",
   },
-  /** Medição via GTM apenas (GA4, Ads, Meta etc. no container). */
+  /**
+   * Mesmo container que oftagenda (`NEXT_PUBLIC_GTM_ID` em agenda.oftleonardo.com.br).
+   * Defina o mesmo valor em Vercel para ambos os projetos.
+   */
   analytics: {
     gtmId: import.meta.env.PUBLIC_GTM_ID ?? "",
   },

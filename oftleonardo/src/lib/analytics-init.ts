@@ -1,10 +1,12 @@
 import { resolveAudiencePageContext } from "@/config/analytics-audiences";
+import { siteConfig } from "@/config/site";
 import {
   GA4_EVENTS,
   hasAnalyticsConsent,
   trackAudiencePageContext,
   trackScrollDepthMilestones,
 } from "@/lib/analytics";
+import { ANALYTICS_APP } from "@/lib/oft-analytics-events";
 
 let outboundBound = false;
 let funnelBootOnce = false;
@@ -12,6 +14,7 @@ let funnelBootOnce = false;
 function mergePageContext(params: Record<string, unknown>): Record<string, unknown> {
   const ctx = resolveAudiencePageContext(window.location.pathname, window.location.search);
   return {
+    analytics_app: ANALYTICS_APP.oftleonardo,
     funnel_stage: ctx.funnel_stage,
     page_intent: ctx.page_intent,
     ...(ctx.content_theme ? { content_theme: ctx.content_theme } : {}),
