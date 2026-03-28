@@ -14,8 +14,8 @@
 
 ## Agendamento
 
-- O agendamento principal acontece em [Agendamento Online](https://oftleonardo.com.br/agendamento-online), com formulário incorporado da plataforma oficial.
-- Canais complementares, como WhatsApp, podem aparecer em pontos específicos da experiência.
+- O formulário completo de agendamento com escolha de data e horário está em [Minha Agenda](https://agenda.oftleonardo.com.br/) (agenda.oftleonardo.com.br). O link [Agendamento Online](https://oftleonardo.com.br/agendamento-online) redireciona para a página inicial com o diálogo de agendamento (incluindo WhatsApp).
+- Canais complementares, como WhatsApp, aparecem no diálogo de agendamento e em pontos específicos da experiência.
 
 ## Artigos — doenças e condições
 

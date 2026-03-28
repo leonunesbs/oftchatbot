@@ -1,5 +1,5 @@
 Leonardo Nunes — oftalmologista (Fortaleza/CE, São Domingos do Maranhão/MA, Fortuna/MA). Site: https://oftleonardo.com.br/
 
-Agendamento online (formulário incorporado): https://oftleonardo.com.br/agendamento-online · Hub de conteúdos: https://oftleonardo.com.br/conteudos
+Agendamento com data/horário: https://agenda.oftleonardo.com.br/ · Atalho no site (redireciona para início + diálogo): https://oftleonardo.com.br/agendamento-online · Hub de conteúdos: https://oftleonardo.com.br/conteudos
 
 Descoberta: sitemap https://oftleonardo.com.br/sitemap.xml · robots https://oftleonardo.com.br/robots.txt · documento completo para LLMs: https://oftleonardo.com.br/llms.txt

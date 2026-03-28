@@ -10,7 +10,6 @@ export const siteConfig = {
   partnerApps: {
     oftagenda:
       "https://agenda.oftleonardo.com.br/?utm_source=oftleonardo&utm_medium=referral&utm_campaign=crossdomain_seo",
-    oftagendaEmbed: "https://agenda.oftleonardo.com.br/embed/agendar",
   },
   analytics: {
     ga4Id: import.meta.env.PUBLIC_GA4_ID ?? "",

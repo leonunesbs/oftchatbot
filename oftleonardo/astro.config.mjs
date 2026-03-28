@@ -21,6 +21,7 @@ const sitemapCustomPages = [
   `${siteOrigin}/politica-de-privacidade`,
   `${siteOrigin}/termos-de-uso`,
   `${siteOrigin}/agendamento-pendente`,
+  `${siteOrigin}/agendamento-online`,
 ];
 
 export default defineConfig({
@@ -109,6 +110,7 @@ export default defineConfig({
           "/acuidade-visual": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
           "/tela-de-amsler": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
           "/agendamento-pendente": { changefreq: EnumChangefreq.MONTHLY, priority: 0.5 },
+          "/agendamento-online": { changefreq: EnumChangefreq.MONTHLY, priority: 0.85 },
           "/politica-de-privacidade": { changefreq: EnumChangefreq.YEARLY, priority: 0.4 },
           "/termos-de-uso": { changefreq: EnumChangefreq.YEARLY, priority: 0.4 },
         };

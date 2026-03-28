@@ -47,7 +47,12 @@ function mergeContext(
   params: Record<string, unknown>,
   context?: AudiencePageContext,
 ): Record<string, unknown> {
-  const ctx = context ?? resolveAudiencePageContext(window.location.pathname);
+  const ctx =
+    context ??
+    resolveAudiencePageContext(
+      typeof window !== "undefined" ? window.location.pathname : "/",
+      typeof window !== "undefined" ? window.location.search : undefined,
+    );
   return {
     funnel_stage: ctx.funnel_stage,
     page_intent: ctx.page_intent,
@@ -144,13 +149,17 @@ export function trackClickWhatsapp(payload: {
   });
 }
 
-/** Diálogo de agendamento aberto (botão CTA, sem mudança de rota). */
+/** Diálogo de agendamento aberto (botão CTA ou deep link `?agendar=1`). */
 export function trackBookingDialogOpen(payload: {
-  /** `id` do botão que abre o diálogo (GTM). */
+  /** `id` do botão que abre o diálogo (GTM). Deep link: `gtm-url-deeplink-agendar`. */
   dialog_opener_id?: string;
   /** Texto visível do CTA, quando for string simples. */
   cta_text?: string;
   page_path?: string;
+  /** URL completa (útil quando há query, ex.: `?agendar=1`). */
+  page_location?: string;
+  /** Disparo via URL em vez de clique no CTA. */
+  booking_entry?: "url_deeplink";
 }) {
   const page_path = payload.page_path ?? window.location.pathname;
   const float_entry = resolveFloatEntry(payload.dialog_opener_id);
@@ -162,7 +171,7 @@ export function trackBookingDialogOpen(payload: {
   });
 }
 
-/** Clique em agendamento online (Minha Agenda / embed). */
+/** Clique em agendamento online (Minha Agenda em agenda.oftleonardo.com.br). */
 export function trackScheduleAppointmentClick(payload: {
   cta_text?: string;
   cta_href: string;

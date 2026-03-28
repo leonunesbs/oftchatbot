@@ -94,10 +94,18 @@ const EXAM_REFERENCE_SLUGS = new Set([
   "microscopia-especular",
 ]);
 
-export function resolveAudiencePageContext(pathname: string): AudiencePageContext {
+export function resolveAudiencePageContext(pathname: string, search?: string): AudiencePageContext {
   let path = pathname || "/";
   if (path !== "/" && path.endsWith("/")) {
     path = path.replace(/\/$/, "") || "/";
+  }
+
+  if (path === "/") {
+    const raw = search?.startsWith("?") ? search.slice(1) : (search ?? "");
+    const sp = new URLSearchParams(raw);
+    if (sp.get("agendar") === "1") {
+      return { funnel_stage: "hot", page_intent: "transactional" };
+    }
   }
 
   if (path === "/conteudos") {

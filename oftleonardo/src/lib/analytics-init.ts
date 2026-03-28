@@ -11,7 +11,7 @@ let outboundBound = false;
 let funnelBootOnce = false;
 
 function mergePageContext(params: Record<string, unknown>): Record<string, unknown> {
-  const ctx = resolveAudiencePageContext(window.location.pathname);
+  const ctx = resolveAudiencePageContext(window.location.pathname, window.location.search);
   return {
     funnel_stage: ctx.funnel_stage,
     page_intent: ctx.page_intent,

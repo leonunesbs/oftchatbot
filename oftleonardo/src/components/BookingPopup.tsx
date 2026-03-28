@@ -9,6 +9,8 @@ interface Props {
   triggerAriaLabel?: string;
   triggerId?: string;
   onlineBookingLinkId?: string;
+  /** Deep link `?agendar=1` + sincronização de URL (CTA principal da home). */
+  urlSync?: boolean;
 }
 
 export default function BookingPopup({
@@ -19,6 +21,7 @@ export default function BookingPopup({
   triggerAriaLabel,
   triggerId,
   onlineBookingLinkId,
+  urlSync,
 }: Props) {
   return (
     <WhatsAppModal
@@ -28,6 +31,7 @@ export default function BookingPopup({
       triggerAriaLabel={triggerAriaLabel}
       triggerId={triggerId}
       onlineBookingLinkId={onlineBookingLinkId}
+      urlSync={urlSync}
     >
       {children}
     </WhatsAppModal>

@@ -17,7 +17,10 @@ import {
   GEO_CITY_COOKIE_NAME,
   type SupportedGeoCitySlug,
 } from "@/lib/geo/constants";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { isBookingUrlOpen, setBookingUrlParam } from "@/lib/booking-url";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+const GTM_DEEPLINK_OPENER_ID = "gtm-url-deeplink-agendar";
 
 function ctaTextFromChildren(children: ReactNode): string | undefined {
   if (typeof children === "string") return children.trim().slice(0, 120);
@@ -74,6 +77,10 @@ interface Props {
   dialogDescription?: string;
   whatsappMessageTemplate?: string;
   showOnlineBookingCta?: boolean;
+  /**
+   * Lê `?agendar=1`, abre o diálogo e sincroniza a URL ao fechar (use só no CTA principal da home).
+   */
+  urlSync?: boolean;
 }
 
 export default function WhatsAppModal({
@@ -88,7 +95,10 @@ export default function WhatsAppModal({
   dialogDescription = "Escolha a cidade e inicie o agendamento pelo WhatsApp",
   whatsappMessageTemplate = "Olá, Dr. Leonardo! Gostaria de agendar uma consulta oftalmológica em {city}.",
   showOnlineBookingCta = true,
+  urlSync = false,
 }: Props) {
+  const [open, setOpen] = useState(false);
+  const deeplinkSyncRef = useRef(false);
   const [preferredCitySlug, setPreferredCitySlug] = useState<SupportedGeoCitySlug | null>(null);
 
   useEffect(() => {
@@ -100,6 +110,20 @@ export default function WhatsAppModal({
       setPreferredCitySlug(cookieValue as SupportedGeoCitySlug);
     }
   }, []);
+
+  useEffect(() => {
+    if (!urlSync) return;
+    if (!isBookingUrlOpen()) return;
+    deeplinkSyncRef.current = true;
+    setOpen(true);
+    trackBookingDialogOpen({
+      dialog_opener_id: GTM_DEEPLINK_OPENER_ID,
+      cta_text: ctaTextFromChildren(children),
+      page_path: window.location.pathname,
+      page_location: window.location.href,
+      booking_entry: "url_deeplink",
+    });
+  }, [urlSync]);
 
   const orderedCities = useMemo(() => {
     if (!preferredCitySlug) return siteConfig.cities;
@@ -117,18 +141,26 @@ export default function WhatsAppModal({
       whatsappMessageTemplate.replace("{city}", cityName),
     );
 
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (urlSync) {
+      setBookingUrlParam(next);
+    }
+    if (!next) return;
+    if (deeplinkSyncRef.current) {
+      deeplinkSyncRef.current = false;
+      return;
+    }
+    trackBookingDialogOpen({
+      dialog_opener_id: triggerId,
+      cta_text: ctaTextFromChildren(children),
+      page_path:
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+    });
+  }
+
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!open) return;
-        trackBookingDialogOpen({
-          dialog_opener_id: triggerId,
-          cta_text: ctaTextFromChildren(children),
-          page_path:
-            typeof window !== "undefined" ? window.location.pathname : undefined,
-        });
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant={variant}
