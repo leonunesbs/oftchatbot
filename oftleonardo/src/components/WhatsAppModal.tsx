@@ -222,6 +222,8 @@ export default function WhatsAppModal({
               <a
                 id={onlineBookingLinkId}
                 href={siteConfig.partnerApps.oftagenda}
+                target="_blank"
+                rel="noopener noreferrer"
                 data-oft-agenda-dialog-tracked="true"
                 onClick={() =>
                   trackScheduleAppointmentClick({
