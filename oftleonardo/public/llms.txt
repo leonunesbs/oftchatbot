@@ -8,6 +8,7 @@
 - [Conteúdos](https://oftleonardo.com.br/conteudos): hub de conteúdos educativos em oftalmologia.
 - [Teste de Acuidade Visual](https://oftleonardo.com.br/acuidade-visual): triagem visual orientativa (não substitui consulta).
 - [Tela de Amsler](https://oftleonardo.com.br/tela-de-amsler): triagem orientativa para distorções centrais (não substitui consulta).
+- [Calculadora de olho seco](https://oftleonardo.com.br/calculadora-olho-seco): teste online de sintomas com questionário clínico OSDI (educativo; não substitui consulta).
 - [Termos de Uso](https://oftleonardo.com.br/termos-de-uso): condições de uso do site e responsabilidades.
 - [Política de Privacidade](https://oftleonardo.com.br/politica-de-privacidade): tratamento de dados e cookies em conformidade com a LGPD.
 - [Agendamento pendente de pagamento](https://oftleonardo.com.br/agendamento-pendente): página exibida após fluxo de agendamento com pagamento a concluir (quando aplicável).

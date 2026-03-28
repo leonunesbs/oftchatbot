@@ -48,6 +48,15 @@ const RULES: Rule[] = [
   },
   {
     match: "exact",
+    pattern: "/calculadora-olho-seco",
+    ctx: {
+      funnel_stage: "tool",
+      page_intent: "tool_triage",
+      content_theme: "olho_seco",
+    },
+  },
+  {
+    match: "exact",
     pattern: "/agendamento-online",
     ctx: { funnel_stage: "hot", page_intent: "transactional" },
   },

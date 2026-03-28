@@ -5,6 +5,7 @@ keywords: "astigmatismo, astigmatismo sintomas, visão embaçada, cilindro ócul
 condition: "Astigmatismo"
 procedure: "Correção com óculos, lentes de contato tóricas ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+hubCategory: refractive
 faq:
   - question: "Astigmatismo é doença?"
     answer: "Na maior parte dos casos, é uma variação anatômica: a córnea (ou, menos comumente, o cristalino) não tem curvatura uniforme como uma esfera perfeita, lembrando mais um formato de 'rugby ball'. Não é contagiosa. Em algumas situações, o astigmatismo pode mudar com doenças da córnea — aí a causa precisa ser investigada."

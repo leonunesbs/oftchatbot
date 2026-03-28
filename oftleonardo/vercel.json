@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/calculadora-osdi",
+      "destination": "/calculadora-olho-seco",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

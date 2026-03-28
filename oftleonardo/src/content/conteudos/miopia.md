@@ -5,6 +5,7 @@ keywords: "miopia, miopia graus, visão embaçada longe, erro de refração, óc
 condition: "Miopia"
 procedure: "Correção com óculos, lentes de contato ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+hubCategory: refractive
 faq:
   - question: "A miopia piora se eu ler muito no escuro ou usar o celular deitado?"
     answer: "Hábitos como leitura com pouca luz podem causar cansaço visual, mas não são a causa principal da miopia. Fatores genéticos e o crescimento do globo ocular na infância e adolescência pesam mais. O importante é ter refração atualizada, pausas no trabalho de perto e acompanhamento periódico com oftalmologista."

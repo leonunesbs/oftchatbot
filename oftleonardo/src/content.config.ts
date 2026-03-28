@@ -17,7 +17,7 @@ const conteudos = defineCollection({
       }),
     ),
     relatedSlugs: z.array(z.string()),
-    hubCategory: z.enum(["conditions", "exams"]).default("conditions"),
+    hubCategory: z.enum(["conditions", "exams", "refractive"]).default("conditions"),
   }),
 });
 

@@ -21,6 +21,11 @@ const tools = [
     label: "Tela de Amsler",
   },
   {
+    id: "gtm-nav-tools-olho-seco",
+    href: "/calculadora-olho-seco",
+    label: "Olho seco",
+  },
+  {
     id: "gtm-nav-tools-agendamento-online",
     href: "/agendamento-online",
     label: "Agendamento Online",

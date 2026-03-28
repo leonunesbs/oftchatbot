@@ -5,9 +5,10 @@ keywords: "cirurgia refrativa, LASIK, PRK, SMILE, laser na visão, miopia cirurg
 condition: "Erros de refração indicados para correção cirúrgica"
 procedure: "Cirurgia refrativa a laser (LASIK, PRK, SMILE ou técnicas relacionadas)"
 readingTime: "9 min"
+hubCategory: refractive
 faq:
   - question: "Cirurgia refrativa 'cura' a vista para sempre?"
-    answer: "O objetivo é reduzir ou eliminar a dependência de óculos para a distância desejada no momento da cirurgia. Porém o olho continua envelhecendo: presbiopia pode surgir na meia-idade, catarata mais tarde, e pequenas mudanças de refração podem ocorrer. Retocques (enhancements) existem em casos selecionados, mas não são garantidos para todos."
+    answer: "O objetivo é reduzir ou eliminar a dependência de óculos para a distância desejada no momento da cirurgia. Porém o olho continua envelhecendo: presbiopia pode surgir na meia-idade, catarata mais tarde, e pequenas mudanças de refração podem ocorrer. Retoques em casos selecionados são possíveis, mas não são garantidos para todos."
   - question: "Qual técnica é melhor: LASIK, PRK ou SMILE?"
     answer: "Não há uma única vencedora para todos. A escolha depende de espessura e forma da córnea, grau, profissão, prática esportiva, história de olho seco e preferências após discussão dos prós e contras. O oftalmologista indica com base em exames, não em moda ou propaganda."
   - question: "Quem tem olho seco pode operar?"
@@ -25,7 +26,7 @@ relatedSlugs:
 
 **Cirurgia refrativa** é o conjunto de procedimentos que visa **alterar a forma óptica do olho** — em geral a **córnea** — para que a luz passe a focar de modo mais adequado na **retina**, reduzindo a necessidade de **óculos** ou **lentes de contato** para determinadas distâncias.
 
-Ela é indicada para **erros de refração** como **miopia**, **hipermetropia** e **astigmatismo**, em **adultos** que preencham critérios de segurança. **Presbiopia** pode ser parcialmente abordada com estratégias específicas (por exemplo, monovisão ou outras abordagens), mas a lógica é diferente da correção só de grau de longe — e os trade-offs devem ser conversados com clareza.
+Ela é indicada para **erros de refração** como **miopia**, **hipermetropia** e **astigmatismo**, em **adultos** que preencham critérios de segurança. **Presbiopia** pode ser parcialmente abordada com estratégias específicas (por exemplo, monovisão ou outras abordagens), mas a lógica é diferente da correção só de grau de longe — e os prós e contras devem ser conversados com clareza.
 
 ## Principais técnicas à laser (visão geral)
 
@@ -33,7 +34,7 @@ Os nomes comerciais variam, mas os conceitos mais comuns incluem:
 
 - **LASIK** — cria-se um **flap** (lapela fina) na córnea; o laser remodela o leito abaixo e o flap é reposicionado. Recuperação visual costuma ser rápida em muitos casos.
 - **PRK / LASEK / transepitelial** — o laser atua na **superfície**, sem flap; pode ser preferida quando o perfil de córnea ou outras variáveis favorecem essa abordagem. A recuperação inicial pode ser mais lenta e com mais desconforto nos primeiros dias.
-- **SMILE** — técnica com incisiones menores e **sem flap** no estilo LASIK; indicação depende de grau, equipamento e experiência da equipe.
+- **SMILE** — técnica com **incisões** menores e **sem flap** no estilo LASIK; a indicação depende de grau, equipamento e experiência da equipe.
 
 A escolha **não** deve ser feita só por vídeo na internet: depende de **exames** (espessura corneana, topografia, aberrometria em alguns casos, saúde da retina etc.) e de **história clínica**.
 
@@ -47,7 +48,7 @@ A escolha **não** deve ser feita só por vídeo na internet: depende de **exame
 
 ## Riscos e limitações (visão honesta)
 
-Como qualquer cirurgia ocular, há riscos: **infeção**, **inflamação**, **descolamento de flap** (em técnicas com flap), **ectasia corneana** (raro, mas grave), **visão subótima** ou necessidade de **retoque**. Sintomas de **olho seco**, **halos** ou **flare** noturno podem existir, mesmo com técnica impecável.
+Como qualquer cirurgia ocular, há riscos: **infecção**, **inflamação**, **descolamento de flap** (em técnicas com flap), **ectasia corneana** (raro, mas grave), **visão subótima** ou necessidade de **retoque**. Podem existir **olho seco**, **halos** e **ofuscamento** noturnos, mesmo com técnica impecável.
 
 Por isso o processo informado — com perguntas e respostas — faz parte do cuidado.
 

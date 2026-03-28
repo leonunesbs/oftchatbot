@@ -25,6 +25,7 @@ const sitemapCustomPages = [
   `${siteOrigin}/conteudos`,
   `${siteOrigin}/acuidade-visual`,
   `${siteOrigin}/tela-de-amsler`,
+  `${siteOrigin}/calculadora-olho-seco`,
   `${siteOrigin}/politica-de-privacidade`,
   `${siteOrigin}/termos-de-uso`,
   `${siteOrigin}/agendamento-pendente`,
@@ -116,6 +117,7 @@ export default defineConfig({
           "/conteudos": { changefreq: EnumChangefreq.WEEKLY, priority: 0.8 },
           "/acuidade-visual": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
           "/tela-de-amsler": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
+          "/calculadora-olho-seco": { changefreq: EnumChangefreq.WEEKLY, priority: 1.0 },
           "/agendamento-pendente": { changefreq: EnumChangefreq.MONTHLY, priority: 0.5 },
           "/agendamento-online": { changefreq: EnumChangefreq.MONTHLY, priority: 0.85 },
           "/politica-de-privacidade": { changefreq: EnumChangefreq.YEARLY, priority: 0.4 },
@@ -144,6 +146,11 @@ export default defineConfig({
         allow: [monorepoRoot],
       },
     },
-    plugins: [tailwindcss()],
+    /**
+     * `tailwindcss()` retorna um *array* de plugins. Se passarmos `[tailwindcss()]`,
+     * o merge do Vite deixa um nível extra aninhado e, em Vite 7, o pipeline de
+     * `transform` pode falhar com: Cannot read properties of undefined (reading 'call').
+     */
+    plugins: [...tailwindcss()],
   },
 });

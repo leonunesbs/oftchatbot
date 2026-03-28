@@ -1,5 +1,5 @@
 Leonardo Nunes — oftalmologista (CRM-CE 27.199 | CRM-PI 10.051), retina clínica e cirúrgica e cirurgia de catarata. Atendimento em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). Site: https://oftleonardo.com.br/
 
-Agendamento com data e horário: https://agenda.oftleonardo.com.br/ · Atalho no site (redireciona para início + diálogo de agendamento): https://oftleonardo.com.br/agendamento-online · Hub com mais de 20 artigos educativos: https://oftleonardo.com.br/conteudos · Ferramentas: teste de acuidade https://oftleonardo.com.br/acuidade-visual · tela de Amsler https://oftleonardo.com.br/tela-de-amsler
+Agendamento com data e horário: https://agenda.oftleonardo.com.br/ · Atalho no site (redireciona para início + diálogo de agendamento): https://oftleonardo.com.br/agendamento-online · Hub com mais de 20 artigos educativos: https://oftleonardo.com.br/conteudos · Ferramentas: teste de acuidade https://oftleonardo.com.br/acuidade-visual · tela de Amsler https://oftleonardo.com.br/tela-de-amsler · calculadora de olho seco https://oftleonardo.com.br/calculadora-olho-seco
 
 Descoberta técnica: sitemap https://oftleonardo.com.br/sitemap.xml · robots https://oftleonardo.com.br/robots.txt · documento completo para LLMs https://oftleonardo.com.br/llms.txt · atalho https://oftleonardo.com.br/ai.txt

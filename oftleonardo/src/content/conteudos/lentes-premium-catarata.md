@@ -35,7 +35,7 @@ Foca de modo predominante em **uma distância** (em geral longe OU perto, confor
 
 ### Multifocal / “EDOF” (profundidade de foco estendida)
 
-Lentes que tentam entregar **mais de uma distância útil** sem óculos, usando zonas ou anéis de foco diferentes. Podem reduzir dependência de óculos, mas costumam ter **trade-offs**: maior chance de **halos**, **perda de contraste** ou sensação de “menos nitidez” em certas condições em troca de conveniência.
+Lentes que tentam entregar **mais de uma distância útil** sem óculos, usando zonas ou anéis de foco diferentes. Podem reduzir dependência de óculos, mas costumam exigir **compromissos**: maior chance de **halos**, **perda de contraste** ou sensação de “menos nitidez” em certas condições em troca de conveniência.
 
 ### Tórica
 

@@ -5,6 +5,7 @@ keywords: "presbiopia, vista cansada, dificuldade para ler de perto, acomodaçã
 condition: "Presbiopia"
 procedure: "Correção da visão para perto (óculos, lentes ou cirurgia refrativa)"
 readingTime: "8 min"
+hubCategory: refractive
 faq:
   - question: "A presbiopia é uma doença?"
     answer: "Não. A presbiopia é uma mudança natural relacionada ao envelhecimento do cristalino e da capacidade de focar de perto (acomodação). Não é contagiosa nem causada por hábitos como 'ler demais no escuro', embora o cansaço visual com trabalho de perto possa incomodar mais quando já existe presbiopia."

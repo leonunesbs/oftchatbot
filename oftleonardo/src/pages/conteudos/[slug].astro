@@ -86,7 +86,11 @@ const faqSchema = {
 const allSchemas = [breadcrumbSchema, medicalPageSchema, faqSchema];
 
 const articleSection =
-  article.data.hubCategory === "exams" ? "Exames e procedimentos" : "Doenças, refração e cirurgia";
+  article.data.hubCategory === "exams"
+    ? "Exames e procedimentos"
+    : article.data.hubCategory === "refractive"
+      ? "Erros refracionais e refração"
+      : "Doenças e condições oculares";
 
 const isPresbiopia = article.id === "presbiopia";
 ---
@@ -211,6 +215,7 @@ const isPresbiopia = article.id === "presbiopia";
           <a href="/#atendimento" class="transition-colors hover:text-foreground">Cidades de Atendimento</a>
           <a href="/acuidade-visual" class="transition-colors hover:text-foreground">Teste de Acuidade Visual</a>
           <a href="/tela-de-amsler" class="transition-colors hover:text-foreground">Tela de Amsler</a>
+          <a href="/calculadora-olho-seco" class="transition-colors hover:text-foreground">Calculadora de olho seco</a>
         </nav>
       </footer>
     </article>

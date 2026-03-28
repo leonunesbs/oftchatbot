@@ -136,6 +136,15 @@ export function PresbiopiaScrollHero({
 
   const t = progress >= 1 ? 1 : easeOutCubic(progress);
 
+  /**
+   * Foco da tela do celular completa antes do fim da trilha (fração do progresso 0–1),
+   * para as letras ficarem nítidas com o hero ainda em sticky — a trilha é longa o bastante
+   * para “segurar” depois disso sem começar a rolar o artigo cedo demais.
+   */
+  const PHONE_FOCUS_BY = 0.74;
+  const phoneScreenT =
+    progress >= 1 ? 1 : easeOutCubic(clamp01(progress / PHONE_FOCUS_BY));
+
   /** Blur forte no início (DOF); some ao focar. */
   const blurPx = t >= 1 ? 0 : lerp(16, 0, t);
   /** Celular: começa maior e “à frente” (Z+), afasta-se e encolhe ao focar. */
@@ -156,8 +165,8 @@ export function PresbiopiaScrollHero({
   return (
     <div
       ref={setTrackEl}
-      className="relative min-h-[240dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
-      style={{ minHeight: "min(240dvh, 245vh)" }}
+      className="relative min-h-[290dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
+      style={{ minHeight: "min(290dvh, 300vh)" }}
     >
       <div className="sticky top-0 flex min-h-[100dvh] flex-col justify-start px-3 pb-10 pt-16 sm:px-5 sm:pb-12 sm:pt-24 md:justify-center md:px-6 md:pt-28">
         <div
@@ -185,7 +194,7 @@ export function PresbiopiaScrollHero({
               <div
                 className="relative h-full w-full overflow-hidden rounded-[1.65rem] bg-zinc-900"
                 style={{
-                  filter: t >= 1 ? "none" : `blur(${lerp(12, 0, t)}px)`,
+                  filter: phoneScreenT >= 1 ? "none" : `blur(${lerp(12, 0, phoneScreenT)}px)`,
                 }}
               >
                 <div className="flex h-full flex-col px-2.5 pb-2 pt-7">

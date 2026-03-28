@@ -12,6 +12,7 @@ import { siteConfig } from "@/config/site";
 import WhatsAppModal from "./WhatsAppModal";
 import {
   CalendarCheck2,
+  Droplets,
   Eye,
   Grid3X3,
   Menu,
@@ -140,6 +141,15 @@ export default function MobileMenu() {
           >
             <Grid3X3 className="size-4" />
             Tela de Amsler
+          </a>
+          <a
+            id="gtm-mobile-tools-olho-seco"
+            href="/calculadora-olho-seco"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            <Droplets className="size-4" />
+            Calculadora de olho seco
           </a>
           <WhatsAppModal
             variant="ghost"

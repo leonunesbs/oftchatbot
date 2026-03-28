@@ -32,6 +32,16 @@ export const clusterTopics: ClusterTopic[] = [
     procedure: "Avaliação de Retina",
   },
   {
+    slug: "calculadora-olho-seco",
+    title: "Calculadora de olho seco online",
+    description:
+      "Teste online de sintomas de olho seco com questionário clínico (OSDI) e resultado em escala 0–100.",
+    href: "/calculadora-olho-seco",
+    intent: "informational",
+    condition: "Síndrome do olho seco",
+    procedure: "Consulta Oftalmológica",
+  },
+  {
     slug: "agendamento",
     title: "Agendamento online de consulta oftalmológica",
     description:

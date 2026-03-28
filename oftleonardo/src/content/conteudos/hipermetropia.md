@@ -5,6 +5,7 @@ keywords: "hipermetropia, hipermetropia sintomas, erro de refração, vista cans
 condition: "Hipermetropia"
 procedure: "Correção com óculos, lentes de contato ou cirurgia refrativa (quando indicada)"
 readingTime: "7 min"
+hubCategory: refractive
 faq:
   - question: "Hipermetropia é o mesmo que presbiopia?"
     answer: "Não. A hipermetropia é um erro de refração (o foco tende a formar-se atrás da retina se o olho não compensar). A presbiopia é a perda progressiva da capacidade de focar de perto por envelhecimento do cristalino. As duas podem coexistir e somar sintomas de perto — daí a importância da refração completa em consulta."
