@@ -1,6 +1,12 @@
 // @ts-check
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { defineConfig, fontProviders } from "astro/config";
 import { EnumChangefreq } from "sitemap";
+
+/** Raiz do monorepo (pnpm: dependências em ../node_modules). */
+const monorepoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
@@ -133,7 +139,11 @@ export default defineConfig({
     build: {
       cssMinify: true,
     },
-
+    server: {
+      fs: {
+        allow: [monorepoRoot],
+      },
+    },
     plugins: [tailwindcss()],
   },
 });

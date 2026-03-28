@@ -2,6 +2,7 @@
 import ArticleFAQ from "@/components/ArticleFAQ";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
+import { PresbiopiaScrollHero } from "@/components/PresbiopiaScrollHero";
 import ScheduleConsultationSection from "@/components/ScheduleConsultationSection.astro";
 import { siteConfig } from "@/config/site";
 import Layout from "@/layouts/Layout.astro";
@@ -86,6 +87,8 @@ const allSchemas = [breadcrumbSchema, medicalPageSchema, faqSchema];
 
 const articleSection =
   article.data.hubCategory === "exams" ? "Exames e procedimentos" : "Doenças, refração e cirurgia";
+
+const isPresbiopia = article.id === "presbiopia";
 ---
 
 <Layout
@@ -107,7 +110,23 @@ const articleSection =
 
   <Header />
 
-  <main id="conteudo-principal" tabindex="-1" class="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+  {isPresbiopia && (
+    <PresbiopiaScrollHero
+      client:load
+      title={title}
+      description={description}
+      readingTime={readingTime}
+    />
+  )}
+
+  <main
+    id="conteudo-principal"
+    tabindex="-1"
+    class:list={[
+      "mx-auto max-w-3xl px-4 sm:px-6",
+      isPresbiopia ? "pb-12 pt-6" : "py-12",
+    ]}
+  >
     <nav aria-label="Breadcrumb" class="mb-6">
       <ol class="flex items-center gap-1 text-xs text-muted-foreground">
         <li><a href="/" class="transition-colors hover:text-foreground">Início</a></li>
@@ -119,17 +138,21 @@ const articleSection =
     </nav>
 
     <article class="space-y-10">
-      <header class="space-y-3">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">
-            {readingTime} de leitura
-          </span>
-        </div>
-        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-        <p class="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {description}
-        </p>
-      </header>
+      {
+        !isPresbiopia && (
+          <header class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">
+                {readingTime} de leitura
+              </span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
+            <p class="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {description}
+            </p>
+          </header>
+        )
+      }
 
       <div class="prose-article">
         <Content />

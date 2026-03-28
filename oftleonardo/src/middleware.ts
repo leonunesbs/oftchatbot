@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro/middleware";
 
-import { resolveGeoCity } from "@/lib/geo";
+import { getDefaultGeoCity, resolveGeoCity } from "@/lib/geo";
 
 const cspDirectives = [
   "default-src 'self'",
@@ -107,35 +107,46 @@ function renderUnderConstructionPage(appName: string, returnUrl: string) {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const acceptsHtml =
-    context.request.headers.get("accept")?.includes("text/html") ?? false;
-  if (siteUnderConstruction && acceptsHtml) {
-    return new Response(
-      renderUnderConstructionPage(
-        "Leonardo Nunes Oftalmologista",
-        "https://oftleonardo.com.br",
-      ),
-      {
-        status: 503,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "no-store, no-cache, must-revalidate",
-          pragma: "no-cache",
-          "Content-Security-Policy": cspDirectives,
-          "Referrer-Policy": "strict-origin-when-cross-origin",
-          "X-Content-Type-Options": "nosniff",
-          "Permissions-Policy":
-            "camera=(), microphone=(), geolocation=(), usb=()",
+  /** Prerender não expõe headers reais; ler `request.headers` dispara avisos do Astro. */
+  if (context.isPrerendered) {
+    const city = getDefaultGeoCity();
+    context.locals.geoCity = {
+      slug: city.slug,
+      name: city.name,
+      state: city.state,
+      source: "fallback",
+    };
+  } else {
+    const acceptsHtml =
+      context.request.headers.get("accept")?.includes("text/html") ?? false;
+    if (siteUnderConstruction && acceptsHtml) {
+      return new Response(
+        renderUnderConstructionPage(
+          "Leonardo Nunes Oftalmologista",
+          "https://oftleonardo.com.br",
+        ),
+        {
+          status: 503,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store, no-cache, must-revalidate",
+            pragma: "no-cache",
+            "Content-Security-Policy": cspDirectives,
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "X-Content-Type-Options": "nosniff",
+            "Permissions-Policy":
+              "camera=(), microphone=(), geolocation=(), usb=()",
+          },
         },
-      },
-    );
-  }
+      );
+    }
 
-  const geoCity = await resolveGeoCity({
-    request: context.request,
-    cookies: context.cookies,
-  });
-  context.locals.geoCity = geoCity;
+    const geoCity = await resolveGeoCity({
+      request: context.request,
+      cookies: context.cookies,
+    });
+    context.locals.geoCity = geoCity;
+  }
 
   const response = await next();
   const contentType = response.headers.get("content-type") ?? "";

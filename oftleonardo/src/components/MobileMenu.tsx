@@ -115,7 +115,7 @@ export default function MobileMenu() {
                 id={navId}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 {link.label}
               </a>
@@ -127,7 +127,7 @@ export default function MobileMenu() {
             id="gtm-mobile-tools-acuidade-visual"
             href="/acuidade-visual"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <Eye className="size-4" />
             Teste de Acuidade Visual
@@ -136,14 +136,14 @@ export default function MobileMenu() {
             id="gtm-mobile-tools-amsler"
             href="/tela-de-amsler"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <Grid3X3 className="size-4" />
             Tela de Amsler
           </a>
           <WhatsAppModal
             variant="ghost"
-            className="h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent"
+            className="h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
             triggerAriaLabel="Agendar consulta"
             triggerId="gtm-mobile-menu-agendamento"
             onlineBookingLinkId="gtm-mobile-menu-dialog-agendar-online"
@@ -156,7 +156,7 @@ export default function MobileMenu() {
             id="gtm-mobile-menu-theme"
             type="button"
             onClick={cycleTheme}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <ThemeIcon className="size-4" />
             {THEME_LABELS[theme]}

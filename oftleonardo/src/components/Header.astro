@@ -1,7 +1,7 @@
 ---
 import { siteConfig } from "@/config/site";
 import BookingPopup from "./BookingPopup";
-import HeaderLocation from "./HeaderLocation";
+import HeaderToolsMenu from "./HeaderToolsMenu";
 import MobileMenu from "./MobileMenu";
 ---
 
@@ -13,7 +13,6 @@ import MobileMenu from "./MobileMenu";
     id="header-inner"
     class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6"
   >
-    <div class="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-4">
     <a id="gtm-header-logo" href="/" class="logo-link shrink-0" aria-label="Página inicial">
       <div class="logo-full">
         <img
@@ -48,20 +47,6 @@ import MobileMenu from "./MobileMenu";
         />
       </div>
     </a>
-    <div
-      class="flex min-w-0 max-w-[5.75rem] flex-col sm:max-w-[9rem] md:max-w-[12rem] lg:max-w-none"
-    >
-      <span
-        class="hidden text-[10px] font-medium uppercase tracking-wide text-muted-foreground/90 sm:block"
-        >Atendimento</span
-      >
-      <HeaderLocation
-        client:load
-        id="gtm-header-location"
-        className="truncate text-[11px] font-medium leading-tight text-foreground/90 sm:text-sm"
-      />
-    </div>
-    </div>
 
     <nav
       class="hidden items-center gap-1 md:flex"
@@ -92,45 +77,7 @@ import MobileMenu from "./MobileMenu";
             );
           })
       }
-      <details id="tools-menu" class="group relative">
-        <summary
-          class="list-none cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:text-foreground"
-        >
-          Ferramentas
-        </summary>
-        <div
-          class="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-border/60 bg-background/95 p-2 opacity-0 shadow-lg backdrop-blur transition duration-150 group-open:visible group-open:opacity-100"
-        >
-          <a
-            id="gtm-nav-tools-acuidade-visual"
-            href="/acuidade-visual"
-            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
-          >
-            Teste Visual
-          </a>
-          <a
-            id="gtm-nav-tools-amsler"
-            href="/tela-de-amsler"
-            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
-          >
-            Tela de Amsler
-          </a>
-          <a
-            id="gtm-nav-tools-agendamento-online"
-            href="/agendamento-online"
-            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
-          >
-            Agendamento Online
-          </a>
-          <a
-            id="gtm-nav-tools-conteudos"
-            href="/conteudos"
-            class="block rounded-md px-3 py-2 text-sm text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
-          >
-            Hub de Conteúdos
-          </a>
-        </div>
-      </details>
+      <HeaderToolsMenu client:load />
       <button
         id="gtm-header-theme-toggle-desktop"
         type="button"
@@ -268,7 +215,6 @@ import MobileMenu from "./MobileMenu";
 
 <script>
   const header = document.getElementById("main-header");
-  const toolsMenu = document.getElementById("tools-menu");
   const SCROLL_RANGE_MOBILE = 80;
   let ticking = false;
   let previousProgress = -1;
@@ -354,24 +300,6 @@ import MobileMenu from "./MobileMenu";
 
   window.addEventListener("scroll", updateTarget, { passive: true });
   window.addEventListener("resize", updateTarget, { passive: true });
-
-  // Keep native <details> semantics, but close when user clicks away.
-  document.addEventListener("click", (event) => {
-    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
-    if (!toolsMenu.open) return;
-
-    const target = event.target;
-    if (target instanceof Node && !toolsMenu.contains(target)) {
-      toolsMenu.open = false;
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (!toolsMenu || !(toolsMenu instanceof HTMLDetailsElement)) return;
-    if (event.key === "Escape" && toolsMenu.open) {
-      toolsMenu.open = false;
-    }
-  });
 
   updateTarget();
   setupSectionLinkSmoothScroll();
