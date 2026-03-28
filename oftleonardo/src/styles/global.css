@@ -74,7 +74,8 @@
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
+    /* Secundário legível sobre fundo branco e sobre gradientes claros (WCAG AA em uso típico) */
+    --muted-foreground: oklch(0.42 0 0);
     /* Superfície sutil para hovers (DropdownMenu, itens de menu) — alinhado ao shadcn */
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);

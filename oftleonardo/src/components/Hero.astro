@@ -34,7 +34,9 @@ import BookingPopup from "./BookingPopup";
         </span>
       </h1>
 
-      <p class="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+      <p
+        class="mt-6 text-lg leading-relaxed text-muted-foreground max-sm:text-foreground/90 dark:max-sm:text-muted-foreground sm:text-xl"
+      >
         {siteConfig.hero.subheadline}
       </p>
 
@@ -60,7 +62,7 @@ import BookingPopup from "./BookingPopup";
       </div>
 
       <div
-        class="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
+        class="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground max-sm:text-foreground/88 dark:max-sm:text-muted-foreground"
       >
         {
           siteConfig.cities.map((city) => (
