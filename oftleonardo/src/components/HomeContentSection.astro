@@ -2,14 +2,16 @@
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import type { CollectionEntry } from "astro:content";
-import { BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Eye, Sparkles } from "lucide-react";
 
 interface Props {
   cityName: string;
   items: CollectionEntry<"conteudos">[];
+  /** Guia de presbiopia em vitrine acima da grade (opcional). */
+  presbiopiaSpotlight?: CollectionEntry<"conteudos"> | null;
 }
 
-const { cityName, items } = Astro.props;
+const { cityName, items, presbiopiaSpotlight } = Astro.props;
 
 const categoryStyles = {
   conditions: {
@@ -67,7 +69,80 @@ const categoryStyles = {
       </p>
     </div>
 
-    <div class="scroll-3d-stage mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      presbiopiaSpotlight && (
+        <div class="scroll-reveal mt-14">
+          <a
+            href={`/conteudos/${presbiopiaSpotlight.id}`}
+            id="gtm-home-conteudo-presbiopia-spotlight"
+            class="surface-lift group relative block overflow-hidden rounded-2xl border-2 border-brand/35 bg-gradient-to-br from-brand/[0.12] via-card to-amber-500/[0.07] p-6 shadow-md shadow-brand/10 outline-none ring-1 ring-brand/15 transition-[transform,box-shadow,border-color] hover:border-brand/50 hover:shadow-lg hover:shadow-brand/15 focus-visible:ring-2 focus-visible:ring-brand/55 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8"
+          >
+            <div
+              class="pointer-events-none absolute -right-16 -top-24 size-56 rounded-full bg-brand/10 blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              class="pointer-events-none absolute -bottom-20 -left-10 size-48 rounded-full bg-amber-400/10 blur-3xl"
+              aria-hidden="true"
+            />
+            <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+                    <Sparkles className="size-3" aria-hidden="true" />
+                    Em destaque
+                  </span>
+                  <span
+                    class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-900 dark:text-amber-300"
+                  >
+                    Refração
+                  </span>
+                  <span class="inline-flex items-center rounded-full border border-border/60 bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    {presbiopiaSpotlight.data.readingTime}
+                  </span>
+                </div>
+                <div class="mt-4 flex items-start gap-3">
+                  <span
+                    class="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand"
+                    aria-hidden="true"
+                  >
+                    <Eye className="size-5" />
+                  </span>
+                  <div class="min-w-0">
+                    <h3 class="text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
+                      Vista cansada após os 40? Entenda a presbiopia
+                    </h3>
+                    <p class="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                      Dificuldade para ler e para focar no celular de perto, com sensação de braço curto?
+                      Entenda o que muda no olho e quais opções existem, de óculos a cirurgia, com
+                      orientação clínica clara.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center lg:flex-col xl:flex-row">
+                <span
+                  class="inline-flex items-center justify-center gap-2 rounded-xl border border-brand/40 bg-brand px-5 py-3 text-sm font-semibold text-brand-foreground shadow-sm transition-colors group-hover:bg-brand/90"
+                >
+                  Abrir guia completo
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      )
+    }
+
+    <div
+      class:list={[
+        "scroll-3d-stage grid gap-5 sm:grid-cols-2 lg:grid-cols-3",
+        presbiopiaSpotlight ? "mt-10" : "mt-14",
+      ]}
+    >
       {
         items.map((article) => {
           const cat = categoryStyles[article.data.hubCategory];

@@ -32,6 +32,10 @@ const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
 
 const articles = await getCollection("conteudos");
 const featuredContent = pickFeaturedArticles(articles);
+const presbiopiaArticle = articles.find((a) => a.id === "presbiopia") ?? null;
+const guidesForStructuredData = presbiopiaArticle
+  ? [presbiopiaArticle, ...featuredContent.filter((a) => a.id !== "presbiopia")]
+  : featuredContent;
 
 const contentItemListSchema = {
   "@context": "https://schema.org",
@@ -39,7 +43,7 @@ const contentItemListSchema = {
   name: "Guias em oftalmologia em destaque",
   description:
     "Seleção de conteúdos educativos sobre saúde ocular com orientação clínica revisada por especialista.",
-  itemListElement: featuredContent.map((a, i) => ({
+  itemListElement: guidesForStructuredData.map((a, i) => ({
     "@type": "ListItem",
     position: i + 1,
     name: a.data.title,
@@ -81,7 +85,11 @@ const contentItemListSchema = {
       <Differentials />
     </div>
     <div class="defer-render scroll-section">
-      <HomeContentSection cityName={geoCity.name} items={featuredContent} />
+      <HomeContentSection
+        cityName={geoCity.name}
+        items={featuredContent}
+        presbiopiaSpotlight={presbiopiaArticle}
+      />
     </div>
     <div class="defer-render scroll-section">
       <Cities />

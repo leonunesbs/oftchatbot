@@ -8,6 +8,8 @@
  * Configure o mesmo ID em `PUBLIC_GTM_ID` (Astro) e `NEXT_PUBLIC_GTM_ID` (Next).
  */
 export const OFT_ANALYTICS_EVENTS = {
+  /** oftagenda: vista de página (App Router). */
+  view_content: "view_content",
   /** oftagenda: escolha do tipo de evento / local. */
   select_city: "select_city",
   /** Início do funil de agendamento (site + agenda). */
@@ -24,7 +26,7 @@ export const OFT_ANALYTICS_EVENTS = {
   booking_dialog_open: "booking_dialog_open",
   /** Conversão no GA4 (WhatsApp ou agendar online no diálogo). */
   generate_lead: "generate_lead",
-  /** oftleonardo: contexto de página para públicos. */
+  /** Contexto de página para públicos (site + agenda). */
   audience_page_context: "audience_page_context",
   scroll_depth_milestone: "scroll_depth_milestone",
 } as const;
@@ -32,11 +34,14 @@ export const OFT_ANALYTICS_EVENTS = {
 export type OftAnalyticsEventName = (typeof OFT_ANALYTICS_EVENTS)[keyof typeof OFT_ANALYTICS_EVENTS];
 
 export const OFTAGENDA_ANALYTICS_EVENTS = [
+  OFT_ANALYTICS_EVENTS.view_content,
   OFT_ANALYTICS_EVENTS.select_city,
   OFT_ANALYTICS_EVENTS.start_booking,
   OFT_ANALYTICS_EVENTS.submit_booking,
   OFT_ANALYTICS_EVENTS.booking_confirmed,
   OFT_ANALYTICS_EVENTS.cross_domain_click,
+  OFT_ANALYTICS_EVENTS.audience_page_context,
+  OFT_ANALYTICS_EVENTS.scroll_depth_milestone,
 ] as const;
 
 export type OftAgendaAnalyticsEventName = (typeof OFTAGENDA_ANALYTICS_EVENTS)[number];
