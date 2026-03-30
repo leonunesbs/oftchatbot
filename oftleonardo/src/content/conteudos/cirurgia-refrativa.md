@@ -1,8 +1,8 @@
 ---
-title: "Cirurgia refrativa: LASIK, PRK, SMILE e o que avaliar antes de operar"
-description: "Entenda o que é cirurgia refrativa, quais erros de refração podem ser tratados, diferenças entre técnicas à laser, critérios de segurança, riscos e expectativas realistas."
+title: "Cirurgia refrativa a laser: LASIK, PRK, SMILE e o que avaliar antes de operar"
+description: "Entenda o que é cirurgia refrativa a laser, quais erros de refração podem ser tratados, diferenças entre técnicas (LASIK, PRK, SMILE), critérios de segurança, riscos e expectativas realistas."
 keywords: "cirurgia refrativa, LASIK, PRK, SMILE, laser na visão, miopia cirurgia, astigmatismo cirurgia, hipermetropia cirurgia, candidato cirurgia refrativa, oftalmologista cirurgia refrativa"
-condition: "Erros de refração indicados para correção cirúrgica"
+condition: "Cirurgia refrativa a laser"
 procedure: "Cirurgia refrativa a laser (LASIK, PRK, SMILE ou técnicas relacionadas)"
 readingTime: "9 min"
 lastReviewed: "2026-03-28"

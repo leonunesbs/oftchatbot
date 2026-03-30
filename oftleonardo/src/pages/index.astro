@@ -35,10 +35,18 @@ const geoCity: GeoCityResolution =
 
 const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
 
-const { featuredContent, presbiopiaArticle } = await loadHomeConteudos();
-const guidesForStructuredData = presbiopiaArticle
-  ? [presbiopiaArticle, ...featuredContent.filter((a) => a.id !== "presbiopia")]
-  : featuredContent;
+const { featuredContent, presbiopiaArticle, premiumLensesArticle } =
+  await loadHomeConteudos();
+
+const spotlightForSchema = [
+  ...(presbiopiaArticle ? [presbiopiaArticle] : []),
+  ...(premiumLensesArticle ? [premiumLensesArticle] : []),
+];
+const spotlightIds = new Set(spotlightForSchema.map((a) => a.id));
+const guidesForStructuredData = [
+  ...spotlightForSchema,
+  ...featuredContent.filter((a) => !spotlightIds.has(a.id)),
+];
 
 const contentItemListSchema = {
   "@context": "https://schema.org",
@@ -85,39 +93,42 @@ const contentItemListSchema = {
         <HomeCosmicBackdrop />
       </div>
       <div class="home-post-hero-stack">
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <Services />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <ExperienceStats />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <Differentials />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <HomeContentSection
             cityName={geoCity.name}
             items={featuredContent}
             presbiopiaSpotlight={presbiopiaArticle}
+            premiumLensesSpotlight={premiumLensesArticle}
           />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <Cities />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <HowItWorks />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <FAQ />
         </div>
-        <div class="defer-render scroll-section">
+        <div class="scroll-section">
           <CTAFinal />
         </div>
       </div>
     </div>
     <script>
       import { initHomeCosmicAnchor } from "@/lib/home-cosmic-anchor";
+      import { initHomeScrollReveal } from "@/lib/home-scroll-reveal";
       initHomeCosmicAnchor();
+      initHomeScrollReveal();
     </script>
   </main>
   <Footer />

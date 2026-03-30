@@ -1,8 +1,8 @@
 ---
-title: "Lentes premium na catarata: multifocais, EDoF, tóricas e como escolher"
-description: "Na catarata, a lente intraocular define nitidez, conforto em várias distâncias e quanto você ainda vai precisar de óculos. Entenda multifocais, trifocais, EDoF e tóricas em linguagem clara, compare opções com segurança e prepare perguntas para a consulta — com opção de agendar online no site."
+title: "Lentes premium na catarata: multifocal, EDoF, tórica e o que avaliar antes da cirurgia"
+description: "Na cirurgia de catarata, a lente intraocular define nitidez, conforto em várias distâncias e quanto você ainda vai precisar de óculos. Entenda multifocais, trifocais, EDoF e tóricas em linguagem clara, compare opções com segurança e prepare perguntas para a consulta — com opção de agendar online no site."
 keywords: "lentes premium catarata, lente intraocular multifocal, lente intraocular trifocal, EDoF catarata, lente intraocular tórica, astigmatismo catarata, independência óculos catarata, halos lentes multifocais, oftalmologista catarata Fortaleza"
-condition: "Catarata — escolha de lente intraocular"
+condition: "Lentes premium na catarata"
 procedure: "Cirurgia de catarata com implante de lente intraocular (incluindo opções premium quando indicadas)"
 readingTime: "11 min"
 lastReviewed: "2026-03-30"

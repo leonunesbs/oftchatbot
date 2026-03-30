@@ -14,6 +14,12 @@ export const HOME_CONTENT_FEATURED_SLUGS = [
 
 export const MAX_HOME_FEATURED_ARTICLES = 6;
 
+/** Conteúdos exibidos só no card «Em destaque» na home, fora da grade. */
+const HOME_SPOTLIGHT_ONLY_IDS = new Set<string>([
+  "presbiopia",
+  "lentes-premium-catarata",
+]);
+
 export function pickFeaturedArticles(
   articles: CollectionEntry<"conteudos">[],
 ): CollectionEntry<"conteudos">[] {
@@ -45,9 +51,14 @@ export function pickFeaturedArticles(
 export async function loadHomeConteudos(): Promise<{
   featuredContent: CollectionEntry<"conteudos">[];
   presbiopiaArticle: CollectionEntry<"conteudos"> | null;
+  premiumLensesArticle: CollectionEntry<"conteudos"> | null;
 }> {
   const preloadIds = [
-    ...new Set<string>([...HOME_CONTENT_FEATURED_SLUGS, "presbiopia"]),
+    ...new Set<string>([
+      ...HOME_CONTENT_FEATURED_SLUGS,
+      "presbiopia",
+      "lentes-premium-catarata",
+    ]),
   ];
   const entries = await Promise.all(
     preloadIds.map((id) => getEntry("conteudos", id)),
@@ -57,6 +68,8 @@ export async function loadHomeConteudos(): Promise<{
   );
 
   const presbiopiaArticle = articles.find((a) => a.id === "presbiopia") ?? null;
+  const premiumLensesArticle =
+    articles.find((a) => a.id === "lentes-premium-catarata") ?? null;
 
   let featured = pickFeaturedArticles(articles);
   if (featured.length < MAX_HOME_FEATURED_ARTICLES) {
@@ -68,5 +81,11 @@ export async function loadHomeConteudos(): Promise<{
     featured = pickFeaturedArticles([...articles, ...rest]);
   }
 
-  return { featuredContent: featured, presbiopiaArticle };
+  featured = featured.filter((a) => !HOME_SPOTLIGHT_ONLY_IDS.has(a.id));
+
+  return {
+    featuredContent: featured,
+    presbiopiaArticle,
+    premiumLensesArticle,
+  };
 }
