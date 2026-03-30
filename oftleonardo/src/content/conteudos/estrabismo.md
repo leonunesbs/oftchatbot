@@ -23,7 +23,7 @@ relatedSlugs:
 
 O estrabismo é uma condição em que os **olhos não ficam alinhados** — enquanto um olho olha para frente, o outro pode desviar para dentro, para fora, para cima ou para baixo. Isso acontece por um desequilíbrio nos músculos que controlam o movimento dos olhos.
 
-Pode surgir na infância ou na vida adulta e tem diferentes causas, incluindo fatores genéticos, erros refrativos elevados, doenças neurológicas e traumas.
+Pode surgir na infância ou na vida adulta e tem diferentes causas, incluindo fatores genéticos, erros refrativos elevados (como [hipermetropia](/conteudos/hipermetropia) significativa), doenças neurológicas e traumas.
 
 ## Quais são os sintomas?
 

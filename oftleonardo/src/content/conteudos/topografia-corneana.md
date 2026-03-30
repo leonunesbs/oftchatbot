@@ -30,16 +30,16 @@ O equipamento projeta **anéis** ou um padrão conhecido sobre a córnea e anali
 
 ## Para que serve?
 
-- Quantificar **astigmatismo** de origem **corneana**
-- Rastrear e acompanhar **ceratocone** e outras **ectasias**
-- Planejar **cirurgia refrativa**, **crosslinking** ou **implante de anel**
-- Auxiliar na escolha de **lentes intraoculares tóricas** na **catarata**
+- Quantificar [astigmatismo](/conteudos/astigmatismo) de origem **corneana**
+- Rastrear e acompanhar [ceratocone](/conteudos/ceratocone) e outras **ectasias**
+- Planejar [cirurgia refrativa](/conteudos/cirurgia-refrativa), **crosslinking** ou **implante de anel**
+- Auxiliar na escolha de **lentes intraoculares tóricas** na [catarata](/conteudos/catarata)
 - Acompanhar **lentes de contato** em casos complexos
 
 ## Quando costuma ser indicada?
 
-Desconfiança de **córnea irregular**, **astigmatismo** alto ou assimétrico, preparo **pré-cirúrgico**, sintomas que sugerem alteração de superfície (ex.: **visão instável** com lentes de contato) e seguimento de **doenças corneanas**.
+Desconfiança de **córnea irregular**, [astigmatismo](/conteudos/astigmatismo) alto ou assimétrico, preparo **pré-cirúrgico**, sintomas que sugerem alteração de superfície (ex.: **visão instável** com lentes de contato) e seguimento de **doenças corneanas**.
 
 ## Topografia e tomografia
 
-A **tomografia de córnea** (por exemplo, sistemas **Scheimpflug**) acrescenta **espessura** e **volume** em 3D. Em ectasia, o par **topografia + tomografia** é muito usado para decisões.
+A [tomografia de córnea](/conteudos/tomografia-de-cornea) (por exemplo, sistemas **Scheimpflug**) acrescenta **espessura** e **volume** em 3D. Em ectasia, o par **topografia + tomografia** é muito usado para decisões.

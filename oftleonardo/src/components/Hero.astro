@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import BookingPopup from "./BookingPopup";
+import { cn } from "@/lib/utils";
 ---
 
 <section id="section-hero" class="relative">
@@ -41,16 +41,19 @@ import BookingPopup from "./BookingPopup";
       </p>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <BookingPopup
-          client:visible
-          size="lg"
-          className="h-12 px-8 text-base"
-          triggerId="gtm-hero-booking"
-          onlineBookingLinkId="gtm-hero-dialog-agendar-online"
-          urlSync={true}
+        <button
+          type="button"
+          data-booking-trigger
+          data-url-sync="true"
+          id="gtm-hero-booking"
+          data-online-booking-link-id="gtm-hero-dialog-agendar-online"
+          class={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "h-12 px-8 text-base",
+          )}
         >
           Agendar Consulta
-        </BookingPopup>
+        </button>
         <a
           id="gtm-hero-ver-especialidades"
           href="#atuacao"

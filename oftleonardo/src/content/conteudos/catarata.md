@@ -42,16 +42,16 @@ Nos estágios iniciais, a catarata pode ser apenas acompanhada. A cirurgia é in
 
 O diagnóstico é feito pelo oftalmologista por meio de:
 
-- **Exame de lâmpada de fenda (biomicroscopia):** permite visualizar a opacidade do cristalino
+- **Exame de lâmpada de fenda ([biomicroscopia](/conteudos/biomicroscopia-lampada-de-fenda)):** permite visualizar a opacidade do cristalino
 - **Exame de refração:** mede o grau dos óculos e avalia a qualidade da visão
-- **Mapeamento de retina:** importante para verificar se há outras doenças que possam afetar o resultado da cirurgia
+- **[Mapeamento de retina](/conteudos/mapeamento-de-retina):** importante para verificar se há outras doenças que possam afetar o resultado da cirurgia
 
 ## Quais são os tratamentos?
 
 O único tratamento eficaz para a catarata é a **cirurgia**:
 
 - **Facoemulsificação:** técnica mais moderna e utilizada, na qual o cristalino opaco é fragmentado por ultrassom e aspirado através de uma pequena incisão, com implante de uma lente intraocular no lugar
-- **Lentes intraoculares:** existem diferentes tipos de lente (monofocal, multifocal, tórica) que podem corrigir grau de longe, de perto e astigmatismo, reduzindo ou eliminando a necessidade de óculos após a cirurgia
+- **Lentes intraoculares:** existem diferentes tipos de lente (monofocal, multifocal, tórica) que podem corrigir grau de longe, de perto e astigmatismo, reduzindo ou eliminando a necessidade de óculos após a cirurgia — veja o artigo sobre [lentes premium na catarata](/conteudos/lentes-premium-catarata) para uma visão geral das opções
 
 A cirurgia é ambulatorial, com anestesia local e recuperação rápida. A maioria dos pacientes nota melhora significativa da visão já nos primeiros dias.
 

@@ -30,19 +30,19 @@ Em um aparelho comum (**perímetro computadorizado**), você cobre um olho de ca
 
 ## Para que serve?
 
-- Detectar e acompanhar **perda periférica** típica do **glaucoma**
+- Detectar e acompanhar **perda periférica** típica do [glaucoma](/conteudos/glaucoma)
 - Investigar **defeitos** sugestivos de problema no **nervo óptico** ou nas **vias visuais** (inclusive neurologia)
 - Monitorar algumas **retinopatias** periféricas e certos **pós-operatórios**
 
 ## Quando costuma ser indicado?
 
-Rastreamento e seguimento de **glaucoma**, investigação de **queixas** compatíveis com falhas no campo visual, ou encaminhamento por outros achados. A periodicidade depende da doença e da estabilidade.
+Rastreamento e seguimento de [glaucoma](/conteudos/glaucoma), investigação de **queixas** compatíveis com falhas no campo visual, ou encaminhamento por outros achados. A periodicidade depende da doença e da estabilidade.
 
 ## Campo visual e OCT
 
 | | Campo visual | OCT (nervo/retina) |
 |---|----------------|---------------------|
 | Mede principalmente | **Função** — onde a visão está mais fraca | **Estrutura** — espessura de camadas |
-| Uso clássico em glaucoma | Detectar e seguir perda periférica | Avaliar dano ao nervo e fibras |
+| Uso clássico em [glaucoma](/conteudos/glaucoma) | Detectar e seguir perda periférica | Avaliar dano ao nervo e fibras |
 
 Os dois exames **juntos** costumam dar uma visão mais completa do que isolados.

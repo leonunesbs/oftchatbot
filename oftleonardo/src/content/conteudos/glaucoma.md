@@ -47,8 +47,8 @@ O diagnóstico completo do glaucoma inclui:
 
 - **Tonometria:** medida da pressão intraocular
 - **Fundoscopia:** avaliação do nervo óptico
-- **Campimetria:** exame de campo visual que detecta áreas de perda de visão
-- **OCT do nervo óptico:** tomografia que mede a espessura das fibras nervosas da retina
+- **[Campimetria](/conteudos/campo-visual-perimetria):** exame de campo visual que detecta áreas de perda de visão
+- **[OCT](/conteudos/oct-tomografia-coerencia-optica) do nervo óptico:** tomografia que mede a espessura das fibras nervosas da retina
 - **Gonioscopia:** avalia o ângulo de drenagem do olho
 - **Paquimetria:** mede a espessura da córnea, que influencia a leitura da pressão
 
@@ -64,4 +64,4 @@ O tratamento é contínuo e para a vida toda. A adesão ao colírio é fundament
 
 ## Quando procurar um oftalmologista?
 
-A partir dos 40 anos, todas as pessoas devem incluir a medida da pressão ocular e a avaliação do nervo óptico nos exames de rotina. Quem tem histórico familiar de glaucoma, é míope ou tem diabetes deve iniciar o rastreamento ainda mais cedo.
+A partir dos 40 anos, todas as pessoas devem incluir a medida da pressão ocular e a avaliação do nervo óptico nos exames de rotina. Quem tem histórico familiar de glaucoma, é [míope](/conteudos/miopia) ou tem diabetes deve iniciar o rastreamento ainda mais cedo.

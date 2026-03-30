@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/site";
 
 interface Props {
   id?: string;
+  class?: string;
   title: string;
   description: string;
   whatsappMessageTemplate: string;
@@ -19,6 +20,7 @@ interface Props {
 
 const {
   id = "agendar",
+  class: className,
   title,
   description,
   whatsappMessageTemplate,
@@ -31,7 +33,7 @@ const {
 
 ---
 
-<section id={id} class="space-y-4 text-center">
+<section id={id} class:list={["space-y-4 text-center", className]}>
   <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
     {title}
   </h2>

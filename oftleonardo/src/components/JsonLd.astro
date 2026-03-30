@@ -1,5 +1,5 @@
 ---
-import { siteConfig } from "@/config/site";
+import { flattenFaqAnswerText, siteConfig } from "@/config/site";
 
 interface Props {
   includeFAQ?: boolean;
@@ -84,7 +84,7 @@ const faqSchema = {
     name: item.question,
     acceptedAnswer: {
       "@type": "Answer",
-      text: item.answer,
+      text: flattenFaqAnswerText(item.answer),
     },
   })),
 };

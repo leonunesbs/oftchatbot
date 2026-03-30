@@ -461,19 +461,59 @@
   }
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     @apply font-sans;
   }
   a:focus-visible,
   button:focus-visible,
   [role="button"]:focus-visible,
-  summary:focus-visible {
+  summary:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
     @apply rounded-sm outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  .skip-links {
+    @apply pointer-events-none fixed top-4 left-4 z-[100] flex max-w-[min(100vw-2rem,20rem)] flex-col gap-1;
+  }
+  .skip-links .skip-link {
+    @apply pointer-events-auto;
   }
   .skip-link {
     @apply sr-only;
   }
   .skip-link:focus-visible {
-    @apply not-sr-only fixed top-4 left-4 z-100 rounded-md bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-md;
+    @apply not-sr-only rounded-md border-2 border-foreground/80 bg-background px-4 py-2.5 text-sm font-semibold text-foreground shadow-md;
+  }
+  @media (prefers-contrast: more) {
+    :root {
+      --border: oklch(0.52 0 0);
+      --input: oklch(0.52 0 0);
+      --muted-foreground: oklch(0.28 0 0);
+      --ring: oklch(0.22 0 0);
+    }
+    .dark {
+      --border: oklch(0.62 0 0);
+      --input: oklch(0.62 0 0);
+      --muted-foreground: oklch(0.92 0 0);
+      --ring: oklch(0.93 0 0);
+    }
+    a:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    summary:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      @apply ring-[3px] ring-offset-4;
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    #main-header {
+      background-color: var(--background) !important;
+      backdrop-filter: none !important;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     html {

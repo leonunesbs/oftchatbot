@@ -30,19 +30,19 @@ Você posiciona o rosto; a câmera obtém uma ou várias **seções** da córnea
 
 ## Para que serve?
 
-- Quantificar **córnea fina** e **risco de ectasia** antes de **cirurgia refrativa**
-- Diagnosticar e **estagiar ceratocone** e acompanhar progressão
+- Quantificar **córnea fina** e **risco de ectasia** antes de [cirurgia refrativa](/conteudos/cirurgia-refrativa)
+- Diagnosticar e **estagiar** [ceratocone](/conteudos/ceratocone) e acompanhar progressão
 - Planejar **crosslinking**, **anéis intracorneanos** ou outras intervenções
 - Complementar a **topografia** quando há dúvida sobre **forma** versus **espessura**
 
 ## Quando costuma ser indicada?
 
-Avaliação pré-operatória de **refrativa** ou **catarata** em córneas suspeitas, **doenças que alteram a curvatura ou espessura**, e seguimento de **ectasias**.
+Avaliação pré-operatória de **refrativa** ou [catarata](/conteudos/catarata) em córneas suspeitas, **doenças que alteram a curvatura ou espessura**, e seguimento de **ectasias**.
 
 ## Relação com topografia e microscopia especular
 
-- **Topografia:** mapa de **curvatura** com foco na superfície
+- **[Topografia](/conteudos/topografia-corneana):** mapa de **curvatura** com foco na superfície
 - **Tomografia (Scheimpflug):** **volume**, **espessura** e **elevação** em 3D
-- **Microscopia especular:** avalia o **endotélio** (camada interna), não a forma externa completa da mesma forma
+- **[Microscopia especular](/conteudos/microscopia-especular):** avalia o **endotélio** (camada interna), não a forma externa completa da mesma forma
 
 Cada exame responde a uma parte da “história” da córnea.

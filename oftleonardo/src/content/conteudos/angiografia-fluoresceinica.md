@@ -31,17 +31,17 @@ Após preparo (inclusive avaliação de **alergias** e **riscos**), faz-se uma *
 ## Para que serve?
 
 - Identificar **vazamento** em **edema macular** de várias causas
-- Avaliar **neovasos**, **áreas isquêmicas** e **não perfundidas** em **retinopatia diabética**, **oclusões** venosas e outras vasculopatias
-- Ajudar em **coriorretinopatia serosa**, inflamações e outras condições em que a **dinâmica vascular** define conduta
+- Avaliar **neovasos**, **áreas isquêmicas** e **não perfundidas** em [retinopatia diabética](/conteudos/retinopatia-diabetica), **oclusões** venosas e outras vasculopatias
+- Ajudar em [coriorretinopatia serosa](/conteudos/coriorretinopatia-serosa), inflamações e outras condições em que a **dinâmica vascular** define conduta
 
 ## Quando costuma ser indicada?
 
-Quando a **foto** do fundo e o **OCT** não bastam para explicar sintomas ou definir tratamento, ou quando é necessário mapear **vazamento** e **perfusão** com precisão. A decisão é do oftalmologista.
+Quando a **foto** do fundo e o [OCT](/conteudos/oct-tomografia-coerencia-optica) não bastam para explicar sintomas ou definir tratamento, ou quando é necessário mapear **vazamento** e **perfusão** com precisão. A decisão é do oftalmologista.
 
 ## Angiografia e outros métodos
 
-- **Retinografia:** imagem estática em cor (ou autofluorescência em alguns protocolos)
-- **OCT:** anatomia em cortes
+- [Retinografia](/conteudos/retinografia): imagem estática em cor (ou autofluorescência em alguns protocolos)
+- [OCT](/conteudos/oct-tomografia-coerencia-optica): anatomia em cortes
 - **Angiografia fluoresceínica:** **função** e **comportamento** dos vasos no tempo
 
 Este conteúdo é **educativo**; riscos, jejum e medicações devem ser esclarecidos pelo **serviço** que realiza o exame.

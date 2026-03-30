@@ -35,14 +35,14 @@ Os sintomas costumam afetar apenas um olho e incluem:
 - Alteração na percepção de cores
 - Sensação de que as imagens estão "lavadas" ou com menos contraste
 
-Os sintomas podem ser confundidos com outras doenças da mácula. A [Tela de Amsler](/tela-de-amsler) pode ajudar a perceber distorções precocemente.
+Os sintomas podem ser confundidos com outras doenças da mácula (por exemplo [degeneração macular](/conteudos/degeneracao-macular)). A [Tela de Amsler](/tela-de-amsler) pode ajudar a perceber distorções precocemente.
 
 ## Como é feito o diagnóstico?
 
 O diagnóstico é confirmado pelo oftalmologista por meio de:
 
-- **Tomografia de coerência óptica (OCT):** mostra com precisão o acúmulo de líquido sob a retina
-- **Angiografia fluoresceínica:** identifica o ponto de vazamento
+- **[Tomografia de coerência óptica (OCT)](/conteudos/oct-tomografia-coerencia-optica):** mostra com precisão o acúmulo de líquido sob a retina
+- **[Angiografia fluoresceínica](/conteudos/angiografia-fluoresceinica):** identifica o ponto de vazamento
 - **Angiografia com indocianina verde:** avalia alterações na coroide
 
 ## Quais são os tratamentos?

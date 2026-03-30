@@ -40,9 +40,9 @@ Por isso, o acompanhamento regular com o oftalmologista é fundamental, mesmo se
 
 O diagnóstico é feito pelo **exame de fundo de olho** (fundoscopia), que permite ao oftalmologista visualizar diretamente a retina. Outros exames complementares podem ser solicitados:
 
-- **Tomografia de coerência óptica (OCT):** avalia o inchaço da retina com imagens de alta definição
-- **Angiografia fluoresceínica:** identifica áreas de vazamento nos vasos da retina
-- **Retinografia:** fotografias do fundo de olho para documentação e acompanhamento
+- **[Tomografia de coerência óptica (OCT)](/conteudos/oct-tomografia-coerencia-optica):** avalia o inchaço da retina com imagens de alta definição
+- **[Angiografia fluoresceínica](/conteudos/angiografia-fluoresceinica):** identifica áreas de vazamento nos vasos da retina
+- **[Retinografia](/conteudos/retinografia):** fotografias do fundo de olho para documentação e acompanhamento
 
 ## Quais são os tratamentos?
 

@@ -1,8 +1,9 @@
 ---
 import "../styles/global.css";
-import { siteConfig } from "@/config/site";
+import BookingDialogHost from "@/components/BookingDialogHost";
 import JsonLd from "@/components/JsonLd.astro";
 import TrackingAndConsent from "@/components/TrackingAndConsent.astro";
+import { siteConfig } from "@/config/site";
 import { GoogleTagmanagerNoscript } from "@digi4care/astro-google-tagmanager";
 
 interface Props {
@@ -138,10 +139,13 @@ const shouldRenderGtmNoscript = import.meta.env.PROD && Boolean(siteConfig.analy
   </head>
   <body>
     {shouldRenderGtmNoscript ? <GoogleTagmanagerNoscript id={siteConfig.analytics.gtmId} /> : null}
-    <a href="#conteudo-principal" class="skip-link"
-      >Pular para o conteúdo principal</a
-    >
+    <nav class="skip-links" aria-label="Atalhos de acesso rápido">
+      <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+      <a href="#main-header" class="skip-link">Pular para o cabeçalho</a>
+      <a href="#rodape" class="skip-link">Pular para o rodapé</a>
+    </nav>
     <slot />
+    <BookingDialogHost client:load />
     <TrackingAndConsent />
   </body>
 </html>

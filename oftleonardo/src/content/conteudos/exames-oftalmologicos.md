@@ -58,4 +58,4 @@ Nem todo sintoma exige todos os exames; o roteiro é **individualizado**.
 
 ## Conteúdos sobre doenças
 
-Para leitura sobre condições específicas, veja também a seção **Doenças e condições oculares** em [Conteúdos](/conteudos) — por exemplo glaucoma, catarata e retinopatia diabética.
+Para leitura sobre condições específicas, veja também [Conteúdos](/conteudos) — por exemplo [glaucoma](/conteudos/glaucoma), [catarata](/conteudos/catarata), [retinopatia diabética](/conteudos/retinopatia-diabetica), [degeneração macular](/conteudos/degeneracao-macular), [ceratocone](/conteudos/ceratocone), [presbiopia](/conteudos/presbiopia) e o hub sobre [miopia](/conteudos/miopia), [hipermetropia](/conteudos/hipermetropia) e [astigmatismo](/conteudos/astigmatismo).

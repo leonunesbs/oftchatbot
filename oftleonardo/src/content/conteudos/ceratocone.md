@@ -30,7 +30,7 @@ A doença geralmente começa na adolescência ou no início da vida adulta e pod
 Os sintomas podem evoluir gradualmente:
 
 - Visão embaçada que piora com o tempo
-- Aumento frequente do grau dos óculos, especialmente do astigmatismo
+- Aumento frequente do grau dos óculos, especialmente do [astigmatismo](/conteudos/astigmatismo)
 - Sensibilidade à luz (fotofobia)
 - Visão dupla ou com sombras ao redor dos objetos
 - Dificuldade para dirigir à noite
@@ -39,9 +39,9 @@ Nos estágios iniciais, o ceratocone pode ser confundido com um simples erro ref
 
 ## Como é feito o diagnóstico?
 
-O exame mais importante para diagnosticar o ceratocone é a **topografia corneana**, que mapeia a curvatura da córnea e identifica irregularidades. Outros exames incluem:
+O exame mais importante para diagnosticar o ceratocone é a [topografia corneana](/conteudos/topografia-corneana), que mapeia a curvatura da córnea e identifica irregularidades. Outros exames incluem:
 
-- **Tomografia de córnea (Pentacam ou Galilei):** avalia a espessura e a forma da córnea em detalhe
+- **[Tomografia de córnea](/conteudos/tomografia-de-cornea) (Pentacam ou Galilei):** avalia a espessura e a forma da córnea em detalhe
 - **Paquimetria:** mede a espessura da córnea, geralmente mais fina no ceratocone
 - **Exame de refração:** detecta astigmatismo irregular
 

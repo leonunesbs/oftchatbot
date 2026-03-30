@@ -198,6 +198,26 @@ export function trackAudiencePageContext() {
   });
 }
 
+/**
+ * Compartilhamento de artigo (GTM / GA4). Evento `share` com `method` conforme GA4
+ * (whatsapp, facebook, twitter, linkedin, telegram, email, copy_link, native).
+ */
+export function trackArticleShare(payload: {
+  method: string;
+  item_id: string;
+  /** `id` do botão para gatilho de clique no GTM. */
+  trigger_id?: string;
+}) {
+  dispatch(GA4_EVENTS.share, {
+    method: payload.method,
+    content_type: "article",
+    item_id: payload.item_id,
+    ...(payload.trigger_id ? { trigger_id: payload.trigger_id } : {}),
+    page_path: window.location.pathname,
+    page_location: window.location.href,
+  });
+}
+
 let scrollDepthBound = false;
 
 /** Marcos 50% e 75% de rolagem para públicos de engajamento. */

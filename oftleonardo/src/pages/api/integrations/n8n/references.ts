@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 
 import { clusterTopics } from "@/config/semantic-clusters";
-import { siteConfig } from "@/config/site";
+import { flattenFaqAnswerText, siteConfig } from "@/config/site";
 
 export const prerender = false;
 
@@ -62,7 +62,12 @@ export const GET: APIRoute = async ({ request }) => {
         includeArticleBody,
       },
       references: {
-        faq: includeHomeFaq ? siteConfig.faq : [],
+        faq: includeHomeFaq
+          ? siteConfig.faq.map((item) => ({
+              question: item.question,
+              answer: flattenFaqAnswerText(item.answer),
+            }))
+          : [],
         contentHub: {
           totalArticles: contentHubArticles.length,
           totalTools: informationalTools.length,

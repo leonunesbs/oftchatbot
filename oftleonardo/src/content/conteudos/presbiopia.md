@@ -34,7 +34,7 @@ A **presbiopia** — popularmente chamada de **vista cansada** — é a dificuld
 
 Para enxergar de perto, o olho precisa **acrescentar poder de foco** — um mecanismo chamado **acomodação**. Isso envolve mudança de formato do cristalino e ação do músculo ciliar. A partir da meia-idade, o cristalino endurece e a acomodação **perde eficiência**. O resultado prático é: a mesma distância que antes era confortável para ler passa a exigir mais esforço ou simplesmente **não traz mais nítido**.
 
-Importante: a presbiopia **não é o mesmo que hipermetropia, miopia ou astigmatismo**, embora esses erros de refração **modifiquem** quando e como você sente a dificuldade de perto. Por exemplo, quem já tem certo grau de hipermetropia pode notar a leitura ruim um pouco antes; quem é míope e tira o óculos para ler pode “adiar” a sensação de presbiopia em alguns casos — mas o processo de endurecimento do cristalino continua existindo.
+Importante: a presbiopia **não é o mesmo que [hipermetropia](/conteudos/hipermetropia), [miopia](/conteudos/miopia) ou [astigmatismo](/conteudos/astigmatismo)**, embora esses erros de refração **modifiquem** quando e como você sente a dificuldade de perto. Por exemplo, quem já tem certo grau de hipermetropia pode notar a leitura ruim um pouco antes; quem é míope e tira o óculos para ler pode “adiar” a sensação de presbiopia em alguns casos — mas o processo de endurecimento do cristalino continua existindo.
 
 ## Quais são os sintomas mais comuns?
 
@@ -53,8 +53,8 @@ Se além disso você notar **visão embaçada persistente**, **metamorfopsia** (
 O diagnóstico é clínico e combina **sua história** (o que incomoda no dia a dia) com o **exame oftalmológico**:
 
 - **Refração objetiva e subjetiva** — define grau de longe e de perto e mede a acomodação disponível
-- **Avaliação da saúde ocular** — córnea, cristalino, retina e nervo óptico (para descartar catarata em estágio relevante, glaucoma, alterações de retina etc.)
-- Em alguns casos, exames complementares (por exemplo, **topografia** ou **OCT**) quando há outras condições ou planejamento cirúrgico
+- **Avaliação da saúde ocular** — córnea, cristalino, retina e nervo óptico (para descartar [catarata](/conteudos/catarata) em estágio relevante, [glaucoma](/conteudos/glaucoma), alterações de retina etc.)
+- Em alguns casos, exames complementares (por exemplo, [topografia](/conteudos/topografia-corneana) ou [OCT](/conteudos/oct-tomografia-coerencia-optica)) quando há outras condições ou planejamento cirúrgico
 
 O objetivo não é só “pôr um grau no óculos”, e sim **entender o seu perfil visual completo** e escolher a solução mais segura e confortável.
 
@@ -74,9 +74,9 @@ Não existe uma única “melhor” opção para todos. A escolha depende de **i
 
 ### Cirurgia e procedimentos
 
-Em **pessoas selecionadas**, podem ser discutidas técnicas de **cirurgia refrativa** com objetivo de reduzir a dependência de óculos para perto, sempre com análise de riscos, estabilidade da refração e condição da córnea e retina.
+Em **pessoas selecionadas**, podem ser discutidas técnicas de [cirurgia refrativa](/conteudos/cirurgia-refrativa) com objetivo de reduzir a dependência de óculos para perto, sempre com análise de riscos, estabilidade da refração e condição da córnea e retina.
 
-Na **catarata**, quando o cristalino já está opaco o suficiente para indicar cirurgia, a **lente intraocular** pode ser planejada para atender também **longe e perto** — mas isso é decisão médica individualizada, não um “upgrade” automático.
+Na [catarata](/conteudos/catarata), quando o cristalino já está opaco o suficiente para indicar cirurgia, a **lente intraocular** pode ser planejada para atender também **longe e perto** — mas isso é decisão médica individualizada, não um “upgrade” automático.
 
 ## Mitos que atrapalham decisões seguras
 
@@ -88,4 +88,4 @@ Na **catarata**, quando o cristalino já está opaco o suficiente para indicar c
 
 Vale agendar avaliação se a **leitura de perto** começou a afetar trabalho, lazer ou segurança (por exemplo, ler rótulos de medicamentos). Também é prudente revisar periodicamente a **prescrição** e a **saúde ocular** — a presbiopia costuma **progredir** até certo ponto, e outras condições podem surgir com a idade.
 
-Na consulta, Leonardo Nunes pode avaliar sua refração, discutir **óculos, lentes de contato ou encaminhamento para cirurgia** quando fizer sentido, e integrar esse cuidado ao **exame de retina e catarata** quando indicado.
+Na consulta, o oftalmologista pode avaliar sua refração, discutir **óculos, lentes de contato ou encaminhamento para cirurgia** quando fizer sentido, e integrar esse cuidado ao exame de retina e à [catarata](/conteudos/catarata) quando indicado.

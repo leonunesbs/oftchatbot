@@ -30,14 +30,14 @@ Você posiciona o rosto no aparelho; a câmera captura reflexo do endotélio e g
 
 ## Para que serve?
 
-- Estimar a **reserva funcional** do endotélio antes de **cirurgia de catarata**, **refrativa** ou **transplante**
+- Estimar a **reserva funcional** do endotélio antes de [cirurgia de catarata](/conteudos/catarata), [cirurgia refrativa](/conteudos/cirurgia-refrativa) ou **transplante**
 - Acompanhar **distúrbios** que comprometem o endotélio (algumas distrofias, alterações pós-cirúrgicas)
 - Investigar **edema de córnea** ou córnea “embaciada” quando a hipótese envolve **falência endotelial**
 
 ## Quando costuma ser indicada?
 
-Planejamento de **cirurgia** em córneas com história de **trauma**, cirurgias prévias, **córnea gutata** ou quando a **biomicroscopia** sugere problema endotelial. Também em **seguimento** de doenças que afetam essa camada.
+Planejamento de **cirurgia** em córneas com história de **trauma**, cirurgias prévias, **córnea gutata** ou quando a [biomicroscopia](/conteudos/biomicroscopia-lampada-de-fenda) sugere problema endotelial. Também em **seguimento** de doenças que afetam essa camada.
 
 ## Endotélio e outros exames
 
-A **tomografia** e a **topografia** descrevem **forma e espessura**; a microscopia especular foca na **viabilidade celular** da face interna. Na avaliação pré-operatória de alto risco, **vários** exames podem ser combinados.
+A [tomografia](/conteudos/tomografia-de-cornea) e a [topografia](/conteudos/topografia-corneana) descrevem **forma e espessura**; a microscopia especular foca na **viabilidade celular** da face interna. Na avaliação pré-operatória de alto risco, **vários** exames podem ser combinados.

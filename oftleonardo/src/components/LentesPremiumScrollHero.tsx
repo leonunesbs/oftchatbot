@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type PresbiopiaScrollHeroProps = {
+type LentesPremiumScrollHeroProps = {
   title: string;
   description: string;
   readingTime: string;
@@ -20,7 +20,6 @@ function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
 }
 
-/** Reduz oscilação por subpixel / jitter de layout sem deixar a animação em “degraus” visíveis. */
 function quantizeProgress(p: number) {
   return Math.round(p * 1200) / 1200;
 }
@@ -33,46 +32,63 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-/** Curva suave entre 0 e 1 no intervalo [edge0, edge1]. */
 function smoothstep(edge0: number, edge1: number, x: number) {
   if (edge1 <= edge0) return x >= edge1 ? 1 : 0;
   const t = clamp01((x - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
 }
 
-/** Narrativa em atos: cada trecho ganha nitidez num trecho do scroll (progresso 0–1). */
+/** Narrativa: vislumbre de uso multifocal — independência relativa dos óculos. */
 const STORY_BEATS: readonly { text: string; fadeInStart: number; fadeInEnd: number }[] = [
   {
-    text: "Primeiro, o perto deixa de ser confortável — leitura e tela pedem mais distância.",
+    text: "Longe, intermediário e perto passam a compartilhar o mesmo plano de foco — menos troca de óculos no ritmo do dia.",
     fadeInStart: 0,
     fadeInEnd: 0.22,
   },
   {
-    text: "O cristalino perde flexibilidade: é um processo natural, não ‘falta de cuidado’ com os olhos.",
+    text: "A lente intraocular redistribui a luz em zonas ou anéis; não devolve o cristalino jovem, mas pode reduzir a dependência de correção.",
     fadeInStart: 0.12,
     fadeInEnd: 0.4,
   },
   {
-    text: "Óculos, lentes ou outras opções existem — a escolha certa depende do exame e da sua rotina.",
+    text: "Há contrapartidas possíveis: halos, sensação de contraste diferente e curva de adaptação — tudo deve ser conversado antes da escolha.",
     fadeInStart: 0.3,
     fadeInEnd: 0.62,
   },
   {
-    text: "Entender ajuda; decidir com segurança é o papel da avaliação oftalmológica completa.",
+    text: "Exames, retina saudável e metas realistas definem se multifocal, EDoF ou monofocal fazem sentido para você.",
     fadeInStart: 0.52,
     fadeInEnd: 0.92,
   },
 ];
 
-export function PresbiopiaScrollHero({
+const FOCUS_LAYERS = [
+  {
+    label: "Longe",
+    hint: "Paisagem, placas, rosto",
+    gradient: "from-sky-500/30 via-sky-900/20 to-zinc-950",
+  },
+  {
+    label: "Intermediário",
+    hint: "Tela, painel, cozinha",
+    gradient: "from-emerald-500/25 via-teal-900/20 to-zinc-950",
+  },
+  {
+    label: "Perto",
+    hint: "Leitura, celular, detalhes",
+    gradient: "from-amber-500/20 via-amber-900/15 to-zinc-950",
+  },
+] as const;
+
+export function LentesPremiumScrollHero({
   title,
   description,
   readingTime,
   lastReviewedFormatted,
   isOpinion = false,
   scheduleAnchorHref = "#agendar",
-  scheduleAnchorId = "gtm-artigo-presbiopia-hero-agendar",
-}: PresbiopiaScrollHeroProps) {
+  scheduleAnchorId = "gtm-artigo-lentes-premium-catarata-hero-agendar",
+}: LentesPremiumScrollHeroProps) {
   const [trackEl, setTrackEl] = useState<HTMLDivElement | null>(null);
   const lastProgressRef = useRef(-1);
   const [progress, setProgress] = useState(0);
@@ -113,7 +129,6 @@ export function PresbiopiaScrollHero({
       }
     };
 
-    /** Um RAF por rajada de eventos — evita loop infinito e flicker por setState a 60fps. */
     const scheduleUpdate = () => {
       if (rafPending) return;
       rafPending = requestAnimationFrame(() => {
@@ -165,30 +180,22 @@ export function PresbiopiaScrollHero({
 
   const t = progress >= 1 ? 1 : easeOutCubic(progress);
 
-  /**
-   * Foco da tela do celular completa antes do fim da trilha (fração do progresso 0–1),
-   * para as letras ficarem nítidas com o hero ainda em sticky — a trilha é longa o bastante
-   * para “segurar” depois disso sem começar a rolar o artigo cedo demais.
-   */
-  const PHONE_FOCUS_BY = 0.74;
-  const phoneScreenT =
-    progress >= 1 ? 1 : easeOutCubic(clamp01(progress / PHONE_FOCUS_BY));
+  const LAYERS_FOCUS_BY = 0.72;
+  const layersT = progress >= 1 ? 1 : easeOutCubic(clamp01(progress / LAYERS_FOCUS_BY));
 
-  /** Blur forte no início (DOF); some ao focar. */
   const blurPx = t >= 1 ? 0 : lerp(16, 0, t);
-  /** Celular: começa maior e “à frente” (Z+), afasta-se e encolhe ao focar. */
-  const phoneZ = lerp(72, 0, t);
-  const phoneRotateY = lerp(11, 0, t);
-  const phoneRotateX = lerp(-6, 0, t);
-  const phoneScale = lerp(1.2, 0.9, t);
-  const phoneX = lerp(0, -12, t);
-  const phoneY = lerp(0, 7, t);
-  /** Bloco de texto: mesma lógica de profundidade, leve rotação em Y. */
-  const textZ = lerp(52, 0, t);
-  const textRotateY = lerp(-6, 0, t);
-  const textRotateX = lerp(3.5, 0, t);
-  const textScale = lerp(1.12, 1, t);
-  const textSlideX = lerp(5, 0, t);
+  const stackZ = lerp(64, 0, t);
+  const stackRotateY = lerp(10, 0, t);
+  const stackRotateX = lerp(-5, 0, t);
+  const stackScale = lerp(1.08, 1, t);
+  const stackX = lerp(0, -8, t);
+  const stackY = lerp(0, 6, t);
+
+  const textZ = lerp(48, 0, t);
+  const textRotateY = lerp(-5, 0, t);
+  const textRotateX = lerp(3, 0, t);
+  const textScale = lerp(1.1, 1, t);
+  const textSlideX = lerp(4, 0, t);
   const opacityMuted = lerp(0.45, 1, t);
 
   return (
@@ -202,104 +209,64 @@ export function PresbiopiaScrollHero({
           className="mx-auto grid w-full min-w-0 max-w-6xl items-center gap-5 sm:gap-7 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-6 lg:gap-10 [transform-style:preserve-3d]"
           style={{
             perspective: "min(1100px, 140vw)",
-            perspectiveOrigin: "50% 38%",
+            perspectiveOrigin: "50% 40%",
           }}
         >
-          {/* Ilustração: primeiro no mobile (primeira dobra); à direita no desktop (md:order-2) */}
           <div
-            className="relative mx-auto flex w-full min-w-0 max-w-[180px] justify-center min-[400px]:max-w-[210px] sm:max-w-[240px] md:order-2 md:mx-0 md:max-w-none md:justify-center lg:justify-end"
+            className="relative mx-auto flex w-full min-w-0 max-w-[min(100%,320px)] justify-center md:order-2 md:mx-0 md:max-w-none md:justify-end"
             aria-hidden
             style={{
               transform: prefersReducedMotion
                 ? undefined
-                : `translate3d(${phoneX}%, ${phoneY}%, 0) translateZ(${phoneZ}px) rotateX(${phoneRotateX}deg) rotateY(${phoneRotateY}deg) scale(${phoneScale})`,
+                : `translate3d(${stackX}%, ${stackY}%, 0) translateZ(${stackZ}px) rotateX(${stackRotateX}deg) rotateY(${stackRotateY}deg) scale(${stackScale})`,
               transformOrigin: "center center",
-              transition: prefersReducedMotion ? "none" : undefined,
               willChange: prefersReducedMotion ? undefined : "transform",
             }}
           >
-            <div className="relative aspect-[9/19] w-full max-w-[180px] rounded-[1.75rem] border border-border/80 bg-zinc-950 p-2 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.45)] min-[400px]:max-w-[200px] min-[400px]:rounded-[1.9rem] sm:max-w-[260px] sm:rounded-[2.25rem] sm:p-[10px] md:w-[min(36vw,300px)] md:max-w-none">
-              <div className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-16 -translate-x-1/2 rounded-full bg-zinc-900" />
-              <div
-                className="relative h-full w-full overflow-hidden rounded-[1.65rem] bg-zinc-900"
-                style={{
-                  filter: phoneScreenT >= 1 ? "none" : `blur(${lerp(12, 0, phoneScreenT)}px)`,
-                }}
-              >
-                <div className="flex h-full flex-col px-2.5 pb-2 pt-7">
-                  {/* Barra de status fictícia */}
-                  <div className="mb-2 flex items-center justify-between px-0.5">
-                    <span className="text-[8px] font-medium tabular-nums text-zinc-500">9:41</span>
-                    <div className="flex items-center gap-0.5">
-                      <div className="h-1.5 w-3 rounded-sm bg-zinc-600" />
-                      <div className="h-2 w-4 rounded border border-zinc-600 bg-zinc-800" />
-                    </div>
-                  </div>
-
-                  {/* Conteúdo tipo leitor / artigo (tema: vista cansada) */}
-                  <div className="min-h-0 flex-1 rounded-xl bg-zinc-950/90 p-2.5 ring-1 ring-inset ring-white/5">
-                    <p className="text-[7px] font-semibold uppercase tracking-wider text-sky-400/90">
-                      Saúde · olhos
-                    </p>
-                    <h3 className="mt-1.5 text-[10px] font-bold leading-tight text-zinc-100">
-                      Quando o perto deixa de focar
-                    </h3>
-                    <p className="mt-2 text-[7px] leading-snug text-zinc-400">
-                      Mensagens e letras pequenas podem exigir mais distância ou mais luz do que antes.
-                    </p>
-                    <p className="mt-1.5 text-[7px] leading-snug text-zinc-500">
-                      Isso costuma aparecer aos poucos — muitas pessoas notam entre 40 e 45 anos.
-                    </p>
-                    <div className="mt-2.5 flex items-center gap-1.5 border-t border-zinc-800/90 pt-2">
-                      <div
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-600/40 to-zinc-800 text-[9px] font-bold text-sky-200/90"
-                        aria-hidden
-                      >
-                        Aa
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[7px] font-medium text-zinc-500">Dica de leitura</p>
-                        <p className="text-[7px] text-zinc-400">Afastar o celular alguns centímetros costuma ajudar na hora.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Dock fictício + indicador home */}
-                  <div className="mt-2 flex flex-col items-center gap-2">
-                    <div className="flex w-full items-center justify-between px-1">
-                      {[
-                        { label: "Ler", active: true },
-                        { label: "Busca", active: false },
-                        { label: "Mapas", active: false },
-                        { label: "Mais", active: false },
-                      ].map((item) => (
-                        <div
-                          key={item.label}
-                          className={cn(
-                            "flex flex-col items-center gap-0.5",
-                            item.active ? "opacity-100" : "opacity-45",
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "h-7 w-7 rounded-xl",
-                              item.active
-                                ? "bg-sky-500/25 ring-1 ring-sky-400/40"
-                                : "bg-zinc-800/90",
-                            )}
-                          />
-                          <span className="text-[6px] font-medium text-zinc-500">{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="h-1 w-9 rounded-full bg-zinc-700/90" />
-                  </div>
-                </div>
+            <div className="relative w-full max-w-[300px] md:max-w-[340px]">
+              <div className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/90 sm:text-[11px]">
+                Um vislumbre de foco em três distâncias
               </div>
+              <div className="flex gap-2 sm:gap-2.5">
+                {FOCUS_LAYERS.map((layer, i) => {
+                  const stagger = prefersReducedMotion ? 1 : clamp01((layersT * 1.15 - i * 0.06) / 0.95);
+                  const layerBlur = prefersReducedMotion ? 0 : lerp(11, 0, stagger);
+                  const layerOpacity = prefersReducedMotion ? 1 : lerp(0.35, 1, stagger);
+                  return (
+                    <div
+                      key={layer.label}
+                      className={cn(
+                        "relative min-h-[200px] flex-1 overflow-hidden rounded-2xl border border-border/70 bg-zinc-950/90 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.42)] sm:min-h-[220px] sm:rounded-3xl",
+                        "ring-1 ring-inset ring-white/5",
+                      )}
+                      style={{
+                        filter: layerBlur <= 0.05 ? "none" : `blur(${layerBlur}px)`,
+                        opacity: layerOpacity,
+                        transform: prefersReducedMotion
+                          ? undefined
+                          : `translateZ(${lerp(8 - i * 4, 0, stagger)}px)`,
+                      }}
+                    >
+                      <div
+                        className={cn(
+                          "absolute inset-0 bg-gradient-to-b opacity-90",
+                          layer.gradient,
+                        )}
+                      />
+                      <div className="relative flex h-full flex-col justify-end p-2.5 sm:p-3">
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-100 sm:text-[10px]">
+                          {layer.label}
+                        </p>
+                        <p className="mt-0.5 text-[8px] leading-snug text-zinc-300/95 sm:text-[9px]">{layer.hint}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="pointer-events-none absolute -bottom-3 left-1/2 h-8 w-[78%] -translate-x-1/2 rounded-[100%] bg-black/25 blur-xl" />
             </div>
           </div>
 
-          {/* Coluna principal: leitura em F — título → subtítulo → narrativa → descrição → ações (md:order-1 = à esquerda no desktop) */}
           <div
             className="isolate flex min-w-0 flex-col justify-center text-left [transform-style:preserve-3d] md:order-1"
             style={{
@@ -326,23 +293,23 @@ export function PresbiopiaScrollHero({
             <h1
               className={cn(
                 "font-black text-foreground break-words [overflow-wrap:anywhere]",
-                "text-[clamp(1.875rem,7vw,5.75rem)] leading-[0.95] tracking-tight sm:text-[clamp(2.25rem,7.5vw,5.75rem)]",
+                "text-[clamp(1.75rem,6.5vw,5.25rem)] leading-[0.95] tracking-tight sm:text-[clamp(2rem,7vw,5.25rem)]",
               )}
               style={{
                 filter: blurPx <= 0 ? "none" : `blur(${blurPx}px)`,
-                letterSpacing: `${lerp(-0.045, -0.028, t)}em`,
+                letterSpacing: `${lerp(-0.042, -0.026, t)}em`,
               }}
             >
-              Vista cansada
+              Lentes premium
             </h1>
             <p
-              className="mt-2 text-[clamp(1.125rem,3.4vw,2.25rem)] font-semibold tracking-tight text-muted-foreground sm:mt-3"
+              className="mt-2 text-[clamp(1.05rem,3.1vw,2rem)] font-semibold tracking-tight text-muted-foreground sm:mt-3"
               style={{
                 filter: blurPx <= 0 ? "none" : `blur(${blurPx * 0.85}px)`,
                 opacity: opacityMuted,
               }}
             >
-              Presbiopia
+              Multifocalidade e escolha na catarata
             </p>
 
             <ol
@@ -409,7 +376,7 @@ export function PresbiopiaScrollHero({
           className="mx-auto mt-8 max-w-6xl px-1 text-center text-[11px] text-muted-foreground/80 sm:mt-10 sm:text-xs"
           aria-hidden="true"
         >
-          Continue rolando para acompanhar a história e, em seguida, o artigo completo
+          Continue rolando para o artigo completo sobre tipos de lente, indicações e expectativas
         </p>
       </div>
     </div>

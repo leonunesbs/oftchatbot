@@ -45,8 +45,8 @@ A **Tela de Amsler** é uma ferramenta simples que pode ajudar a detectar distor
 O oftalmologista avalia a mácula por meio de:
 
 - **Exame de fundo de olho:** visualização direta da retina
-- **Tomografia de coerência óptica (OCT):** imagem detalhada das camadas da retina para identificar líquido ou atrofia
-- **Angiografia:** exame com contraste para identificar vasos anormais na forma úmida
+- **[Tomografia de coerência óptica (OCT)](/conteudos/oct-tomografia-coerencia-optica):** imagem detalhada das camadas da retina para identificar líquido ou atrofia
+- **[Angiografia](/conteudos/angiografia-fluoresceinica):** exame com contraste para identificar vasos anormais na forma úmida
 
 ## Quais são os tratamentos?
 

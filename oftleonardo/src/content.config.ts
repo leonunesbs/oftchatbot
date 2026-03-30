@@ -13,6 +13,8 @@ const conteudos = defineCollection({
     readingTime: z.string(),
     /** Data da última revisão do conteúdo (ISO `YYYY-MM-DD`). */
     lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    /** Se verdadeiro, exibe o badge «Opinião» (conteúdo editorial); o padrão é artigo técnico revisado. */
+    isOpinion: z.boolean().optional(),
     faq: z.array(
       z.object({
         question: z.string(),

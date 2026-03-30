@@ -118,9 +118,8 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
       <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Conteúdos em oftalmologia</h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
         Explore guias sobre doenças oculares e erros de refração, referências sobre exames (diagnóstico
-        por imagem e função visual) e ferramentas de triagem. Informações acessíveis revisadas por
-        Leonardo Nunes,
-        oftalmologista especialista em retina e catarata.
+        por imagem e função visual) e ferramentas de triagem. Textos técnicos revisados; artigos de opinião
+        aparecem identificados com o badge «Opinião».
       </p>
     </section>
 
@@ -179,6 +178,11 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
                   <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
                     {article.data.readingTime}
                   </span>
+                  {article.data.isOpinion && (
+                    <span class="inline-flex items-center rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200">
+                      Opinião
+                    </span>
+                  )}
                 </div>
                 <h3 class="mt-2 text-base font-semibold text-foreground">{article.data.condition}</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">
@@ -229,6 +233,11 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
                   <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
                     {article.data.readingTime}
                   </span>
+                  {article.data.isOpinion && (
+                    <span class="inline-flex items-center rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200">
+                      Opinião
+                    </span>
+                  )}
                 </div>
                 <h3 class="mt-2 text-base font-semibold text-foreground">{article.data.condition}</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">
@@ -276,6 +285,11 @@ const allSchemas = [breadcrumbSchema, itemListSchema, ...conditionSchemas];
                   <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
                     {article.data.readingTime}
                   </span>
+                  {article.data.isOpinion && (
+                    <span class="inline-flex items-center rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200">
+                      Opinião
+                    </span>
+                  )}
                 </div>
                 <h3 class="mt-2 text-base font-semibold text-foreground">{article.data.condition}</h3>
                 <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">

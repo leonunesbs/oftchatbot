@@ -1,3 +1,247 @@
+export type FaqAnswerSegment =
+  | { type: "text"; text: string }
+  | {
+      type: "link";
+      href: string;
+      label: string;
+      /** Abre o diálogo global de agendamento (`BookingDialogHost`) na home. */
+      bookingDialog?: boolean;
+      onlineBookingLinkId?: string;
+      urlSync?: boolean;
+    };
+
+export type FaqItem = {
+  question: string;
+  answer: readonly FaqAnswerSegment[];
+};
+
+/** Texto contínuo para JSON-LD, API e leitores de tela (sem URLs). */
+export function flattenFaqAnswerText(segments: readonly FaqAnswerSegment[]): string {
+  return segments
+    .map((s) => (s.type === "text" ? s.text : s.label))
+    .join("");
+}
+
+const homeFaq = [
+  {
+    question: "A cirurgia de catarata é segura?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "Sim. A cirurgia de catarata por facoemulsificação é um dos procedimentos mais realizados e seguros da medicina atual, com altas taxas de sucesso. É feita com anestesia local (colírio anestésico), dura em média 15 a 20 minutos e a recuperação visual é rápida. O Dr. Leonardo realiza avaliação pré-operatória completa, escolha individualizada da lente intraocular e acompanhamento pós-operatório rigoroso para garantir a melhor recuperação. Veja também o ",
+      },
+      { type: "link" as const, href: "/conteudos/catarata", label: "guia sobre catarata" },
+      { type: "text" as const, text: "." },
+    ],
+  },
+  {
+    question: "O que é presbiopia (vista cansada) e como é tratada?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "A presbiopia é a dificuldade natural para enxergar de perto que surge a partir dos 40 anos, causada pela perda gradual de flexibilidade do cristalino. O tratamento mais comum é o uso de óculos para leitura ou lentes multifocais. Em casos selecionados, pode ser considerado o implante de lente intraocular multifocal durante a cirurgia de catarata. Na consulta, o Dr. Leonardo avalia o grau, a saúde ocular completa e orienta a melhor opção para o seu perfil. Leia o ",
+      },
+      { type: "link" as const, href: "/conteudos/presbiopia", label: "guia completo sobre presbiopia" },
+      {
+        type: "text" as const,
+        text: ", com sintomas, diagnóstico e opções de correção.",
+      },
+    ],
+  },
+  {
+    question: "Tenho diabetes. Com que frequência devo examinar os olhos?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "Todo paciente com diabetes tipo 1 ou tipo 2 deve realizar exame de fundo de olho pelo menos uma vez por ano, mesmo sem queixas visuais. A ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/retinopatia-diabetica",
+        label: "retinopatia diabética",
+      },
+      {
+        type: "text" as const,
+        text: " é uma das principais causas de cegueira evitável e, em estágios iniciais, não apresenta sintomas. A detecção precoce com exames como ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/oct-tomografia-coerencia-optica",
+        label: "OCT",
+      },
+      { type: "text" as const, text: " e " },
+      { type: "link" as const, href: "/conteudos/retinografia", label: "retinografia" },
+      {
+        type: "text" as const,
+        text: " permite iniciar o tratamento antes que haja perda de visão.",
+      },
+    ],
+  },
+  {
+    question: "Quais são as especialidades do Dr. Leonardo?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "O Dr. Leonardo é médico oftalmologista com atuação em oftalmologia clínica, retina clínica e cirúrgica e cirurgia de catarata. Realiza consultas completas, exames especializados de retina (OCT, retinografia, angiografia) e procedimentos cirúrgicos com técnicas modernas e seguras. Confira a ",
+      },
+      { type: "link" as const, href: "/#atuacao", label: "área de atuação" },
+      { type: "text" as const, text: " na página inicial e os " },
+      { type: "link" as const, href: "/conteudos", label: "conteúdos educativos" },
+      { type: "text" as const, text: " do site." },
+    ],
+  },
+  {
+    question: "Em quais cidades o Dr. Leonardo atende?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "O Dr. Leonardo atende em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). O agendamento é feito pelo WhatsApp — use o ",
+      },
+      {
+        type: "link" as const,
+        href: "/agendamento-online",
+        label: "agendamento online",
+      },
+      {
+        type: "text" as const,
+        text: " para escolher a cidade; a equipe confirma data e horário.",
+      },
+    ],
+  },
+  {
+    question: "O Dr. Leonardo atende por convênio?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "Sim. Além de atendimento particular, o Dr. Leonardo aceita convênios selecionados, que podem variar por cidade. ",
+      },
+      {
+        type: "link" as const,
+        href: "/",
+        label: "Fale no WhatsApp",
+        bookingDialog: true,
+        onlineBookingLinkId: "gtm-faq-convenio-dialog-agendar-online",
+        urlSync: true,
+      },
+      {
+        type: "text" as const,
+        text: " para confirmar se o seu plano é atendido na localidade desejada.",
+      },
+    ],
+  },
+  {
+    question: "Como funciona a cirurgia de catarata?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "A cirurgia é realizada pela técnica de facoemulsificação — um procedimento minimamente invasivo, com micro-incisão e implante de lente intraocular. A avaliação pré-operatória é completa, a escolha da lente é personalizada de acordo com o seu perfil visual e o acompanhamento pós-operatório é rigoroso, garantindo segurança e recuperação rápida. Saiba mais sobre ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/catarata",
+        label: "cirurgia de catarata",
+      },
+      { type: "text" as const, text: " e sobre " },
+      {
+        type: "link" as const,
+        href: "/conteudos/lentes-premium-catarata",
+        label: "lentes intraoculares premium",
+      },
+      { type: "text" as const, text: "." },
+    ],
+  },
+  {
+    question: "O que é o tratamento de retina e quando é necessário?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "O tratamento de retina é indicado para doenças como ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/retinopatia-diabetica",
+        label: "retinopatia diabética",
+      },
+      { type: "text" as const, text: ", " },
+      {
+        type: "link" as const,
+        href: "/conteudos/degeneracao-macular",
+        label: "degeneração macular",
+      },
+      {
+        type: "text" as const,
+        text: ", descolamento de retina e oclusões vasculares. O diagnóstico é feito com exames de alta resolução como ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/oct-tomografia-coerencia-optica",
+        label: "OCT",
+      },
+      { type: "text" as const, text: " e " },
+      {
+        type: "link" as const,
+        href: "/conteudos/angiografia-fluoresceinica",
+        label: "angiografia",
+      },
+      {
+        type: "text" as const,
+        text: ", permitindo detecção precoce e definição da melhor conduta para preservar a visão de cada paciente.",
+      },
+    ],
+  },
+  {
+    question: "Com que frequência devo consultar um oftalmologista?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "A recomendação é de pelo menos uma consulta anual para adultos. Pacientes com diabetes, hipertensão, histórico familiar de glaucoma ou acima de 40 anos devem manter acompanhamento regular, pois muitas doenças oculares são silenciosas e só são detectadas em exame de rotina. Crianças devem ter a primeira avaliação oftalmológica até os 3 anos de idade. Veja também o artigo sobre ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/exames-oftalmologicos",
+        label: "exames oftalmológicos",
+      },
+      { type: "text" as const, text: "." },
+    ],
+  },
+  {
+    question: "Como faço para agendar uma consulta?",
+    answer: [
+      {
+        type: "text" as const,
+        text: 'O agendamento é simples: use a página de ',
+      },
+      {
+        type: "link" as const,
+        href: "/agendamento-online",
+        label: "agendamento online",
+      },
+      {
+        type: "text" as const,
+        text: ', clique em "Agendar Consulta", selecione a cidade de atendimento e envie a mensagem pelo WhatsApp. A equipe retorna em horário comercial para confirmar o melhor dia e horário para você.',
+      },
+    ],
+  },
+  {
+    question: "Qual a diferença entre oftalmologista e optometrista?",
+    answer: [
+      {
+        type: "text" as const,
+        text: "Oftalmologista é o médico que cursou seis anos de medicina e completou residência médica em oftalmologia, sendo habilitado para diagnosticar, tratar clinicamente e operar doenças dos olhos. Já o optometrista é um profissional de saúde visual com formação em optometria, focado em exames de refração e adaptação de lentes, mas sem habilitação para realizar cirurgias ou prescrever medicamentos. O Dr. Leonardo é médico oftalmologista com registro no CRM e formação especializada em retina e catarata. Leia mais em ",
+      },
+      {
+        type: "link" as const,
+        href: "/conteudos/exames-oftalmologicos",
+        label: "exames oftalmológicos",
+      },
+      {
+        type: "text" as const,
+        text: " sobre o que esperar na consulta.",
+      },
+    ],
+  },
+] satisfies readonly FaqItem[];
+
 export const siteConfig = {
   name: "Leonardo Nunes",
   title: "Oftalmologista",
@@ -199,63 +443,7 @@ export const siteConfig = {
     },
   ],
 
-  faq: [
-    {
-      question: "A cirurgia de catarata é segura?",
-      answer:
-        "Sim. A cirurgia de catarata por facoemulsificação é um dos procedimentos mais realizados e seguros da medicina atual, com altas taxas de sucesso. É feita com anestesia local (colírio anestésico), dura em média 15 a 20 minutos e a recuperação visual é rápida. O Dr. Leonardo realiza avaliação pré-operatória completa, escolha individualizada da lente intraocular e acompanhamento pós-operatório rigoroso para garantir a melhor recuperação.",
-    },
-    {
-      question: "O que é presbiopia (vista cansada) e como é tratada?",
-      answer:
-        "A presbiopia é a dificuldade natural para enxergar de perto que surge a partir dos 40 anos, causada pela perda gradual de flexibilidade do cristalino. O tratamento mais comum é o uso de óculos para leitura ou lentes multifocais. Em casos selecionados, pode ser considerado o implante de lente intraocular multifocal durante a cirurgia de catarata. Na consulta, o Dr. Leonardo avalia o grau, a saúde ocular completa e orienta a melhor opção para o seu perfil. Há também um guia completo sobre sintomas, diagnóstico e opções de correção na área Conteúdos do site, no artigo dedicado à presbiopia.",
-    },
-    {
-      question: "Tenho diabetes. Com que frequência devo examinar os olhos?",
-      answer:
-        "Todo paciente com diabetes tipo 1 ou tipo 2 deve realizar exame de fundo de olho pelo menos uma vez por ano, mesmo sem queixas visuais. A retinopatia diabética é uma das principais causas de cegueira evitável e, em estágios iniciais, não apresenta sintomas. A detecção precoce com exames como OCT e retinografia permite iniciar o tratamento antes que haja perda de visão.",
-    },
-    {
-      question: "Quais são as especialidades do Dr. Leonardo?",
-      answer:
-        "O Dr. Leonardo é médico oftalmologista com atuação em oftalmologia clínica, retina clínica e cirúrgica e cirurgia de catarata. Realiza consultas completas, exames especializados de retina (OCT, retinografia, angiografia) e procedimentos cirúrgicos com técnicas modernas e seguras.",
-    },
-    {
-      question: "Em quais cidades o Dr. Leonardo atende?",
-      answer:
-        "O Dr. Leonardo atende em Fortaleza (CE), São Domingos do Maranhão (MA) e Fortuna (MA). O agendamento é feito pelo WhatsApp — basta escolher a cidade de preferência e a equipe confirma data e horário.",
-    },
-    {
-      question: "O Dr. Leonardo atende por convênio?",
-      answer:
-        "Sim. Além de atendimento particular, o Dr. Leonardo aceita convênios selecionados, que podem variar por cidade. Entre em contato pelo WhatsApp para confirmar se o seu plano é atendido na localidade desejada.",
-    },
-    {
-      question: "Como funciona a cirurgia de catarata?",
-      answer:
-        "A cirurgia é realizada pela técnica de facoemulsificação — um procedimento minimamente invasivo, com micro-incisão e implante de lente intraocular. A avaliação pré-operatória é completa, a escolha da lente é personalizada de acordo com o seu perfil visual e o acompanhamento pós-operatório é rigoroso, garantindo segurança e recuperação rápida.",
-    },
-    {
-      question: "O que é o tratamento de retina e quando é necessário?",
-      answer:
-        "O tratamento de retina é indicado para doenças como retinopatia diabética, degeneração macular (DMRI), descolamento de retina e oclusões vasculares. O diagnóstico é feito com exames de alta resolução como OCT e angiografia, permitindo detecção precoce e definição da melhor conduta para preservar a visão de cada paciente.",
-    },
-    {
-      question: "Com que frequência devo consultar um oftalmologista?",
-      answer:
-        "A recomendação é de pelo menos uma consulta anual para adultos. Pacientes com diabetes, hipertensão, histórico familiar de glaucoma ou acima de 40 anos devem manter acompanhamento regular, pois muitas doenças oculares são silenciosas e só são detectadas em exame de rotina. Crianças devem ter a primeira avaliação oftalmológica até os 3 anos de idade.",
-    },
-    {
-      question: "Como faço para agendar uma consulta?",
-      answer:
-        'O agendamento é simples: clique no botão "Agendar Consulta" em qualquer lugar do site, selecione a cidade de atendimento e envie a mensagem pelo WhatsApp. A equipe retorna em horário comercial para confirmar o melhor dia e horário para você.',
-    },
-    {
-      question: "Qual a diferença entre oftalmologista e optometrista?",
-      answer:
-        "Oftalmologista é o médico que cursou seis anos de medicina e completou residência médica em oftalmologia, sendo habilitado para diagnosticar, tratar clinicamente e operar doenças dos olhos. Já o optometrista é um profissional de saúde visual com formação em optometria, focado em exames de refração e adaptação de lentes, mas sem habilitação para realizar cirurgias ou prescrever medicamentos. O Dr. Leonardo é médico oftalmologista com registro no CRM e formação especializada em retina e catarata.",
-    },
-  ],
+  faq: homeFaq,
 
   navLinks: [
     { label: "Especialidades", href: "/#atuacao" },

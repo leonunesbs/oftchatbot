@@ -62,10 +62,10 @@ Podem ser **gelatinosas** ou **rígidas gaspermeáveis**, com indicação confor
 
 ### Cirurgia refrativa
 
-Técnicas como **LASIK**, **PRK** ou **SMILE** (entre outras) podem reduzir a dependência de óculos em **candidatos selecionados**. A decisão depende de exames da córnea, grau, idade e expectativas — tema detalhado no guia sobre **cirurgia refrativa**.
+Técnicas como **LASIK**, **PRK** ou **SMILE** (entre outras) podem reduzir a dependência de óculos em **candidatos selecionados**. A decisão depende de exames da córnea, grau, idade e expectativas — tema detalhado no guia sobre [cirurgia refrativa](/conteudos/cirurgia-refrativa).
 
 ## Miopia e saúde ocular de longo prazo
 
 Em **graus mais elevados**, o acompanhamento pode incluir orientações específicas e, quando indicado, exames para avaliar **retina periférica** e outros aspectos. O objetivo é combinar **boa visão corrigida** com **prevenção** e detecção precoce de alterações.
 
-Na consulta, Leonardo Nunes pode avaliar sua refração, discutir **óculos, lentes de contato ou encaminhamento para avaliação cirúrgica** quando fizer sentido, e integrar esse cuidado ao **exame de retina e catarata** quando indicado.
+Na consulta, o oftalmologista pode avaliar sua refração, discutir **óculos, lentes de contato ou encaminhamento para avaliação cirúrgica** quando fizer sentido, e integrar esse cuidado ao exame de retina e à [catarata](/conteudos/catarata) quando indicado.

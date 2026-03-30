@@ -27,7 +27,7 @@ relatedSlugs:
 
 **Cirurgia refrativa** é o conjunto de procedimentos que visa **alterar a forma óptica do olho** — em geral a **córnea** — para que a luz passe a focar de modo mais adequado na **retina**, reduzindo a necessidade de **óculos** ou **lentes de contato** para determinadas distâncias.
 
-Ela é indicada para **erros de refração** como **miopia**, **hipermetropia** e **astigmatismo**, em **adultos** que preencham critérios de segurança. **Presbiopia** pode ser parcialmente abordada com estratégias específicas (por exemplo, monovisão ou outras abordagens), mas a lógica é diferente da correção só de grau de longe — e os prós e contras devem ser conversados com clareza.
+Ela é indicada para **erros de refração** como [miopia](/conteudos/miopia), [hipermetropia](/conteudos/hipermetropia) e [astigmatismo](/conteudos/astigmatismo), em **adultos** que preencham critérios de segurança. [Presbiopia](/conteudos/presbiopia) pode ser parcialmente abordada com estratégias específicas (por exemplo, monovisão ou outras abordagens), mas a lógica é diferente da correção só de grau de longe — e os prós e contras devem ser conversados com clareza.
 
 ## Principais técnicas à laser (visão geral)
 
@@ -42,7 +42,7 @@ A escolha **não** deve ser feita só por vídeo na internet: depende de **exame
 ## O que é avaliado antes da cirurgia?
 
 - **Estabilidade** da refração (especialmente em jovens)
-- **Espessura** e **integridade** da córnea (descartar ou tratar formas frágeis, ceratocone subclínico etc.)
+- **Espessura** e **integridade** da córnea (descartar ou tratar formas frágeis, [ceratocone](/conteudos/ceratocone) subclínico etc.)
 - **Umidade ocular** e superfície ocular
 - **Retina** (buracos, degenerações periféricas podem precisar de abordagem antes ou vigilância)
 - **Expectativas**: visão noturna, halos, necessidade de óculos para certas tarefas mesmo após cirurgia “bem-sucedida”
@@ -55,9 +55,9 @@ Por isso o processo informado — com perguntas e respostas — faz parte do cui
 
 ## Cirurgia refrativa e outras fases da vida
 
-- **Presbiopia**: mesmo com excelente visão para longe após o laser, pode surgir necessidade de óculos para perto mais adiante.
-- **Catarata**: no futuro, o planejamento da **lente intraocular** considerará medidas da córnea; informe sempre que já fez cirurgia refrativa.
+- **[Presbiopia](/conteudos/presbiopia)**: mesmo com excelente visão para longe após o laser, pode surgir necessidade de óculos para perto mais adiante.
+- **[Catarata](/conteudos/catarata)**: no futuro, o planejamento da **lente intraocular** considerará medidas da córnea; informe sempre que já fez cirurgia refrativa.
 
 ## Quando procurar um oftalmologista?
 
-Se você deseja **avaliar candidatura** à cirurgia refrativa, o primeiro passo é uma consulta com **exames pré-operatórios completos** e discussão realista de **benefícios e riscos**. Leonardo Nunes pode orientar se o perfil é adequado ou se outras opções (óculos, lentes de contato, outros tratamentos) são mais seguras no seu caso.
+Se você deseja **avaliar candidatura** à cirurgia refrativa, o primeiro passo é uma consulta com **exames pré-operatórios completos** e discussão realista de **benefícios e riscos**. Na avaliação, o oftalmologista pode orientar se o perfil é adequado ou se outras opções (óculos, lentes de contato, outros tratamentos) são mais seguras no seu caso.

@@ -1,12 +1,14 @@
 ---
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import BookingPopup from "./BookingPopup";
+import { cn } from "@/lib/utils";
 import HeaderToolsMenu from "./HeaderToolsMenu";
 import MobileMenu from "./MobileMenu";
 ---
 
 <header
   id="main-header"
+  tabindex="-1"
   class="sticky top-0 z-40 w-full border-b border-border/70 bg-background/92 backdrop-blur-xl backdrop-saturate-150"
 >
   <div
@@ -95,29 +97,35 @@ import MobileMenu from "./MobileMenu";
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
         </span>
       </button>
-      <BookingPopup
-        client:visible
-        size="default"
-        className="ml-2 inline-flex h-10 rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        triggerAriaLabel="Agendar consulta"
-        triggerId="gtm-header-booking-desktop"
-        onlineBookingLinkId="gtm-header-desktop-dialog-agendar-online"
+      <button
+        type="button"
+        data-booking-trigger
+        id="gtm-header-booking-desktop"
+        data-online-booking-link-id="gtm-header-desktop-dialog-agendar-online"
+        aria-label="Agendar consulta"
+        class={cn(
+          buttonVariants({ variant: "default", size: "default" }),
+          "ml-2 inline-flex h-10 rounded-md bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90",
+        )}
       >
         Agendar Consulta
-      </BookingPopup>
+      </button>
     </nav>
 
     <div id="mobile-controls" class="flex items-center gap-1 md:hidden">
-      <BookingPopup
-        client:visible
-        size="sm"
-        className="inline-flex h-8 rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        triggerAriaLabel="Agendar consulta"
-        triggerId="gtm-header-booking-mobile"
-        onlineBookingLinkId="gtm-header-mobile-dialog-agendar-online"
+      <button
+        type="button"
+        data-booking-trigger
+        id="gtm-header-booking-mobile"
+        data-online-booking-link-id="gtm-header-mobile-dialog-agendar-online"
+        aria-label="Agendar consulta"
+        class={cn(
+          buttonVariants({ variant: "default", size: "sm" }),
+          "inline-flex h-8 rounded-md bg-brand px-3 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90",
+        )}
       >
         Agendar
-      </BookingPopup>
+      </button>
       <button
         id="gtm-header-theme-toggle-mobile"
         type="button"

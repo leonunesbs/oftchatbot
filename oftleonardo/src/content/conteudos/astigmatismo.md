@@ -30,9 +30,9 @@ O **astigmatismo** é um erro de refração em que o olho **não foca com a mesm
 ## Astigmatismo regular e irregular
 
 - **Regular** — o mais comum; a assimetria segue um padrão previsível e costuma ser bem corrigida com óculos e, na maioria dos casos, com lentes tóricas.
-- **Irregular** — padrão menos uniforme; pode aparecer após trauma, cirurgias na córnea ou em doenças como **ceratocone**. A correção pode exigir lentes rígidas gaspermeáveis, esclerais ou tratamentos específicos da causa.
+- **Irregular** — padrão menos uniforme; pode aparecer após trauma, cirurgias na córnea ou em doenças como [ceratocone](/conteudos/ceratocone). A correção pode exigir lentes rígidas gaspermeáveis, esclerais ou tratamentos específicos da causa.
 
-Se o astigmatismo **aumenta rápido** ou a visão fica **muito irregular**, a investigação com **topografia corneana** e acompanhamento especializado fazem sentido.
+Se o astigmatismo **aumenta rápido** ou a visão fica **muito irregular**, a investigação com [topografia corneana](/conteudos/topografia-corneana) e acompanhamento especializado fazem sentido.
 
 ## Quais são os sintomas?
 
@@ -45,7 +45,7 @@ Dependem do grau e de miopia/hipermetropia associadas:
 
 ## Como é o diagnóstico?
 
-Além da **refração** (que define esfera, cilindro e eixo), o exame avalia a **saúde da córnea** e descarta outras causas de queda de visão. Em casos selecionados, **topografia** ou **tomografia de córnea** complementam o estudo.
+Além da **refração** (que define esfera, cilindro e eixo), o exame avalia a **saúde da córnea** e descarta outras causas de queda de visão. Em casos selecionados, [topografia](/conteudos/topografia-corneana) ou [tomografia de córnea](/conteudos/tomografia-de-cornea) complementam o estudo.
 
 ## Opções de correção
 
@@ -59,10 +59,10 @@ Lentes com **cilindro** personalizado são a opção mais simples e reversível.
 
 ### Cirurgia refrativa
 
-Pode corrigir ou reduzir astigmatismo **regular** em candidatos adequados, muitas vezes em combinação com miopia ou hipermetropia. O planejamento usa medidas de córnea e expectativas realistas.
+Pode corrigir ou reduzir astigmatismo **regular** em candidatos adequados, muitas vezes em combinação com [miopia](/conteudos/miopia) ou [hipermetropia](/conteudos/hipermetropia). O planejamento usa medidas de córnea e expectativas realistas.
 
 ## Astigmatismo e outras condições
 
-Astigmatismo pode coexistir com **miopia**, **hipermetropia** e **presbiopia**. Após certa idade, a **catarata** também pode alterar a refração — às vezes “mascarando” ou mudando o astigmatismo medido.
+Astigmatismo pode coexistir com [miopia](/conteudos/miopia), [hipermetropia](/conteudos/hipermetropia) e [presbiopia](/conteudos/presbiopia). Após certa idade, a [catarata](/conteudos/catarata) também pode alterar a refração — às vezes “mascarando” ou mudando o astigmatismo medido.
 
-Na consulta, Leonardo Nunes pode orientar a melhor forma de correção para o seu caso e indicar **exames complementares** quando o padrão não for típico ou quando houver suspeita de doença de córnea.
+Na consulta, o oftalmologista pode orientar a melhor forma de correção para o seu caso e indicar **exames complementares** quando o padrão não for típico ou quando houver suspeita de doença de córnea.

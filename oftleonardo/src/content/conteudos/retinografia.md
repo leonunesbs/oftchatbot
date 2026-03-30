@@ -32,7 +32,7 @@ Você posiciona o rosto no aparelho; a câmera foca o fundo do olho e **tira uma
 
 - **Documentar** o aspecto do fundo em uma data — útil para comparar depois
 - Apoiar **educação** do paciente e registro no prontuário
-- Ajudar no **rastreamento** e **acompanhamento** de **retinopatia diabética**, hipertensão com alterações oculares, doenças do disco e algumas **maculopatias**
+- Ajudar no **rastreamento** e **acompanhamento** de [retinopatia diabética](/conteudos/retinopatia-diabetica), hipertensão com alterações oculares, doenças do disco e algumas **maculopatias**
 
 ## Quando costuma ser indicada?
 

@@ -29,6 +29,8 @@ export const OFT_ANALYTICS_EVENTS = {
   /** Contexto de página para públicos (site + agenda). */
   audience_page_context: "audience_page_context",
   scroll_depth_milestone: "scroll_depth_milestone",
+  /** Compartilhamento de conteúdo (ex.: artigos em /conteudos). Alinha ao evento recomendado do GA4 `share`. */
+  share: "share",
 } as const;
 
 export type OftAnalyticsEventName = (typeof OFT_ANALYTICS_EVENTS)[keyof typeof OFT_ANALYTICS_EVENTS];

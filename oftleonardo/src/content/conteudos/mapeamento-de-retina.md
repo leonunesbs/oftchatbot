@@ -31,7 +31,7 @@ Equipamentos específicos combinam **ótica**, **iluminação** e **software** p
 ## Para que serve?
 
 - Melhor visualização de alterações na **periferia** da retina em uma única imagem
-- Apoio ao **estadiamento** de **retinopatia diabética** e outras doenças que podem afetar bordas da retina
+- Apoio ao **estadiamento** de [retinopatia diabética](/conteudos/retinopatia-diabetica) e outras doenças que podem afetar bordas da retina
 - Documentação em **vasculites**, algumas **tumorações** ou lesões periféricas
 
 ## Quando costuma ser indicado?
@@ -40,6 +40,6 @@ Quando o oftalmologista precisa avaliar **mais retina periférica** do que a fot
 
 ## Relação com retinografia e angiografia
 
-- **Retinografia** clássica: foco em documentação do fundo; campo varia pelo aparelho.
+- [Retinografia](/conteudos/retinografia) clássica: foco em documentação do fundo; campo varia pelo aparelho.
 - **Mapeamento ampliado**: prioriza **largura de campo**.
-- **Angiografia fluoresceínica**: estuda **circulação e vazamento**; é outro tipo de exame, frequentemente combinado quando necessário.
+- [Angiografia fluoresceínica](/conteudos/angiografia-fluoresceinica): estuda **circulação e vazamento**; é outro tipo de exame, frequentemente combinado quando necessário.

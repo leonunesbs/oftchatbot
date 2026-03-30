@@ -36,7 +36,7 @@ Os sintomas **nem sempre são óbvios** em hipermetropia leve, porque o olho com
 - Cansaço visual, ardor ou **dor ao redor dos olhos** após leitura ou telas
 - **Dificuldade para manter foco** de perto por longos períodos
 - Em alguns casos, visão **menos nítida** também para longe, quando a compensação não é suficiente
-- Em **crianças**: sintomas podem incluir estrabismo ou preguiça de um olho — exige avaliação especializada
+- Em **crianças**: sintomas podem incluir [estrabismo](/conteudos/estrabismo) ou preguiça de um olho — exige avaliação especializada
 
 Sintomas de início súbito ou perda visual importante **não** devem ser atribuídos só à hipermetropia.
 
@@ -46,9 +46,9 @@ O diagnóstico combina **história clínica** com **refração** (objetiva e sub
 
 ## Hipermetropia e outras condições
 
-- **Astigmatismo** e **miopia** podem coexistir com hipermetropia em graus diferentes em cada olho.
-- **Presbiopia** soma dificuldade de perto na meia-idade; o plano de correção pode envolver **multifocais**, **progressivas** ou outras soluções.
-- **Catarata** altera a refração ao longo do tempo; quem nunca usou óculos pode passar a precisar, ou o grau pode “andar”.
+- [Astigmatismo](/conteudos/astigmatismo) e [miopia](/conteudos/miopia) podem coexistir com hipermetropia em graus diferentes em cada olho.
+- [Presbiopia](/conteudos/presbiopia) soma dificuldade de perto na meia-idade; o plano de correção pode envolver **multifocais**, **progressivas** ou outras soluções.
+- [Catarata](/conteudos/catarata) altera a refração ao longo do tempo; quem nunca usou óculos pode passar a precisar, ou o grau pode “andar”.
 
 ## Opções de tratamento
 
@@ -62,8 +62,8 @@ Lentes esféricas ou tóricas (se houver astigmatismo relevante), com orientaç�
 
 ### Cirurgia refrativa
 
-Pode ser discutida em **adultos com critérios adequados**, após exames da córnea e planejamento individual — ver guia de **cirurgia refrativa**.
+Pode ser discutida em **adultos com critérios adequados**, após exames da córnea e planejamento individual — ver o guia de [cirurgia refrativa](/conteudos/cirurgia-refrativa).
 
 ## Quando procurar um oftalmologista?
 
-Procure avaliação se há **cansaço visual persistente**, dificuldade escolar em crianças, ou mudança súbita de visão. Na consulta, Leonardo Nunes pode medir sua refração, avaliar **alinhamento ocular** em crianças quando necessário e orientar **óculos, lentes ou encaminhamento** para cirurgia quando indicado.
+Procure avaliação se há **cansaço visual persistente**, dificuldade escolar em crianças, ou mudança súbita de visão. Na consulta, o oftalmologista pode medir sua refração, avaliar **alinhamento ocular** em crianças quando necessário e orientar **óculos, lentes ou encaminhamento** para cirurgia quando indicado.

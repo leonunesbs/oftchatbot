@@ -31,7 +31,7 @@ Você apoia o queixo e a testa num suporte; o médico ajusta a luz e a ampliaç�
 ## Para que serve?
 
 - Detectar e acompanhar **ceratites**, **úlceras**, **corpo estranho**, **secação** e alterações da **superfície** ocular
-- Avaliar **catarata**, **inflamações** intraoculares e **glaucoma** (em conjunto com outros exames)
+- Avaliar [catarata](/conteudos/catarata), **inflamações** intraoculares e [glaucoma](/conteudos/glaucoma) (em conjunto com outros exames)
 - Examinar **reborde palpebral**, **blefarite**, **problemas de lágrima**
 - Preparar ou acompanhar **cirurgias** (catarata, refrativa, transplante etc.)
 
@@ -41,4 +41,4 @@ Está presente em praticamente **toda consulta oftalmológica completa**. É ped
 
 ## Relação com outros exames
 
-A biomicroscopia mostra **como as estruturas parecem** sob luz e magnificação; **retinografia**, **OCT**, **campo visual** e **angiografia** acrescentam documentação em imagem, medidas de espessura ou função visual — não são redundâncias, e sim **complementos** quando há indicação.
+A biomicroscopia mostra **como as estruturas parecem** sob luz e magnificação; [retinografia](/conteudos/retinografia), [OCT](/conteudos/oct-tomografia-coerencia-optica), [campo visual](/conteudos/campo-visual-perimetria) e [angiografia](/conteudos/angiografia-fluoresceinica) acrescentam documentação em imagem, medidas de espessura ou função visual — não são redundâncias, e sim **complementos** quando há indicação.

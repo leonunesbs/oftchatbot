@@ -36,15 +36,15 @@ O equipamento emite luz que penetra o tecido e mede o eco óptico retornado; um 
 
 ## Para que serve?
 
-- Diagnosticar e acompanhar **edema macular**, **DMRI** “úmida” ou seca avançada, **buraco macular**, **membranas**
+- Diagnosticar e acompanhar **edema macular**, [degeneração macular](/conteudos/degeneracao-macular) (DMRI) “úmida” ou seca avançada, **buraco macular**, **membranas**
 - Monitorar resposta a tratamentos **intra-vítreos** ou outros
-- Auxiliar na avaliação de **glaucoma** junto com pressão, disco e **campo visual**
-- Apoiar decisões em **córnea** e, em alguns fluxos, **catarata** (medições específicas)
+- Auxiliar na avaliação de [glaucoma](/conteudos/glaucoma) junto com pressão, disco e [campo visual](/conteudos/campo-visual-perimetria)
+- Apoiar decisões em **córnea** e, em alguns fluxos, [catarata](/conteudos/catarata) (medições específicas)
 
 ## Quando costuma ser indicado?
 
-Suspeita ou acompanhamento de **doenças maculares**, **glaucoma**, **alterações do nervo óptico**, edema macular de diversas causas, e situações em que a **estrutura em camadas** precisa ser quantificada.
+Suspeita ou acompanhamento de **doenças maculares**, [glaucoma](/conteudos/glaucoma), **alterações do nervo óptico**, edema macular de diversas causas, e situações em que a **estrutura em camadas** precisa ser quantificada.
 
 ## OCT e retinografia
 
-A **retinografia** mostra a **cor e o desenho** do fundo; o **OCT** mostra **profundidade e espessura**. Na prática, são **complementares**.
+A [retinografia](/conteudos/retinografia) mostra a **cor e o desenho** do fundo; o **OCT** mostra **profundidade e espessura**. Na prática, são **complementares**.
