@@ -117,41 +117,19 @@ function applyMotionFrame(dom: MotionDom, progress: number, reduced: boolean) {
   const layersT = p >= 1 ? 1 : easeOutCubic(clamp01(p / LAYERS_FOCUS_BY));
 
   const blurPx = t >= 1 ? 0 : lerp(16, 0, t);
-  const stackZ = lerp(64, 0, t);
-  const stackRotateY = lerp(10, 0, t);
-  const stackRotateX = lerp(-5, 0, t);
-  const stackScale = lerp(1.08, 1, t);
-  const stackX = 0;
-  /** Pouco deslocamento vertical para não “invadir” a coluna de texto no empilhamento mobile. */
-  const stackY = lerp(0, 2.25, t);
-
-  const textZ = lerp(48, 0, t);
-  const textRotateY = lerp(-5, 0, t);
-  const textRotateX = lerp(3, 0, t);
-  const textScale = lerp(1.1, 1, t);
-  const textSlideX = lerp(4, 0, t);
   const opacityMuted = lerp(0.45, 1, t);
 
   const { stack, textCol, h1, sub, desc, storyLis, layerOuters, layerInners, layerIconWraps } = dom;
 
+  /** Sem transform 3D no scroll — blur/opacidade apenas (melhor em mobile). */
   if (stack) {
-    if (reduced) {
-      stack.style.transform = "";
-      stack.style.removeProperty("will-change");
-    } else {
-      stack.style.transform = `translate3d(${stackX}%, ${stackY}%, 0) translateZ(${stackZ}px) rotateX(${stackRotateX}deg) rotateY(${stackRotateY}deg) scale(${stackScale})`;
-      stack.style.willChange = p < 0.999 ? "transform" : "auto";
-    }
+    stack.style.transform = "";
+    stack.style.removeProperty("will-change");
   }
 
   if (textCol) {
-    if (reduced) {
-      textCol.style.transform = "";
-      textCol.style.removeProperty("will-change");
-    } else {
-      textCol.style.transform = `translate3d(${textSlideX}%, 0, 0) translateZ(${textZ}px) rotateX(${textRotateX}deg) rotateY(${textRotateY}deg) scale(${textScale})`;
-      textCol.style.willChange = p < 0.999 ? "transform" : "auto";
-    }
+    textCol.style.transform = "";
+    textCol.style.removeProperty("will-change");
   }
 
   if (h1) {
@@ -177,7 +155,7 @@ function applyMotionFrame(dom: MotionDom, progress: number, reduced: boolean) {
     const lineBlur = reduced ? 0 : 9 * (1 - reveal);
     li.style.opacity = String(reduced ? 1 : 0.25 + 0.75 * reveal);
     li.style.filter = lineBlur <= 0.05 ? "none" : `blur(${lineBlur}px)`;
-    li.style.transform = reduced ? "" : `translateY(${lerp(10, 0, reveal)}px)`;
+    li.style.transform = "";
   }
 
   for (let i = 0; i < FOCUS_LAYERS.length; i++) {
@@ -190,13 +168,8 @@ function applyMotionFrame(dom: MotionDom, progress: number, reduced: boolean) {
     const layerOpacity = reduced ? 1 : lerp(0.35, 1, stagger);
     /** Defocus nas ilustrações: metade do blur do fundo (teto ~5,5px). */
     const iconDefocusPx = reduced ? 0 : layerBlur * 0.5;
-    if (reduced) {
-      outer.style.transform = "";
-      outer.style.removeProperty("will-change");
-    } else {
-      outer.style.transform = `translateZ(${lerp(8 - i * 4, 0, stagger)}px)`;
-      outer.style.willChange = p < 0.999 ? "transform" : "auto";
-    }
+    outer.style.transform = "";
+    outer.style.removeProperty("will-change");
     inner.style.filter = layerBlur <= 0.05 ? "none" : `blur(${layerBlur}px)`;
     inner.style.opacity = String(layerOpacity);
 
@@ -403,20 +376,11 @@ export function LentesPremiumHeroVariantA({
       data-lentes-hero-variant="A"
     >
       <div className="sticky top-[4.75rem] z-0 flex min-h-[calc(100dvh-4.75rem)] flex-col justify-start px-3 pb-12 pt-16 sm:px-5 sm:pb-14 sm:pt-[4.25rem] md:px-6 md:pb-12 md:pt-24 lg:pt-28">
-        <div
-          className="mx-auto grid w-full min-w-0 max-w-6xl items-start gap-x-5 gap-y-10 sm:gap-x-6 sm:gap-y-9 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-10 [transform-style:preserve-3d]"
-          style={{
-            perspective: "min(1100px, 140vw)",
-            perspectiveOrigin: "50% 40%",
-          }}
-        >
+        <div className="mx-auto grid w-full min-w-0 max-w-6xl items-start gap-x-5 gap-y-10 sm:gap-x-6 sm:gap-y-9 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-10">
           <div
             ref={(node) => patchMotionRef(motionDomRef, "stack", node)}
             className="relative mx-auto flex w-full min-w-0 max-w-[368px] justify-center md:order-2 md:mx-auto md:max-w-[392px] md:justify-self-center"
             aria-hidden
-            style={{
-              transformOrigin: "center center",
-            }}
           >
             <div className="relative mx-auto w-full max-w-[332px] pb-14 sm:max-w-[360px] sm:pb-16 md:max-w-[392px] md:pb-10">
               <div className="mb-4 flex justify-center sm:mb-5">
@@ -433,7 +397,7 @@ export function LentesPremiumHeroVariantA({
                       ref={layerOuterRefs[i]}
                       className={cn(
                         "relative min-h-[172px] flex-1 overflow-hidden rounded-2xl border border-border/70 bg-zinc-950/92 sm:min-h-[188px] sm:rounded-3xl md:min-h-[202px]",
-                        "ring-1 ring-inset ring-white/[0.06] [transform-style:preserve-3d]",
+                        "ring-1 ring-inset ring-white/[0.06]",
                       )}
                       style={{
                         boxShadow:
@@ -510,10 +474,7 @@ export function LentesPremiumHeroVariantA({
 
           <div
             ref={(node) => patchMotionRef(motionDomRef, "textCol", node)}
-            className="isolate relative z-[1] flex min-w-0 flex-col justify-center text-left [transform-style:preserve-3d] md:order-1"
-            style={{
-              transformOrigin: "left center",
-            }}
+            className="isolate relative z-[1] flex min-w-0 flex-col justify-center text-left md:order-1"
           >
             <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5 sm:gap-3 md:mb-4">
               <span className="inline-flex items-center rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand">

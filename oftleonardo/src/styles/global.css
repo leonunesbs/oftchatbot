@@ -286,7 +286,7 @@
   }
 }
 
-/** LIO esquemática: perspectiva; rotação em `LentesPremiumIolSketch` (rAF + scroll). */
+/** LIO esquemática: perspectiva; giro só em CSS (`animation`), sem rAF nem scroll. */
 .lentes-premium-iol-sketch-perspective {
   perspective: min(920px, 90vw);
   /** Alinha o eixo visual ao centro da óptica no viewBox (160×80 em 320×160). */
@@ -295,6 +295,28 @@
 
 .lentes-premium-iol-sketch-spin {
   transform-style: preserve-3d;
+}
+
+@keyframes lentes-premium-iol-y-spin {
+  from {
+    transform: rotateY(0deg) translateZ(18px);
+  }
+
+  to {
+    transform: rotateY(360deg) translateZ(18px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lentes-premium-iol-sketch-spin-animated {
+    animation: lentes-premium-iol-y-spin 32s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lentes-premium-iol-sketch-spin-animated {
+    transform: translateZ(14px) rotateY(-14deg);
+  }
 }
 
 /** Sem réplicas sobrepostas: só translateZ leve + sombra para profundidade (evita “fantasma” ao girar). */
