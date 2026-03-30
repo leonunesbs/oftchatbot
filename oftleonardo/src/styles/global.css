@@ -289,6 +289,41 @@
       transparent 88%
     );
   }
+  /** Telas estreitas: menos “torre”, mais largura — máscara + leve scale no SVG. */
+  @media (max-width: 1023px) {
+    .home-cosmic-backdrop__svg {
+      transform: translate3d(0, var(--cosmic-translate-y), 0) scale(1.05, 0.92);
+      mask-image: radial-gradient(
+        ellipse 56% 68% at 50% 50%,
+        black 0%,
+        black 28%,
+        transparent 88%
+      );
+      -webkit-mask-image: radial-gradient(
+        ellipse 56% 68% at 50% 50%,
+        black 0%,
+        black 28%,
+        transparent 88%
+      );
+    }
+  }
+  @media (max-width: 639px) {
+    .home-cosmic-backdrop__svg {
+      transform: translate3d(0, var(--cosmic-translate-y), 0) scale(1.12, 0.84);
+      mask-image: radial-gradient(
+        ellipse 74% 54% at 50% 50%,
+        black 0%,
+        black 26%,
+        transparent 86%
+      );
+      -webkit-mask-image: radial-gradient(
+        ellipse 74% 54% at 50% 50%,
+        black 0%,
+        black 26%,
+        transparent 86%
+      );
+    }
+  }
   html.dark .home-cosmic-backdrop__svg {
     opacity: 0.96;
   }
