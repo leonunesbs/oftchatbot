@@ -1,11 +1,7 @@
-import { type Ref } from "react";
-
 import { cn } from "@/lib/utils";
 
 type LentesPremiumIolSketchProps = {
   className?: string;
-  /** Quando definido, envolve o giro CSS num wrapper para `rotateY` extra via scroll (hero variante A). */
-  scrollDriveRef?: Ref<HTMLDivElement>;
 };
 
 const iolSvgClass =
@@ -73,25 +69,9 @@ function LentesPremiumIolSvg({ className }: { className?: string }) {
 
 /**
  * Esboço esquemático de LIO: óptica + hápticos em C, rotação em perspectiva.
- * Giro contínuo via CSS (`animation`); opcionalmente um wrapper com ref para somar rotação ao scroll.
+ * Giro contínuo via CSS (`animation`).
  */
-export function LentesPremiumIolSketch({ className, scrollDriveRef }: LentesPremiumIolSketchProps) {
-  const spinBlock = (
-    <div
-      className="lentes-premium-iol-sketch-spin lentes-premium-iol-sketch-spin-animated w-full"
-      style={{
-        transformOrigin: "50% 50%",
-        backfaceVisibility: "hidden",
-      }}
-    >
-      <div className="lentes-premium-iol-sketch-depth relative flex aspect-[2/1] w-full items-center justify-center">
-        <div className="lentes-premium-iol-sketch-depth-front relative flex w-full items-center justify-center">
-          <LentesPremiumIolSvg />
-        </div>
-      </div>
-    </div>
-  );
-
+export function LentesPremiumIolSketch({ className }: LentesPremiumIolSketchProps) {
   return (
     <div
       className={cn(
@@ -104,17 +84,18 @@ export function LentesPremiumIolSketch({ className, scrollDriveRef }: LentesPrem
         <div className="h-[90%] max-h-[160px] w-[90%] max-w-[280px] rounded-full bg-brand/[0.08] blur-2xl dark:bg-brand/[0.1]" />
       </div>
       <div className="lentes-premium-iol-sketch-perspective relative w-full [contain:layout_style]">
-        {scrollDriveRef ? (
-          <div
-            ref={scrollDriveRef}
-            className="lentes-premium-iol-sketch-scroll-drive w-full [transform-style:preserve-3d]"
-            style={{ transformOrigin: "50% 50%" }}
-          >
-            {spinBlock}
+        <div
+          className="lentes-premium-iol-sketch-spin lentes-premium-iol-sketch-spin-animated w-full"
+          style={{
+            backfaceVisibility: "hidden",
+          }}
+        >
+          <div className="lentes-premium-iol-sketch-depth relative flex aspect-[2/1] w-full items-center justify-center">
+            <div className="lentes-premium-iol-sketch-depth-front relative flex w-full items-center justify-center">
+              <LentesPremiumIolSvg />
+            </div>
           </div>
-        ) : (
-          spinBlock
-        )}
+        </div>
       </div>
     </div>
   );

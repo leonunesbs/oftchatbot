@@ -286,24 +286,25 @@
   }
 }
 
-/** LIO esquemática: perspectiva; giro base em CSS (`animation`); variante A pode somar `rotateY` via wrapper no scroll. */
+/** LIO esquemática: perspectiva; giro em CSS (`animation`). */
 .lentes-premium-iol-sketch-perspective {
   perspective: min(920px, 90vw);
-  /** Alinha o eixo visual ao centro da óptica no viewBox (160×80 em 320×160). */
-  perspective-origin: 50% 45%;
+  /** Eixo fixo e centralizado na caixa da LIO (evita “órbita” com perspective-origin ou translateZ na mesma camada do rotateY). */
+  perspective-origin: 50% 50%;
 }
 
 .lentes-premium-iol-sketch-spin {
   transform-style: preserve-3d;
+  transform-origin: 50% 50%;
 }
 
 @keyframes lentes-premium-iol-y-spin {
   from {
-    transform: rotateY(0deg) translateZ(18px);
+    transform: rotateY(0deg);
   }
 
   to {
-    transform: rotateY(360deg) translateZ(18px);
+    transform: rotateY(360deg);
   }
 }
 
@@ -315,7 +316,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lentes-premium-iol-sketch-spin-animated {
-    transform: translateZ(14px) rotateY(-14deg);
+    transform: rotateY(-14deg);
   }
 }
 

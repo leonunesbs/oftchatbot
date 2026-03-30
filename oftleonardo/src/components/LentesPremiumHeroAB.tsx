@@ -32,7 +32,7 @@ function pushAbExposure(variant: LentesPremiumHeroAbVariant) {
 }
 
 /**
- * Teste A/B do hero em lentes premium: **A** = trilha de scroll com rotação extra da LIO, **B** = estático conversão.
+ * Teste A/B do hero em lentes premium: **A** = layout alternativo (sem trilha/sticky), **B** = estático conversão.
  *
  * - Atribuição 50/50 em `localStorage` (`oft_ab_lentes_premium_hero_v1`).
  * - Forçar: `?lp_hero=a` ou `?lp_hero=b` (não altera o storage).

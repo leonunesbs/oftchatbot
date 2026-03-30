@@ -1,5 +1,4 @@
 import { BookOpen, CheckCircle2, Monitor, Mountain, type LucideIcon } from "lucide-react";
-import { useLayoutEffect, useRef } from "react";
 
 import { LentesPremiumIolSketch } from "@/components/LentesPremiumIolSketch";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,43 +14,19 @@ export type LentesPremiumHeroVariantProps = {
   scheduleAnchorId?: string;
 };
 
-function clamp01(n: number) {
-  return Math.min(1, Math.max(0, n));
-}
-
-function quantizeProgress(p: number) {
-  return Math.round(p * 1200) / 1200;
-}
-
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3;
-}
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-
 /** Narrativa: “premium” vai além de trifocal — distâncias, qualidade visual e trade-offs de luz. */
-const STORY_BEATS: readonly { text: string; fadeInStart: number; fadeInEnd: number }[] = [
+const STORY_BEATS: readonly { text: string }[] = [
   {
     text: "Lente premium na catarata não resume a trifocal: pode ser nitidez na distância planejada, faixa de foco mais ampla (EDoF) ou menos óculos no dia a dia — sempre discutindo contraste e halos.",
-    fadeInStart: 0,
-    fadeInEnd: 0.22,
   },
   {
     text: "Multifocal e trifocal dividem a luz entre focos; monofocal de linha superior prioriza a imagem em uma distância. Em ambos os casos há compromissos a alinhar antes da cirurgia.",
-    fadeInStart: 0.12,
-    fadeInEnd: 0.4,
   },
   {
     text: "Há contrapartidas possíveis: halos, sensação de contraste diferente e curva de adaptação — tudo deve ser conversado antes da escolha.",
-    fadeInStart: 0.3,
-    fadeInEnd: 0.62,
   },
   {
     text: "Exames (retina, nervo, medidas) e metas honestas definem se monofocal de linha superior, EDoF, multifocal/trifocal ou tórica fazem sentido — na consulta você fecha o plano com o oftalmologista.",
-    fadeInStart: 0.52,
-    fadeInEnd: 0.92,
   },
 ];
 
@@ -90,21 +65,7 @@ const FOCUS_LAYERS: readonly {
   },
 ];
 
-/** Soma rotação em Y ao giro CSS da LIO conforme o progresso na trilha de scroll. */
-function applyIolScrollFrame(iolWrap: HTMLDivElement | null, progress: number, reduced: boolean) {
-  if (!iolWrap) return;
-  if (reduced) {
-    iolWrap.style.transform = "";
-    iolWrap.style.removeProperty("will-change");
-    return;
-  }
-  const p = progress >= 1 ? 1 : easeOutCubic(progress);
-  const deg = lerp(0, 360, p);
-  iolWrap.style.transform = `rotateY(${deg}deg)`;
-  iolWrap.style.willChange = p < 0.999 ? "transform" : "auto";
-}
-
-/** Variante **A** — hero com trilha de scroll; único efeito na rolagem é rotação extra da LIO (soma ao giro CSS). */
+/** Variante **A** — mesmo conteúdo da B com outro arranjo visual; LIO só com giro CSS (sem trilha longa, sticky nem scroll em JS). */
 export function LentesPremiumHeroVariantA({
   title,
   description,
@@ -114,143 +75,12 @@ export function LentesPremiumHeroVariantA({
   scheduleAnchorHref = "/agendamento-online",
   scheduleAnchorId = "gtm-artigo-lentes-premium-catarata-hero-agendar",
 }: LentesPremiumHeroVariantProps) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const iolScrollWrapRef = useRef<HTMLDivElement | null>(null);
-  const lastProgressRef = useRef(-1);
-
-  useLayoutEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let reducedMotion = mq.matches;
-
-    let rafPending = 0;
-    let resizeObserver: ResizeObserver | undefined;
-    let lastObservedW = 0;
-    let lastObservedH = 0;
-
-    /** Altura da viewport só em resize/layout — no mobile o visualViewport muda durante o gesto e recalcular a cada `scroll` briga com o `dvh` do trilho (sensação de rolagem invertida). */
-    const viewportH = { current: 0 };
-    const syncViewportHeight = () => {
-      viewportH.current = window.visualViewport?.height ?? window.innerHeight;
-    };
-
-    const update = () => {
-      if (document.visibilityState !== "visible") return;
-      const rect = el.getBoundingClientRect();
-      const trackHeight = Math.max(rect.height, el.offsetHeight, 1);
-      const vh = viewportH.current;
-      const scrollable = Math.max(1, trackHeight - vh);
-      /** Primeiros pixels de scroll: progresso 0 (layout estável, conteúdo legível por mais rolagem); depois 0→1 no restante da trilha. */
-      const progressLeadIn = Math.min(220, Math.max(96, Math.round(vh * 0.18)));
-      const scrolled = Math.max(0, -rect.top);
-      const denom = Math.max(1, scrollable - progressLeadIn);
-      let p =
-        scrolled <= progressLeadIn ? 0 : clamp01((scrolled - progressLeadIn) / denom);
-      if (p >= 0.997) p = 1;
-      p = quantizeProgress(p);
-      const prev = lastProgressRef.current;
-      if (Math.abs(p - prev) <= 1 / 2400) return;
-      lastProgressRef.current = p;
-      applyIolScrollFrame(iolScrollWrapRef.current, p, false);
-    };
-
-    const scheduleUpdate = () => {
-      if (rafPending) return;
-      rafPending = requestAnimationFrame(() => {
-        rafPending = 0;
-        update();
-      });
-    };
-
-    const onWindowResize = () => {
-      syncViewportHeight();
-      lastProgressRef.current = -1;
-      scheduleUpdate();
-    };
-
-    const attachScrollChain = () => {
-      window.addEventListener("scroll", scheduleUpdate, { passive: true });
-      window.addEventListener("resize", onWindowResize, { passive: true });
-      /** Só `resize`: `visualViewport` `scroll` (ex.: barra de endereço / pan com zoom) recalcula o hero inteiro e pode “puxar” a página ou saltar o progresso ao alternar rolagem. */
-      window.visualViewport?.addEventListener("resize", onWindowResize);
-
-      if (typeof ResizeObserver !== "undefined") {
-        resizeObserver = new ResizeObserver((entries) => {
-          const cr = entries[0]?.contentRect;
-          if (cr) {
-            const dw = Math.abs(cr.width - lastObservedW);
-            const dh = Math.abs(cr.height - lastObservedH);
-            lastObservedW = cr.width;
-            lastObservedH = cr.height;
-            if (dw > 0.5 || dh > 0.5) {
-              syncViewportHeight();
-              lastProgressRef.current = -1;
-            }
-          }
-          scheduleUpdate();
-        });
-        resizeObserver.observe(el);
-      }
-
-      syncViewportHeight();
-      update();
-    };
-
-    const detachScrollChain = () => {
-      if (rafPending) cancelAnimationFrame(rafPending);
-      rafPending = 0;
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", onWindowResize);
-      window.visualViewport?.removeEventListener("resize", onWindowResize);
-      resizeObserver?.disconnect();
-      resizeObserver = undefined;
-    };
-
-    const onReducedMotionChange = () => {
-      const next = mq.matches;
-      if (next === reducedMotion) return;
-      reducedMotion = next;
-      lastProgressRef.current = -1;
-
-      if (next) {
-        detachScrollChain();
-        applyIolScrollFrame(iolScrollWrapRef.current, 1, true);
-      } else {
-        attachScrollChain();
-      }
-    };
-
-    mq.addEventListener("change", onReducedMotionChange);
-
-    if (reducedMotion) {
-      applyIolScrollFrame(iolScrollWrapRef.current, 1, true);
-    } else {
-      attachScrollChain();
-    }
-
-    return () => {
-      mq.removeEventListener("change", onReducedMotionChange);
-      detachScrollChain();
-    };
-  }, []);
-
   return (
     <div
-      ref={trackRef}
-      className="relative min-h-[470dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
-      style={{
-        minHeight: "min(470dvh, 500vh)",
-        /** Evita scroll anchoring com sticky: o browser não deve “corrigir” scrollTop ao alternar a rolagem. */
-        overflowAnchor: "none",
-      }}
+      className="relative w-full min-w-0 max-w-full overflow-x-hidden border-b border-border/70 bg-gradient-to-b from-muted/40 via-background to-background"
       data-lentes-hero-variant="A"
     >
-      <div
-        className="sticky top-[4.75rem] z-0 flex min-h-[calc(100dvh-4.75rem)] flex-col justify-start px-3 pb-12 pt-16 sm:px-5 sm:pb-14 sm:pt-[4.25rem] md:px-6 md:pb-12 md:pt-24 lg:pt-28"
-        style={{ overflowAnchor: "none" }}
-      >
+      <div className="relative z-0 flex flex-col justify-start px-3 pb-12 pt-16 sm:px-5 sm:pb-14 sm:pt-[4.25rem] md:px-6 md:pb-12 md:pt-24 lg:pt-28">
         <div className="mx-auto grid w-full min-w-0 max-w-6xl items-start gap-x-5 gap-y-10 sm:gap-x-6 sm:gap-y-9 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-10">
           <div
             className="relative mx-auto flex w-full min-w-0 max-w-[368px] justify-center md:order-2 md:mx-auto md:max-w-[392px] md:justify-self-center"
@@ -277,10 +107,7 @@ export function LentesPremiumHeroVariantA({
                           "0 20px 40px -18px rgba(0,0,0,0.45), 0 8px 16px -6px rgba(0,0,0,0.28)",
                       }}
                     >
-                      <div
-                        className="absolute inset-0 isolate"
-                        aria-hidden
-                      >
+                      <div className="absolute inset-0 isolate" aria-hidden>
                         <div className={cn("absolute inset-0 bg-gradient-to-b opacity-92", gradient)} />
                         <div
                           className={cn(
@@ -315,7 +142,7 @@ export function LentesPremiumHeroVariantA({
                   );
                 })}
               </div>
-              <LentesPremiumIolSketch className="mt-6 sm:mt-7" scrollDriveRef={iolScrollWrapRef} />
+              <LentesPremiumIolSketch className="mt-6 sm:mt-7" />
               <div className="mt-6 rounded-2xl border border-dashed border-brand/35 bg-gradient-to-br from-brand/[0.07] to-transparent p-4 sm:mt-7 sm:rounded-3xl sm:p-5">
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-brand sm:text-[11px]">
                   <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
@@ -414,7 +241,7 @@ export function LentesPremiumHeroVariantA({
           className="mx-auto mt-8 max-w-6xl px-1 text-center text-[11px] text-muted-foreground/80 sm:mt-10 sm:text-xs"
           aria-hidden="true"
         >
-          Continue rolando para o artigo completo sobre tipos de lente, indicações e expectativas
+          O guia completo sobre tipos de lente, indicações e expectativas está abaixo
         </p>
       </div>
     </div>
