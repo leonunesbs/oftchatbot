@@ -58,7 +58,8 @@ export function initHomeScrollReveal(): void {
     },
     {
       root: null,
-      rootMargin: "0px 0px -8% 0px",
+      /** Margem inferior positiva: a animação começa um pouco antes do bloco “encostar” no fim da viewport — menos sensação de atraso. */
+      rootMargin: "0px 0px 14% 0px",
       threshold: 0,
     },
   );
