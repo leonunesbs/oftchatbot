@@ -344,12 +344,11 @@
     );
   }
   /**
-   * Modo claro: no branco o glow some — recupera com opacidade total + saturação/contraste leves.
-   * (Máscara fica só nas @media para não brigar com breakpoints.)
+   * Modo claro: azul forte sob texto escuro quebra legibilidade — desatura e clareia o burst.
    */
   html:not(.dark) .home-cosmic-backdrop__svg {
-    opacity: 0.88;
-    filter: saturate(0.9) contrast(1.02) brightness(1.07);
+    opacity: 0.68;
+    filter: saturate(0.72) contrast(1.02) brightness(1.1);
   }
   /** Viewports largas: ainda mais extensão horizontal (telas pequenas seguem nos max-width abaixo). */
   @media (min-width: 1280px) {
@@ -400,6 +399,26 @@
         black 0%,
         black 26%,
         transparent 86%
+      );
+    }
+
+    /* Mobile + modo claro: núcleo mais curto e epicentro mais alto — menos “mancha” azul atrás dos títulos. */
+    html:not(.dark) .home-cosmic-backdrop__svg {
+      opacity: 0.42;
+      filter: saturate(0.52) contrast(1.01) brightness(1.16);
+      mask-image: radial-gradient(
+        ellipse 78% 56% at 50% 36%,
+        black 0%,
+        black 8%,
+        rgba(0, 0, 0, 0.5) 26%,
+        transparent 68%
+      );
+      -webkit-mask-image: radial-gradient(
+        ellipse 78% 56% at 50% 36%,
+        black 0%,
+        black 8%,
+        rgba(0, 0, 0, 0.5) 26%,
+        transparent 68%
       );
     }
   }

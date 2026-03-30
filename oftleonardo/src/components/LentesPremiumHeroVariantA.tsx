@@ -260,8 +260,6 @@ export function LentesPremiumHeroVariantA({
                         "ring-1 ring-inset ring-white/[0.06] [transform-style:preserve-3d]",
                       )}
                       style={{
-                        filter: layerBlur <= 0.05 ? "none" : `blur(${layerBlur}px)`,
-                        opacity: layerOpacity,
                         transform: prefersReducedMotion
                           ? undefined
                           : `translateZ(${lerp(8 - i * 4, 0, stagger)}px)`,
@@ -269,19 +267,28 @@ export function LentesPremiumHeroVariantA({
                           "0 20px 40px -18px rgba(0,0,0,0.45), 0 8px 16px -6px rgba(0,0,0,0.28)",
                       }}
                     >
-                      <div className={cn("absolute inset-0 bg-gradient-to-b opacity-92", gradient)} />
-                      <div className="relative flex h-full min-h-[inherit] flex-col">
+                      {/* Blur/opacity só no fundo — ícones ficam nítidos como na variante B */}
+                      <div
+                        className="absolute inset-0 isolate"
+                        style={{
+                          filter: layerBlur <= 0.05 ? "none" : `blur(${layerBlur}px)`,
+                          opacity: layerOpacity,
+                        }}
+                        aria-hidden
+                      >
+                        <div className={cn("absolute inset-0 bg-gradient-to-b opacity-92", gradient)} />
+                        <div
+                          className={cn(
+                            "pointer-events-none absolute left-1/2 top-[40%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl sm:h-[4.25rem] sm:w-[4.25rem]",
+                            glow,
+                          )}
+                        />
+                      </div>
+                      <div className="relative z-[1] flex h-full min-h-[inherit] flex-col">
                         <div className="relative flex flex-1 flex-col items-center justify-center px-1 pt-3 pb-1 sm:pt-4">
-                          <div
-                            className={cn(
-                              "pointer-events-none absolute left-1/2 top-[40%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl sm:h-[4.25rem] sm:w-[4.25rem]",
-                              glow,
-                            )}
-                            aria-hidden
-                          />
                           <Icon
                             className={cn(
-                              "relative z-[1] h-10 w-10 drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11",
+                              "relative h-10 w-10 drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11",
                               iconTint,
                             )}
                             strokeWidth={1.35}
