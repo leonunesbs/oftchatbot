@@ -289,6 +289,8 @@
 /** LIO esquemática: perspectiva; rotação em `LentesPremiumIolSketch` (rAF + scroll). */
 .lentes-premium-iol-sketch-perspective {
   perspective: min(920px, 90vw);
+  /** Alinha o eixo visual ao centro da óptica no viewBox (160×80 em 320×160). */
+  perspective-origin: 50% 45%;
 }
 
 .lentes-premium-iol-sketch-spin {

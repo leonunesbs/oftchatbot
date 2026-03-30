@@ -334,8 +334,8 @@ export function LentesPremiumHeroVariantA({
     const attachScrollChain = () => {
       window.addEventListener("scroll", scheduleUpdate, { passive: true });
       window.addEventListener("resize", onWindowResize, { passive: true });
+      /** Só `resize`: `visualViewport` `scroll` (ex.: barra de endereço / pan com zoom) recalcula o hero inteiro e pode “puxar” a página ou saltar o progresso ao alternar rolagem. */
       window.visualViewport?.addEventListener("resize", onWindowResize);
-      window.visualViewport?.addEventListener("scroll", onWindowResize);
 
       if (typeof ResizeObserver !== "undefined") {
         resizeObserver = new ResizeObserver((entries) => {
@@ -363,7 +363,6 @@ export function LentesPremiumHeroVariantA({
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", onWindowResize);
       window.visualViewport?.removeEventListener("resize", onWindowResize);
-      window.visualViewport?.removeEventListener("scroll", onWindowResize);
       resizeObserver?.disconnect();
       resizeObserver = undefined;
     };
