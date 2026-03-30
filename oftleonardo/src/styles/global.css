@@ -286,7 +286,7 @@
   }
 }
 
-/** LIO esquemática: perspectiva; giro só em CSS (`animation`), sem rAF nem scroll. */
+/** LIO esquemática: perspectiva; giro base em CSS (`animation`); variante A pode somar `rotateY` via wrapper no scroll. */
 .lentes-premium-iol-sketch-perspective {
   perspective: min(920px, 90vw);
   /** Alinha o eixo visual ao centro da óptica no viewBox (160×80 em 320×160). */

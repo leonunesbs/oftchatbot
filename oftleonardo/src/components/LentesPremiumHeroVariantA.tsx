@@ -1,5 +1,5 @@
 import { BookOpen, CheckCircle2, Monitor, Mountain, type LucideIcon } from "lucide-react";
-import { type MutableRefObject, useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 import { LentesPremiumIolSketch } from "@/components/LentesPremiumIolSketch";
 import { buttonVariants } from "@/components/ui/button";
@@ -29,12 +29,6 @@ function easeOutCubic(t: number) {
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
-}
-
-function smoothstep(edge0: number, edge1: number, x: number) {
-  if (edge1 <= edge0) return x >= edge1 ? 1 : 0;
-  const t = clamp01((x - edge0) / (edge1 - edge0));
-  return t * t * (3 - 2 * t);
 }
 
 /** Narrativa: “premium” vai além de trifocal — distâncias, qualidade visual e trade-offs de luz. */
@@ -96,106 +90,21 @@ const FOCUS_LAYERS: readonly {
   },
 ];
 
-const LAYERS_FOCUS_BY = 0.72;
-
-type MotionDom = {
-  stack: HTMLDivElement | null;
-  textCol: HTMLDivElement | null;
-  h1: HTMLElement | null;
-  sub: HTMLParagraphElement | null;
-  desc: HTMLParagraphElement | null;
-  storyLis: (HTMLLIElement | null)[];
-  layerOuters: (HTMLDivElement | null)[];
-  layerInners: (HTMLDivElement | null)[];
-  /** Área do ícone — defocus acompanha o fundo, em intensidade menor. */
-  layerIconWraps: (HTMLDivElement | null)[];
-};
-
-function applyMotionFrame(dom: MotionDom, progress: number, reduced: boolean) {
-  const p = reduced ? 1 : progress;
-  const t = p >= 1 ? 1 : easeOutCubic(p);
-  const layersT = p >= 1 ? 1 : easeOutCubic(clamp01(p / LAYERS_FOCUS_BY));
-
-  const blurPx = t >= 1 ? 0 : lerp(16, 0, t);
-  const opacityMuted = lerp(0.45, 1, t);
-
-  const { stack, textCol, h1, sub, desc, storyLis, layerOuters, layerInners, layerIconWraps } = dom;
-
-  /** Sem transform 3D no scroll — blur/opacidade apenas (melhor em mobile). */
-  if (stack) {
-    stack.style.transform = "";
-    stack.style.removeProperty("will-change");
+/** Soma rotação em Y ao giro CSS da LIO conforme o progresso na trilha de scroll. */
+function applyIolScrollFrame(iolWrap: HTMLDivElement | null, progress: number, reduced: boolean) {
+  if (!iolWrap) return;
+  if (reduced) {
+    iolWrap.style.transform = "";
+    iolWrap.style.removeProperty("will-change");
+    return;
   }
-
-  if (textCol) {
-    textCol.style.transform = "";
-    textCol.style.removeProperty("will-change");
-  }
-
-  if (h1) {
-    h1.style.filter = blurPx <= 0 ? "none" : `blur(${blurPx}px)`;
-    h1.style.letterSpacing = `${lerp(-0.042, -0.026, t)}em`;
-  }
-
-  if (sub) {
-    sub.style.filter = blurPx <= 0 ? "none" : `blur(${blurPx * 0.85}px)`;
-    sub.style.opacity = String(opacityMuted);
-  }
-
-  if (desc) {
-    desc.style.filter = blurPx <= 0 ? "none" : `blur(${blurPx * 0.5}px)`;
-    desc.style.opacity = String(lerp(0.55, 1, t));
-  }
-
-  for (let i = 0; i < STORY_BEATS.length; i++) {
-    const li = storyLis[i];
-    if (!li) continue;
-    const beat = STORY_BEATS[i]!;
-    const reveal = reduced ? 1 : smoothstep(beat.fadeInStart, beat.fadeInEnd, p);
-    const lineBlur = reduced ? 0 : 9 * (1 - reveal);
-    li.style.opacity = String(reduced ? 1 : 0.25 + 0.75 * reveal);
-    li.style.filter = lineBlur <= 0.05 ? "none" : `blur(${lineBlur}px)`;
-    li.style.transform = "";
-  }
-
-  for (let i = 0; i < FOCUS_LAYERS.length; i++) {
-    const outer = layerOuters[i];
-    const inner = layerInners[i];
-    const iconWrap = layerIconWraps[i];
-    if (!outer || !inner) continue;
-    const stagger = reduced ? 1 : clamp01((layersT * 1.15 - i * 0.06) / 0.95);
-    const layerBlur = reduced ? 0 : lerp(11, 0, stagger);
-    const layerOpacity = reduced ? 1 : lerp(0.35, 1, stagger);
-    /** Defocus nas ilustrações: metade do blur do fundo (teto ~5,5px). */
-    const iconDefocusPx = reduced ? 0 : layerBlur * 0.5;
-    outer.style.transform = "";
-    outer.style.removeProperty("will-change");
-    inner.style.filter = layerBlur <= 0.05 ? "none" : `blur(${layerBlur}px)`;
-    inner.style.opacity = String(layerOpacity);
-
-    if (iconWrap) {
-      if (reduced) {
-        iconWrap.style.filter = "";
-        iconWrap.style.removeProperty("opacity");
-        iconWrap.style.removeProperty("will-change");
-      } else {
-        iconWrap.style.filter = iconDefocusPx <= 0.05 ? "none" : `blur(${iconDefocusPx}px)`;
-        iconWrap.style.opacity = String(lerp(0.82, 1, stagger));
-        iconWrap.style.willChange = p < 0.999 ? "filter, opacity" : "auto";
-      }
-    }
-  }
+  const p = progress >= 1 ? 1 : easeOutCubic(progress);
+  const deg = lerp(0, 360, p);
+  iolWrap.style.transform = `rotateY(${deg}deg)`;
+  iolWrap.style.willChange = p < 0.999 ? "transform" : "auto";
 }
 
-function patchMotionRef<K extends keyof MotionDom>(
-  motionDomRef: MutableRefObject<MotionDom>,
-  key: K,
-  value: MotionDom[K],
-) {
-  motionDomRef.current = { ...motionDomRef.current, [key]: value };
-}
-
-/** Variante **A** — hero com trilha de scroll e blur (baseline de deploy). */
+/** Variante **A** — hero com trilha de scroll; único efeito na rolagem é rotação extra da LIO (soma ao giro CSS). */
 export function LentesPremiumHeroVariantA({
   title,
   description,
@@ -206,58 +115,8 @@ export function LentesPremiumHeroVariantA({
   scheduleAnchorId = "gtm-artigo-lentes-premium-catarata-hero-agendar",
 }: LentesPremiumHeroVariantProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const iolScrollWrapRef = useRef<HTMLDivElement | null>(null);
   const lastProgressRef = useRef(-1);
-  const motionDomRef = useRef<MotionDom>({
-    stack: null,
-    textCol: null,
-    h1: null,
-    sub: null,
-    desc: null,
-    storyLis: Array.from({ length: STORY_BEATS.length }, () => null),
-    layerOuters: Array.from({ length: FOCUS_LAYERS.length }, () => null),
-    layerInners: Array.from({ length: FOCUS_LAYERS.length }, () => null),
-    layerIconWraps: Array.from({ length: FOCUS_LAYERS.length }, () => null),
-  });
-
-  const storyLiRefs = useMemo(
-    () =>
-      STORY_BEATS.map((_, index) => (el: HTMLLIElement | null) => {
-        const next = motionDomRef.current.storyLis.slice();
-        next[index] = el;
-        patchMotionRef(motionDomRef, "storyLis", next);
-      }),
-    [],
-  );
-
-  const layerOuterRefs = useMemo(
-    () =>
-      FOCUS_LAYERS.map((_, index) => (el: HTMLDivElement | null) => {
-        const next = motionDomRef.current.layerOuters.slice();
-        next[index] = el;
-        patchMotionRef(motionDomRef, "layerOuters", next);
-      }),
-    [],
-  );
-
-  const layerInnerRefs = useMemo(
-    () =>
-      FOCUS_LAYERS.map((_, index) => (el: HTMLDivElement | null) => {
-        const next = motionDomRef.current.layerInners.slice();
-        next[index] = el;
-        patchMotionRef(motionDomRef, "layerInners", next);
-      }),
-    [],
-  );
-
-  const layerIconWrapRefs = useMemo(
-    () =>
-      FOCUS_LAYERS.map((_, index) => (el: HTMLDivElement | null) => {
-        const next = motionDomRef.current.layerIconWraps.slice();
-        next[index] = el;
-        patchMotionRef(motionDomRef, "layerIconWraps", next);
-      }),
-    [],
-  );
 
   useLayoutEffect(() => {
     const el = trackRef.current;
@@ -294,7 +153,7 @@ export function LentesPremiumHeroVariantA({
       const prev = lastProgressRef.current;
       if (Math.abs(p - prev) <= 1 / 2400) return;
       lastProgressRef.current = p;
-      applyMotionFrame(motionDomRef.current, p, false);
+      applyIolScrollFrame(iolScrollWrapRef.current, p, false);
     };
 
     const scheduleUpdate = () => {
@@ -357,7 +216,7 @@ export function LentesPremiumHeroVariantA({
 
       if (next) {
         detachScrollChain();
-        applyMotionFrame(motionDomRef.current, 1, true);
+        applyIolScrollFrame(iolScrollWrapRef.current, 1, true);
       } else {
         attachScrollChain();
       }
@@ -366,7 +225,7 @@ export function LentesPremiumHeroVariantA({
     mq.addEventListener("change", onReducedMotionChange);
 
     if (reducedMotion) {
-      applyMotionFrame(motionDomRef.current, 1, true);
+      applyIolScrollFrame(iolScrollWrapRef.current, 1, true);
     } else {
       attachScrollChain();
     }
@@ -383,7 +242,7 @@ export function LentesPremiumHeroVariantA({
       className="relative min-h-[470dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
       style={{
         minHeight: "min(470dvh, 500vh)",
-        /** Evita scroll anchoring com blur/sticky: o browser não deve “corrigir” scrollTop quando o paint muda na inversão da rolagem. */
+        /** Evita scroll anchoring com sticky: o browser não deve “corrigir” scrollTop ao alternar a rolagem. */
         overflowAnchor: "none",
       }}
       data-lentes-hero-variant="A"
@@ -394,7 +253,6 @@ export function LentesPremiumHeroVariantA({
       >
         <div className="mx-auto grid w-full min-w-0 max-w-6xl items-start gap-x-5 gap-y-10 sm:gap-x-6 sm:gap-y-9 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-10">
           <div
-            ref={(node) => patchMotionRef(motionDomRef, "stack", node)}
             className="relative mx-auto flex w-full min-w-0 max-w-[368px] justify-center md:order-2 md:mx-auto md:max-w-[392px] md:justify-self-center"
             aria-hidden
           >
@@ -405,12 +263,11 @@ export function LentesPremiumHeroVariantA({
                 </span>
               </div>
               <div className="flex gap-3 sm:gap-3.5">
-                {FOCUS_LAYERS.map((layer, i) => {
+                {FOCUS_LAYERS.map((layer) => {
                   const { Icon, iconTint, glow, gradient } = layer;
                   return (
                     <div
                       key={layer.label}
-                      ref={layerOuterRefs[i]}
                       className={cn(
                         "relative min-h-[172px] flex-1 overflow-hidden rounded-2xl border border-border/70 bg-zinc-950/92 sm:min-h-[188px] sm:rounded-3xl md:min-h-[202px]",
                         "ring-1 ring-inset ring-white/[0.06]",
@@ -420,9 +277,7 @@ export function LentesPremiumHeroVariantA({
                           "0 20px 40px -18px rgba(0,0,0,0.45), 0 8px 16px -6px rgba(0,0,0,0.28)",
                       }}
                     >
-                      {/* Blur/opacity no fundo; ilustrações recebem defocus menor via applyMotionFrame. */}
                       <div
-                        ref={layerInnerRefs[i]}
                         className="absolute inset-0 isolate"
                         aria-hidden
                       >
@@ -435,10 +290,7 @@ export function LentesPremiumHeroVariantA({
                         />
                       </div>
                       <div className="relative z-[1] grid h-full min-h-[inherit] grid-rows-2">
-                        <div
-                          ref={layerIconWrapRefs[i]}
-                          className="relative flex min-h-0 flex-col items-center justify-center px-1 pt-2 pb-1 sm:pt-3"
-                        >
+                        <div className="relative flex min-h-0 flex-col items-center justify-center px-1 pt-2 pb-1 sm:pt-3">
                           <Icon
                             className={cn(
                               "relative h-10 w-10 drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11",
@@ -463,7 +315,7 @@ export function LentesPremiumHeroVariantA({
                   );
                 })}
               </div>
-              <LentesPremiumIolSketch className="mt-6 sm:mt-7" />
+              <LentesPremiumIolSketch className="mt-6 sm:mt-7" scrollDriveRef={iolScrollWrapRef} />
               <div className="mt-6 rounded-2xl border border-dashed border-brand/35 bg-gradient-to-br from-brand/[0.07] to-transparent p-4 sm:mt-7 sm:rounded-3xl sm:p-5">
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-brand sm:text-[11px]">
                   <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
@@ -488,10 +340,7 @@ export function LentesPremiumHeroVariantA({
             </div>
           </div>
 
-          <div
-            ref={(node) => patchMotionRef(motionDomRef, "textCol", node)}
-            className="isolate relative z-[1] flex min-w-0 flex-col justify-center text-left md:order-1"
-          >
+          <div className="isolate relative z-[1] flex min-w-0 flex-col justify-center text-left md:order-1">
             <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5 sm:gap-3 md:mb-4">
               <span className="inline-flex items-center rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand">
                 {readingTime} de leitura
@@ -507,7 +356,6 @@ export function LentesPremiumHeroVariantA({
             </div>
 
             <h1
-              ref={(node) => patchMotionRef(motionDomRef, "h1", node)}
               className={cn(
                 "font-black text-foreground break-words [overflow-wrap:anywhere]",
                 "text-[clamp(1.75rem,6.5vw,5.25rem)] leading-[0.95] tracking-tight sm:text-[clamp(2rem,7vw,5.25rem)]",
@@ -515,10 +363,7 @@ export function LentesPremiumHeroVariantA({
             >
               Lentes premium
             </h1>
-            <p
-              ref={(node) => patchMotionRef(motionDomRef, "sub", node)}
-              className="mt-3 text-[clamp(1.05rem,3.1vw,2rem)] font-semibold tracking-tight text-muted-foreground sm:mt-4"
-            >
+            <p className="mt-3 text-[clamp(1.05rem,3.1vw,2rem)] font-semibold tracking-tight text-muted-foreground sm:mt-4">
               Multifocal, EDoF e tórica na catarata: o que avaliar antes da cirurgia
             </p>
 
@@ -529,7 +374,6 @@ export function LentesPremiumHeroVariantA({
               {STORY_BEATS.map((beat, index) => (
                 <li
                   key={index}
-                  ref={storyLiRefs[index]}
                   className="list-none text-[13px] leading-snug text-muted-foreground sm:text-sm sm:leading-relaxed"
                 >
                   {beat.text}
@@ -537,10 +381,7 @@ export function LentesPremiumHeroVariantA({
               ))}
             </ol>
 
-            <p
-              ref={(node) => patchMotionRef(motionDomRef, "desc", node)}
-              className="mt-2 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base md:text-lg"
-            >
+            <p className="mt-2 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base md:text-lg">
               {description}
             </p>
 
