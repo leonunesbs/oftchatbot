@@ -1,0 +1,131 @@
+---
+/**
+ * Fundo cósmico leve: gradientes + raios/anéis com um único blur no grupo vetorial.
+ * Evita feDisplacementMap, feTurbulence multicamada e máscara interna duplicada (o recorte fica no CSS).
+ */
+const deg = (d: number) => (d * Math.PI) / 180;
+
+const cx = 500;
+const cy = 400;
+const innerR = 10;
+const rayMax = 380;
+
+type Ray = { x1: number; y1: number; x2: number; y2: number; o: number; w: number };
+
+function ray(angleDeg: number, len: number, o: number, w: number): Ray {
+  const r = deg(angleDeg);
+  return {
+    x1: cx + Math.cos(r) * innerR,
+    y1: cy + Math.sin(r) * innerR,
+    x2: cx + Math.cos(r) * len,
+    y2: cy + Math.sin(r) * len,
+    o,
+    w,
+  };
+}
+
+/** 16 raios (~22,5°) — densidade visual próxima com metade dos segmentos do layout anterior. */
+const mainAngles = Array.from({ length: 16 }, (_, i) => i * 22.5);
+const longRays: Ray[] = mainAngles.map((a, i) =>
+  ray(
+    a,
+    rayMax - 22 + (i % 5) * 10,
+    0.016 + (i % 7) * 0.003,
+    0.52 + (i % 4) * 0.11,
+  ),
+);
+
+const shockRings: { r: number; o: number; w: number }[] = [
+  { r: 72, o: 0.055, w: 0.82 },
+  { r: 148, o: 0.032, w: 0.62 },
+  { r: 238, o: 0.018, w: 0.5 },
+];
+---
+
+<div
+  class="home-cosmic-backdrop pointer-events-none absolute inset-0 overflow-visible"
+  aria-hidden="true"
+>
+  <svg
+    class="home-cosmic-backdrop__svg"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 800"
+    preserveAspectRatio="xMidYMid slice"
+    width="100%"
+    height="100%"
+    focusable="false"
+  >
+    <defs>
+      <radialGradient
+        id="cosmic-burst-core"
+        cx="50%"
+        cy="50%"
+        r="52%"
+        fx="50%"
+        fy="50%"
+        gradientUnits="objectBoundingBox"
+        gradientTransform="translate(0.5 0.5) scale(0.4 1.16) translate(-0.5 -0.5)"
+      >
+        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.58" />
+        <stop offset="12%" stop-color="var(--color-brand)" stop-opacity="0.28" />
+        <stop offset="30%" stop-color="var(--color-brand)" stop-opacity="0.075" />
+        <stop offset="52%" stop-color="var(--color-brand)" stop-opacity="0.018" />
+        <stop offset="100%" stop-color="var(--color-brand)" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient
+        id="cosmic-burst-edge"
+        cx="50%"
+        cy="50%"
+        r="62%"
+        gradientUnits="objectBoundingBox"
+        gradientTransform="translate(0.5 0.5) scale(0.36 1.1) translate(-0.5 -0.5)"
+      >
+        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.048" />
+        <stop offset="38%" stop-color="var(--color-brand)" stop-opacity="0.014" />
+        <stop offset="100%" stop-color="var(--color-brand)" stop-opacity="0" />
+      </radialGradient>
+      <!-- Um blur compartilhado para anéis + raios (uma composição em vez de várias cadeias). -->
+      <filter id="cosmic-burst-soft" x="-22%" y="-22%" width="144%" height="144%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.2" />
+      </filter>
+    </defs>
+
+    <g>
+      <rect width="1000" height="800" fill="url(#cosmic-burst-edge)" opacity="0.92" />
+      <rect width="1000" height="800" fill="url(#cosmic-burst-core)" opacity="0.98" />
+    </g>
+
+    <g
+      stroke="var(--color-brand)"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      filter="url(#cosmic-burst-soft)"
+    >
+      {
+        shockRings.map((ring) => (
+          <ellipse
+            cx={cx}
+            cy={cy}
+            rx={ring.r * 0.84}
+            ry={ring.r * 1.1}
+            stroke-opacity={ring.o}
+            stroke-width={ring.w}
+          />
+        ))
+      }
+      {
+        longRays.map((p) => (
+          <line
+            x1={p.x1}
+            y1={p.y1}
+            x2={p.x2}
+            y2={p.y2}
+            stroke-opacity={p.o}
+            stroke-width={p.w}
+          />
+        ))
+      }
+    </g>
+  </svg>
+</div>

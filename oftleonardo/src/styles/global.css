@@ -232,16 +232,6 @@
   }
 }
 
-/** Faixa de cards da home: deslocamento horizontal ligado à rolagem vertical (md+). */
-@keyframes guides-cards-horizontal {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(min(0px, calc(100vw - 100% - 3rem)), 0, 0);
-  }
-}
-
 @layer utilities {
   /**
    * Reduz memória e trabalho de pintura: o navegador pode omitir conteúdo fora da viewport.
@@ -269,6 +259,46 @@
   .scroll-reveal {
     opacity: 1;
     transform: none;
+  }
+
+  /**
+   * Fundo cósmico (home): epicentro ao centro da seção guias (--cosmic-translate-y em home-cosmic-anchor).
+   */
+  .home-cosmic-anchor {
+    --cosmic-translate-y: 0px;
+  }
+  /** Isola pintura do backdrop e reduz invalidação no scroll (SVG simplificado no componente). */
+  .home-cosmic-backdrop {
+    contain: paint;
+    isolation: isolate;
+  }
+  .home-cosmic-backdrop__svg {
+    display: block;
+    opacity: 0.94;
+    transform: translate3d(0, var(--cosmic-translate-y), 0);
+    mask-image: radial-gradient(
+      ellipse 42% 78% at 50% 50%,
+      black 0%,
+      black 28%,
+      transparent 88%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 42% 78% at 50% 50%,
+      black 0%,
+      black 28%,
+      transparent 88%
+    );
+  }
+  html.dark .home-cosmic-backdrop__svg {
+    opacity: 0.96;
+  }
+
+  /** Conteúdo sempre acima do fundo cósmico (backdrop em -z-10 na âncora). */
+  .home-post-hero-stack {
+    @apply relative isolate z-10 flex flex-col;
+  }
+  .home-post-hero-stack > .scroll-section {
+    @apply relative z-0;
   }
 
   .scroll-3d-stage {
@@ -319,21 +349,6 @@
       animation: card-scroll-diagonal-right linear both;
       animation-timeline: view(block);
       animation-range: entry 0% cover 36%;
-    }
-
-    /**
-     * Vitrine "Guias e referências" (home): rolagem vertical move a faixa na horizontal.
-     * Só em md+; em telas menores permanece grade para leitura confortável.
-     */
-    @media (min-width: 768px) {
-      .guides-cards-parallax__track {
-        animation-name: guides-cards-horizontal;
-        animation-duration: 1ms;
-        animation-fill-mode: both;
-        animation-timing-function: linear;
-        animation-timeline: view(block);
-        animation-range: entry 0% cover 48%;
-      }
     }
   }
 
@@ -413,10 +428,12 @@
     .scroll-reveal,
     .scroll-card-motion,
     .scroll-card-diagonal-left,
-    .scroll-card-diagonal-right,
-    .guides-cards-parallax__track {
+    .scroll-card-diagonal-right {
       animation: none !important;
       transform: none !important;
+    }
+    .home-cosmic-backdrop {
+      display: none;
     }
   }
 }

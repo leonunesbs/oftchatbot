@@ -1,5 +1,5 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import Cities from "@/components/Cities.astro";
 import CTAFinal from "@/components/CTAFinal.astro";
@@ -10,28 +10,32 @@ import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import Hero from "@/components/Hero.astro";
 import HomeContentSection from "@/components/HomeContentSection.astro";
+import HomeCosmicBackdrop from "@/components/HomeCosmicBackdrop.astro";
 import HowItWorks from "@/components/HowItWorks.astro";
 import Services from "@/components/Services.astro";
 import VisualAcuityFloat from "@/components/VisualAcuityFloat";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { siteConfig } from "@/config/site";
-import { buildHomeSeoFromCity, resolveGeoCity } from "@/lib/geo";
-import { pickFeaturedArticles } from "@/lib/home-featured-content";
+import { buildHomeSeoFromCity, getDefaultGeoCity } from "@/lib/geo";
+import type { GeoCityResolution } from "@/lib/geo/resolve-city";
+import { loadHomeConteudos } from "@/lib/home-featured-content";
 import Layout from "@/layouts/Layout.astro";
-import { getCollection } from "astro:content";
 
-const geoCity =
+const geoCity: GeoCityResolution =
   Astro.locals.geoCity ??
-  (await resolveGeoCity({
-    request: Astro.request,
-    cookies: Astro.cookies,
-  }));
+  (() => {
+    const c = getDefaultGeoCity();
+    return {
+      slug: c.slug,
+      name: c.name,
+      state: c.state,
+      source: "fallback",
+    };
+  })();
 
 const dynamicSeo = buildHomeSeoFromCity(geoCity.name);
 
-const articles = await getCollection("conteudos");
-const featuredContent = pickFeaturedArticles(articles);
-const presbiopiaArticle = articles.find((a) => a.id === "presbiopia") ?? null;
+const { featuredContent, presbiopiaArticle } = await loadHomeConteudos();
 const guidesForStructuredData = presbiopiaArticle
   ? [presbiopiaArticle, ...featuredContent.filter((a) => a.id !== "presbiopia")]
   : featuredContent;
@@ -73,34 +77,48 @@ const contentItemListSchema = {
     >
     </div>
     <Hero />
-    <div class="defer-render scroll-section">
-      <Services />
+    <div class="home-cosmic-anchor relative isolate overflow-x-clip">
+      <div
+        class="pointer-events-none absolute inset-0 -z-10 overflow-visible"
+        aria-hidden="true"
+      >
+        <HomeCosmicBackdrop />
+      </div>
+      <div class="home-post-hero-stack">
+        <div class="defer-render scroll-section">
+          <Services />
+        </div>
+        <div class="defer-render scroll-section">
+          <ExperienceStats />
+        </div>
+        <div class="defer-render scroll-section">
+          <Differentials />
+        </div>
+        <div class="defer-render scroll-section">
+          <HomeContentSection
+            cityName={geoCity.name}
+            items={featuredContent}
+            presbiopiaSpotlight={presbiopiaArticle}
+          />
+        </div>
+        <div class="defer-render scroll-section">
+          <Cities />
+        </div>
+        <div class="defer-render scroll-section">
+          <HowItWorks />
+        </div>
+        <div class="defer-render scroll-section">
+          <FAQ />
+        </div>
+        <div class="defer-render scroll-section">
+          <CTAFinal />
+        </div>
+      </div>
     </div>
-    <div class="defer-render scroll-section">
-      <ExperienceStats />
-    </div>
-    <div class="defer-render scroll-section">
-      <Differentials />
-    </div>
-    <div class="defer-render scroll-section">
-      <HomeContentSection
-        cityName={geoCity.name}
-        items={featuredContent}
-        presbiopiaSpotlight={presbiopiaArticle}
-      />
-    </div>
-    <div class="defer-render scroll-section">
-      <Cities />
-    </div>
-    <div class="defer-render scroll-section">
-      <HowItWorks />
-    </div>
-    <div class="defer-render scroll-section">
-      <FAQ />
-    </div>
-    <div class="defer-render scroll-section">
-      <CTAFinal />
-    </div>
+    <script>
+      import { initHomeCosmicAnchor } from "@/lib/home-cosmic-anchor";
+      initHomeCosmicAnchor();
+    </script>
   </main>
   <Footer />
   <VisualAcuityFloat client:idle />
