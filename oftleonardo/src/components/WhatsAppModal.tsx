@@ -196,7 +196,7 @@ export default function WhatsAppModal({
                   trigger_id: triggerId,
                 })
               }
-              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-brand/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:border-brand/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-600/10 text-green-600 transition-colors group-hover:bg-green-600/20">
                 <WhatsAppIcon className="size-5" />
@@ -213,7 +213,7 @@ export default function WhatsAppModal({
           ))}
         </div>
         {showOnlineBookingCta && (
-          <div className="mt-5 rounded-2xl border border-border/70 bg-muted/30 p-4">
+          <div className="mt-5 rounded-xl border border-border/70 bg-muted/30 p-4">
             <p className="text-sm text-muted-foreground">
               Prefere escolher data e horário agora? Faça seu agendamento online em
               poucos cliques.

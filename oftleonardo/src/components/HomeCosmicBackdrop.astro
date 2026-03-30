@@ -66,10 +66,14 @@ const shockRings: { r: number; o: number; w: number }[] = [
         gradientUnits="objectBoundingBox"
         gradientTransform="translate(0.5 0.5) scale(0.4 1.16) translate(-0.5 -0.5)"
       >
-        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.58" />
-        <stop offset="12%" stop-color="var(--color-brand)" stop-opacity="0.28" />
-        <stop offset="30%" stop-color="var(--color-brand)" stop-opacity="0.075" />
-        <stop offset="52%" stop-color="var(--color-brand)" stop-opacity="0.018" />
+        <!-- Centro mais intenso; queda longa e suave em paracentral / pericentral. -->
+        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.78" />
+        <stop offset="5%" stop-color="var(--color-brand)" stop-opacity="0.66" />
+        <stop offset="11%" stop-color="var(--color-brand)" stop-opacity="0.44" />
+        <stop offset="20%" stop-color="var(--color-brand)" stop-opacity="0.24" />
+        <stop offset="32%" stop-color="var(--color-brand)" stop-opacity="0.11" />
+        <stop offset="46%" stop-color="var(--color-brand)" stop-opacity="0.038" />
+        <stop offset="60%" stop-color="var(--color-brand)" stop-opacity="0.012" />
         <stop offset="100%" stop-color="var(--color-brand)" stop-opacity="0" />
       </radialGradient>
       <radialGradient
@@ -80,8 +84,9 @@ const shockRings: { r: number; o: number; w: number }[] = [
         gradientUnits="objectBoundingBox"
         gradientTransform="translate(0.5 0.5) scale(0.36 1.1) translate(-0.5 -0.5)"
       >
-        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.048" />
-        <stop offset="38%" stop-color="var(--color-brand)" stop-opacity="0.014" />
+        <stop offset="0%" stop-color="var(--color-brand)" stop-opacity="0.055" />
+        <stop offset="22%" stop-color="var(--color-brand)" stop-opacity="0.032" />
+        <stop offset="48%" stop-color="var(--color-brand)" stop-opacity="0.012" />
         <stop offset="100%" stop-color="var(--color-brand)" stop-opacity="0" />
       </radialGradient>
       <!-- Um blur compartilhado para anéis + raios (uma composição em vez de várias cadeias). -->

@@ -35,7 +35,7 @@ const imageStyles: Record<string, string> = {
       {siteConfig.cities.map((city) => {
         const importedImage = cityImages[city.slug];
         return (
-          <div class="surface-lift scroll-card-depth scroll-card-motion group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card hover:border-border hover:shadow-md">
+          <div class="surface-lift scroll-card-depth scroll-card-motion group flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card hover:border-border hover:shadow-md">
               {/* Photo area */}
               <div class="relative aspect-16/10 w-full overflow-hidden bg-secondary/60">
                 {importedImage ? (
@@ -59,7 +59,7 @@ const imageStyles: Record<string, string> = {
                   />
                 ) : (
                   <div class="flex h-full w-full flex-col items-center justify-center gap-3 bg-linear-to-br from-secondary/80 via-secondary/40 to-brand/6">
-                    <div class="flex size-16 items-center justify-center rounded-2xl bg-brand/10 text-brand/50">
+                    <div class="flex size-16 items-center justify-center rounded-lg bg-brand/10 text-brand/50">
                       <Camera className="size-7" />
                     </div>
                     <span class="max-w-[200px] text-center text-xs leading-relaxed text-foreground/75">

@@ -34,7 +34,7 @@ export default function CookieConsentBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-border/60 bg-background/95 p-4 shadow-lg backdrop-blur-lg">
+      <div className="mx-auto max-w-3xl rounded-xl border border-border/60 bg-background/95 p-4 shadow-lg backdrop-blur-lg">
         <p className="text-sm font-semibold leading-tight">
           Sua privacidade em primeiro lugar
         </p>

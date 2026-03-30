@@ -174,12 +174,12 @@
 
 @keyframes section-reveal {
   from {
-    opacity: 0.2;
-    transform: translate3d(0, 24px, 0) scale(0.985);
+    opacity: 0.05;
+    transform: translate3d(0, 34px, 0) scale(0.978);
   }
-  60% {
-    opacity: 0.88;
-    transform: translate3d(0, 1px, 0) scale(0.996);
+  58% {
+    opacity: 0.78;
+    transform: translate3d(0, 2px, 0) scale(0.995);
   }
   to {
     opacity: 1;
@@ -189,12 +189,12 @@
 
 @keyframes card-scroll-lift {
   from {
-    transform: translate3d(0, 22px, 0) scale(0.985);
-    opacity: 0.3;
+    transform: translate3d(0, 30px, -50px) scale(0.966);
+    opacity: 0.1;
   }
-  55% {
-    transform: translate3d(0, -1px, 0) scale(0.996);
-    opacity: 0.9;
+  52% {
+    transform: translate3d(0, -2px, -6px) scale(0.991);
+    opacity: 0.82;
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
@@ -204,12 +204,12 @@
 
 @keyframes card-scroll-diagonal-left {
   from {
-    transform: translate3d(-18px, 20px, 0) scale(0.985);
-    opacity: 0.3;
+    transform: translate3d(-22px, 28px, -48px) scale(0.966);
+    opacity: 0.1;
   }
-  60% {
-    transform: translate3d(1px, -1px, 0) scale(0.996);
-    opacity: 0.9;
+  55% {
+    transform: translate3d(1px, -2px, -6px) scale(0.991);
+    opacity: 0.82;
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
@@ -219,12 +219,12 @@
 
 @keyframes card-scroll-diagonal-right {
   from {
-    transform: translate3d(18px, 20px, 0) scale(0.985);
-    opacity: 0.3;
+    transform: translate3d(22px, 28px, -48px) scale(0.966);
+    opacity: 0.1;
   }
-  60% {
-    transform: translate3d(-1px, -1px, 0) scale(0.996);
-    opacity: 0.9;
+  55% {
+    transform: translate3d(-1px, -2px, -6px) scale(0.991);
+    opacity: 0.82;
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
@@ -277,17 +277,42 @@
     opacity: 0.94;
     transform: translate3d(0, var(--cosmic-translate-y), 0);
     mask-image: radial-gradient(
-      ellipse 42% 78% at 50% 50%,
+      ellipse 56% 75% at 50% 50%,
       black 0%,
       black 28%,
       transparent 88%
     );
     -webkit-mask-image: radial-gradient(
-      ellipse 42% 78% at 50% 50%,
+      ellipse 56% 75% at 50% 50%,
       black 0%,
       black 28%,
       transparent 88%
     );
+  }
+  /**
+   * Modo claro: no branco o glow some — recupera com opacidade total + saturação/contraste leves.
+   * (Máscara fica só nas @media para não brigar com breakpoints.)
+   */
+  html:not(.dark) .home-cosmic-backdrop__svg {
+    opacity: 0.88;
+    filter: saturate(0.9) contrast(1.02) brightness(1.07);
+  }
+  /** Viewports largas: ainda mais extensão horizontal (telas pequenas seguem nos max-width abaixo). */
+  @media (min-width: 1280px) {
+    .home-cosmic-backdrop__svg {
+      mask-image: radial-gradient(
+        ellipse 68% 72% at 50% 50%,
+        black 0%,
+        black 28%,
+        transparent 88%
+      );
+      -webkit-mask-image: radial-gradient(
+        ellipse 68% 72% at 50% 50%,
+        black 0%,
+        black 28%,
+        transparent 88%
+      );
+    }
   }
   /** Telas estreitas: menos “torre”, mais largura — máscara + leve scale no SVG. */
   @media (max-width: 1023px) {
@@ -337,7 +362,8 @@
   }
 
   .scroll-3d-stage {
-    perspective: 1100px;
+    perspective: 880px;
+    perspective-origin: 50% 70%;
     transform-style: preserve-3d;
   }
 
@@ -363,27 +389,27 @@
       animation-name: section-reveal;
       animation-duration: 1ms;
       animation-fill-mode: both;
-      animation-timing-function: linear;
+      animation-timing-function: cubic-bezier(0.22, 0.82, 0.28, 1);
       animation-timeline: view(block);
-      animation-range: entry 0% cover 32%;
+      animation-range: entry 0% cover 38%;
     }
 
     .scroll-card-motion {
-      animation: card-scroll-lift linear both;
+      animation: card-scroll-lift cubic-bezier(0.2, 0.85, 0.3, 1) both;
       animation-timeline: view(block);
-      animation-range: entry 0% cover 36%;
+      animation-range: entry 0% cover 42%;
     }
 
     .scroll-card-diagonal-left {
-      animation: card-scroll-diagonal-left linear both;
+      animation: card-scroll-diagonal-left cubic-bezier(0.2, 0.85, 0.3, 1) both;
       animation-timeline: view(block);
-      animation-range: entry 0% cover 36%;
+      animation-range: entry 0% cover 42%;
     }
 
     .scroll-card-diagonal-right {
-      animation: card-scroll-diagonal-right linear both;
+      animation: card-scroll-diagonal-right cubic-bezier(0.2, 0.85, 0.3, 1) both;
       animation-timeline: view(block);
-      animation-range: entry 0% cover 36%;
+      animation-range: entry 0% cover 42%;
     }
   }
 

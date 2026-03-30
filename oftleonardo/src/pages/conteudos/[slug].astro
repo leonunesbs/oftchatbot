@@ -195,7 +195,7 @@ const isPresbiopia = article.id === "presbiopia";
       />
 
       <footer class="space-y-6 border-t border-border pt-8">
-        <div class="mx-auto max-w-2xl rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+        <div class="mx-auto max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
           <p class="text-center text-xs leading-relaxed text-muted-foreground">
             <strong>Aviso médico:</strong> Este conteúdo é informativo e educacional. Não substitui a
             consulta com um médico oftalmologista. Para diagnóstico e tratamento, procure atendimento
@@ -211,7 +211,7 @@ const isPresbiopia = article.id === "presbiopia";
                 {relatedArticles.map((related) => (
                   <a
                     href={`/conteudos/${related.id}`}
-                    class="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
+                    class="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
                   >
                     {related.data.condition}
                   </a>

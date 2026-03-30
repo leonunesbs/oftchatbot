@@ -47,7 +47,7 @@ export default function InstructionsStep({ onContinue }: InstructionsStepProps) 
         </div>
       </div>
 
-      <div className="flex max-w-sm items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+      <div className="flex max-w-sm items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
         <p className="text-muted-foreground text-xs leading-relaxed">
           Este teste <strong>não substitui</strong> uma consulta oftalmológica.

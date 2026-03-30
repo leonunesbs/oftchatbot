@@ -75,7 +75,7 @@ export default function DistanceSelection({
         })}
       </div>
 
-      <div className="flex max-w-sm items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
+      <div className="flex max-w-sm items-start gap-3 rounded-xl border border-border bg-muted/50 p-3">
         <Ruler className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         <p className="text-muted-foreground text-xs leading-relaxed">
           Use uma fita métrica ou régua para medir a distância. Mantenha a

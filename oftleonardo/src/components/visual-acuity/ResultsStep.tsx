@@ -84,7 +84,7 @@ export default function ResultsStep({ results, distanceLabel, onRestart }: Resul
       </div>
 
       {attention ? (
-        <div className="max-w-sm rounded-lg border border-orange-200 bg-orange-50 p-4 text-center dark:border-orange-900/50 dark:bg-orange-950/30">
+        <div className="max-w-sm rounded-xl border border-orange-200 bg-orange-50 p-4 text-center dark:border-orange-900/50 dark:bg-orange-950/30">
           <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
             Seu resultado sugere que uma avaliação profissional pode ser
             importante. Um exame oftalmológico completo pode identificar causas
@@ -92,7 +92,7 @@ export default function ResultsStep({ results, distanceLabel, onRestart }: Resul
           </p>
         </div>
       ) : (
-        <div className="max-w-sm rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
+        <div className="max-w-sm rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400" />
             <div className="space-y-1 text-left">

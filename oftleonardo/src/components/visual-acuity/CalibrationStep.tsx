@@ -89,7 +89,7 @@ export default function CalibrationStep({
         {/* Credit card outline */}
         <div className="flex flex-1 items-center justify-center">
           <div
-            className="relative flex items-center justify-center rounded-lg border-2 border-dashed border-brand bg-brand/5 transition-all duration-100"
+            className="relative flex items-center justify-center rounded-xl border-2 border-dashed border-brand bg-brand/5 transition-all duration-100"
             style={{
               width: `${cardWidthPx}px`,
               height: `${cardHeightPx}px`,

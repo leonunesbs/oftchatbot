@@ -13,10 +13,20 @@ interface Props {
 
 const { cityName, items, presbiopiaSpotlight } = Astro.props;
 
-const categoryLabel = {
-  conditions: "Doenças e condições",
+/** Mesmas cores dos cards em /conteudos (hub por tipo). */
+const hubBadgeClass = {
+  conditions:
+    "border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-400",
+  refractive:
+    "border-amber-500/25 bg-amber-500/10 text-amber-800 dark:text-amber-400",
+  exams:
+    "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+} as const;
+
+const hubBadgeLabel = {
+  conditions: "Guia",
   refractive: "Refração",
-  exams: "Exames e diagnóstico",
+  exams: "Referência",
 } as const;
 ---
 
@@ -26,7 +36,7 @@ const categoryLabel = {
   class="relative scroll-mt-28 py-24 sm:py-32"
 >
   <div
-    class="pointer-events-none absolute inset-x-0 top-0 h-[min(55vh,480px)] bg-gradient-to-b from-muted/45 via-muted/15 to-transparent dark:from-muted/25 dark:via-muted/8"
+    class="pointer-events-none absolute inset-x-0 top-0 h-[min(55vh,480px)] bg-gradient-to-b from-brand/[0.055] via-brand/[0.018] to-transparent dark:from-muted/25 dark:via-muted/8"
     aria-hidden="true"
   />
   <div class="relative mx-auto max-w-6xl px-4 sm:px-6">
@@ -35,13 +45,13 @@ const categoryLabel = {
         class="mb-5 flex flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3"
       >
         <span
-          class="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand"
+          class="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/95 px-3 py-1 text-xs font-semibold tracking-wide text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.06] dark:border-brand/25 dark:bg-brand/10 dark:text-brand dark:shadow-none dark:ring-0"
         >
-          <BookOpen className="size-3.5 opacity-90" aria-hidden="true" />
+          <BookOpen className="size-3.5 text-brand dark:opacity-90" aria-hidden="true" />
           Conteúdo educativo
         </span>
         <span
-          class="inline-flex items-center rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/35 dark:text-zinc-300"
+          class="inline-flex items-center rounded-full border border-border/70 bg-background/90 px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/35 dark:text-zinc-300 dark:shadow-none"
         >
           Revisão clínica
         </span>
@@ -53,14 +63,14 @@ const categoryLabel = {
         Guias e referências em oftalmologia
       </h2>
       <p
-        class="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg"
+        class="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-foreground/88 sm:mt-6 sm:text-lg dark:text-muted-foreground"
       >
         Textos claros sobre doenças oculares, refração e exames — para você chegar à consulta com mais
         segurança e perguntas melhores. Os guias são gerais e ajudam a entender o que costuma ser avaliado
         no consultório, em qualquer cidade.
       </p>
       <p
-        class="mx-auto mt-4 max-w-2xl text-pretty text-xs leading-relaxed text-muted-foreground/85 sm:text-sm"
+        class="mx-auto mt-4 max-w-2xl text-pretty text-xs leading-relaxed text-foreground/72 sm:text-sm dark:text-muted-foreground/85"
       >
         Informação de educação em saúde: não substitui avaliação presencial nem diagnóstico individual.
       </p>
@@ -72,7 +82,7 @@ const categoryLabel = {
           <a
             href={`/conteudos/${presbiopiaSpotlight.id}`}
             id="gtm-home-conteudo-presbiopia-spotlight"
-            class="surface-lift group relative block overflow-hidden rounded-3xl border border-border/55 bg-card p-7 shadow-[0_24px_64px_-36px_rgba(0,0,0,0.18)] outline-none ring-1 ring-black/[0.04] transition-[transform,box-shadow,border-color] duration-500 hover:border-brand/35 hover:shadow-[0_32px_72px_-32px_rgba(0,0,0,0.22)] focus-visible:ring-2 focus-visible:ring-brand/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-border dark:shadow-[0_24px_64px_-36px_rgba(0,0,0,0.55)] dark:ring-white/[0.06] dark:hover:border-brand/40 sm:p-9"
+            class="surface-lift group relative block overflow-hidden rounded-xl border border-border/55 bg-card p-7 shadow-[0_24px_64px_-36px_rgba(0,0,0,0.18)] outline-none ring-1 ring-black/[0.04] transition-[transform,box-shadow,border-color] duration-500 hover:border-brand/35 hover:shadow-[0_32px_72px_-32px_rgba(0,0,0,0.22)] focus-visible:ring-2 focus-visible:ring-brand/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-border dark:shadow-[0_24px_64px_-36px_rgba(0,0,0,0.55)] dark:ring-white/[0.06] dark:hover:border-brand/40 sm:p-9"
           >
             <div
               class="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/[0.07] via-transparent to-amber-500/[0.06] dark:from-brand/[0.08] dark:to-amber-500/[0.05]"
@@ -86,7 +96,7 @@ const categoryLabel = {
                   <span class="inline-flex items-center rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand">
                     Em destaque
                   </span>
-                  <span class="inline-flex items-center rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/40 dark:text-zinc-300">
+                  <span class="inline-flex items-center rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-medium tracking-wide text-amber-800 dark:text-amber-400">
                     Refração
                   </span>
                   <span class="inline-flex items-center rounded-full border border-border/60 bg-muted/35 px-3 py-1 text-xs font-medium tabular-nums text-muted-foreground">
@@ -95,7 +105,7 @@ const categoryLabel = {
                 </div>
                 <div class="mt-5 flex items-start gap-4 sm:mt-6">
                   <span
-                    class="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-2xl border border-brand/20 bg-brand/[0.08] text-brand dark:bg-brand/15"
+                    class="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-lg border border-brand/20 bg-brand/[0.08] text-brand dark:bg-brand/15"
                     aria-hidden="true"
                   >
                     <Eye className="size-5" />
@@ -116,7 +126,7 @@ const categoryLabel = {
               </div>
               <div class="flex shrink-0 flex-col sm:flex-row sm:items-center lg:flex-col xl:flex-row">
                 <span
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-brand/35 bg-brand px-6 py-3.5 text-sm font-semibold text-brand-foreground shadow-sm transition-colors duration-300 group-hover:bg-brand/92"
+                  class="inline-flex items-center justify-center gap-2 rounded-md border border-brand/35 bg-brand px-6 py-3.5 text-sm font-semibold text-brand-foreground shadow-sm transition-colors duration-300 group-hover:bg-brand/92"
                 >
                   Abrir guia completo
                   <ArrowRight
@@ -139,24 +149,32 @@ const categoryLabel = {
     >
       {
         items.map((article) => {
-          const hub = categoryLabel[article.data.hubCategory];
+          const hubKey = article.data.hubCategory;
+          const badgeTone = hubBadgeClass[hubKey];
+          const badgeText = hubBadgeLabel[hubKey];
           return (
             <article
-              class="surface-lift scroll-card-depth scroll-card-motion group relative h-full overflow-hidden rounded-3xl border border-border/40 bg-card/95 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-border/70 hover:shadow-[0_16px_48px_-28px_rgba(0,0,0,0.14)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)] dark:hover:shadow-[0_20px_56px_-24px_rgba(0,0,0,0.55)]"
+              class="surface-lift scroll-card-depth scroll-card-motion group relative h-full overflow-hidden rounded-xl border border-border/40 bg-card/95 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-border/70 hover:shadow-[0_16px_48px_-28px_rgba(0,0,0,0.14)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)] dark:hover:shadow-[0_20px_56px_-24px_rgba(0,0,0,0.55)]"
             >
               <a
                 href={`/conteudos/${article.id}`}
                 id={`gtm-home-conteudo-${article.id}`}
-                class="flex h-full flex-col rounded-3xl p-7 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8"
+                class="flex h-full flex-col rounded-xl p-7 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8"
               >
-                <p class="text-[11px] font-medium uppercase tracking-[0.07em] text-muted-foreground">
-                  {hub}
-                  <span class="mx-2 inline-block opacity-35" aria-hidden="true">
-                    ·
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    class:list={[
+                      "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                      badgeTone,
+                    ]}
+                  >
+                    {badgeText}
                   </span>
-                  <span class="tabular-nums normal-case tracking-normal">{article.data.readingTime}</span>
-                </p>
-                <h3 class="mt-5 text-pretty text-xl font-semibold leading-snug tracking-tight text-foreground transition-colors duration-300 group-hover:text-brand/95 sm:text-[1.35rem]">
+                  <span class="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                    {article.data.readingTime}
+                  </span>
+                </div>
+                <h3 class="mt-4 text-pretty text-xl font-semibold leading-snug tracking-tight text-foreground transition-colors duration-300 group-hover:text-brand/95 sm:mt-5 sm:text-[1.35rem]">
                   {article.data.condition}
                 </h3>
                 <p
@@ -182,14 +200,14 @@ const categoryLabel = {
       <a
         href="/conteudos"
         id="gtm-home-conteudos-hub"
-        class={`${buttonVariants({ size: "lg" })} min-h-12 rounded-2xl px-8 text-base shadow-sm`}
+        class={`${buttonVariants({ size: "lg" })} min-h-12 rounded-md px-8 text-base shadow-sm`}
       >
         Ver todos os conteúdos
       </a>
       <a
         href="/agendamento-online"
         id="gtm-home-conteudos-agendar"
-        class={`${buttonVariants({ variant: "outline", size: "lg" })} min-h-12 rounded-2xl px-8 text-base`}
+        class={`${buttonVariants({ variant: "outline", size: "lg" })} min-h-12 rounded-md px-8 text-base`}
       >
         Agendar consulta
       </a>

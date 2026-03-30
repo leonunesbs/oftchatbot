@@ -180,7 +180,7 @@ export default function VisualAcuityTest({
   return (
     <div className="flex min-h-[80dvh] flex-col items-center justify-center gap-6 px-4 py-8">
       {liveRole !== "solo" ? (
-        <div className="w-full max-w-lg rounded-lg border border-brand/30 bg-brand/5 px-4 py-3">
+        <div className="w-full max-w-lg rounded-xl border border-brand/30 bg-brand/5 px-4 py-3">
           <p className="text-sm font-medium">
             Avaliação remota {livePin ? `#${livePin}` : ""}
           </p>
@@ -191,7 +191,7 @@ export default function VisualAcuityTest({
         </div>
       ) : null}
       {isHost ? (
-        <div className="w-full max-w-2xl rounded-lg border border-brand/20 bg-brand/5 p-4">
+        <div className="w-full max-w-2xl rounded-xl border border-brand/20 bg-brand/5 p-4">
           <p className="text-sm font-semibold">Modo examinador (gabarito completo)</p>
           <p className="text-muted-foreground mt-1 text-xs">
             Use este gabarito para conferir as respostas do paciente durante a consulta.

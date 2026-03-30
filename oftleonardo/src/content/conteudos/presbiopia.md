@@ -44,7 +44,7 @@ Os sinais costumam aparecer gradualmente, muitas vezes **entre 40 e 45 anos** (c
 - **Cansaço**, dor de cabeça ou ardor após **trabalho prolongado de perto**
 - Sensação de que **falta luz** para ler com conforto
 - Dificuldade com **letras pequenas** (rótulos, medicamentos, mensagens em aplicativos)
-- Em alguns casos, **visão fluctuante** ao alternar rápido entre longe e perto
+- Em alguns casos, **nitidez instável** ao alternar rápido entre longe e perto
 
 Se além disso você notar **visão embaçada persistente**, **metamorfopsia** (linhas tortas), **perda de visão periférica** ou **dor ocular intensa**, não atribua tudo à presbiopia: **outras condições** precisam ser investigadas com urgência.
 

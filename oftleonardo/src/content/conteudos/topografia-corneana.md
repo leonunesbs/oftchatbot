@@ -38,7 +38,7 @@ O equipamento projeta **anéis** ou um padrão conhecido sobre a córnea e anali
 
 ## Quando costuma ser indicada?
 
-Desconfiança de **córnea irregular**, **astigmatismo** alto ou assimétrico, preparo **pré-cirúrgico**, sintomas que sugerem alteração de superfície (ex.: visão fluctuante com lentes) e seguimento de **doenças corneanas**.
+Desconfiança de **córnea irregular**, **astigmatismo** alto ou assimétrico, preparo **pré-cirúrgico**, sintomas que sugerem alteração de superfície (ex.: **visão instável** com lentes de contato) e seguimento de **doenças corneanas**.
 
 ## Topografia e tomografia
 
