@@ -266,10 +266,6 @@
     animation-delay: 0.3s;
   }
 
-  .home-hero-in-delay-6 {
-    animation-delay: 0.36s;
-  }
-
   .lentes-hero-rise {
     animation: content-rise-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
