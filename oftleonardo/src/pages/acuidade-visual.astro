@@ -7,15 +7,21 @@ import { siteConfig } from "@/config/site";
 import Layout from "@/layouts/Layout.astro";
 
 const title =
-  "Leonardo Nunes · Oftalmologista em Fortaleza | Teste de acuidade visual online gratuito";
+  "Teste de visão online grátis | Snellen e Tumbling E no celular";
 const description =
-  "Teste sua visão grátis em poucos minutos no celular: calibração rápida e resultado na hora. Triagem orientativa — não substitui consulta. Agende com Leonardo Nunes em Fortaleza.";
+  "Teste de visão e tabela Snellen online grátis: calibração com cartão, resultado na hora. Triagem — não substitui oftalmologista. Fortaleza.";
 const keywords =
-  "teste de acuidade visual online, teste de visão online, teste visual gratuito, teste de visão pelo celular, acuidade visual, oftalmologista Fortaleza, triagem visual, teste ocular online, exame de vista online, Snellen, Tumbling E, teste de visão de perto";
+  "teste de visão online, teste de acuidade visual online, tabela de Snellen teste online, exame de vista online, régua tamanho real, oftalmologista online grátis, triagem visual gratuita, Snellen, Tumbling E, teste ocular pelo celular, acuidade visual, oftalmologista Fortaleza";
 
 const canonical = new URL("/acuidade-visual", siteConfig.canonical).href;
 
 const faqItems = [
+  {
+    question:
+      "Este site oferece oftalmologista online grátis ou consulta gratuita?",
+    answer:
+      "Não. Aqui você encontra apenas um teste de acuidade visual online gratuito (triagem de visão com tabela Snellen). Não há consulta oftalmológica completa nem atendimento médico ao vivo sem custo nesta página. Para avaliação com oftalmologista, use o SUS, seu plano de saúde ou agende consulta presencial — em Fortaleza, você pode agendar com Leonardo Nunes pelo fluxo de agendamento do site.",
+  },
   {
     question:
       "O teste de acuidade visual online substitui uma consulta oftalmológica?",
@@ -104,9 +110,9 @@ const breadcrumbSchema = {
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Teste de Acuidade Visual Online",
+  name: "Teste de visão online grátis (Snellen e Tumbling E)",
   description:
-    "Teste gratuito de acuidade visual pelo celular, com calibração de tela e resultado imediato. Triagem orientativa com Leonardo Nunes, oftalmologista em Fortaleza.",
+    "Teste gratuito de acuidade visual pelo celular, com calibração de tela e resultado imediato. Triagem orientativa — não substitui consulta oftalmológica. Conteúdo por Leonardo Nunes, oftalmologista em Fortaleza.",
   url: canonical,
   applicationCategory: "HealthApplication",
   operatingSystem: "All",
@@ -134,7 +140,7 @@ const webAppSchema = {
 const medicalPageSchema = {
   "@context": "https://schema.org",
   "@type": "MedicalWebPage",
-  name: "Teste de acuidade visual online gratuito",
+  name: "Teste de visão online grátis com tabela Snellen",
   description,
   url: canonical,
   inLanguage: "pt-BR",
@@ -284,27 +290,52 @@ const allSchemas = [
     <article class="space-y-12 px-4 py-12">
       <header class="space-y-4 text-center">
         <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
-          Teste de Acuidade Visual Online e Gratuito
+          Teste de visão online grátis: Snellen e Tumbling E no celular
         </h1>
         <p
           class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
         >
-          Avalie sua visão de perto diretamente pelo celular com este teste de
-          acuidade visual com <strong>progressão logarítmica dos optotipos</strong
-          > e resultado em <strong>escala de Snellen</strong> (20/20, 20/40,
-          20/60), utilizando optotipos
-          <strong>Snellen</strong> e <strong>Tumbling E</strong>. Ferramenta de
-          triagem desenvolvida pelo <strong
-            >Leonardo Nunes, oftalmologista</strong
-          > especialista em retina e catarata.
+          Ferramenta de <strong>exame de vista online</strong> para triagem: use
+          uma <strong>tabela de Snellen</strong> digital com
+          <strong>progressão logarítmica dos optotipos</strong> e resultado em
+          <strong>escala Snellen</strong> (20/20, 20/40, 20/60). A calibração com
+          cartão funciona como <strong>referência de tamanho real</strong> na
+          tela. Optotipos <strong>Snellen</strong> e <strong>Tumbling E</strong>.
+          Conteúdo clínico por <strong>Leonardo Nunes</strong>, oftalmologista em
+          Fortaleza (retina e catarata).
         </p>
       </header>
+
+      <!-- Intent mismatch: "oftalmologista online grátis" etc. -->
+      <section class="space-y-3" aria-labelledby="triagem-vs-consulta-heading">
+        <h2
+          id="triagem-vs-consulta-heading"
+          class="text-center text-xl font-bold tracking-tight sm:text-2xl"
+        >
+          Triagem gratuita e consulta com oftalmologista
+        </h2>
+        <div
+          class="mx-auto max-w-2xl space-y-3 text-sm leading-relaxed text-muted-foreground"
+        >
+          <p>
+            Quem busca <strong>oftalmologista online grátis</strong> ou
+            <strong>exame de vista online</strong> completo precisa saber: esta
+            página oferece <strong>somente triagem de acuidade visual gratuita</strong>
+            (teste de visão com Snellen). Não há consulta médica ao vivo nem
+            diagnóstico sem custo aqui. Para avaliação completa (pressão, retina,
+            refração), use o SUS, seu convênio ou
+            <a href="#agendar" class="font-medium text-foreground underline underline-offset-2 hover:text-brand"
+              >agende uma consulta presencial</a
+            >.
+          </p>
+        </div>
+      </section>
 
       <!-- How it works -->
       <section class="space-y-8" id="como-funciona">
         <div class="space-y-2 text-center">
           <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
-            Como Funciona o Teste de Acuidade Visual
+            Como funciona o teste de Snellen online
           </h2>
           <p class="text-sm text-muted-foreground">
             5 passos simples para avaliar sua visão
@@ -344,7 +375,7 @@ const allSchemas = [
       <!-- About the test -->
       <section class="space-y-4">
         <h2 class="text-center text-xl font-bold tracking-tight sm:text-2xl">
-          Sobre o Teste de Visão Online
+          Tabela Snellen online e calibração (referência de tamanho real)
         </h2>
         <div
           class="mx-auto max-w-2xl space-y-3 text-sm leading-relaxed text-muted-foreground"
@@ -352,10 +383,11 @@ const allSchemas = [
           <p>
             Este teste de acuidade visual de perto utiliza a mesma metodologia
             empregada em consultórios oftalmológicos, adaptada para dispositivos
-            digitais. A calibração da tela com um
-            cartão de crédito permite calcular a densidade de pixels e exibir os
-            optotipos no tamanho fisicamente correto para a distância
-            selecionada.
+            digitais. A calibração com um
+            cartão de crédito ou débito substitui a
+            <strong>régua em tamanho real</strong>: você alinha o cartão à imagem na
+            tela para que a <strong>tabela de Snellen</strong> apareça no tamanho
+            correto para a distância escolhida.
           </p>
           <p>
             Os resultados são apresentados na <strong>escala de Snellen</strong> (ex:
