@@ -10,6 +10,7 @@ import { siteConfig } from "@/config/site";
 import { formatLastReviewedPtBr } from "@/lib/format-last-reviewed";
 import Layout from "@/layouts/Layout.astro";
 import { getCollection, render } from "astro:content";
+import { stripFaqAnswerMarkdownForPlainText } from "@/lib/faq-answer-markdown";
 
 export const prerender = true;
 
@@ -94,7 +95,10 @@ const faqSchema = {
   mainEntity: faq.map((item) => ({
     "@type": "Question",
     name: item.question,
-    acceptedAnswer: { "@type": "Answer", text: item.answer },
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: stripFaqAnswerMarkdownForPlainText(item.answer),
+    },
   })),
 };
 
@@ -167,7 +171,11 @@ const scheduleWhatsappTemplate = isLentesPremium
     tabindex="-1"
     class:list={[
       "mx-auto max-w-3xl px-4 sm:px-6",
-      hasScrollHero ? "pb-12 pt-6" : "py-12",
+      hasScrollHero
+        ? isLentesPremium
+          ? "pb-12 pt-16 sm:pt-20 md:pt-24"
+          : "pb-12 pt-12 sm:pt-14 md:pt-16"
+        : "py-12",
     ]}
   >
     <nav aria-label="Breadcrumb" class="mb-6">

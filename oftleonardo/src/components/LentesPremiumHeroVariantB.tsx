@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { LentesPremiumIolSketch } from "@/components/LentesPremiumIolSketch";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,7 @@ const LENS_TYPES: readonly { label: string; Icon: LucideIcon }[] = [
 
 const VALUE_POINTS: readonly { text: string; Icon: LucideIcon }[] = [
   {
-    text: "Veja o que multifocal, trifocal, EDoF e tórica costumam entregar — e onde ainda pode fazer sentido usar óculos — sem jargão de catálogo.",
+    text: "Entenda quando o ganho é mais distância, mais nitidez ou outro perfil de luz — monofocal de linha superior, EDoF, multifocal/trifocal e tórica — e onde óculos ainda podem fazer sentido, sem jargão de catálogo.",
     Icon: Sparkles,
   },
   {
@@ -223,21 +224,21 @@ export function LentesPremiumHeroVariantB({
             <p className="sr-only">{title}</p>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none">
-            <div className="lentes-hero-rise lentes-hero-rise-delay-2 mb-4 flex items-center justify-center gap-2 lg:justify-start">
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="relative mx-auto w-full max-w-[400px]">
+            <div className="lentes-hero-rise lentes-hero-rise-delay-1 mb-4 flex items-center justify-center gap-2">
+              <span className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 O que você quer enxergar bem
               </span>
             </div>
 
-            <div className="flex justify-center gap-2 sm:gap-3 lg:justify-start">
+            <div className="flex justify-center gap-2 sm:gap-3">
               {FOCUS_LAYERS.map((layer) => {
                 const { Icon, iconTint, glow, gradient, floatDelayClass } = layer;
                 return (
                   <div
                     key={layer.label}
                     className={cn(
-                      "lentes-hero-card-float relative min-h-[158px] flex-1 overflow-hidden rounded-2xl border border-border/70 bg-zinc-950/92 shadow-lg ring-1 ring-inset ring-white/[0.06] sm:min-h-[176px] sm:rounded-3xl md:min-h-[188px]",
+                      "lentes-hero-card-float relative min-h-[172px] flex-1 overflow-hidden rounded-2xl border border-border/70 bg-zinc-950/92 shadow-lg ring-1 ring-inset ring-white/[0.06] sm:min-h-[188px] sm:rounded-3xl md:min-h-[202px]",
                       floatDelayClass,
                     )}
                     style={{
@@ -246,8 +247,8 @@ export function LentesPremiumHeroVariantB({
                     }}
                   >
                     <div className={cn("absolute inset-0 bg-gradient-to-b opacity-92", gradient)} />
-                    <div className="relative flex h-full min-h-[inherit] flex-col">
-                      <div className="relative flex flex-1 flex-col items-center justify-center px-2 pt-4 pb-2">
+                    <div className="relative grid h-full min-h-[inherit] grid-rows-2">
+                      <div className="relative flex min-h-0 flex-col items-center justify-center px-2 pt-2 pb-2 sm:pt-3">
                         <div
                           className={cn(
                             "pointer-events-none absolute left-1/2 top-[40%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl sm:h-[4.25rem] sm:w-[4.25rem]",
@@ -264,19 +265,23 @@ export function LentesPremiumHeroVariantB({
                           aria-hidden
                         />
                       </div>
-                      <div className="relative border-t border-white/10 bg-black/25 px-2 py-2 sm:px-2.5 sm:py-2.5">
-                        <p className="text-center text-[10px] font-bold uppercase tracking-wider text-zinc-50 sm:text-[11px]">
-                          {layer.label}
-                        </p>
-                        <p className="mt-0.5 text-center text-[9px] font-medium leading-tight text-zinc-300/95 sm:text-[10px]">
-                          {layer.tag}
-                        </p>
+                      <div className="relative flex min-h-0 flex-col items-center justify-center border-t border-white/10 bg-black/25 px-2 py-2 sm:px-2.5 sm:py-2.5">
+                        <div>
+                          <p className="text-center text-[10px] font-bold uppercase tracking-wider text-zinc-50 sm:text-[11px]">
+                            {layer.label}
+                          </p>
+                          <p className="mt-0.5 text-center text-[9px] font-medium leading-tight text-zinc-300/95 sm:text-[10px]">
+                            {layer.tag}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            <LentesPremiumIolSketch className="lentes-hero-rise lentes-hero-rise-delay-3 mx-auto mt-7 sm:mt-8" />
 
             <div className="lentes-hero-rise lentes-hero-rise-delay-4 mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
               {LENS_TYPES.map(({ label, Icon }) => (

@@ -286,6 +286,33 @@
   }
 }
 
+/** LIO esquemática: perspectiva; rotação em `LentesPremiumIolSketch` (rAF + scroll). */
+.lentes-premium-iol-sketch-perspective {
+  perspective: min(920px, 90vw);
+}
+
+.lentes-premium-iol-sketch-spin {
+  transform-style: preserve-3d;
+}
+
+/** Sem réplicas sobrepostas: só translateZ leve + sombra para profundidade (evita “fantasma” ao girar). */
+.lentes-premium-iol-sketch-depth {
+  transform-style: preserve-3d;
+}
+
+.lentes-premium-iol-sketch-depth-front {
+  transform: translateZ(8px);
+  filter:
+    drop-shadow(0 14px 22px rgb(15 23 42 / 0.11))
+    drop-shadow(0 4px 10px rgb(15 23 42 / 0.07));
+}
+
+.dark .lentes-premium-iol-sketch-depth-front {
+  filter:
+    drop-shadow(0 16px 28px rgb(0 0 0 / 0.34))
+    drop-shadow(0 6px 14px rgb(0 0 0 / 0.2));
+}
+
 @layer utilities {
   .surface-lift {
     transform: translate3d(0, 0, 0);

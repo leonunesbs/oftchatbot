@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { renderFaqAnswerMarkdown } from "@/lib/faq-answer-markdown";
 
 interface ArticleFAQProps {
   items: { question: string; answer: string }[];
@@ -18,7 +19,7 @@ export default function ArticleFAQ({ items }: ArticleFAQProps) {
             {item.question}
           </AccordionTrigger>
           <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
-            {item.answer}
+            {renderFaqAnswerMarkdown(item.answer)}
           </AccordionContent>
         </AccordionItem>
       ))}
