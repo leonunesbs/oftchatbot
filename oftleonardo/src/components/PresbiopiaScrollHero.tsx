@@ -97,11 +97,17 @@ export function PresbiopiaScrollHero({
     let lastObservedW = 0;
     let lastObservedH = 0;
 
+    /** Ver `LentesPremiumHeroVariantA`: no mobile, não reler visualViewport a cada `scroll`. */
+    const viewportH = { current: 0 };
+    const syncViewportHeight = () => {
+      viewportH.current = window.visualViewport?.height ?? window.innerHeight;
+    };
+
     const update = () => {
       if (document.visibilityState !== "visible") return;
       const rect = el.getBoundingClientRect();
       const trackHeight = Math.max(rect.height, el.offsetHeight, 1);
-      const vh = window.visualViewport?.height ?? window.innerHeight;
+      const vh = viewportH.current;
       const scrollable = Math.max(1, trackHeight - vh);
       let p = clamp01(-rect.top / scrollable);
       if (p >= 0.997) p = 1;
@@ -123,14 +129,15 @@ export function PresbiopiaScrollHero({
     };
 
     const onWindowResize = () => {
+      syncViewportHeight();
       lastProgressRef.current = -1;
       scheduleUpdate();
     };
 
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", onWindowResize, { passive: true });
+    /** Só `resize`: `visualViewport` `scroll` (barra de endereço / pinch) recalcula demais e pode puxar a página ao inverter a rolagem — alinhado ao hero lentes premium A. */
     window.visualViewport?.addEventListener("resize", onWindowResize);
-    window.visualViewport?.addEventListener("scroll", onWindowResize);
 
     let resizeObserver: ResizeObserver | undefined;
     if (typeof ResizeObserver !== "undefined") {
@@ -142,6 +149,7 @@ export function PresbiopiaScrollHero({
           lastObservedW = cr.width;
           lastObservedH = cr.height;
           if (dw > 0.5 || dh > 0.5) {
+            syncViewportHeight();
             lastProgressRef.current = -1;
           }
         }
@@ -150,6 +158,7 @@ export function PresbiopiaScrollHero({
       resizeObserver.observe(el);
     }
 
+    syncViewportHeight();
     scheduleUpdate();
 
     return () => {
@@ -157,7 +166,6 @@ export function PresbiopiaScrollHero({
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", onWindowResize);
       window.visualViewport?.removeEventListener("resize", onWindowResize);
-      window.visualViewport?.removeEventListener("scroll", onWindowResize);
       resizeObserver?.disconnect();
       mq.removeEventListener("change", apply);
     };
@@ -195,9 +203,15 @@ export function PresbiopiaScrollHero({
     <div
       ref={setTrackEl}
       className="relative min-h-[290dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
-      style={{ minHeight: "min(290dvh, 300vh)" }}
+      style={{
+        minHeight: "min(290dvh, 300vh)",
+        overflowAnchor: "none",
+      }}
     >
-      <div className="sticky top-0 flex min-h-[100dvh] flex-col justify-start px-3 pb-10 pt-16 sm:px-5 sm:pb-12 sm:pt-24 md:justify-center md:px-6 md:pt-28">
+      <div
+        className="sticky top-0 flex min-h-[100dvh] flex-col justify-start px-3 pb-10 pt-16 sm:px-5 sm:pb-12 sm:pt-24 md:justify-center md:px-6 md:pt-28"
+        style={{ overflowAnchor: "none" }}
+      >
         <div
           className="mx-auto grid w-full min-w-0 max-w-6xl items-center gap-5 sm:gap-7 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-6 lg:gap-10 [transform-style:preserve-3d]"
           style={{

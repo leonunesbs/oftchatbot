@@ -35,6 +35,8 @@ const {
   faq,
   relatedSlugs,
   isOpinion,
+  conflictOfInterest,
+  conflictOfInterestNote,
 } = article.data;
 
 const lastReviewedFormatted = formatLastReviewedPtBr(lastReviewed);
@@ -214,6 +216,25 @@ const scheduleWhatsappTemplate = isLentesPremium
       }
 
       <div class="mb-10 flex flex-col gap-5 sm:mb-12 sm:gap-6">
+        {
+          conflictOfInterest && (
+            <aside
+              class="not-prose rounded-md border border-border/50 bg-muted/20 px-3 py-2 text-xs leading-relaxed text-muted-foreground"
+              aria-label="Declaração de conflito de interesses"
+            >
+              {conflictOfInterest === "none" ? (
+                <p class="m-0">Sem conflito de interesses declarado em relação a este conteúdo.</p>
+              ) : (
+                <div class="space-y-1">
+                  <p class="m-0 font-medium text-foreground/80">Conflito de interesses declarado.</p>
+                  {conflictOfInterestNote ? (
+                    <p class="m-0 text-muted-foreground">{conflictOfInterestNote}</p>
+                  ) : null}
+                </div>
+              )}
+            </aside>
+          )
+        }
         <div class="prose-article">
           <Content />
         </div>

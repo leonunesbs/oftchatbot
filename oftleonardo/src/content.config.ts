@@ -15,6 +15,12 @@ const conteudos = defineCollection({
     lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     /** Se verdadeiro, exibe o badge «Opinião» (conteúdo editorial); o padrão é artigo técnico revisado. */
     isOpinion: z.boolean().optional(),
+    /**
+     * Declaração de conflito de interesses: exibe selo discreto antes do texto quando preenchido.
+     * Use `declared` junto de `conflictOfInterestNote` quando houver relação relevante a informar.
+     */
+    conflictOfInterest: z.enum(["none", "declared"]).optional(),
+    conflictOfInterestNote: z.string().optional(),
     faq: z.array(
       z.object({
         question: z.string(),

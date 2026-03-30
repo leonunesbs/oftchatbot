@@ -6,6 +6,7 @@ condition: "Lentes premium na catarata"
 procedure: "Cirurgia de catarata com implante de lente intraocular (incluindo opções premium quando indicadas)"
 readingTime: "11 min"
 lastReviewed: "2026-03-30"
+conflictOfInterest: "none"
 faq:
   - question: "Lente premium elimina óculos para sempre?"
     answer: "Ninguém pode prometer **zero óculos** em qualquer situação. Na [cirurgia de catarata](/conteudos/catarata), multifocais, trifocais, EDoF e combinações com **lente tórica** costumam **diminuir** o uso de óculos para longe, meio e perto — mas leitura muito fina, pouca luz ou tarefas exigentes ainda podem exigir correção. **Premium** também pode ser **monofocal de alta qualidade**, com nitidez e contraste excelentes na distância planejada, sem a lógica de “várias distâncias na mesma lente”. Tudo isso se define com exame, metas claras e expectativa realista."
@@ -36,7 +37,7 @@ Este texto é **educativo** e **independente de marca**: nomes comerciais mudam;
 
 ## Como as LIOs costumam ser agrupadas (visão de catálogo)
 
-Na prática, catálogos oftalmológicos — como os de grandes fornecedores — costumam separar linhas de forma parecida com esta (às vezes com sublinhas “básica” vs. mais trabalhadas **dentro** de cada família, por material, superfície óptica ou entrega cirúrgica):
+Na prática, catálogos oftalmológicos — no padrão que fabricantes e laboratórios parceiros costumam adotar — separam linhas de forma parecida com esta (às vezes com sublinhas “básica” vs. mais trabalhadas **dentro** de cada família, por material, superfície óptica ou entrega cirúrgica):
 
 | Família | Ideia central | O que costuma otimizar |
 | --- | --- | --- |

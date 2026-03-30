@@ -271,11 +271,17 @@ export function LentesPremiumHeroVariantA({
     let lastObservedW = 0;
     let lastObservedH = 0;
 
+    /** Altura da viewport só em resize/layout — no mobile o visualViewport muda durante o gesto e recalcular a cada `scroll` briga com o `dvh` do trilho (sensação de rolagem invertida). */
+    const viewportH = { current: 0 };
+    const syncViewportHeight = () => {
+      viewportH.current = window.visualViewport?.height ?? window.innerHeight;
+    };
+
     const update = () => {
       if (document.visibilityState !== "visible") return;
       const rect = el.getBoundingClientRect();
       const trackHeight = Math.max(rect.height, el.offsetHeight, 1);
-      const vh = window.visualViewport?.height ?? window.innerHeight;
+      const vh = viewportH.current;
       const scrollable = Math.max(1, trackHeight - vh);
       /** Primeiros pixels de scroll: progresso 0 (layout estável, conteúdo legível por mais rolagem); depois 0→1 no restante da trilha. */
       const progressLeadIn = Math.min(220, Math.max(96, Math.round(vh * 0.18)));
@@ -300,6 +306,7 @@ export function LentesPremiumHeroVariantA({
     };
 
     const onWindowResize = () => {
+      syncViewportHeight();
       lastProgressRef.current = -1;
       scheduleUpdate();
     };
@@ -319,6 +326,7 @@ export function LentesPremiumHeroVariantA({
             lastObservedW = cr.width;
             lastObservedH = cr.height;
             if (dw > 0.5 || dh > 0.5) {
+              syncViewportHeight();
               lastProgressRef.current = -1;
             }
           }
@@ -327,6 +335,7 @@ export function LentesPremiumHeroVariantA({
         resizeObserver.observe(el);
       }
 
+      syncViewportHeight();
       update();
     };
 
@@ -372,10 +381,17 @@ export function LentesPremiumHeroVariantA({
     <div
       ref={trackRef}
       className="relative min-h-[470dvh] w-full min-w-0 max-w-full bg-gradient-to-b from-muted/40 via-background to-background"
-      style={{ minHeight: "min(470dvh, 500vh)" }}
+      style={{
+        minHeight: "min(470dvh, 500vh)",
+        /** Evita scroll anchoring com blur/sticky: o browser não deve “corrigir” scrollTop quando o paint muda na inversão da rolagem. */
+        overflowAnchor: "none",
+      }}
       data-lentes-hero-variant="A"
     >
-      <div className="sticky top-[4.75rem] z-0 flex min-h-[calc(100dvh-4.75rem)] flex-col justify-start px-3 pb-12 pt-16 sm:px-5 sm:pb-14 sm:pt-[4.25rem] md:px-6 md:pb-12 md:pt-24 lg:pt-28">
+      <div
+        className="sticky top-[4.75rem] z-0 flex min-h-[calc(100dvh-4.75rem)] flex-col justify-start px-3 pb-12 pt-16 sm:px-5 sm:pb-14 sm:pt-[4.25rem] md:px-6 md:pb-12 md:pt-24 lg:pt-28"
+        style={{ overflowAnchor: "none" }}
+      >
         <div className="mx-auto grid w-full min-w-0 max-w-6xl items-start gap-x-5 gap-y-10 sm:gap-x-6 sm:gap-y-9 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-10">
           <div
             ref={(node) => patchMotionRef(motionDomRef, "stack", node)}
@@ -456,7 +472,7 @@ export function LentesPremiumHeroVariantA({
                 <ul className="mt-2.5 space-y-2 text-[11px] leading-snug text-muted-foreground sm:text-xs">
                   <li className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/75" aria-hidden />
-                    Retina e nervo óptico em dia nos exames.
+                    Retina e nervo óptico saudáveis nos exames.
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/75" aria-hidden />

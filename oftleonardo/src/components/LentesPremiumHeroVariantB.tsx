@@ -31,7 +31,7 @@ const FOCUS_LAYERS: readonly {
 }[] = [
   {
     label: "Longe",
-    tag: "Direção, TV, rosto",
+    tag: "Direção, painéis, rostos",
     Icon: Mountain,
     iconTint: "text-sky-200/95",
     glow: "bg-sky-400/25",
@@ -49,7 +49,7 @@ const FOCUS_LAYERS: readonly {
   },
   {
     label: "Perto",
-    tag: "Leitura, celular",
+    tag: "Leitura fina, celular",
     Icon: BookOpen,
     iconTint: "text-amber-200/95",
     glow: "bg-amber-400/20",
@@ -67,15 +67,15 @@ const LENS_TYPES: readonly { label: string; Icon: LucideIcon }[] = [
 
 const VALUE_POINTS: readonly { text: string; Icon: LucideIcon }[] = [
   {
-    text: "Entenda quando o ganho é mais distância, mais nitidez ou outro perfil de luz — monofocal de linha superior, EDoF, multifocal/trifocal e tórica — e onde óculos ainda podem fazer sentido, sem jargão de catálogo.",
+    text: "Diferencie o que cada família de lente realmente entrega — distância útil, nitidez, contraste e perfil de halos — da monofocal de alta performance à multifocal/trifocal, EDoF e tórica, sem confundir “premium” com um único modelo de catálogo.",
     Icon: Sparkles,
   },
   {
-    text: "Antecipe halos, contraste e adaptação: alinhe isso à sua rotina (direção à noite, telas, leitura) antes de escolher a lente.",
+    text: "Cruze halos, contraste e tempo de adaptação com a sua rotina (direção à noite, telas, leitura fina): expectativa alinhada reduz surpresa e aumenta satisfação com o resultado.",
     Icon: ShieldCheck,
   },
   {
-    text: "Chegue à consulta com perguntas prontas e decida com o oftalmologista com base nos seus exames e nas suas metas.",
+    text: "Leve exames em dia e chegue com dúvidas objetivas: a escolha da LIO é decisão médica compartilhada, fundamentada nos seus dados e nas metas que você e o oftalmologista definem juntos.",
     Icon: MessageCircle,
   },
 ];
@@ -132,7 +132,7 @@ export function LentesPremiumHeroVariantB({
             >
               <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/12 px-3 py-1 text-xs font-semibold tracking-wide text-brand">
                 <Sparkles className="h-3.5 w-3.5 opacity-90" aria-hidden />
-                Guia + próximo passo na consulta
+                Decisão informada: leitura + avaliação presencial
               </span>
               <span className="inline-flex items-center rounded-full border border-border/80 bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
                 {readingTime} de leitura
@@ -217,8 +217,9 @@ export function LentesPremiumHeroVariantB({
                 "lentes-hero-rise lentes-hero-rise-delay-5 mt-5 max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm",
               )}
             >
-              Conteúdo educativo, sem indicação de marca. Na consulta com o Dr Leonardo, exames e objetivos definem se
-              multifocal, EDoF, tórica ou monofocal é a melhor combinação para o seu caso.
+              Conteúdo educativo, independente de marca. Na consulta com o Dr Leonardo, exames (retina, córnea, medidas)
+              e suas prioridades orientam juntos a melhor estratégia — multifocal, EDoF, tórica, monofocal ou combinação —
+              para o seu caso.
             </p>
 
             <p className="sr-only">{title}</p>
@@ -227,7 +228,7 @@ export function LentesPremiumHeroVariantB({
           <div className="relative mx-auto w-full max-w-[400px]">
             <div className="lentes-hero-rise lentes-hero-rise-delay-1 mb-4 flex items-center justify-center gap-2">
               <span className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                O que você quer enxergar bem
+                Onde a sua rotina exige nitidez
               </span>
             </div>
 
@@ -298,20 +299,20 @@ export function LentesPremiumHeroVariantB({
             <div className="lentes-hero-rise lentes-hero-rise-delay-5 mt-6 rounded-2xl border border-dashed border-brand/35 bg-gradient-to-br from-brand/[0.07] to-transparent p-4 sm:rounded-3xl sm:p-5">
               <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand sm:text-xs">
                 <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
-                Checklist rápido
+                O que costuma pesar na indicação
               </p>
               <ul className="mt-3 space-y-2 text-xs leading-snug text-muted-foreground sm:text-sm">
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/75" aria-hidden />
-                  Retina e nervo óptico em dia nos exames — isso orienta se multifocal faz sentido.
+                  Retina e nervo óptico em condições de suportar o desenho óptico escolhido — ponto decisivo para multifocal e parentes.
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/75" aria-hidden />
-                  Prioridades claras: direção à noite, leitura fina, telas, contraste.
+                  Prioridades explícitas: direção noturna, leitura prolongada, telas e exigência de contraste.
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/75" aria-hidden />
-                  Astigmatismo relevante pode pedir tórica ou estratégia combinada.
+                  Astigmatismo corneano relevante costuma exigir tórica ou plano combinado, não “só escolher multifocal”.
                 </li>
               </ul>
             </div>
