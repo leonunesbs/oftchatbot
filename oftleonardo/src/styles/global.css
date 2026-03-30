@@ -494,9 +494,43 @@
   /** Conteúdo sempre acima do fundo cósmico (backdrop em -z-10 na âncora). */
   .home-post-hero-stack {
     @apply relative isolate z-10 flex flex-col;
+    perspective: 1180px;
+    perspective-origin: 50% 42%;
   }
   .home-post-hero-stack > .scroll-section {
     @apply relative z-0;
+  }
+
+  /** Profundidade dinâmica (`home-scroll-depth.ts`): só translate/rotate no plano; variáveis com fallback. */
+  .home-depth-section__inner {
+    --home-section-ty: 0px;
+    --home-section-rx: 0deg;
+    transform: translate3d(0, var(--home-section-ty), 0) rotateX(var(--home-section-rx));
+    transform-style: preserve-3d;
+  }
+
+  .home-hero-depth-target {
+    --hero-depth-ty: 0px;
+    transform: translate3d(0, var(--hero-depth-ty), 0);
+  }
+
+  .parallax-layer {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    contain: paint;
+  }
+
+  .parallax-artifacts .parallax-layer--v1 {
+    opacity: 0.2;
+  }
+  .parallax-artifacts .parallax-layer--v2 {
+    opacity: 0.26;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v1 {
+    opacity: 0.28;
+  }
+  html.dark .parallax-artifacts .parallax-layer--v2 {
+    opacity: 0.34;
   }
 
   .scroll-3d-stage {
@@ -694,6 +728,14 @@
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
+    }
+    .home-hero-depth-target,
+    .home-depth-section__inner,
+    .parallax-layer {
+      transform: none !important;
+    }
+    .parallax-artifacts {
+      display: none !important;
     }
     .home-cosmic-backdrop {
       display: none;

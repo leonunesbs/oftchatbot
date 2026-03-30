@@ -11,6 +11,7 @@ import Header from "@/components/Header.astro";
 import Hero from "@/components/Hero.astro";
 import HomeContentSection from "@/components/HomeContentSection.astro";
 import HomeCosmicBackdrop from "@/components/HomeCosmicBackdrop.astro";
+import ParallaxArtifacts from "@/components/ParallaxArtifacts";
 import HowItWorks from "@/components/HowItWorks.astro";
 import Services from "@/components/Services.astro";
 import VisualAcuityFloat from "@/components/VisualAcuityFloat";
@@ -79,6 +80,7 @@ const contentItemListSchema = {
     tabindex="-1"
     class="relative isolate overflow-x-clip"
   >
+    <ParallaxArtifacts />
     <div
       class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(40%_30%_at_0%_35%,color-mix(in_oklch,var(--color-brand)_4%,transparent),transparent),radial-gradient(35%_25%_at_100%_68%,color-mix(in_oklch,var(--color-brand)_3%,transparent),transparent)]"
       aria-hidden="true"
@@ -94,41 +96,59 @@ const contentItemListSchema = {
       </div>
       <div class="home-post-hero-stack">
         <div class="scroll-section">
-          <Services />
+          <div class="home-depth-section__inner">
+            <Services />
+          </div>
         </div>
         <div class="scroll-section">
-          <ExperienceStats />
+          <div class="home-depth-section__inner">
+            <ExperienceStats />
+          </div>
         </div>
         <div class="scroll-section">
-          <Differentials />
+          <div class="home-depth-section__inner">
+            <Differentials />
+          </div>
         </div>
         <div class="scroll-section">
-          <HomeContentSection
-            cityName={geoCity.name}
-            items={featuredContent}
-            presbiopiaSpotlight={presbiopiaArticle}
-            premiumLensesSpotlight={premiumLensesArticle}
-          />
+          <div class="home-depth-section__inner">
+            <HomeContentSection
+              cityName={geoCity.name}
+              items={featuredContent}
+              presbiopiaSpotlight={presbiopiaArticle}
+              premiumLensesSpotlight={premiumLensesArticle}
+            />
+          </div>
         </div>
         <div class="scroll-section">
-          <Cities />
+          <div class="home-depth-section__inner">
+            <Cities />
+          </div>
         </div>
         <div class="scroll-section">
-          <HowItWorks />
+          <div class="home-depth-section__inner">
+            <HowItWorks />
+          </div>
         </div>
         <div class="scroll-section">
-          <FAQ />
+          <div class="home-depth-section__inner">
+            <FAQ />
+          </div>
         </div>
         <div class="scroll-section">
-          <CTAFinal />
+          <div class="home-depth-section__inner">
+            <CTAFinal />
+          </div>
         </div>
       </div>
     </div>
     <script>
       import { initHomeCosmicAnchor } from "@/lib/home-cosmic-anchor";
+      import { initHomeScrollDepth } from "@/lib/home-scroll-depth";
       import { initHomeScrollReveal } from "@/lib/home-scroll-reveal";
       initHomeCosmicAnchor();
       initHomeScrollReveal();
+      initHomeScrollDepth();
     </script>
   </main>
   <Footer />
