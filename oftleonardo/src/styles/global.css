@@ -232,6 +232,16 @@
   }
 }
 
+/** Faixa de cards da home: deslocamento horizontal ligado à rolagem vertical (md+). */
+@keyframes guides-cards-horizontal {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(min(0px, calc(100vw - 100% - 3rem)), 0, 0);
+  }
+}
+
 @layer utilities {
   /**
    * Reduz memória e trabalho de pintura: o navegador pode omitir conteúdo fora da viewport.
@@ -259,29 +269,6 @@
   .scroll-reveal {
     opacity: 1;
     transform: none;
-  }
-
-  .parallax-layer {
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    contain: paint;
-  }
-
-  /**
-   * Opacidade do fundo parallax: tema claro precisa de mais contraste no texto;
-   * tema escuro mantém o efeito visível com leve redução.
-   */
-  .parallax-artifacts .parallax-layer--v1 {
-    opacity: 0.28;
-  }
-  .parallax-artifacts .parallax-layer--v2 {
-    opacity: 0.34;
-  }
-  html.dark .parallax-artifacts .parallax-layer--v1 {
-    opacity: 0.36;
-  }
-  html.dark .parallax-artifacts .parallax-layer--v2 {
-    opacity: 0.42;
   }
 
   .scroll-3d-stage {
@@ -332,6 +319,21 @@
       animation: card-scroll-diagonal-right linear both;
       animation-timeline: view(block);
       animation-range: entry 0% cover 36%;
+    }
+
+    /**
+     * Vitrine "Guias e referências" (home): rolagem vertical move a faixa na horizontal.
+     * Só em md+; em telas menores permanece grade para leitura confortável.
+     */
+    @media (min-width: 768px) {
+      .guides-cards-parallax__track {
+        animation-name: guides-cards-horizontal;
+        animation-duration: 1ms;
+        animation-fill-mode: both;
+        animation-timing-function: linear;
+        animation-timeline: view(block);
+        animation-range: entry 0% cover 48%;
+      }
     }
   }
 
@@ -412,12 +414,9 @@
     .scroll-card-motion,
     .scroll-card-diagonal-left,
     .scroll-card-diagonal-right,
-    .parallax-layer {
+    .guides-cards-parallax__track {
       animation: none !important;
       transform: none !important;
-    }
-    .parallax-artifacts {
-      display: none !important;
     }
   }
 }

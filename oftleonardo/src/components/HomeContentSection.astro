@@ -152,16 +152,22 @@ const categoryStyles = {
 
     <div
       class:list={[
-        "scroll-3d-stage grid gap-5 sm:grid-cols-2 lg:grid-cols-3",
+        "guides-cards-parallax",
         presbiopiaSpotlight ? "mt-10" : "mt-14",
       ]}
     >
+      <div
+        class="guides-cards-parallax__viewport scroll-3d-stage -mx-4 overflow-x-clip px-4 sm:-mx-6 sm:px-6"
+      >
+        <div
+          class="guides-cards-parallax__track grid gap-5 sm:grid-cols-2 md:flex md:w-max md:max-w-none md:grid-cols-none md:flex-nowrap md:gap-5 md:pr-1 lg:gap-6"
+        >
       {
         items.map((article) => {
           const cat = categoryStyles[article.data.hubCategory];
           return (
             <article
-              class={`surface-lift scroll-card-depth scroll-card-motion h-full rounded-2xl border border-border/50 bg-card transition-colors hover:border-border hover:shadow-sm ${cat.ring}`}
+              class={`surface-lift scroll-card-depth scroll-card-motion h-full rounded-2xl border border-border/50 bg-card transition-colors hover:border-border hover:shadow-sm md:min-w-[min(100%,17.5rem)] md:max-w-[20rem] md:shrink-0 lg:min-w-[18rem] ${cat.ring}`}
             >
               <a
                 href={`/conteudos/${article.id}`}
@@ -195,6 +201,8 @@ const categoryStyles = {
           );
         })
       }
+        </div>
+      </div>
     </div>
 
     <div class="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
