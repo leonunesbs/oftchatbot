@@ -232,6 +232,60 @@
   }
 }
 
+/** Entrada suave para heros estáticos (ex.: lentes premium); omitida com prefers-reduced-motion. */
+@keyframes content-rise-soft {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lentes-hero-rise {
+    animation: content-rise-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lentes-hero-rise-delay-1 {
+    animation-delay: 0.07s;
+  }
+
+  .lentes-hero-rise-delay-2 {
+    animation-delay: 0.14s;
+  }
+
+  .lentes-hero-rise-delay-3 {
+    animation-delay: 0.21s;
+  }
+
+  .lentes-hero-rise-delay-4 {
+    animation-delay: 0.28s;
+  }
+
+  .lentes-hero-rise-delay-5 {
+    animation-delay: 0.35s;
+  }
+
+  .lentes-hero-card-float {
+    animation: content-rise-soft 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lentes-hero-card-float-delay-1 {
+    animation-delay: 0.1s;
+  }
+
+  .lentes-hero-card-float-delay-2 {
+    animation-delay: 0.18s;
+  }
+
+  .lentes-hero-card-float-delay-3 {
+    animation-delay: 0.26s;
+  }
+}
+
 @layer utilities {
   /**
    * Reduz memória e trabalho de pintura: o navegador pode omitir conteúdo fora da viewport.

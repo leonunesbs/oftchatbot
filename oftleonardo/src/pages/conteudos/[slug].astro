@@ -110,6 +110,16 @@ const articleSection =
 const isPresbiopia = article.id === "presbiopia";
 const isLentesPremium = article.id === "lentes-premium-catarata";
 const hasScrollHero = isPresbiopia || isLentesPremium;
+
+const scheduleSectionTitle = isLentesPremium
+  ? "Planeje a lente da catarata na consulta"
+  : "Agende sua Consulta Oftalmológica";
+const scheduleSectionDescription = isLentesPremium
+  ? "Discuta multifocal, EDoF, tórica e expectativas realistas com base nos seus exames. Agende online com horário escolhido ou fale pelo WhatsApp — sem compromisso com um modelo de lente antes da avaliação."
+  : `Tem dúvidas sobre ${condition.toLowerCase()}? Agende uma consulta oftalmológica para avaliação completa e orientação personalizada.`;
+const scheduleWhatsappTemplate = isLentesPremium
+  ? "Olá! Gostaria de agendar consulta para avaliar opções de lente intraocular (multifocal, EDoF, tórica) na cirurgia de catarata em {city}."
+  : `Olá! Gostaria de agendar uma consulta sobre ${condition.toLowerCase()} em {city}.`;
 ---
 
 <Layout
@@ -210,9 +220,9 @@ const hasScrollHero = isPresbiopia || isLentesPremium;
       <ScheduleConsultationSection
         class="mt-10"
         id="agendar"
-        title="Agende sua Consulta Oftalmológica"
-        description={`Tem dúvidas sobre ${condition.toLowerCase()}? Agende uma consulta oftalmológica para avaliação completa e orientação personalizada.`}
-        whatsappMessageTemplate={`Olá! Gostaria de agendar uma consulta sobre ${condition.toLowerCase()} em {city}.`}
+        title={scheduleSectionTitle}
+        description={scheduleSectionDescription}
+        whatsappMessageTemplate={scheduleWhatsappTemplate}
         triggerLabel="Agendar consulta"
         triggerGtmId={`gtm-artigo-${article.id}-schedule-whatsapp`}
         agendaLinkGtmId={`gtm-artigo-${article.id}-schedule-agenda`}
@@ -231,7 +241,7 @@ const hasScrollHero = isPresbiopia || isLentesPremium;
         {
           relatedArticles.length > 0 && (
             <div class="space-y-3">
-              <h3 class="text-sm font-semibold text-foreground">Conteúdos relacionados</h3>
+              <h3 class="text-sm font-semibold text-foreground">Leia também</h3>
               <div class="flex flex-wrap gap-2">
                 {relatedArticles.map((related) => (
                   <a
@@ -245,19 +255,6 @@ const hasScrollHero = isPresbiopia || isLentesPremium;
             </div>
           )
         }
-
-        <nav
-          aria-label="Links relacionados"
-          class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground"
-        >
-          <a href="/" class="transition-colors hover:text-foreground">Página Inicial</a>
-          <a href="/conteudos" class="transition-colors hover:text-foreground">Conteúdos</a>
-          <a href="/#atuacao" class="transition-colors hover:text-foreground">Especialidades</a>
-          <a href="/#atendimento" class="transition-colors hover:text-foreground">Cidades de Atendimento</a>
-          <a href="/acuidade-visual" class="transition-colors hover:text-foreground">Teste de Acuidade Visual</a>
-          <a href="/tela-de-amsler" class="transition-colors hover:text-foreground">Tela de Amsler</a>
-          <a href="/calculadora-olho-seco" class="transition-colors hover:text-foreground">Calculadora de olho seco</a>
-        </nav>
       </footer>
     </article>
   </main>

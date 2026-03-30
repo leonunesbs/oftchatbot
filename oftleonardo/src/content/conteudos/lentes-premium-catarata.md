@@ -1,6 +1,6 @@
 ---
 title: "Lentes premium na catarata: multifocais, EDoF, tóricas e como escolher"
-description: "Guia sobre lentes intraoculares na cirurgia de catarata: monofocais, multifocais ou trifocais, profundidade de foco estendida (EDoF), lentes tóricas e o que esperar de nitidez, óculos, halos e adaptação — com linguagem próxima à de fabricantes, para você conversar melhor com o cirurgião."
+description: "Na catarata, a lente intraocular define nitidez, conforto em várias distâncias e quanto você ainda vai precisar de óculos. Entenda multifocais, trifocais, EDoF e tóricas em linguagem clara, compare opções com segurança e prepare perguntas para a consulta — com opção de agendar online no site."
 keywords: "lentes premium catarata, lente intraocular multifocal, lente intraocular trifocal, EDoF catarata, lente intraocular tórica, astigmatismo catarata, independência óculos catarata, halos lentes multifocais, oftalmologista catarata Fortaleza"
 condition: "Catarata — escolha de lente intraocular"
 procedure: "Cirurgia de catarata com implante de lente intraocular (incluindo opções premium quando indicadas)"
@@ -82,7 +82,7 @@ Mesmo com LIO de alto desempenho, pode ser necessário **óculos** em algumas ta
 
 ## Biomaterial e entrega cirúrgica (contexto)
 
-Fabricantes descrevem LIOs em **acrílico hidrofóbico** ou **hidrofílico**, com diferentes hápticas (por exemplo C-loop, quatro pontas) e opções **pré-carregadas** em injetores — tudo isso influencia manuseio cirúrgico e estabilidade, mas **não substitui** a conversa sobre o **desenho óptico** (monofocal vs. multifocal vs. EDoF vs. tórica). Na consulta, o foco do paciente costuma ser **resultado visual e expectativas**, não o nome do polímero.
+Fabricantes descrevem LIOs em **acrílico hidrofóbico** ou **hidrofílico**, com diferentes hápticos (por exemplo C-loop, quatro pontas) e opções **pré-carregadas** em injetores — tudo isso influencia manuseio cirúrgico e estabilidade, mas **não substitui** a conversa sobre o **desenho óptico** (monofocal vs. multifocal vs. EDoF vs. tórica). Na consulta, o foco do paciente costuma ser **resultado visual e expectativas**, não o nome do polímero.
 
 ## Relação com cirurgia refrativa prévia
 
@@ -91,3 +91,11 @@ Se você já fez **LASIK/PRK/SMILE** ([cirurgia refrativa](/conteudos/cirurgia-r
 ## Quando discutir lentes premium?
 
 Na avaliação da [catarata](/conteudos/catarata) ou quando a cirurgia já está indicada pelo impacto na qualidade de vida. Na consulta, o oftalmologista pode explicar quais famílias de lente fazem sentido para **seus exames e objetivos**, sem promessa genérica de resultado.
+
+## Próximo passo: escolha alinhada ao seu olho e à sua rotina
+
+A decisão de lente combina **exames** (retina, córnea, astigmatismo, medidas biométricas) com **prioridades pessoais**: direção à noite, leitura prolongada, telas, tolerância a fenômenos de luz. Quanto mais claras forem suas metas, mais objetiva fica a conversa sobre monofocal, multifocal, EDoF ou tórica — inclusive em combinações quando indicadas.
+
+**Na prática:** traga dúvidas sobre óculos após a cirurgia, halos e contraste; se já usou lente de contato ou fez cirurgia refrativa, leve relatórios antigos. Isso encurta o caminho entre informação e um plano que faça sentido para você.
+
+[Agende consulta oftalmológica online](/agendamento-online) (data e horário à sua escolha) ou role até [a seção de contato no final desta página](#agendar) para falar por WhatsApp ou abrir a agenda parceira.
