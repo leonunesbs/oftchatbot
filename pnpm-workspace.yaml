@@ -1,6 +1,7 @@
 packages:
   - "oftagenda"
   - "oftleonardo"
+  - "oftbackend"
   - "oftchatbot"
   - "psiqdenise"
 

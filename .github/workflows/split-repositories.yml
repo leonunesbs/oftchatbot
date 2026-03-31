@@ -18,6 +18,7 @@ jobs:
       oftleonardo: ${{ steps.filter.outputs.oftleonardo }}
       oftchatbot: ${{ steps.filter.outputs.oftchatbot }}
       psiqdenise: ${{ steps.filter.outputs.psiqdenise }}
+      oftbackend: ${{ steps.filter.outputs.oftbackend }}
     steps:
       - name: Checkout monorepo
         uses: actions/checkout@v5.0.0
@@ -40,6 +41,9 @@ jobs:
               - 'pnpm-workspace.yaml'
             psiqdenise:
               - 'psiqdenise/**'
+              - 'pnpm-workspace.yaml'
+            oftbackend:
+              - 'oftbackend/**'
               - 'pnpm-workspace.yaml'
 
   split-oftagenda:
@@ -133,3 +137,26 @@ jobs:
             exit 1
           fi
           bash scripts/split-package-push.sh psiqdenise leonunesbs/psiqdenise
+
+  split-oftbackend:
+    name: Sync oftbackend repository
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.oftbackend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4.2.0
+        with:
+          run_install: false
+      - name: Split subtree and push
+        env:
+          TARGET_TOKEN: ${{ secrets.OFTBACKEND_REPO_TOKEN }}
+        run: |
+          if [ -z "${TARGET_TOKEN}" ]; then
+            echo "Missing secret OFTBACKEND_REPO_TOKEN"
+            exit 1
+          fi
+          bash scripts/split-package-push.sh oftbackend leonunesbs/oftbackend
