@@ -7,3 +7,11 @@
 [submodule "psiqdenise"]
 	path = psiqdenise
 	url = https://github.com/leonunesbs/psiqdenise.git
+[submodule "oftbackend"]
+	path = oftbackend
+	url = https://github.com/leonunesbs/oftbackend.git
+	branch = main
+[submodule "oftleonardo"]
+	path = oftleonardo
+	url = https://github.com/leonunesbs/oftleonardo.git
+	branch = main

@@ -1,8 +1,0 @@
-# Leonardo Nunes — oftalmologia
-
-Este arquivo aponta para a documentação canônica do site para assistentes e mecanismos de busca semânticos.
-
-- Documento completo (estrutura, páginas e artigos): https://oftleonardo.com.br/llms.txt
-- Resumo numa linha: https://oftleonardo.com.br/llm.txt
-- Sitemap: https://oftleonardo.com.br/sitemap.xml
-- Robots: https://oftleonardo.com.br/robots.txt
