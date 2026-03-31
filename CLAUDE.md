@@ -39,7 +39,7 @@ Any destructive user action (delete, clear, reset, irreversible state change) mu
 
 This is a pnpm monorepo (`oftcore`). **Primary products:** `oftagenda`, `oftleonardo`, and `psiqdenise` (they drive root `pnpm dev`, `pnpm build`, `pnpm lint`, and `pnpm type-check`). **`oftchatbot/`** is kept as an **MVP** (WhatsApp/Lumi); validate it explicitly with `pnpm build:chatbot`, `pnpm lint:chatbot`, and `pnpm type-check:chatbot` from the monorepo root when you change it.
 
-- **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + Stripe. Runs on port 3001 by default.
+- **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + pagamentos online (**Stripe** e **Pagar.me** em paralelo, escolha por deploy). Runs on port 3001 by default.
 - **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Booking via iframe embed of oftagenda (`/agendamento-online` → `/embed/agendar`).
 - **`psiqdenise/`** — Psychologist site (Astro). Same stack family as oftleonardo; uses its own content and port (see `psiqdenise/package.json`).
 - **`oftchatbot/`** — Clinic chatbot app (Next.js). Runs on port 3030 by default. MVP scope; not part of the default monorepo build/lint/type-check pipeline.
@@ -118,7 +118,8 @@ pnpm format           # oxfmt --write
 - **Next.js 16** App Router, React 19, TypeScript, Tailwind v4, shadcn/ui
 - **Convex** — real-time database and backend (queries/mutations in `convex/`)
 - **Clerk** — authentication; roles stored in `publicMetadata.role` (`"member"` | `"admin"`)
-- **Stripe** — payments (webhook at `/api/stripe/webhook`)
+- **Stripe** — checkout `POST /api/stripe/checkout`; webhook `POST /api/stripe/webhook` (assinatura `stripe-signature`).
+- **Pagar.me** — SDK [`pagarmeapisdklib`](https://github.com/pagarme/pagarme-nodejs-sdk); checkout hospedado via pedido + `payment_method: checkout`; rota `POST /api/pagarme/checkout` (mesmo contrato de resposta que Stripe: `{ ok: true, url }`); webhook `POST /api/pagarme/webhook`. Provedor ativo no cliente: `NEXT_PUBLIC_PAYMENT_PROVIDER` (`stripe` \| `pagarme`).
 - **Zod v4** — validation; `zod/v4` import path required (not `zod`)
 
 ### Key directories
@@ -143,7 +144,7 @@ pnpm format           # oxfmt --write
 | `/status` | Connectivity diagnostics |
 
 ### Convex schema tables
-`event_types`, `availabilities`, `availability_overrides`, `reservations`, `payments`, `stripe_webhook_events`, `patients`, `appointments`, `appointment_details`, `appointment_events`
+`event_types`, `availabilities`, `availability_overrides`, `reservations`, `payments` (inclui `provider` opcional `stripe` \| `pagarme`, `lastPagarmeEventId`), `stripe_webhook_events`, `pagarme_webhook_events`, `patients`, `appointments`, `appointment_details`, `appointment_events`
 
 ### Admin role guard
 Admin access is gated by `requireAdmin()` from `src/lib/access.ts`, which reads `publicMetadata.role` from Clerk. In Convex functions, `convex/admin.ts` re-reads the role from JWT claims.
@@ -154,9 +155,30 @@ Admin access is gated by `requireAdmin()` from `src/lib/access.ts`, which reads 
 
 ### Environment variables (oftagenda)
 Required: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CONVEX_URL`
-Optional: `CONVEX_URL`, `CONVEX_DEPLOY_KEY`, `CLERK_FRONTEND_API_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+
+**Pagamentos — escolha do provedor (build / deploy):**
+- `NEXT_PUBLIC_PAYMENT_PROVIDER` — `stripe` (padrão) ou `pagarme`. Afeta checkout inicial, retentativa no painel e remarcação paga.
+
+**Stripe (quando usado):**
+- `STRIPE_SECRET_KEY` — obrigatória se `NEXT_PUBLIC_PAYMENT_PROVIDER=stripe` (ou padrão) e fluxo de checkout Stripe estiver ativo.
+- `STRIPE_WEBHOOK_SECRET` — verificação do webhook Stripe.
+
+**Pagar.me (quando `NEXT_PUBLIC_PAYMENT_PROVIDER=pagarme`):**
+- `PAGARME_SECRET_KEY` — chave secreta (`sk_test_…` / `sk_…`); Basic Auth na API: usuário = secret, senha vazia (conforme [documentação de autenticação](https://docs.pagar.me/reference/autentica%C3%A7%C3%A3o-2)).
+- `PAGARME_WEBHOOK_BASIC_USER` e `PAGARME_WEBHOOK_BASIC_PASSWORD` — opcionais; se **ambos** estiverem definidos, `POST /api/pagarme/webhook` exige o mesmo Basic Auth configurado no painel da Pagar.me. Se omitidos, o webhook não valida Basic (evitar em produção sem outra proteção).
+- Opcionais para checkout (placeholder de customer / endereço de cobrança no pedido): `PAGARME_CHECKOUT_PLACEHOLDER_DOCUMENT` (CPF só dígitos), `PAGARME_CHECKOUT_BILLING_STREET`, `PAGARME_CHECKOUT_BILLING_NUMBER`, `PAGARME_CHECKOUT_BILLING_ZIP`, `PAGARME_CHECKOUT_BILLING_NEIGHBORHOOD`, `PAGARME_CHECKOUT_BILLING_CITY`, `PAGARME_CHECKOUT_BILLING_STATE`, `PAGARME_CHECKOUT_BILLING_LINE1`, `PAGARME_CHECKOUT_BILLING_LINE2`.
+
+Outras opcionais: `CONVEX_URL`, `CONVEX_DEPLOY_KEY`, `CLERK_FRONTEND_API_URL`.
 
 Build auto-deploys Convex when `CONVEX_DEPLOY_KEY` is set.
+
+### Webhooks de pagamento (oftagenda)
+| Provedor | URL (HTTPS) | Observação |
+|----------|-------------|------------|
+| Stripe | `https://<domínio>/api/stripe/webhook` | Eventos já tratados no código (ex.: `checkout.session.completed`, expirado, falha, reembolso). |
+| Pagar.me | `https://<domínio>/api/pagarme/webhook` | Cadastrar no painel: `order.paid`, `order.payment_failed`, `order.canceled`, `checkout.canceled`, `charge.refunded`. Lista geral: [eventos de webhook](https://docs.pagar.me/docs/webhooks). |
+
+Rotas de webhook são públicas no middleware (`src/proxy.ts`) para não exigir sessão Clerk.
 
 ## oftleonardo architecture
 

@@ -1,0 +1,33 @@
+---
+description: Pagamentos oftagenda — Stripe + Pagar.me, env e webhooks
+globs: oftagenda/**/*
+alwaysApply: false
+---
+
+# Pagamentos (oftagenda)
+
+- Dois provedores em **paralelo**; um ativo por deploy via **`NEXT_PUBLIC_PAYMENT_PROVIDER`**: `stripe` (padrão) ou `pagarme`.
+- **Checkout:** mesma UX — `POST` autenticado retorna `{ ok: true, url }` para redirecionar ao provedor.
+  - Stripe: [`oftagenda/src/app/api/stripe/checkout/route.ts`](oftagenda/src/app/api/stripe/checkout/route.ts)
+  - Pagar.me: [`oftagenda/src/app/api/pagarme/checkout/route.ts`](oftagenda/src/app/api/pagarme/checkout/route.ts) — usa SDK [`pagarmeapisdklib`](https://github.com/pagarme/pagarme-nodejs-sdk) em [`oftagenda/src/lib/pagarme.ts`](oftagenda/src/lib/pagarme.ts) (pedido + `payment_method: checkout`, URL em `checkouts[].paymentUrl`).
+- **UI / retentativa / remarcação paga:** [`checkoutApiPath` / `resolvePublicPaymentProvider`](oftagenda/src/lib/payment-provider.ts) — não fixar só `/api/stripe/checkout`.
+
+## Variáveis de ambiente
+
+| Variável | Uso |
+|---------|-----|
+| `NEXT_PUBLIC_PAYMENT_PROVIDER` | `stripe` ou `pagarme` |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe |
+| `PAGARME_SECRET_KEY` | Pagar.me (Basic: user = chave, password vazio) |
+| `PAGARME_WEBHOOK_BASIC_USER`, `PAGARME_WEBHOOK_BASIC_PASSWORD` | Opcional; se ambos definidos, webhook Pagarme exige Basic Auth |
+| `PAGARME_CHECKOUT_PLACEHOLDER_DOCUMENT` | CPF só dígitos (placeholder do customer na API) |
+| `PAGARME_CHECKOUT_BILLING_*` | Endereço de cobrança no pedido (ver `pagarme.ts`) |
+
+## Webhooks
+
+- **Stripe:** `POST /api/stripe/webhook` — `STRIPE_WEBHOOK_SECRET`.
+- **Pagar.me:** `POST /api/pagarme/webhook` — eventos tratados no código: `order.paid`, `order.payment_failed`, `order.canceled`, `checkout.canceled`, `charge.refunded`.
+
+Dedup: `stripe_webhook_events` e `pagarme_webhook_events`. Reconciliação: `reconcileStripeEvent` / `reconcilePagarmeEvent` em [`oftagenda/convex/stripe.ts`](oftagenda/convex/stripe.ts).
+
+Bypass Clerk em [`oftagenda/src/proxy.ts`](oftagenda/src/proxy.ts) para ambas as URLs de webhook.
