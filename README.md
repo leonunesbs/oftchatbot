@@ -1,158 +1,215 @@
-# oftcore (monorepo)
+# LUMI — Chatbot da Clínica Oft Leonardo (MVP WhatsApp)
 
-Monorepo com os pacotes:
+Pacote **oftchatbot** no monorepo **`oftcore`**: na raiz use `pnpm install`, depois `pnpm dev:chatbot` ou os scripts desta pasta (MVP — validação explícita com `pnpm type-check:chatbot` / `pnpm build:chatbot` na raiz).
 
-- **`oftagenda`** — agendamento (Next.js + Convex + Clerk)
-- **`oftleonardo`** — site institucional (Astro)
-- **`psiqdenise`** — site da psicóloga (Astro)
-- **`oftbackend`** — API Node.js (Fastify) para responsabilidades server-side ligadas ao `oftagenda`; Convex continua como fonte de verdade
-- **`oftchatbot`** — chatbot / CRM WhatsApp (Next.js, MVP)
+LUMI é o chatbot da clínica `oftleonardo.com.br`, implementado em modo clássico (sem LLM), com foco em:
 
-## Estrutura
+- responder dúvidas principais da clínica
+- apoiar agendamento de consulta
+- detectar sinais de urgência oftalmológica
+- encaminhar para atendimento humano quando necessário
 
-```text
-.
-├── oftagenda
-├── oftleonardo
-├── psiqdenise
-├── oftbackend
-├── oftchatbot
-├── package.json
-└── pnpm-workspace.yaml
-```
+O MVP atual processa mensagens recebidas no WhatsApp via WAHA.
 
-## Requisitos
+## Escopo funcional
 
-- Node.js 20+
-- pnpm 10+ (versão fixada em `package.json` → `packageManager`)
+### 1) Informações gerais
 
-## Instalação
+- horário de atendimento
+- local e como chegar
+- política de valores (texto informativo)
+- dúvidas de serviços oftalmológicos (nível educativo)
 
-Na raiz do repositório:
+### 2) Triagem de urgência
+
+Se detectar sinais como dor ocular intensa, perda súbita de visão, trauma ocular, flashes/sombras ou produto químico no olho, a LUMI:
+
+- orienta pronto atendimento imediato
+- interrompe fluxo de agendamento
+
+### 3) Agendamento
+
+A LUMI coleta progressivamente:
+
+- como a pessoa prefere ser chamada
+- telefone
+- e-mail (opcional)
+- local
+- tipo de consulta
+- preferência de data/turno
+
+Regras:
+
+- captura múltiplas entidades na mesma frase
+- pergunta apenas o que faltar
+- confirma resumo antes da conclusão
+- usa resposta curta e natural (uma pergunta principal por mensagem)
+
+### 4) Reagendamento/cancelamento e handoff
+
+Situações encaminhadas para humano via WhatsApp:
+
+- pedido explícito por atendente
+- reagendamento/cancelamento
+- pergunta específica de preço/convênio
+- fora de escopo
+- falhas de validação persistentes
+
+## Fora do escopo clínico
+
+A LUMI não:
+
+- diagnostica
+- prescreve tratamento
+- interpreta exame individual
+- dá conduta médica personalizada
+
+## LGPD e privacidade
+
+- coleta mínima para agendamento
+- aviso padrão: `Seus dados serão usados apenas para agendamento.`
+- telemetria sem conteúdo sensível de conversa
+- timezone operacional: `America/Fortaleza`
+
+## Arquitetura implementada
+
+### Núcleo LUMI
+
+Arquivos em `src/lib/lumi`:
+
+- `types.ts` — tipos de intent, estado, sessão e telemetria
+- `patterns.ts` — normalização e padrões de termos
+- `intents.ts` — classificador por regras com prioridade
+- `entities.ts` — extração simples de entidades (nome, telefone, email, local, tipo, data/turno)
+- `guardrails.ts` — bloqueio de conduta médica personalizada
+- `copy.ts` — mensagens da persona LUMI
+- `state-machine.ts` — orquestração do fluxo completo
+- `telemetry.ts` — eventos não sensíveis
+- `config/clinic.ts` — dados configuráveis da clínica
+- `integrations/oftagenda.ts` — adapter de agendamento com link do oftagenda
+
+### Persistência de estado conversacional
+
+Foi adicionada a tabela `lumi_sessions` no SQLite usado por `contact-profile`, com:
+
+- estado da conversa
+- entidades coletadas (JSON)
+- falhas de validação
+- status de handoff
+- último intent e timestamps
+
+Arquivo: `src/lib/contact-profile/store.ts`.
+
+### Integração com WAHA
+
+No webhook `POST /api/waha/webhook`, mensagens de usuário elegíveis são processadas pela máquina de estados LUMI e a resposta é enviada com o domínio de chat já existente.
+
+Arquivo: `src/app/api/waha/webhook/route.ts`.
+
+## API do MVP
+
+### `GET /api/slots`
+
+Consulta horários por:
+
+- `location`
+- `consultationType`
+- `date` (opcional)
+- `period` (opcional: `manha|tarde|noite`)
+
+Resposta:
+
+- `slots`: lista de opções
+- `count`: total
+
+Arquivo: `src/app/api/slots/route.ts`.
+
+### `POST /api/book`
+
+Confirma agendamento com:
+
+- `slotId`
+- `fullName`
+- `phone`
+- `email` (opcional)
+- `location`
+- `consultationType`
+
+Resposta:
+
+- `ok`
+- `confirmation.protocol`
+- `confirmation.source` (`oftagenda_link|mock`)
+
+Arquivo: `src/app/api/book/route.ts`.
+
+## Variáveis de ambiente
+
+Além das variáveis WAHA, o MVP usa um link-base do oftagenda:
+
+- `OFTAGENDA_BOOKING_URL` (opcional, padrão: `https://agenda.oftleonardo.com.br/agendar`)
+- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` (opcional)
+- `STRIPE_PRIVATE_KEY` (opcional)
+
+A Lumi monta o link de agendamento com parâmetros mínimos (nome, telefone, e-mail quando houver, local e tipo de consulta) e envia no WhatsApp para a pessoa concluir.
+
+Para webhook automático da sessão WAHA, você também pode configurar:
+
+- `WAHA_WEBHOOK_URL` (opcional, padrão: `http://host.docker.internal:3030/api/waha/webhook`)
+
+### Assistente Fox (OpenAI wrap da Lumi)
+
+Para manter o fluxo determinístico da Lumi e apenas reescrever a resposta com tom conversacional da Fox:
+
+- `OPENAI_API_KEY=...`
+- `FOX_OPENAI_MODEL=gpt-4.1-nano` (baixo custo)
+
+A escolha entre Lumi/Fox é feita pela interface do CRM, por botões no header do chat.
+
+Opcionais para custo/latência:
+
+- `OPENAI_BASE_URL` (default: `https://api.openai.com/v1`)
+- `FOX_MAX_OUTPUT_TOKENS` (default: `90`)
+- `FOX_REQUEST_TIMEOUT_MS` (default: `4000`)
+
+Se a API falhar, timeout ocorrer ou Fox não estiver habilitada, o sistema usa automaticamente a resposta determinística original da Lumi.
+
+## Telemetria
+
+Eventos:
+
+- `intent_detected`
+- `scheduling_started`
+- `scheduling_completed`
+- `urgent_triage_triggered`
+- `handoff_triggered`
+- `fallback_hit`
+
+Arquivo: `src/lib/lumi/telemetry.ts`.
+
+## Testes de diálogo (30 cenários)
+
+Arquivo: `tests/lumi/dialogs.spec.ts`.
+
+Cobertura:
+
+- sinônimos e erros de digitação
+- múltiplas informações na mesma frase
+- urgência
+- fuga de fluxo e retomada
+- pedido direto de humano
+- confirmações curtas (`sim`, `ok`)
+
+## Rodando localmente
 
 ```bash
-pnpm install
+pnpm dev
 ```
 
-## Comandos na raiz
-
-### Desenvolvimento
-
-| Comando | Descrição |
-|--------|-----------|
-| `pnpm dev` | `oftagenda` + `oftleonardo` + `psiqdenise` em paralelo (scripts `dev:web` de cada um) |
-| `pnpm dev:all:full` | Mesmos três pacotes com scripts `dev` completos (ex.: `oftagenda` com Convex) |
-| `pnpm dev:with-chatbot` | Três acima + `oftchatbot` |
-| `pnpm dev:with-backend` | `oftagenda` + `oftleonardo` + `oftbackend` + `psiqdenise` |
-| `pnpm dev:full-stack` | Inclui também `oftchatbot` |
-| `pnpm dev:agenda` | Só `oftagenda` (Next.js; sem subir Convex sozinho pelo script do pacote) |
-| `pnpm dev:agenda:full` | `oftagenda` com Next.js + Convex |
-| `pnpm dev:leonardo` | Só `oftleonardo` |
-| `pnpm dev:psiqdenise` | Só `psiqdenise` |
-| `pnpm dev:chatbot` | Só `oftchatbot` |
-
-### Build, lint e tipos
-
-| Comando | Escopo |
-|--------|--------|
-| `pnpm build` | `oftagenda`, `oftleonardo`, `psiqdenise` |
-| `pnpm build:agenda` / `build:leonardo` / `build:psiqdenise` / `build:chatbot` / `build:backend` | Pacote único |
-| `pnpm lint` | `oftagenda`, `oftleonardo`, `psiqdenise` |
-| `pnpm lint:chatbot` / `pnpm lint:backend` | Pacote único |
-| `pnpm type-check` | `oftagenda`, `oftleonardo`, `psiqdenise` |
-| `pnpm type-check:chatbot` / `pnpm type-check:backend` | Pacote único |
-| `pnpm test:backend` | Testes do `oftbackend` |
-
-### oftchatbot (MVP)
+Para validação de tipos:
 
 ```bash
-pnpm start:chatbot
-pnpm test:chatbot
-pnpm type-check:chatbot
-pnpm lint:chatbot
-pnpm lint:fix:chatbot
-pnpm format:chatbot
-pnpm format:check:chatbot
-pnpm waha:init
-pnpm waha:up
-pnpm waha:down
-pnpm waha:logs
-pnpm waha:pull
-pnpm waha:smoke
+pnpm type-check
 ```
 
-### Outros
-
-```bash
-pnpm preview:leonardo
-```
-
-## Portas usadas no desenvolvimento
-
-| Pacote | URL padrão |
-|--------|------------|
-| `oftagenda` | `http://localhost:3001` (`NEXT_PORT` pode sobrescrever) |
-| `oftleonardo` | `http://localhost:4331` (`PORT`) |
-| `psiqdenise` | `http://localhost:4331` (`PORT`) — ao rodar `oftleonardo` e `psiqdenise` juntos, use `PORT` diferente em um deles |
-| `oftchatbot` | `http://localhost:3030` |
-| `oftbackend` | `http://localhost:8080` (`PORT` no `.env`) |
-| Convex (dev, dentro do `oftagenda`) | porta padrão do CLI Convex |
-
-## CI
-
-- **`split-repositories.yml`** — após push em `main`, sincroniza pastas do monorepo com repositórios espelho (`git subtree split`), quando há mudanças nos paths correspondentes (ou em `workflow_dispatch`).
-- **`oftbackend.yml`** — em PR/push que alteram `oftbackend/` (ou lock/workspace), executa lint, typecheck, Spectral no OpenAPI, testes e build do `oftbackend`.
-
-## Deploy recomendado (ex.: Vercel)
-
-Cada app costuma ser um projeto separado, com **Root Directory** apontando para a pasta do pacote (`oftagenda`, `oftleonardo`, `psiqdenise`, etc.).
-
-- Variáveis de ambiente ficam isoladas por projeto (Clerk/Convex no `oftagenda`, analytics no site, etc.).
-- Builds menores e rollback independente.
-
-Sugestão de comandos:
-
-- Install: `pnpm install --frozen-lockfile` (no monorepo) ou, no repositório espelho após split, conforme o lock gerado pelo CI.
-- Build (exemplos): `pnpm --filter ./oftagenda build`, `pnpm --filter ./oftleonardo build`.
-
-## Espelhamento no GitHub (subtree split)
-
-O workflow **`.github/workflows/split-repositories.yml`** publica alterações no monorepo para repositórios standalone (deploys costumam apontar para esses repos).
-
-| Pasta | Repositório de destino | Secret (PAT fine-grained recomendado) |
-|-------|-------------------------|--------------------------------------|
-| `oftagenda/` | `leonunesbs/oftagenda` | `OFTAGENDA_REPO_TOKEN` |
-| `oftleonardo/` | `leonunesbs/oftleonardo` | `OFTLEONARDO_REPO_TOKEN` |
-| `oftchatbot/` | `leonunesbs/oftchatbot` | `OFTCHATBOT_REPO_TOKEN` |
-| `psiqdenise/` | `leonunesbs/psiqdenise` | `PSIQDENISE_REPO_TOKEN` |
-| `oftbackend/` | `leonunesbs/oftbackend` | `OFTBACKEND_REPO_TOKEN` |
-
-Permissão mínima típica do token: **Contents: Read and write** apenas no repositório de destino.
-
-Fluxo:
-
-1. Desenvolver e commitar **só no monorepo** `oftcore` (raiz).
-2. Push para `main` dispara os jobs quando os paths mudam (ou use **Run workflow** manualmente).
-3. Não dependa de push manual aos repos espelho para manter o histórico alinhado ao monorepo.
-
-Detalhes adicionais: `CLAUDE.md` e regras em `.cursor/rules/`.
-
-## SEO, mídia paga e mensuração
-
-### Eventos padronizados (GTM/GA4/Meta/Ads)
-
-- `select_city`
-- `start_booking`
-- `submit_booking`
-- `booking_confirmed`
-
-### Variáveis de ambiente sugeridas
-
-- **oftagenda** (`NEXT_PUBLIC_*`): `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GOOGLE_ADS_ID`
-- **oftleonardo** (`PUBLIC_*`): `PUBLIC_GA4_ID`, `PUBLIC_GTM_ID`, `PUBLIC_META_PIXEL_ID`, `PUBLIC_GOOGLE_ADS_ID`
-
-### Governança (LGPD)
-
-- Não enviar PII em eventos de analytics.
-- Evitar query params com dados sensíveis em URLs públicas.
-- Separar segredos por app e ambiente (dev/staging/prod).
+Observação: atualmente o projeto possui erros pré-existentes em hooks legados não relacionados ao LUMI.
