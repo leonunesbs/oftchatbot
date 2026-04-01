@@ -33,6 +33,7 @@
     "format:check:chatbot": "pnpm --filter ./oftchatbot format:check",
     "type-check": "pnpm -r --if-present --filter ./oftagenda --filter ./oftleonardo --filter ./psiqdenise type-check",
     "type-check:backend": "pnpm --filter ./oftbackend type-check",
+    "test:backend": "pnpm --filter ./oftbackend test",
     "type-check:chatbot": "pnpm --filter ./oftchatbot type-check",
     "test:chatbot": "pnpm --filter ./oftchatbot test",
     "waha:init": "pnpm --filter ./oftchatbot waha:init",
