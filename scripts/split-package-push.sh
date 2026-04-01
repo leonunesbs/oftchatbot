@@ -48,4 +48,31 @@ else
   echo "No changes detected in ${PREFIX} pnpm files"
 fi
 
-git push --force "https://x-access-token:${TARGET_TOKEN}@github.com/${TARGET_REPO}.git" "${BRANCH_NAME}:main"
+# Point local `main` at the split tip so we push main→main (avoids a remote split-<pkg>
+# branch being newer than main if something ever created it).
+git branch -f main HEAD
+git checkout main
+
+GIT_PUSH_URL="https://x-access-token:${TARGET_TOKEN}@github.com/${TARGET_REPO}.git"
+REMOTE_MAIN="refs/heads/main"
+
+echo "Pushing refs/heads/main -> ${REMOTE_MAIN} on ${TARGET_REPO}"
+git push --force "${GIT_PUSH_URL}" "refs/heads/main:${REMOTE_MAIN}"
+
+# Drop stray split-* branch on the mirror so only main carries the export history.
+if git ls-remote "${GIT_PUSH_URL}" "refs/heads/${BRANCH_NAME}" | grep -q .; then
+  echo "Deleting stale refs/heads/${BRANCH_NAME} on ${TARGET_REPO}"
+  git push "${GIT_PUSH_URL}" --delete "${BRANCH_NAME}"
+fi
+
+LOCAL_TIP="$(git rev-parse main)"
+REMOTE_TIP="$(git ls-remote "${GIT_PUSH_URL}" "${REMOTE_MAIN}" | awk '{print $1}')"
+if [[ -z "${REMOTE_TIP}" ]]; then
+  echo "ERROR: could not read ${REMOTE_MAIN} on ${TARGET_REPO} after push"
+  exit 1
+fi
+if [[ "${LOCAL_TIP}" != "${REMOTE_TIP}" ]]; then
+  echo "ERROR: ${REMOTE_MAIN} (${REMOTE_TIP}) does not match local main (${LOCAL_TIP})"
+  exit 1
+fi
+echo "OK: ${TARGET_REPO}@${REMOTE_MAIN} = ${LOCAL_TIP}"
