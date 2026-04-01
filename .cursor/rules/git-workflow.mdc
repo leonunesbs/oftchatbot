@@ -8,7 +8,7 @@ alwaysApply: true
 ## Fonte única e propagação
 
 - **Única fonte de verdade no Git:** o repositório **`oftcore`** (commits e pushes a partir da raiz do monorepo).
-- **Não** faça `git commit` nem `git push` dentro de `oftagenda/`, `oftleonardo/`, `oftchatbot/` ou `psiqdenise/` como repositórios separados (incluindo remotes `leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`). Alterações nesses produtos entram como pastas no `oftcore`.
+- **Não** faça `git commit` nem `git push` dentro de `oftagenda/`, `oftleonardo/`, `oftchatbot/`, `psiqdenise/` ou `oftbackend/` como repositórios separados (incluindo remotes `leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`, `oftbackend`). Alterações nesses produtos entram como pastas no `oftcore`.
 - **Propagação** para os repositórios standalone é **somente** via `.github/workflows/split-repositories.yml` (script `scripts/split-package-push.sh`) após push para `main` no `oftcore`. Não conte com push manual aos repos filhos para manter histórico alinhado.
 - **Submódulos:** não misture submódulos Git com o fluxo do monorepo. A fonte de verdade são as pastas versionadas no `oftcore`; o espelho para `leonunesbs/*` é só o subtree split no CI. Para migrar de `.gitmodules` para árvore normal (recomendado), use `bash scripts/submodules-to-plain-tree.sh` uma vez (com submódulos inicializados e fetch possível), depois faça um commit na raiz.
 - Se existirem clones aninhados antigos, **não** use push direto ao remote do pacote para “sincronizar”; o fluxo correto é commit na raiz do `oftcore` e deixar o split atualizar o repo destino.

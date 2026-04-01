@@ -2,6 +2,10 @@
 node_modules/
 .pnpm-store/
 
+# package build artifacts (útil também após migração submodule → pasta plana)
+oftbackend/target/
+oftbackend/dist/
+
 # workspace/build caches
 .turbo/
 .cache/

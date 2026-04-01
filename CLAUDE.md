@@ -18,8 +18,8 @@ After completing any task, ask: **"Quer fazer commit e push?"** only when commit
 
 ## Commit/push strategy
 
-- **Single source of truth:** version control for product code happens **only** in `oftcore`. Implement changes under `oftagenda/`, `oftleonardo/`, `oftchatbot/`, `psiqdenise/`, then commit and push from the monorepo root.
-- **Do not** push commits directly to the standalone GitHub repos (`leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`). Those remotes are updated by CI, not by manual pushes from a separate clone.
+- **Single source of truth:** version control for product code happens **only** in `oftcore`. Implement changes under `oftagenda/`, `oftleonardo/`, `oftchatbot/`, `psiqdenise/`, `oftbackend/`, then commit and push from the monorepo root.
+- **Do not** push commits directly to the standalone GitHub repos (`leonunesbs/oftagenda`, `oftleonardo`, `oftchatbot`, `psiqdenise`, `oftbackend`). Those remotes are updated by CI, not by manual pushes from a separate clone.
 - Always run commit/push from the `oftcore` monorepo root.
 - Do not run commit/push directly inside package directories as if they were separate repositories.
 - Propagate package changes through `.github/workflows/split-repositories.yml`, which calls `scripts/split-package-push.sh` to run `git subtree split` and push each package repo after pushes to `main`.
@@ -37,11 +37,12 @@ Any destructive user action (delete, clear, reset, irreversible state change) mu
 
 ## Repository structure
 
-This is a pnpm monorepo (`oftcore`). **Primary products:** `oftagenda`, `oftleonardo`, and `psiqdenise` (they drive root `pnpm dev`, `pnpm build`, `pnpm lint`, and `pnpm type-check`). **`oftchatbot/`** is kept as an **MVP** (WhatsApp/Lumi); validate it explicitly with `pnpm build:chatbot`, `pnpm lint:chatbot`, and `pnpm type-check:chatbot` from the monorepo root when you change it.
+This is a pnpm monorepo (`oftcore`). **Primary products:** `oftagenda`, `oftleonardo`, and `psiqdenise` (they drive root `pnpm dev`, `pnpm build`, `pnpm lint`, and `pnpm type-check`). **`oftchatbot/`** is kept as an **MVP** (WhatsApp/Lumi); validate it explicitly with `pnpm build:chatbot`, `pnpm lint:chatbot`, and `pnpm type-check:chatbot` from the monorepo root when you change it. **`oftbackend/`** is a Fastify API package: use `pnpm build:backend`, `pnpm lint:backend`, `pnpm type-check:backend`, and `pnpm test:backend` when you change it; CI is `.github/workflows/oftbackend.yml`.
 
 - **`oftagenda/`** — Ophthalmology scheduling app. Next.js 16 App Router + Convex + Clerk + pagamentos online (**Stripe** e **Pagar.me** em paralelo, escolha por deploy). Runs on port 3001 by default.
 - **`oftleonardo/`** — Doctor's personal/marketing site. Astro 5 + React + Tailwind CSS v4. Runs on port 4331 by default. Booking via iframe embed of oftagenda (`/agendamento-online` → `/embed/agendar`).
-- **`psiqdenise/`** — Psychologist site (Astro). Same stack family as oftleonardo; uses its own content and port (see `psiqdenise/package.json`).
+- **`psiqdenise/`** — Psychologist site (Astro). Same stack family as oftleonardo; default dev port 4331 — set `PORT` when running alongside `oftleonardo`.
+- **`oftbackend/`** — Node.js (Fastify) API for server-side concerns shared with `oftagenda`; Convex remains source of truth. Default port 8080. OpenAPI in `openapi/openapi.yaml`; `/docs` when running.
 - **`oftchatbot/`** — Clinic chatbot app (Next.js). Runs on port 3030 by default. MVP scope; not part of the default monorepo build/lint/type-check pipeline.
 
 ### Monorepo split & deploy strategy
@@ -54,6 +55,7 @@ On every push to `main`, `.github/workflows/split-repositories.yml` runs paralle
 | `oftleonardo/` | `leonunesbs/oftleonardo` | `OFTLEONARDO_REPO_TOKEN` |
 | `oftchatbot/` | `leonunesbs/oftchatbot` | `OFTCHATBOT_REPO_TOKEN` |
 | `psiqdenise/` | `leonunesbs/psiqdenise` | `PSIQDENISE_REPO_TOKEN` |
+| `oftbackend/` | `leonunesbs/oftbackend` | `OFTBACKEND_REPO_TOKEN` |
 
 Each job also generates a standalone `pnpm-workspace.yaml` and `pnpm-lock.yaml` inside the package directory (extracted from the root workspace config) so the target repo can install dependencies independently. Deployments (Vercel, Convex, etc.) are triggered from those individual repos, not from this monorepo.
 
@@ -69,6 +71,8 @@ Run from the monorepo root (`/Users/leonunesbs/Documents/Github/oftcore.nosync`)
 pnpm dev                  # dev oftagenda + oftleonardo + psiqdenise (parallel)
 pnpm dev:all:full         # same three packages (full dev scripts per package)
 pnpm dev:with-chatbot     # dev + oftchatbot (MVP) alongside the three above
+pnpm dev:with-backend     # oftagenda + oftleonardo + oftbackend + psiqdenise
+pnpm dev:full-stack       # above + oftchatbot
 pnpm dev:all:full:with-chatbot   # full dev scripts including oftchatbot
 pnpm dev:agenda           # only oftagenda (Next.js only, no Convex)
 pnpm dev:agenda:full      # only oftagenda + Convex dev
@@ -76,10 +80,14 @@ pnpm dev:leonardo         # only oftleonardo
 pnpm dev:psiqdenise       # only psiqdenise
 pnpm dev:chatbot          # only oftchatbot
 pnpm build                # build oftagenda + oftleonardo + psiqdenise
+pnpm build:backend        # build oftbackend only
 pnpm build:chatbot        # build oftchatbot only (MVP)
 pnpm lint                 # lint oftagenda + oftleonardo + psiqdenise
+pnpm lint:backend         # lint oftbackend only
 pnpm lint:chatbot         # lint oftchatbot only
 pnpm type-check           # type-check oftagenda + oftleonardo + psiqdenise
+pnpm type-check:backend   # type-check oftbackend only
+pnpm test:backend         # run oftbackend tests
 pnpm type-check:chatbot   # type-check oftchatbot only
 ```
 
@@ -179,6 +187,10 @@ Build auto-deploys Convex when `CONVEX_DEPLOY_KEY` is set.
 | Pagar.me | `https://<domínio>/api/pagarme/webhook` | Cadastrar no painel: `order.paid`, `order.payment_failed`, `order.canceled`, `checkout.canceled`, `charge.refunded`. Lista geral: [eventos de webhook](https://docs.pagar.me/docs/webhooks). |
 
 Rotas de webhook são públicas no middleware (`src/proxy.ts`) para não exigir sessão Clerk.
+
+## oftbackend architecture
+
+Fastify server in `oftbackend/`: JWT validation (Clerk), booking and payment routes, Prometheus metrics, OpenAPI spec (`openapi/openapi.yaml`). Convex URL aligns with `oftagenda`. For cutover from Next-only API routes, follow `oftbackend/docs/cutover-runbook.md` and `oftbackend/docs/observability.md`.
 
 ## oftleonardo architecture
 

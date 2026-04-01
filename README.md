@@ -1,10 +1,12 @@
-# oftcore (Monorepo)
+# oftcore (monorepo)
 
-Monorepo para os projetos:
+Monorepo com os pacotes:
 
-- `oftagenda` (Next.js + Convex)
-- `oftleonardo` (Astro)
-- `oftchatbot` (Next.js)
+- **`oftagenda`** — agendamento (Next.js + Convex + Clerk)
+- **`oftleonardo`** — site institucional (Astro)
+- **`psiqdenise`** — site da psicóloga (Astro)
+- **`oftbackend`** — API Node.js (Fastify) para responsabilidades server-side ligadas ao `oftagenda`; Convex continua como fonte de verdade
+- **`oftchatbot`** — chatbot / CRM WhatsApp (Next.js, MVP)
 
 ## Estrutura
 
@@ -12,6 +14,8 @@ Monorepo para os projetos:
 .
 ├── oftagenda
 ├── oftleonardo
+├── psiqdenise
+├── oftbackend
 ├── oftchatbot
 ├── package.json
 └── pnpm-workspace.yaml
@@ -20,153 +24,118 @@ Monorepo para os projetos:
 ## Requisitos
 
 - Node.js 20+
-- pnpm 10+
+- pnpm 10+ (versão fixada em `package.json` → `packageManager`)
 
 ## Instalação
+
+Na raiz do repositório:
 
 ```bash
 pnpm install
 ```
 
-## Comandos unificados
+## Comandos na raiz
 
-### Rodar tudo junto
+### Desenvolvimento
+
+| Comando | Descrição |
+|--------|-----------|
+| `pnpm dev` | `oftagenda` + `oftleonardo` + `psiqdenise` em paralelo (scripts `dev:web` de cada um) |
+| `pnpm dev:all:full` | Mesmos três pacotes com scripts `dev` completos (ex.: `oftagenda` com Convex) |
+| `pnpm dev:with-chatbot` | Três acima + `oftchatbot` |
+| `pnpm dev:with-backend` | `oftagenda` + `oftleonardo` + `oftbackend` + `psiqdenise` |
+| `pnpm dev:full-stack` | Inclui também `oftchatbot` |
+| `pnpm dev:agenda` | Só `oftagenda` (Next.js; sem subir Convex sozinho pelo script do pacote) |
+| `pnpm dev:agenda:full` | `oftagenda` com Next.js + Convex |
+| `pnpm dev:leonardo` | Só `oftleonardo` |
+| `pnpm dev:psiqdenise` | Só `psiqdenise` |
+| `pnpm dev:chatbot` | Só `oftchatbot` |
+
+### Build, lint e tipos
+
+| Comando | Escopo |
+|--------|--------|
+| `pnpm build` | `oftagenda`, `oftleonardo`, `psiqdenise` |
+| `pnpm build:agenda` / `build:leonardo` / `build:psiqdenise` / `build:chatbot` / `build:backend` | Pacote único |
+| `pnpm lint` | `oftagenda`, `oftleonardo`, `psiqdenise` |
+| `pnpm lint:chatbot` / `pnpm lint:backend` | Pacote único |
+| `pnpm type-check` | `oftagenda`, `oftleonardo`, `psiqdenise` |
+| `pnpm type-check:chatbot` / `pnpm type-check:backend` | Pacote único |
+| `pnpm test:backend` | Testes do `oftbackend` |
+
+### oftchatbot (MVP)
 
 ```bash
-pnpm dev
-pnpm run dev:all:web
-```
-
-Para subir também o Convex do `oftagenda`:
-
-```bash
-pnpm run dev:all:full
-```
-
-### Rodar individualmente
-
-```bash
-pnpm run dev:agenda
-pnpm run dev:agenda:full
-pnpm run dev:leonardo
-pnpm run dev:chatbot
-```
-
-`dev:agenda` e `dev:agenda:full` iniciam o painel completo do `oftagenda` (Next.js + Convex).
-
-### Build
-
-```bash
-pnpm run build
-pnpm run build:agenda
-pnpm run build:leonardo
-pnpm run build:chatbot
+pnpm start:chatbot
+pnpm test:chatbot
+pnpm type-check:chatbot
+pnpm lint:chatbot
+pnpm lint:fix:chatbot
+pnpm format:chatbot
+pnpm format:check:chatbot
+pnpm waha:init
+pnpm waha:up
+pnpm waha:down
+pnpm waha:logs
+pnpm waha:pull
+pnpm waha:smoke
 ```
 
 ### Outros
 
 ```bash
-pnpm run lint
-pnpm run type-check
-pnpm run preview:leonardo
+pnpm preview:leonardo
 ```
 
-### Comandos do oftchatbot via root
+## Portas usadas no desenvolvimento
 
-```bash
-pnpm run start:chatbot
-pnpm run test:chatbot
-pnpm run type-check:chatbot
-pnpm run lint:chatbot
-pnpm run lint:fix:chatbot
-pnpm run format:chatbot
-pnpm run format:check:chatbot
-pnpm run waha:init
-pnpm run waha:up
-pnpm run waha:down
-pnpm run waha:logs
-pnpm run waha:pull
-pnpm run waha:smoke
-```
+| Pacote | URL padrão |
+|--------|------------|
+| `oftagenda` | `http://localhost:3001` (`NEXT_PORT` pode sobrescrever) |
+| `oftleonardo` | `http://localhost:4331` (`PORT`) |
+| `psiqdenise` | `http://localhost:4331` (`PORT`) — ao rodar `oftleonardo` e `psiqdenise` juntos, use `PORT` diferente em um deles |
+| `oftchatbot` | `http://localhost:3030` |
+| `oftbackend` | `http://localhost:8080` (`PORT` no `.env`) |
+| Convex (dev, dentro do `oftagenda`) | porta padrão do CLI Convex |
 
-## Portas padronizadas
+## CI
 
-Para evitar conflito ao executar simultaneamente:
+- **`split-repositories.yml`** — após push em `main`, sincroniza pastas do monorepo com repositórios espelho (`git subtree split`), quando há mudanças nos paths correspondentes (ou em `workflow_dispatch`).
+- **`oftbackend.yml`** — em PR/push que alteram `oftbackend/` (ou lock/workspace), executa lint, typecheck, Spectral no OpenAPI, testes e build do `oftbackend`.
 
-- `oftagenda` (Next.js): `http://localhost:3001`
-- `oftleonardo` (Astro): `http://localhost:4331`
-- `oftchatbot` (Next.js): `http://localhost:3030`
-- `Convex dev` (dentro do `oftagenda`): mantém a porta padrão do Convex no processo de desenvolvimento
+## Deploy recomendado (ex.: Vercel)
 
-Obs.: as portas podem ser sobrescritas por variável de ambiente:
+Cada app costuma ser um projeto separado, com **Root Directory** apontando para a pasta do pacote (`oftagenda`, `oftleonardo`, `psiqdenise`, etc.).
 
-- `NEXT_PORT` para `oftagenda`
-- `PORT` para `oftleonardo`
+- Variáveis de ambiente ficam isoladas por projeto (Clerk/Convex no `oftagenda`, analytics no site, etc.).
+- Builds menores e rollback independente.
 
-## Método de deploy recomendado
+Sugestão de comandos:
 
-### Melhor estratégia: deploy separado por app no mesmo monorepo (Vercel)
+- Install: `pnpm install --frozen-lockfile` (no monorepo) ou, no repositório espelho após split, conforme o lock gerado pelo CI.
+- Build (exemplos): `pnpm --filter ./oftagenda build`, `pnpm --filter ./oftleonardo build`.
 
-Cada app deve ser configurado como um projeto independente na Vercel, apontando para subdiretórios:
+## Espelhamento no GitHub (subtree split)
 
-- Projeto A -> Root Directory: `oftagenda`
-- Projeto B -> Root Directory: `oftleonardo`
+O workflow **`.github/workflows/split-repositories.yml`** publica alterações no monorepo para repositórios standalone (deploys costumam apontar para esses repos).
 
-**Por que esse método é o melhor aqui:**
+| Pasta | Repositório de destino | Secret (PAT fine-grained recomendado) |
+|-------|-------------------------|--------------------------------------|
+| `oftagenda/` | `leonunesbs/oftagenda` | `OFTAGENDA_REPO_TOKEN` |
+| `oftleonardo/` | `leonunesbs/oftleonardo` | `OFTLEONARDO_REPO_TOKEN` |
+| `oftchatbot/` | `leonunesbs/oftchatbot` | `OFTCHATBOT_REPO_TOKEN` |
+| `psiqdenise/` | `leonunesbs/psiqdenise` | `PSIQDENISE_REPO_TOKEN` |
+| `oftbackend/` | `leonunesbs/oftbackend` | `OFTBACKEND_REPO_TOKEN` |
 
-- isolamento de variáveis de ambiente (Clerk/Convex no `oftagenda`, Cal/API no `oftleonardo`);
-- builds menores e mais rápidos por app;
-- rollback independente;
-- domínio/subdomínio por projeto sem acoplamento.
+Permissão mínima típica do token: **Contents: Read and write** apenas no repositório de destino.
 
-### Configuração sugerida
+Fluxo:
 
-- Framework detectado automaticamente por app (Next.js e Astro).
-- Install Command:
-  - deploy direto do monorepo: `pnpm install --frozen-lockfile`
-  - deploy via repositório espelho (subtree split): `pnpm install --no-frozen-lockfile` (ou versionar um `pnpm-lock.yaml` dentro do repo espelho)
-- Build Command:
-  - `oftagenda`: `pnpm --filter ./oftagenda build`
-  - `oftleonardo`: `pnpm --filter ./oftleonardo build`
+1. Desenvolver e commitar **só no monorepo** `oftcore` (raiz).
+2. Push para `main` dispara os jobs quando os paths mudam (ou use **Run workflow** manualmente).
+3. Não dependa de push manual aos repos espelho para manter o histórico alinhado ao monorepo.
 
-### Alternativas (quando considerar)
-
-- **Turborepo + Remote Cache**: útil se crescer para muitos apps/pacotes compartilhados.
-- **Deploy único**: não recomendado neste cenário, porque une ciclos de deploy e aumenta risco de impacto cruzado.
-
-## Acesso isolado no GitHub
-
-Para manter o monorepo como fonte principal e continuar com acesso isolado por projeto, foi adicionado o workflow:
-
-- `.github/workflows/split-repositories.yml`
-
-Ele sincroniza automaticamente:
-
-- `oftagenda/` -> `leonunesbs/oftagenda`
-- `oftleonardo/` -> `leonunesbs/oftleonardo`
-- `oftchatbot/` -> `leonunesbs/oftchatbot`
-
-### Como configurar no GitHub
-
-No repositório monorepo (`oftcore`), adicione três secrets de Actions:
-
-- `OFTAGENDA_REPO_TOKEN`
-- `OFTLEONARDO_REPO_TOKEN`
-- `OFTCHATBOT_REPO_TOKEN`
-
-Recomendação:
-
-- usar **Fine-grained PAT** separado para cada secret;
-- cada token com acesso somente ao respectivo repositório de destino;
-- permissão mínima: `Contents: Read and write`.
-
-Assim, você mantém isolamento de acesso (cada token só publica em um repo).
-
-### Fluxo recomendado
-
-- Fazer alterações apenas no monorepo.
-- Não editar diretamente os repositórios espelho.
-- Cada push para `main` dispara a sincronização dos três repos.
+Detalhes adicionais: `CLAUDE.md` e regras em `.cursor/rules/`.
 
 ## SEO, mídia paga e mensuração
 
@@ -177,26 +146,13 @@ Assim, você mantém isolamento de acesso (cada token só publica em um repo).
 - `submit_booking`
 - `booking_confirmed`
 
-### Variáveis de ambiente recomendadas
+### Variáveis de ambiente sugeridas
 
-- `oftagenda` (`NEXT_PUBLIC_*`)
-  - `NEXT_PUBLIC_GA4_ID`
-  - `NEXT_PUBLIC_GTM_ID`
-  - `NEXT_PUBLIC_META_PIXEL_ID`
-  - `NEXT_PUBLIC_GOOGLE_ADS_ID`
-- `oftleonardo` (`PUBLIC_*`)
-  - `PUBLIC_GA4_ID`
-  - `PUBLIC_GTM_ID`
-  - `PUBLIC_META_PIXEL_ID`
-  - `PUBLIC_GOOGLE_ADS_ID`
+- **oftagenda** (`NEXT_PUBLIC_*`): `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GOOGLE_ADS_ID`
+- **oftleonardo** (`PUBLIC_*`): `PUBLIC_GA4_ID`, `PUBLIC_GTM_ID`, `PUBLIC_META_PIXEL_ID`, `PUBLIC_GOOGLE_ADS_ID`
 
-### Regras de governança (LGPD-first)
+### Governança (LGPD)
 
-- Não enviar PII (email, telefone, nome) em eventos de analytics.
-- Evitar query params com PII em URLs públicas.
-- Separar segredos por app e por ambiente (dev/staging/prod).
-- Revisar tags de terceiros periodicamente.
-
-## Nota de manutenção
-
-Este commit pode incluir ajustes pontuais de documentação no monorepo para validar o fluxo de sincronização entre repositórios.
+- Não enviar PII em eventos de analytics.
+- Evitar query params com dados sensíveis em URLs públicas.
+- Separar segredos por app e ambiente (dev/staging/prod).
