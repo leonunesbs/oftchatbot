@@ -68,7 +68,7 @@
     "oxfmt": "0.40.0",
     "oxlint": "1.55.0",
     "oxlint-tsgolint": "0.17.0",
-    "postcss": "8.5.8",
+    "postcss": "8.5.10",
     "shadcn": "4.0.8",
     "tailwindcss": "^4.2.1",
     "tsx": "4.21.0",
